@@ -228,7 +228,16 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.TimeOfBirth) { return; }
                 _newPatient.TimeOfBirth = value;
-                NotifyPropertyChanged("TimeOfBirth");
+                NotifyPropertyChanged("TimeOfBirth", "IsYoungerThanMinEnrollTime");
+            }
+        }
+        public bool IsYoungerThanMinEnrollTime
+        {
+            get
+            {
+                if (_newPatient.DateTimeBirth==null) {return false;}
+                var ageMins = (DateTime.Now - _newPatient.DateTimeBirth.Value).TotalMinutes;
+                return ageMins >= 0 && ageMins < NewPatientModel.MinEnrollAgeMins;
             }
         }
         public bool? LikelyDie24Hr
@@ -599,8 +608,8 @@ namespace BlowTrial.ViewModel
         {
             if (_abnormalities!= null) { _abnormalities.Clear(); }
             _newPatient = new NewPatientModel();
-
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber");
+            _wtForAgeCentile = null;
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrollTime");
         }
         #endregion
 

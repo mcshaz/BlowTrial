@@ -21,14 +21,13 @@ namespace BlowTrial.Domain.Providers
         {
             _typeConstructor = iDataContextType.GetConstructor(System.Type.EmptyTypes);
             _emptyObjects = new object[0];
-            _createContext = delegate { return (IDataContext)_typeConstructor.Invoke(_emptyObjects); };
+            _createContext = delegate { return (ITrialDataContext)_typeConstructor.Invoke(_emptyObjects); };
             _dbContext = _createContext.Invoke();
-            _dbFileName = _dbContext.DbName;
             
 #if DEBUG
-            if (iDataContextType.GetInterface("IDataContext")==null)
+            if (iDataContextType.GetInterface("ITrialDataContext")==null)
             {
-                throw new ArgumentException("Argument iDataContextType must implement IDataContext");
+                throw new ArgumentException("Argument iDataContextType must implement ITrialDataContext");
             }
             if (_typeConstructor==null)
             {
@@ -36,19 +35,20 @@ namespace BlowTrial.Domain.Providers
             }
 #endif
         }
-        public Repository(Func<IDataContext> createContext)
+        public Repository(Func<ITrialDataContext> createContext)
         {
             _createContext = createContext;
             _dbContext = _createContext.Invoke();
+            _dbBackupPath = _dbContext.DbBackupPath;
         }
         #endregion // Constructors
         #region Members
         private readonly ConstructorInfo _typeConstructor;
         private readonly Object[] _emptyObjects;
-        private readonly Func<IDataContext> _createContext;
-        private string _dbFileName;
+        private readonly Func<ITrialDataContext> _createContext;
+        private string _dbBackupPath;
         private string _zipPath;
-        private IDataContext _dbContext;
+        private ITrialDataContext _dbContext;
         #endregion // Members
 
         #region Properties
@@ -60,11 +60,12 @@ namespace BlowTrial.Domain.Providers
         { 
             get
             {
-                return _zipPath.Substring(0, _zipPath.Length - _dbFileName.Length);
+                return Path.GetDirectoryName(_zipPath);
             }
             set 
             {
-                _zipPath = value + '\\' + _dbFileName.Substring(0, _dbFileName.Length - 3) + "zip";
+                if (!Directory.Exists(value)) {throw new ArgumentException("specified directory does not exist");}
+                _zipPath = value + '\\' + Path.GetFileNameWithoutExtension(_dbBackupPath) + ".zip";
             } 
         }
         public string BackupFilePath { get { return _zipPath; } }
@@ -199,7 +200,7 @@ namespace BlowTrial.Domain.Providers
             {
                 throw new InvalidOperationException("Cannot call backup method without setting backup directory property");
             }
-            var dbFile = new FileInfo(_dbFileName);
+            var dbFile = new FileInfo(_dbBackupPath);
             if (!dbFile.Exists) { return; }
             var backupFile = new FileInfo(BackupFilePath);
             if (backupFile.Exists && backupFile.LastWriteTime >= dbFile.LastWriteTime)
@@ -221,8 +222,8 @@ namespace BlowTrial.Domain.Providers
                 throw new InvalidOperationException("Cannot call backup method without setting backup directory property");
             }
             var backupFile = new FileInfo(BackupFilePath);
-            if (!backupFile.Exists) { throw new FileNotFoundException("Database file not found", _dbFileName); }
-            var dbFile = new FileInfo(_dbFileName);
+            if (!backupFile.Exists) { throw new FileNotFoundException("Database file not found", _dbBackupPath); }
+            var dbFile = new FileInfo(_dbBackupPath);
             if (dbFile.Exists && backupFile.LastWriteTime <= dbFile.LastWriteTime)
             {
                 return;

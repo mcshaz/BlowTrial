@@ -8,6 +8,7 @@ using System.Data.Entity;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
+using System.Linq;
 
 namespace BlowTrial
 {
@@ -36,10 +37,11 @@ namespace BlowTrial
         {
             base.OnStartup(e);
 
+            //Set data directory
+            AppDomain.CurrentDomain.SetData("DataDirectory", Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+
             //Application initialisation
             AutoMapperConfiguration.Configure();
-            Database.SetInitializer<DataContext>(new DataContextInitialiser());
-            Database.SetInitializer<MembershipContext>(new MembershipContextInitialiser());
 
             //Security
             CustomPrincipal customPrincipal = new CustomPrincipal();

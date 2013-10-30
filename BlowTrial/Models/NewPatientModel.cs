@@ -22,6 +22,7 @@ namespace BlowTrial.Models
         public const int MaxGestAgeBirth = 43;
         public const int MinBirthWeightGrams = 350;
         public const int MaxBirthWeightGrams = 1999;
+        public const int MinEnrollAgeMins = 60;
         #endregion
 
         #region Constructors
@@ -135,7 +136,7 @@ namespace BlowTrial.Models
             if (DateTimeBirth == null) { return false; }
             var now = DateTime.Now;
             var age = now -this.DateTimeBirth.Value;
-            return age.Days < MaxAgeDaysEnroll && age.TotalMinutes > 60;
+            return age.Days < MaxAgeDaysEnroll && age.TotalMinutes >= MinEnrollAgeMins;
         }
         #endregion
 
@@ -278,7 +279,7 @@ namespace BlowTrial.Models
         DateTimeErrorString ValidateDob()
         {
             var error = _dateTimeBirthSplitter.ValidateNotEmpty();
-            var now = DateTime.Today;
+            var now = DateTime.Now;
             _dateTimeBirthSplitter.ValidateIsBefore(Strings.DateTime_Now, now, ref error);
             if (error.DateError == null && DateTimeBirth.HasValue)
             {

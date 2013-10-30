@@ -48,11 +48,6 @@ namespace BlowTrial.Helpers
             });
             appData.SaveChanges();
         }
-        public static FileInfo BackupFileName()
-        {
-            //var x= (new DataContext).Database.Connection.ConnectionString;
-            return new FileInfo(DataContext.ParticipantDbName);
-        }
 
     }
 }

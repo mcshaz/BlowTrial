@@ -237,6 +237,8 @@
                     -->
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+                    <TextBlock Text="As patient is less than 60 minutes old, they may be screened but not enrolled yet" TextWrapping="Wrap"
+                             Visibility="{Binding Path=IsYoungerThanMinEnrollTime, Converter={StaticResource boolToVisConverter}, Mode=OneWay}" />
                     <ContentPresenter 
                             Content="{Binding ElementName=dateOfBirthDatePicker, Path=(Validation.Errors).CurrentItem}"/>
                     <ContentPresenter 

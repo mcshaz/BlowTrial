@@ -35,7 +35,7 @@ namespace BlowTrial.ViewModel
 
         #region Constructor
 
-        public MainWindowViewModel() : this(new Repository(typeof(DataContext))) { }
+        public MainWindowViewModel() : this(new Repository(()=>new TrialDataContext())) { }
         public MainWindowViewModel(IRepository repository) : base(repository)
         {
             //base.DisplayName = Strings.MainWindowViewModel_WorkspaceName;

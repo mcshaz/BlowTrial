@@ -29,9 +29,9 @@ namespace BlowTrial.Domain.Providers
             context.SaveChanges();
         }
     }
-    class DataContextInitialiser : DropCreateDatabaseIfModelChanges<DataContext>
+    class DataContextInitialiser : DropCreateDatabaseIfModelChanges<TrialDataContext>
     {
-        protected override void Seed(DataContext context)
+        protected override void Seed(TrialDataContext context)
         {
             context.Vaccines.Add(new Vaccine{ Name = Vaccine.BcgName()});
             context.Vaccines.Add(new Vaccine { Name = Vaccine.OpvName() });

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BlowTrial.Domain.Interfaces
 {
-    public interface IDataContext
+    public interface ITrialDataContext
     {
         DbSet<Vaccine> Vaccines { get; set; }
         DbSet<VaccineAdministered> VaccinesAdministered { get; set; }
@@ -15,7 +15,7 @@ namespace BlowTrial.Domain.Interfaces
         DbSet<ScreenedPatient> ScreenedPatients { get; set; }
         DbSet<ProtocolViolation> ProtocolViolations { get; set; }
         Database Database { get; }
-        String DbName { get; }
+        String DbBackupPath { get; }
         void Dispose();
         int SaveChanges();
     }
