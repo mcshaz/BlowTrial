@@ -1,0 +1,32 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters">
+    <con:EnumToBooleanConverter x:Key="enumConverter" />
+    <con:BoolInverterConverter x:Key="boolInvertConvert" />
+    <con:NullableBoolConverter x:Key="nullBoolConvert" />
+    <con:IsNotNullConverter x:Key="isNotNullConvert" />
+    <BooleanToVisibilityConverter x:Key="boolToVisConverter" />
+
+    <Style x:Key="errorStyle" TargetType="TextBlock">
+        <Setter Property="FontStyle" Value="Italic" />
+        <Setter Property="Foreground" Value="Red" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Margin" Value="0,1" />
+    </Style>
+    <DataTemplate DataType="{x:Type ValidationError}">
+        <TextBlock Style="{StaticResource errorStyle}" Text="{Binding Path=ErrorContent}" />
+    </DataTemplate>
+    <!-- http://www.codeproject.com/script/Content/ViewAssociatedFile.aspx?rzp=%2FKB%2FWPF%2F410217%2F%2Flvtest.zip&zep=ControlLib%2FThemes%2FGeneric1.xaml&obid=410217&obtid=2&ovid=1 -->
+    <Style x:Key="Body_Content_DataGrid_Centering"
+        TargetType="{x:Type DataGridCell}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                    <Grid Background="{TemplateBinding Background}">
+                        <ContentPresenter VerticalAlignment="Center" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

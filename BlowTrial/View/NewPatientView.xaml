@@ -1,0 +1,427 @@
+﻿<UserControl 
+  x:Class="BlowTrial.View.NewPatientView"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vw="clr-namespace:BlowTrial.View"
+  xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+  HorizontalAlignment="Stretch"
+  VerticalAlignment="Top"
+  >
+    <UserControl.Resources>
+        <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
+    </UserControl.Resources>
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.Row="0">
+            <Grid Margin="0,2,5,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="6" />
+                    <ColumnDefinition Width="Auto" MinWidth="287" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="25" VerticalAlignment="Stretch" Width="6" />
+                <!-- Name-->
+                <Label 
+                  Grid.Row="0" Grid.Column="0" 
+                  Content="Name:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=nameTxt}" 
+                  />
+                <TextBox 
+                  x:Name="nameTxt"
+                  Grid.Row="0" Grid.Column="2" 
+                  Text="{Binding Path=Name, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+                <ContentPresenter 
+                  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=nameTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+
+                <!-- HospitalIdentifier-->
+                <Label 
+                  Grid.Row="2" Grid.Column="0" 
+                  Content="Hospital identifier:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=hospitalIdentifierTxt}" 
+                  />
+                <TextBox 
+                  x:Name="hospitalIdentifierTxt"
+                  Grid.Row="2" Grid.Column="2" 
+                  Text="{Binding Path=HospitalIdentifier, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  
+                  />
+                <ContentPresenter 
+                  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=hospitalIdentifierTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+                <!-- IsMale-->
+                <Label 
+                  Grid.Row="4" Grid.Column="0" 
+                  Content="Gender:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=isMaleTxt}" 
+                  />
+                <ComboBox 
+                  x:Name="isMaleTxt"
+                  Grid.Row="4" Grid.Column="2" 
+                  ItemsSource="{Binding Path=IsMaleOptions, Mode=OneTime}"
+                  SelectedValuePath="Key" 
+                  DisplayMemberPath="Value"
+                  SelectedValue="{Binding Path=IsMale, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  
+                  />
+                <ContentPresenter 
+                  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=isMaleTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+                <!-- MothersName-->
+                <Label 
+                  Grid.Row="6" Grid.Column="0" 
+                  Content="Mothers Name:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=mothersNameTxt}" 
+                  />
+                <TextBox
+                  x:Name="mothersNameTxt"
+                  Grid.Row="6" Grid.Column="2" 
+                  Text="{Binding Path=MothersName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+                <ContentPresenter 
+                  Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=mothersNameTxt, Path=(Validation.Errors).CurrentItem}"
+                  />                
+                <!-- PhoneNumber-->
+                <Label 
+                  Grid.Row="8" Grid.Column="0" 
+                  Content="Phone Number:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=phoneNumberTxt}" 
+                  />
+                <wpfToolkit:MaskedTextBox
+                  x:Name="phoneNumberTxt"
+                  Grid.Row="8" Grid.Column="2" Mask="(000) 000-0000"
+                  Text="{Binding Path=PhoneNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+                <ContentPresenter 
+                  Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=phoneNumberTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+                <!-- GestAge-->
+                <Label 
+                  Grid.Row="10" Grid.Column="0" 
+                  Content="Gestational age:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=gestAgeWeeksTxt}" 
+                  />
+                <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.Column="2" >
+                    <TextBox 
+                      x:Name="gestAgeWeeksTxt"
+                      Text="{Binding Path=GestAgeWeeks, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                       Width="50"/>
+                    <Label Content="Weeks" Target="{Binding ElementName=gestAgeWeeksTxt}"/>
+                    <TextBox 
+                      x:Name="gestAgeDaysTxt"
+                      Text="{Binding Path=GestAgeDays, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                       Width="50"/>
+                    <Label Content="Days" Target="{Binding ElementName=gestAgeDaysTxt}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+                    <ContentPresenter 
+                      Content="{Binding ElementName=gestAgeWeeksTxt, Path=(Validation.Errors).CurrentItem}" />
+                    <ContentPresenter 
+                      Content="{Binding ElementName=gestAgeDaysTxt, Path=(Validation.Errors).CurrentItem}" Margin="5,0,0,0"/>
+                </StackPanel>
+                <!-- AdmissionWeight-->
+                <Label 
+                  Grid.Row="12" Grid.Column="0" 
+                  Content="Admission weight (grams):" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=admissionWeightTxt}" 
+                  />
+                <TextBox 
+                  x:Name="admissionWeightTxt"
+                  Grid.Row="12" Grid.Column="2" 
+                  Text="{Binding Path=AdmissionWeight, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+                <StackPanel Orientation="Horizontal" Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding Path=WtForAgeCentile}" />
+                    <ContentPresenter 
+                      Content="{Binding ElementName=admissionWeightTxt, Path=(Validation.Errors).CurrentItem}" />
+                </StackPanel>
+
+                <!-- Abnormalities-->
+                <TextBlock 
+                  Grid.Row="14" Grid.Column="0" 
+                  Text="Abnormalities:" Margin="6"
+                  HorizontalAlignment="Right" />
+                <DataGrid
+                  x:Name="abnormalitiesDataGrid"
+                  Grid.Row="14" Grid.Column="2" CanUserAddRows="True" CanUserDeleteRows="True"
+                    ItemsSource="{Binding Path=Abnormalities, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                    HorizontalAlignment="Stretch"
+                    AutoGenerateColumns="False"
+                    HeadersVisibility="None"
+                    RowHeight="26"
+                    Loaded="abnormalitiesDataGrid_Loaded"
+                    CellStyle="{StaticResource Body_Content_DataGrid_Centering}"
+                    >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Path=Description}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <ContentPresenter 
+                  Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=abnormalitiesDataGrid, Path=(Validation.Errors).CurrentItem}"
+                  />
+
+                <!-- DOB-->
+                <Label 
+                  Grid.Row="16" Grid.Column="0" 
+                  Content="Date/Time of birth:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=dateOfBirthDatePicker}" 
+                  />
+                <StackPanel Orientation="Horizontal" Grid.Row="16" Grid.Column="2" HorizontalAlignment="Stretch" >
+                    <DatePicker
+                      x:Name="dateOfBirthDatePicker" Width="120" SelectedDate="{Binding Path=DateOfBirth, ValidatesOnDataErrors=True, 
+                            UpdateSourceTrigger=PropertyChanged}"  
+                        DisplayDateEnd="{Binding Path=Today, Mode=OneWay}" DisplayDateStart="{Binding Path=MinScreeeningDate, Mode=OneWay}"/>
+                    <wpfToolkit:MaskedTextBox Text="{Binding Path=TimeOfBirth, StringFormat=hh\\:mm, ValidatesOnDataErrors=True, 
+                            UpdateSourceTrigger=PropertyChanged}" Grid.Row="16" Grid.Column="1" Margin="10,0" x:Name="timeOfBirthTxt" 
+                                              Mask="90:00" Width="50" TextAlignment="Center"/>
+                    <!--
+                    <AdornerDecorator>
+                        <TextBox x:Name="dOBTimeTxt" Text="{Binding Path=TimeOfBirth, StringFormat=hh\\:mm}" Width="59" Margin="10,0,0,0" controls:MaskedText.Mask="#0:00" TextAlignment="Right" >
+                            <controls:WatermarkService.Watermark>
+                                <TextBlock VerticalAlignment="Center" >HH:MM</TextBlock>
+                            </controls:WatermarkService.Watermark>
+                        </TextBox>
+                    </AdornerDecorator>
+                    -->
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+                    <ContentPresenter 
+                            Content="{Binding ElementName=dateOfBirthDatePicker, Path=(Validation.Errors).CurrentItem}"/>
+                    <ContentPresenter 
+                          Content="{Binding ElementName=timeOfBirthTxt, Path=(Validation.Errors).CurrentItem}" Margin="5,0,0,0"/>
+                </StackPanel>
+
+                <!-- LikelyDie24Hr-->
+                <Label 
+                    Grid.Row="18" Grid.Column="0" 
+                    Content="Expected 24Hr Survival:" 
+                    HorizontalAlignment="Right"
+                    Target="{Binding ElementName=likelyDie24HrTxt}"  
+                    />
+                <ComboBox 
+                  x:Name="likelyDie24HrTxt"
+                  Grid.Row="18" Grid.Column="2" 
+                  ItemsSource="{Binding Path=LikelyDie24HrOptions, Mode=OneTime}"
+                  SelectedValuePath="Key" 
+                  DisplayMemberPath="Value"
+                  SelectedValue="{Binding Path=LikelyDie24Hr, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  
+                  />
+                <ContentPresenter 
+                    Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                    Content="{Binding ElementName=likelyDie24HrTxt, Path=(Validation.Errors).CurrentItem}"
+                    />
+
+                <!-- BadMalform-->
+                <Label 
+                  Grid.Row="20" Grid.Column="0" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=badMalformTxt}" 
+                >
+                    <TextBlock TextWrapping="Wrap">
+                        Severe congenital malformation:
+                    </TextBlock>
+                </Label>
+                <ComboBox Height="26"
+                  x:Name="badMalformTxt"
+                  Grid.Row="20" Grid.Column="2" 
+                  ItemsSource="{Binding Path=RequiredBoolOptions, Mode=OneTime}"
+                  SelectedValuePath="Key" 
+                  DisplayMemberPath="Value"
+                  SelectedValue="{Binding Path=BadMalform, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  
+                  />
+                <ContentPresenter 
+                  Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=badMalformTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+
+                <!-- BadInfectnImmune-->
+                <Label 
+                  Grid.Row="22" Grid.Column="0" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=badInfectnImmuneTxt}"  >
+                    <TextBlock TextWrapping="Wrap">
+                        Mother or baby known HIV, Hep B Herpes Zoster or immunodeficiency:
+                    </TextBlock>
+                </Label>
+                <ComboBox 
+                      x:Name="badInfectnImmuneTxt"
+                      Height="26"
+                      Grid.Row="22" Grid.Column="2" 
+                      ItemsSource="{Binding Path=RequiredBoolOptions, Mode=OneTime}"
+                      SelectedValuePath="Key" 
+                      DisplayMemberPath="Value"
+                      SelectedValue="{Binding Path=BadInfectnImmune, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                      
+                      />
+                <ContentPresenter 
+                  Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=badInfectnImmuneTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+
+                <!-- WasGivenBcgPrior-->
+                <Label 
+                  Grid.Row="24" Grid.Column="0" 
+                  Content="BCG vaccination status:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=wasGivenBcgPriorTxt}" 
+                  />
+                <ComboBox 
+                  x:Name="wasGivenBcgPriorTxt"
+                  Grid.Row="24" Grid.Column="2" 
+                  ItemsSource="{Binding Path=WasGivenBcgPriorOptions, Mode=OneTime}"
+                  SelectedValuePath="Key" 
+                  DisplayMemberPath="Value"
+                  SelectedValue="{Binding Path=WasGivenBcgPrior, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <ContentPresenter 
+                  Grid.Row="25" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=wasGivenBcgPriorTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
+
+                <!-- RefusedConsent-->
+                <Label 
+                  Grid.Row="26" Grid.Column="0" 
+                  Content="Informed consent:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=refusedConsentCombo}" />
+                <ComboBox
+                  x:Name="refusedConsentCombo"
+                  Grid.Row="26" Grid.Column="2" 
+                  ItemsSource="{Binding Path=RefusedConsentOptions, Mode=OneTime}"
+                  SelectedValuePath="Key" 
+                  DisplayMemberPath="Value"
+                  SelectedValue="{Binding Path=RefusedConsent, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                   >
+                    <ComboBox.Style>
+                        <Style TargetType="{x:Type ComboBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConsentRequired}" Value="False">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.Style>
+                </ComboBox>
+                <ContentPresenter 
+                  Grid.Row="27" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=refusedConsentCombo, Path=(Validation.Errors).CurrentItem}" />
+                
+                <!--MultipleSiblingId-->
+                <Label 
+                  Grid.Row="28" Grid.Column="0" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=hasSiblingEnrolledChk}" >
+                    <TextBlock TextWrapping="Wrap">
+                        Has a twin or triplet enrolled in this trial:
+                    </TextBlock>
+                </Label>
+                <CheckBox Grid.Row="28" Grid.Column="2" x:Name="hasSiblingEnrolledChk" Margin="6,1,0,0" VerticalAlignment="Center"
+                          IsChecked="{Binding Path=HasSiblingEnrolled}" >
+                    <CheckBox.Style>
+                        <Style TargetType="{x:Type CheckBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding OkToRandomise}" Value="False">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+                <TextBox Grid.Row="28" Grid.Column="2" x:Name="multipleSiblingIdTxt" Margin="40,0,0,0" Height="26"
+                         Text="{Binding Path=MultipleSiblingId, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                         >
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSiblingEnrolled}"  Value="False">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <StackPanel Orientation="Horizontal" Grid.Row="29" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right" >
+                    <TextBlock Text="{Binding Path=SiblingNote, Mode=OneWay}" />
+                    <ContentPresenter 
+                        Content="{Binding ElementName=multipleSiblingIdTxt, Path=(Validation.Errors).CurrentItem}" />
+                </StackPanel>
+           
+            </Grid>
+        </ScrollViewer>
+        <Line Grid.Row="1" Grid.RowSpan="2" 
+            VerticalAlignment="Top" Stroke="Gray" StrokeThickness="1"
+            X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />
+        <!-- BUTTON -->
+        <TextBlock Grid.Row="1" 
+                VerticalAlignment="Center" Margin="5">
+            <Hyperlink Command="{Binding Path=ClearAllCmd}">
+                Clear form (without saving)
+            </Hyperlink>
+        </TextBlock>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button 
+              Command="{Binding Path=RandomiseCmd}"
+              Content="_Enroll"
+              HorizontalAlignment="Right"
+              Margin="4" Padding="8,0,8,0" IsDefault="True" />
+            <Button 
+              Command="{Binding Path=AddScreenCmd}"
+              Content="_Add to screening log"
+              HorizontalAlignment="Right"
+              Margin="4" Padding="8,0,8,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

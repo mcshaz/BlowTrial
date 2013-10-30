@@ -1,0 +1,67 @@
+﻿<Window 
+  x:Class="BlowTrial.MainWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vm="clr-namespace:BlowTrial.ViewModel"
+  FontSize="13" 
+  FontFamily="Verdana"
+  MinWidth="650" MinHeight="420"
+  Title="{Binding Path=ProjectName}"
+  Width="750" Height="420"
+  WindowStartupLocation="CenterScreen"
+  >
+    <Window.Resources>
+        <ResourceDictionary Source="MainWindowResources.xaml" />
+    </Window.Resources>
+
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" KeyboardNavigation.TabNavigation="None">
+            <Menu KeyboardNavigation.TabNavigation="Cycle">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_Logout" Command="{Binding Path=LogoutCmd}" />
+                    <MenuItem Header="E_xit" Command="{Binding Path=CloseCmd}" />
+                </MenuItem>
+                <MenuItem Header="_Options" >
+                    <MenuItem Header="_Cloud Directory" Command="{Binding Path=ShowCloudDirectoryCmd}" />
+                    <MenuItem Header="_Export as CSV" Command="{Binding Path=ShowCreateCsvCmd}" />
+                    <MenuItem Header="Change _Password" IsEnabled="False" />
+                    <MenuItem Header="Manage _Users" IsEnabled="False"/>
+                </MenuItem>
+                <MenuItem Header="_Help" />
+            </Menu>
+        </DockPanel>
+
+        <Grid Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border 
+                Grid.Column="0" 
+                Style="{StaticResource MainBorderStyle}"
+                Width="170"
+                >   
+                <HeaderedContentControl
+                  Content="{Binding Path=Commands}"
+                  ContentTemplate="{StaticResource CommandsTemplate}"
+                  Header="Control Panel"
+                  Style="{StaticResource MainHCCStyle}"
+                  />    
+            </Border>
+
+            <Border
+        Grid.Column="2" 
+        Style="{StaticResource MainBorderStyle}"
+        >
+                <HeaderedContentControl 
+          Content="{Binding Path=Workspaces}"
+          ContentTemplate="{StaticResource WorkspacesTemplate}"
+          Header="{Binding Path=DisplayName}"
+          Style="{StaticResource MainHCCStyle}"
+          />
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

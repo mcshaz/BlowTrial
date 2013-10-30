@@ -1,0 +1,82 @@
+﻿<UserControl 
+  x:Class="BlowTrial.View.SummaryDataView"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vw="clr-namespace:BlowTrial.View"
+  xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+  HorizontalAlignment="Stretch"
+  VerticalAlignment="Top"
+  >
+    <UserControl.Resources>
+        <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
+    </UserControl.Resources>
+    <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+        <StackPanel Orientation="Vertical">
+            <GroupBox Header="Participants" DataContext="{Binding Path=ParticipantData}">
+                <Grid Margin="0,2,5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition  />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Total:" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Path=TotalCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Intervention Arm:" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Path=InterventionArmCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Path=InterventionArmFrac, Mode=OneWay, StringFormat='{}({0:p})'}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Arm" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Path=ControlArmCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Path=ControlArmFrac, Mode=OneWay, StringFormat='{}({0:p})'}" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Completed Records" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Path=CompletedRecordCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Incomplete Records" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Path=PendingRecordCount, Mode=OneWay}" />
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Screened Patients" DataContext="{Binding Path=ScreenedPatientData}">
+                <Grid Margin="0,2,5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition  />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Total:" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Path=TotalCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Likely to die within 24 hours:" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Path=LikelyDie24HrCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Bad Malformation:" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Path=BadMalformCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Bad infection or immune problem:" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Path=BadInfectnImmuneCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Had been given BCG prior:" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Path=WasGivenBcgPriorCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Refused Consent:" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding Path=RefusedConsentCount, Mode=OneWay}" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Missed:" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding Path=MissedCount, Mode=OneWay}" />
+                </Grid>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

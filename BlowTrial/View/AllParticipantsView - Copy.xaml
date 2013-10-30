@@ -1,0 +1,107 @@
+﻿<UserControl 
+  x:Class="BlowTrial.View.AllParticipantsView"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+  >
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
+                <ResourceDictionary>
+
+                    <GroupStyle x:Key="DetailsGroupStyle">
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock 
+                                    x:Name="txt" 
+                                    Background="{StaticResource Brush_HeaderBackground}"
+                                    FontWeight="Bold"
+                                    Foreground="White"
+                                    Margin="1"
+                                    Padding="4,2,0,2"
+                                    Text="{Binding Name}" 
+                                    />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                    <Style x:Key="ParticipantItemStyle" TargetType="{x:Type ListViewItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="ItemsControl.AlternationIndex" Value="1" />
+                                <Condition Property="IsSelected" Value="False" />
+                                <Condition Property="IsMouseOver" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="#EEEEEEEE" />
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <DockPanel>
+
+        <ListView 
+          AlternationCount="2" DockPanel.Dock="Top"
+          ItemContainerStyle="{StaticResource ParticipantItemStyle}"
+          ItemsSource="{Binding Path=AllParticipants}"
+            SelectedItem="{Binding Path=SelectedParticipant}"
+          >
+            <ListView.GroupStyle>
+                <StaticResourceExtension 
+                  ResourceKey="DetailsGroupStyle" 
+                  />
+            </ListView.GroupStyle>
+            <ListView.View>
+            <GridView AllowsColumnReorder="True" >
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Id}" >
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}" CommandParameter="Id">
+                            Trial Id
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" >
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}" CommandParameter="Name">
+                            Name
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Gender}" >
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}" CommandParameter="Gender">
+                            Gender
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Id}" >
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="Id">
+                            Hospital Id
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=AgeDays}">
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="DateTimeBirth">
+                            Days of age
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="DateTimeEnrollment">
+                            Date Of Enrollment
+                        </GridViewColumnHeader>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ContentPresenter 
+                                      Content="{Binding Path=DateTimeEnrollment}" 
+                                      ContentStringFormat="d" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+      </ListView.View>
+    </ListView>
+        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,0,5,5" >
+            <Hyperlink Command="{Binding ShowUpdateDetails}" >Update Details</Hyperlink>
+        </TextBlock>
+        <Separator DockPanel.Dock="Bottom" />
+    </DockPanel>
+</UserControl>
