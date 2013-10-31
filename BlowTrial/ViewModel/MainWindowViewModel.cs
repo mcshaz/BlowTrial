@@ -349,9 +349,9 @@ namespace BlowTrial.ViewModel
                 if (disposing)
                 {
                     if (_repository != null) { _repository.Dispose(); }
-                    if (_backupService != null) { _backupService.Dispose(); }
                 }
                 // Indicate that the instance has been disposed.
+                _repository = null;
                 _disposed = true;
             }
         }

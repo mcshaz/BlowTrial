@@ -16,7 +16,7 @@ namespace BlowTrial.ViewModel
     public abstract class WorkspaceViewModel: ViewModelBase
     {
         #region Fields
-        protected readonly IRepository _repository;
+        protected IRepository _repository;
         RelayCommand _closeCmd;
          #endregion
 

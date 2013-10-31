@@ -8,7 +8,7 @@ using System.Windows.Threading;
 
 namespace BlowTrial.Infrastructure
 {
-    public class BackupService: IDisposable
+    public class BackupService
     {
         #region Constructors
         private const int millisecsPerMin = 1000*60;
@@ -81,37 +81,16 @@ namespace BlowTrial.Infrastructure
         }
         #endregion
 
-        #region IDisposable implementation
-        private bool _disposed = false;
-        public void Dispose()
-        {
-            Dispose(true);
+        #region finalizer
 
-            // Use SupressFinalize in case a subclass 
-            // of this type implements a finalizer.
-            GC.SuppressFinalize(this);
-        }
         ~BackupService()
         {
-            Dispose(false);
-        }
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
+            if (_isToBackup)
             {
-                if (disposing)
-                {
-                    if (_isToBackup)
-                    {
-                        Backup(this, new EventArgs());
-                    }
-                    _timer.Tick -= _handler;
-                    _timer.Stop(); 
-                }
-
-                // Indicate that the instance has been disposed.
-                _disposed = true;
+                Backup(this, new EventArgs());
             }
+            _timer.Tick -= _handler;
+            _timer.Stop(); 
         }
         #endregion // IDiposable
     }
