@@ -44,7 +44,7 @@ namespace BlowTrial.ViewModel
             {
                 ScreenedPatientData.MissedCount++;
             }
-            if (e.NewScreenedPatient.RefusedConsent)
+            if (e.NewScreenedPatient.RefusedConsent == true)
             {
                 ScreenedPatientData.RefusedConsentCount++;
             }

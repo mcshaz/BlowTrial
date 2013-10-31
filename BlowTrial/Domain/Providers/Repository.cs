@@ -210,7 +210,7 @@ namespace BlowTrial.Domain.Providers
             _dbContext.Dispose();
             using (ZipFile zip = new ZipFile())
             {
-                zip.AddFile(dbFile.FullName);
+                zip.AddFile(dbFile.FullName,"");
                 zip.Save(backupFile.FullName);
             }
             _dbContext = _createContext.Invoke();
@@ -233,7 +233,7 @@ namespace BlowTrial.Domain.Providers
             {
                 // here, we extract every entry, but we could extract conditionally
                 // based on entry name, size, date, checkbox status, etc.  
-                zip1[0].Extract(dbFile.FullName, ExtractExistingFileAction.OverwriteSilently);
+                zip1[0].Extract(dbFile.DirectoryName, ExtractExistingFileAction.OverwriteSilently);
             }
             _dbContext = _createContext.Invoke();
         }
@@ -255,7 +255,7 @@ namespace BlowTrial.Domain.Providers
                 BadMalformCount = _dbContext.ScreenedPatients.Count(s => s.BadMalform),
                 LikelyDie24HrCount = _dbContext.ScreenedPatients.Count(s => s.LikelyDie24Hr),
                 MissedCount = _dbContext.ScreenedPatients.Count(s => s.Missed),
-                RefusedConsentCount = _dbContext.ScreenedPatients.Count(s => s.RefusedConsent),
+                RefusedConsentCount = _dbContext.ScreenedPatients.Count(s => s.RefusedConsent==true),
                 WasGivenBcgPriorCount = _dbContext.ScreenedPatients.Count(s => s.WasGivenBcgPrior)
             };
         }

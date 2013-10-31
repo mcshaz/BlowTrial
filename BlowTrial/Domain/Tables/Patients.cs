@@ -64,7 +64,7 @@ namespace BlowTrial.Domain.Tables
 	    public bool BadMalform {get; set;}
 	    public bool BadInfectnImmune {get; set;}
 	    public bool WasGivenBcgPrior {get;set;}
-	    public bool RefusedConsent {get;set;}
+	    public bool? RefusedConsent {get;set;}
         public bool Missed { get; set; }
     }
 }

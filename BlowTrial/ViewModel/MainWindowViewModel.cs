@@ -48,6 +48,7 @@ namespace BlowTrial.ViewModel
         }
 
         #endregion // Constructor
+
         #region NewDayNotifier
         public void CreateNewDayNotifier()
         {
@@ -67,6 +68,7 @@ namespace BlowTrial.ViewModel
             SetDayTimer();
         }
         #endregion
+
         #region Properties
         public string ProjectName
         {

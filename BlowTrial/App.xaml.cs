@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using System.Linq;
+using System.IO;
 
 namespace BlowTrial
 {
@@ -38,7 +39,13 @@ namespace BlowTrial
             base.OnStartup(e);
 
             //Set data directory
-            AppDomain.CurrentDomain.SetData("DataDirectory", Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+            string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\BlowTrial";
+            if (!Directory.Exists(baseDir))
+            {
+                Directory.CreateDirectory(baseDir);
+            }
+
+            AppDomain.CurrentDomain.SetData("DataDirectory", baseDir);
 
             //Application initialisation
             AutoMapperConfiguration.Configure();
