@@ -584,4 +584,7 @@
   <data name="MainWindowViewModel_Command_ViewSummary" xml:space="preserve">
     <value>Summary Data</value>
   </data>
+  <data name="NotApplicable" xml:space="preserve">
+    <value>N/A</value>
+  </data>
 </root>

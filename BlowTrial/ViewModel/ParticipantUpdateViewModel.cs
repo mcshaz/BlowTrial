@@ -17,6 +17,7 @@ using AutoMapper;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using BlowTrial.Infrastructure.Centiles;
+using System.Windows.Threading;
 
 namespace BlowTrial.ViewModel
 {
@@ -25,6 +26,7 @@ namespace BlowTrial.ViewModel
         #region Fields
         ParticipantModel _participant;
         OutcomeAt28DaysSplitter _outcomeSplitter;
+        DispatcherTimer _ageTimer;
 
         ObservableCollection<VaccineAdministeredViewModel> _vaccinesAdministered;
         ObservableCollection<VaccineViewModel> _allVaccinesAvailable;
@@ -38,14 +40,24 @@ namespace BlowTrial.ViewModel
             SaveChanges = new RelayCommand(Save, CanSave);
 
             CreateVaccineList();
+
+            _ageTimer = new DispatcherTimer(DispatcherPriority.Normal)
+            {
+                Interval = IntervalToSameTime(_participant.DateTimeBirth)
+            };
+            _ageTimer.Tick += OnAgeIncrementing;
+            _ageTimer.Start();
         }
+
         #endregion
 
         #region Properties
         public ListCollectionView VaccinesAdministeredLV { get; private set; } // of List<VaccineAdministeredViewModel>
 
         public bool IsParticipantModelChanged { get; private set; }
+
         public bool IsVaccineAdminChanged { get; private set; }
+
         public override string DisplayName
         {
             get
@@ -53,6 +65,7 @@ namespace BlowTrial.ViewModel
                 return string.Format(Strings.ParticipantUpdateVM_DisplayName, _participant.Id);
             }
         }
+
         public int Id
         {
             get
@@ -60,6 +73,7 @@ namespace BlowTrial.ViewModel
                 return _participant.Id;
             }
         }
+
         public string Name
         {
             get
@@ -75,6 +89,7 @@ namespace BlowTrial.ViewModel
             }
             */
         }
+
         public string PhoneNumber
         {
             get
@@ -88,6 +103,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("PhoneNumber");
             }
         }
+
         public string TrialArm
         {
             get
@@ -95,6 +111,7 @@ namespace BlowTrial.ViewModel
                 return _participant.TrialArm;
             }
         }
+
         public string HospitalIdentifier
         {
             get
@@ -110,11 +127,28 @@ namespace BlowTrial.ViewModel
             }
             */
         }
+
         public int AgeDays
         {
             get
             {
                 return _participant.Age.Days;
+            }
+        }
+
+        public string AgeDaysString
+        {
+            get
+            {
+                if (IsKnownDead == true)
+                {
+                    return Strings.NotApplicable;
+                }
+                if (AgeDays>28)
+                {
+                    return ">28"; //≥
+                }
+                return AgeDays.ToString();
             }
         }
 
@@ -470,7 +504,7 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public DateTime Today
+        public DateTime Today // such a silly property is for the upper bound of the datepickers
         {
             get
             {
@@ -594,11 +628,6 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        void SuggestRequeryDay(object args)
-        {
-            NotifyPropertyChanged("AgeDays", "CGA", "Today", "LastPossibleDate", "Is28Days");
-        }
-
         void CreateVaccineList()
         {
             if (_participant.VaccinesAdministered == null)
@@ -715,12 +744,18 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        #endregion
+
         #region Window Event Handlers
+
         internal void OnClosingWindow(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = !OkToProceed();
         }
+
         #endregion
+
+        #region Methods
 
         public bool OkToProceed()
         {
@@ -761,6 +796,7 @@ namespace BlowTrial.ViewModel
             // Yes, OK or No
             return true; 
         }
+
         void CancelChanges()
         {
             _participant = Mapper.Map<ParticipantModel>(
@@ -768,6 +804,26 @@ namespace BlowTrial.ViewModel
                                 .First(p => p.Id == _participant.Id));
             IsParticipantModelChanged = IsVaccineAdminChanged = false;
             _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
+        }
+
+        #endregion
+
+        #region AgeTimer
+
+        static TimeSpan IntervalToSameTime(DateTime orginalDateTime)
+        {
+            var returnVar = DateTime.Now.TimeOfDay - orginalDateTime.TimeOfDay;
+            if (returnVar.TotalHours < 0)
+            {
+                returnVar += TimeSpan.FromDays(1);
+            }
+            return returnVar;
+        }
+
+        void OnAgeIncrementing(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged("AgeDays", "CGA", "Today", "DeathLastContactOrToday", "Is28Days");
+            _ageTimer.Interval = IntervalToSameTime(_participant.DateTimeBirth);
         }
 
         #endregion
@@ -786,10 +842,12 @@ namespace BlowTrial.ViewModel
                 return returnVal;
             }
         }
+
         static readonly string[] ValidatedProperties = 
         { 
             "DiedAfterDischarge"
         };
+
         public string GetValidationError(string propertyName)
         {
             switch (propertyName)
@@ -822,6 +880,15 @@ namespace BlowTrial.ViewModel
             }
             return null;
         }
+
         #endregion //Validation
+
+        #region finaliser
+        ~ParticipantUpdateViewModel()
+        {
+            _ageTimer.Stop();
+            _ageTimer.Tick -= OnAgeIncrementing;
+        }
+        #endregion
     }
 }
