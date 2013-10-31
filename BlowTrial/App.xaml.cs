@@ -55,28 +55,23 @@ namespace BlowTrial
             AppDomain.CurrentDomain.SetThreadPrincipal(customPrincipal);
             base.OnStartup(e);
 
-            //Setup Main Window
-            MainWindow window = new MainWindow();
-
             // Create the ViewModel to which 
             // the main window binds.
             var mainWindowVm = new MainWindowViewModel();
+            MainWindow window = new MainWindow(mainWindowVm);
 
             // When the ViewModel asks to be closed, 
             // close the window.
             EventHandler handler = null;
             handler = delegate
             {
-                mainWindowVm.RequestClose -= handler;
                 window.Close();
+                if (!window.IsLoaded) //in case user cancelled
+                {
+                    mainWindowVm.RequestClose -= handler;
+                }
             };
             mainWindowVm.RequestClose += handler;
-
-            // Allow all controls in the window to 
-            // bind to the ViewModel by setting the 
-            // DataContext, which propagates down 
-            // the element tree.
-            window.DataContext = mainWindowVm;
 
             window.Show();
         }

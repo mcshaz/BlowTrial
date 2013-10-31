@@ -19,16 +19,17 @@
     <PublishUrl>C:\Users\OEM\Documents\BlowTrial Deployable\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <UpdateUrl>https://github.com/mcshaz/BlowTrial/releases/download/v0.1-dev/BlowTrial.Deployable.zip/</UpdateUrl>
     <WebPage>publish.htm</WebPage>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>0.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -182,11 +183,11 @@
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
     <Compile Include="ViewModel\CloudDirectoryViewModel.cs" />
     <Compile Include="ViewModel\DataSummaryViewModel.cs" />
-    <Compile Include="ViewModel\ParticipantListItemViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\NewPatientViewModel.cs" />
     <Compile Include="ViewModel\ParticipantUpdateViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\NotifyChangeBase.cs" />
     <Compile Include="ViewModel\UtilityViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModel\WorkspaceViewModel.cs" />
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />

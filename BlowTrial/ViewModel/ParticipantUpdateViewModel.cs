@@ -38,8 +38,6 @@ namespace BlowTrial.ViewModel
             SaveChanges = new RelayCommand(Save, CanSave);
 
             CreateVaccineList();
-
-            Mediator.Register("NewDayElapsed", SuggestRequeryDay);
         }
         #endregion
 
@@ -494,7 +492,13 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("WtForAgeCentile");
             }
         }
-        public bool IsUserCancelled { get; set; }
+        public string DetailsPending
+        {
+            get
+            {
+                return DetailsDictionary.GetDetails(_participant.DataRequired);
+            }
+        }
         #endregion
 
         #region Listbox options
@@ -711,15 +715,14 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        #region Window Event Handlers
         internal void OnClosingWindow(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!WishToProceed())
-            {
-                e.Cancel = IsUserCancelled = true;
-            }
+            e.Cancel = !OkToProceed();
         }
+        #endregion
 
-        bool WishToProceed()
+        public bool OkToProceed()
         {
             if (IsParticipantModelChanged || IsVaccineAdminChanged)
             {
@@ -750,52 +753,23 @@ namespace BlowTrial.ViewModel
                         break;
                     case MessageBoxResult.Cancel:
                         return false;
+                    default: //OK in Proceed ? OK/Cancel and No In Close without saving? yes/no/cancel
+                        CancelChanges();
+                        break;
                 }
             }
-            return true; // OK or No
+            // Yes, OK or No
+            return true; 
         }
-        internal bool ChangeParticipantModel(ParticipantModel participant)
+        void CancelChanges()
         {
-            if (_participant == participant || !WishToProceed()) { return false; }
-            _participant = participant;
+            _participant = Mapper.Map<ParticipantModel>(
+                            _repository.Participants.Include("VaccinesAdministered").Include("VaccinesAdministered.VaccineGiven")
+                                .First(p => p.Id == _participant.Id));
             IsParticipantModelChanged = IsVaccineAdminChanged = false;
-            SetListsBoxes();
-            CreateVaccineList();
-
-            NotifyPropertyChanged("PostDischargeOutcomeKnown",
-                "DiedAfterDischarge",
-                "OutcomeAt28Days", 
-                "OutcomeAt28orDischarge",
-                "DischargedBy28Days",
-                "IsKnownDead",
-                "DeathOrLastContactLabel",
-                "WeightLabel",
-                "OtherCauseOfDeathDetail",
-                "BcgAdverse",
-                "BcgAdverseDetail",
-                "BcgPapule",
-                "LastContactWeight",
-                "LastWeightDate",
-                "LastWeightDate",
-                "CauseOfDeath",
-                "OtherCauseOfDeathDetail",
-                "DischargeDate",
-                "DischargeTime",
-                "DeathOrLastContactDate",
-                "DeathOrLastContactTime",
-                "DisplayName",
-                "Id",
-                "TrialArm",
-                "AgeDays",
-                "CGA",
-                "Gender",
-                "AdmissionWeight",
-                "DateTimeBirth",
-                "DateTimeEnrollment",
-                "Name",
-                "HospitalIdentifier");
-            return true;
+            _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
         }
+
         #endregion
 
         #region Validation
@@ -828,7 +802,6 @@ namespace BlowTrial.ViewModel
                     return ValidatePostDischargeOutcomes();
             }
             return ((IDataErrorInfo)_participant)[propertyName];
-            
         }
 
         string ValidatePostDischargeOutcomes()
@@ -850,12 +823,5 @@ namespace BlowTrial.ViewModel
             return null;
         }
         #endregion //Validation
-
-        #region Destructor
-        ~ParticipantUpdateViewModel()
-        {
-            Mediator.Unregister("NewDayElapsed", SuggestRequeryDay);
-        }
-        #endregion
     }
 }

@@ -30,7 +30,7 @@ namespace BlowTrial.ViewModel
         ReadOnlyCollection<CommandViewModel> _commands;
         ObservableCollection<WorkspaceViewModel> _workspaces;
         BackupService _backupService;
-        DispatcherTimer _newDayTimer;
+
         #endregion // Fields
 
         #region Constructor
@@ -48,26 +48,6 @@ namespace BlowTrial.ViewModel
         }
 
         #endregion // Constructor
-
-        #region NewDayNotifier
-        public void CreateNewDayNotifier()
-        {
-            _newDayTimer = new DispatcherTimer(DispatcherPriority.Background); 
-            SetDayTimer();
-            _newDayTimer.Tick += new EventHandler(NewDayElapsed);
-            _newDayTimer.Start();
-        }
-        void SetDayTimer()
-        {
-            var now = DateTime.Now;
-            _newDayTimer.Interval = (now.Date.AddDays(1).AddSeconds(1) - now);
-        }
-        private void NewDayElapsed(object sender, EventArgs e)
-        {
-            Mediator.NotifyColleagues("NewDayElapsed", null); //could pass datetime.now as arg
-            SetDayTimer();
-        }
-        #endregion
 
         #region Properties
         public string ProjectName
@@ -328,6 +308,13 @@ namespace BlowTrial.ViewModel
             }
         }
         #endregion // Private Helpers
+
+        #region Event Handlers
+        public void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Mediator.NotifyColleagues("MainWindowClosing", e);
+        }
+        #endregion
 
         #region IDisposable implementation
         //http://msdn.microsoft.com/en-us/library/vstudio/b1yfkh5e%28v=vs.100%29.aspx

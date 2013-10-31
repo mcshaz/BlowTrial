@@ -20,7 +20,6 @@ namespace BlowTrial.ViewModel
         internal ParticipantListItemViewModel(ParticipantModel participant)
         {
             this.ParticipantModel = participant;
-            Mediator.Register("NewDayElapsed", SuggestRequeryDay);
         }
         #endregion
 
@@ -93,13 +92,7 @@ namespace BlowTrial.ViewModel
             get { return this.ParticipantModel.RegisteredAt; }
         }
 
-        public string DetailsPending
-        {
-            get
-            {
-                return DetailsDictionary.GetDetails(this.ParticipantModel.DataRequired);
-            }
-        }
+
 
         #endregion
 
@@ -117,7 +110,6 @@ namespace BlowTrial.ViewModel
         #region Destructor
         ~ParticipantListItemViewModel()
         {
-            Mediator.Unregister("NewDayElapsed", SuggestRequeryDay);
         }
         #endregion
     }

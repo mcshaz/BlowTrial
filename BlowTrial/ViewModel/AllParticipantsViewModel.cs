@@ -18,7 +18,7 @@ namespace BlowTrial.ViewModel
     {
         #region Fields
         ParticipantUpdateView _updateWindow;
-        ParticipantListItemViewModel _selectedParticipant;
+        ParticipantUpdateViewModel _selectedParticipant;
         #endregion // Fields
 
         #region Constructor
@@ -32,7 +32,7 @@ namespace BlowTrial.ViewModel
             SortGridView = new RelayCommand(SortParticipants, param=>true);
             ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null);
 
-
+            Mediator.Register("MainWindowClosing", OnMainWindowClosing);
         }
 
         void GetAllParticipants()
@@ -42,7 +42,7 @@ namespace BlowTrial.ViewModel
                 new Converter<Participant, ParticipantListItemViewModel>(p => new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(p))));
              * */
             var participantVMs = _repository.Participants.Include("VaccinesAdministered").Include("VaccinesAdministered.VaccineGiven").ToArray()
-                .Select(p => new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(p)))
+                .Select(p => new ParticipantUpdateViewModel(_repository,Mapper.Map<ParticipantModel>(p)))
                 .ToList();
             AllParticipants = new ListCollectionView(participantVMs);
             AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DetailsPending"));
@@ -53,16 +53,19 @@ namespace BlowTrial.ViewModel
 
         #region Properties
         public ListCollectionView AllParticipants { get; private set; }
-        public ParticipantListItemViewModel SelectedParticipant
+        public ParticipantUpdateViewModel SelectedParticipant
         { 
             get { return _selectedParticipant; } 
             set
             {
                 if (_selectedParticipant == value) { return; }
-                if (_updateWindow == null || 
-                    (_updateWindow != null && ((ParticipantUpdateViewModel)_updateWindow.DataContext).ChangeParticipantModel(value.ParticipantModel)))
+                if (_updateWindow == null)
                 {
                     _selectedParticipant = value;
+                }
+                else if (((ParticipantUpdateViewModel)_updateWindow.DataContext).OkToProceed())
+                {
+                    _updateWindow.DataContext = _selectedParticipant = value;
                 }
                 NotifyPropertyChanged("SelectedParticipant");
             }
@@ -82,17 +85,9 @@ namespace BlowTrial.ViewModel
         }
         void ShowUpdateWindow(object param)
         {
-            var participantUpdateViewModel = new ParticipantUpdateViewModel(_repository, SelectedParticipant.ParticipantModel);
-
-            _repository.ParticipantUpdated += participantUpdated;
-            _updateWindow = new ParticipantUpdateView(participantUpdateViewModel);
-            _updateWindow.Closed += updateWindow_Closed;
+            _updateWindow = new ParticipantUpdateView(SelectedParticipant);
+            _updateWindow.Closed += OnUpdateWindow_Closed;
             _updateWindow.Show();
-        }
-
-        private void participantUpdated(object sender, EventArgs e)
-        {
-            SelectedParticipant.SuggestRequery();
         }
 
         public RelayCommand SortGridView { get; private set; }
@@ -122,41 +117,41 @@ namespace BlowTrial.ViewModel
         }
         #endregion
 
-        #region Event Handling Methods
-
-        #region Window Event Handlers
-        private void updateWindow_Closed(object sender, EventArgs e)
-        {
-            var participantUpdateViewModel = (ParticipantUpdateViewModel)_updateWindow.DataContext; // ?? datacontext may have been disposed
-            _repository.ParticipantUpdated -= participantUpdated;
-            _updateWindow.Closing -= updateWindow_Closed;
-            if (!_finalising)
-            {
-                SelectedParticipant.ParticipantModel = Mapper.Map<ParticipantModel>(_repository.Participants.Find(SelectedParticipant.ParticipantModel.Id));
-            }
-            _updateWindow = null;
-        }
-        #endregion
+        #region Events
 
         private void OnParticipantAdded(object sender, ParticipantEventArgs e)
         {
-            var viewModel = new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(e.NewParticipant));
+            var viewModel = new ParticipantUpdateViewModel(_repository, Mapper.Map<ParticipantModel>(e.NewParticipant));
             AllParticipants.AddNewItem(viewModel);
             AllParticipants.CommitNew();
         }
 
-        #endregion // Event Handling Methods
+        void OnUpdateWindow_Closed(object sender, EventArgs e)
+        {
+            _updateWindow.Closed -= OnUpdateWindow_Closed;
+            _updateWindow = null;
+        }
+
+        void OnMainWindowClosing(object args)
+        {
+            if (_updateWindow == null) { return; }
+            if (SelectedParticipant.OkToProceed())
+            {
+                _updateWindow.Close();
+            }
+            else
+            {
+                ((System.ComponentModel.CancelEventArgs)args).Cancel = true;
+            }
+        }
+
+        #endregion // Events
 
         #region  finalizer
-        bool _finalising;
         ~AllParticipantsViewModel()
         {
-            //_newDayTimer.Dispose();
-            _finalising = true;
-            if (_updateWindow != null) { _updateWindow.Close(); } //this will detach the onclose handler and dispose the viewmodel
             _repository.ParticipantAdded -= OnParticipantAdded;
-            _updateWindow = null;
-            AllParticipants = null;
+            Mediator.Unregister("MainWindowClosing", OnMainWindowClosing);
         }
 
         #endregion // finalizer

@@ -40,9 +40,6 @@ namespace BlowTrial.ViewModel
             RandomiseCmd = new RelayCommand(Randomise, CanRandomise);
             ClearAllCmd = new RelayCommand(ClearAllFields, CanClear);
             AddScreenCmd = new RelayCommand(AddScreen, CanScreen);
-
-            Mediator.Register("NewDayElapsed", UpdateDateNotified);
-
         }
         #endregion
 
@@ -186,8 +183,8 @@ namespace BlowTrial.ViewModel
         void abnormality_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             _newPatient.Abnormalities = (from a in _abnormalities
-                                         where !string.IsNullOrWhiteSpace(a.DisplayName)
-                                         select a.DisplayName).ToSeparatedList(';');
+                                         where !string.IsNullOrWhiteSpace(a.Description)
+                                         select a.Description).ToSeparatedList(';');
             NotifyPropertyChanged("Abnormalities");
         }
 
@@ -712,20 +709,22 @@ namespace BlowTrial.ViewModel
             return null;
         }
         #endregion // IDataErrorInfo Members
-
-        #region Destructor
-        ~NewPatientViewModel()
-        {
-            Mediator.Unregister("NewDayElapsed", UpdateDateNotified);
-        }
-        #endregion
     }
-    public class Abnormality : ViewModelBase 
+    public class Abnormality : NotifyChangeBase 
     {
+        #region Description
+        private string _description;
         public string Description
         {
-            get { return DisplayName; }
-            set { DisplayName = value; }
+            get { return _description; }
+            set
+            {
+                if (_description == value) { return; }
+                _description = value;
+                NotifyPropertyChanged("Description");
+            }
         }
+
+        #endregion // DisplayName
     }
 }
