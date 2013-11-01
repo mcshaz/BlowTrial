@@ -71,7 +71,6 @@ namespace BlowTrial.ViewModel
             }
         }
         
-
         #endregion
 
         #region Public Interface
@@ -114,6 +113,7 @@ namespace BlowTrial.ViewModel
                    (new SortDescription(propertyName, ListSortDirection.Descending));
                 _isAscending[propertyName] = true;
             }
+            if (propertyName == "Id") { NotifyPropertyChanged("IsIdSort"); }
         }
         #endregion
 

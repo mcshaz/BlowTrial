@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.20827.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlowTrial", "BlowTrial\BlowTrial.csproj", "{6D146229-91CA-46C0-9F74-B12DF8E68C64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xceed.Wpf.Toolkit", "..\..\..\Visual Studio 2013\Code Snippets\WPFextended\Main\Source\ExtendedWPFToolkitSolution\Src\Xceed.Wpf.Toolkit\Xceed.Wpf.Toolkit.csproj", "{72E591D6-8F83-4D8C-8F67-9C325E623234}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CD_ROM|Any CPU = CD_ROM|Any CPU
@@ -26,16 +24,6 @@ Global
 		{6D146229-91CA-46C0-9F74-B12DF8E68C64}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6D146229-91CA-46C0-9F74-B12DF8E68C64}.SingleImage|Any CPU.ActiveCfg = Release|Any CPU
 		{6D146229-91CA-46C0-9F74-B12DF8E68C64}.SingleImage|Any CPU.Build.0 = Release|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.CD_ROM|Any CPU.ActiveCfg = Release|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.CD_ROM|Any CPU.Build.0 = Release|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.DVD-5|Any CPU.ActiveCfg = Debug|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.DVD-5|Any CPU.Build.0 = Debug|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.Release|Any CPU.Build.0 = Release|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.SingleImage|Any CPU.ActiveCfg = Release|Any CPU
-		{72E591D6-8F83-4D8C-8F67-9C325E623234}.SingleImage|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

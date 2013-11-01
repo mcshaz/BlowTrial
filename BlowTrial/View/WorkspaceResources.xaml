@@ -16,7 +16,6 @@
     <DataTemplate DataType="{x:Type ValidationError}">
         <TextBlock Style="{StaticResource errorStyle}" Text="{Binding Path=ErrorContent}" />
     </DataTemplate>
-    <!-- http://www.codeproject.com/script/Content/ViewAssociatedFile.aspx?rzp=%2FKB%2FWPF%2F410217%2F%2Flvtest.zip&zep=ControlLib%2FThemes%2FGeneric1.xaml&obid=410217&obtid=2&ovid=1 -->
     <Style x:Key="Body_Content_DataGrid_Centering"
         TargetType="{x:Type DataGridCell}">
         <Setter Property="Template">
