@@ -19,8 +19,7 @@ namespace BlowTrial.Infrastructure.AutoMapper
                 .ForMember(d => d.Error, o => o.Ignore())
                 .ForMember(d => d.IsValid, o => o.Ignore())
                 .ForMember(d => d.BackupIntervalMinutes, o => o.MapFrom(s => s.IntervalMins))
-                .ForMember(d => d.CloudDirectory, o => o.MapFrom(s => s.Directory))
-                .ForMember(d => d.BackupToCloud, o => o.MapFrom(s => s.IsToBackup));
+                .ForMember(d => d.CloudDirectory, o => o.MapFrom(s => s.Directory));
         }
     }
 }

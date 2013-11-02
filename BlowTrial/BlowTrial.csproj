@@ -170,6 +170,7 @@
     <Compile Include="Infrastructure\CSV\EnumerableToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantDataToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantCsvModel.cs" />
+    <Compile Include="Infrastructure\Extensions\ColorExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\LinqExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringEnumerationExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringExtensions.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
+    <Compile Include="Models\GetAppSettingsModel.cs" />
     <Compile Include="Models\SummaryModels.cs" />
     <Compile Include="Models\VaccineAdministeredModel.cs" />
     <Compile Include="Security\MembershipRepository.cs" />
@@ -202,13 +204,14 @@
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
     <Compile Include="ViewModel\CloudDirectoryViewModel.cs" />
     <Compile Include="ViewModel\DataSummaryViewModel.cs" />
+    <Compile Include="ViewModel\GetAppSettingsWizardViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\NewPatientViewModel.cs" />
     <Compile Include="ViewModel\ParticipantUpdateViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\NotifyChangeBase.cs" />
     <Compile Include="ViewModel\UtilityViewModels\ViewModelBase.cs" />
-    <Compile Include="ViewModel\WorkspaceViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\WorkspaceViewModel.cs" />
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />
     <Compile Include="ViewModel\VaccineViewModels.cs" />
     <Compile Include="View\AllScreenedView.xaml.cs">
@@ -216,6 +219,9 @@
     </Compile>
     <Compile Include="View\AllParticipantsView.xaml.cs">
       <DependentUpon>AllParticipantsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\BackupUserControlBase.xaml.cs">
+      <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\CreateCsvView.xaml.cs">
       <DependentUpon>CreateCsvView.xaml</DependentUpon>
@@ -234,6 +240,9 @@
     </Compile>
     <Compile Include="View\ParticipantUpdateView.xaml.cs">
       <DependentUpon>ParticipantUpdateView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\GetAppSettingsWizard.xaml.cs">
+      <DependentUpon>GetAppSettingsWizard.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -259,6 +268,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="View\BackupUserControlBase.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\CreateCsvView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -266,6 +279,10 @@
     <Page Include="View\SummaryDataView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\GetAppSettingsWizard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\WorkspaceResources.xaml">
       <SubType>Designer</SubType>

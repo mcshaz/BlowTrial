@@ -22,7 +22,6 @@ namespace BlowTrial.Models
             { 
                 "CloudDirectory",
                 "BackupIntervalMinutes",
-                "BackupToCloud"
             };
         }
         #endregion //Constructors
@@ -33,7 +32,7 @@ namespace BlowTrial.Models
         #region Properties
         public string CloudDirectory { get; set; }
         public int? BackupIntervalMinutes { get; set; }
-        public bool? BackupToCloud { get; set; }
+
         #endregion
 
         #region Methods
@@ -55,9 +54,6 @@ namespace BlowTrial.Models
                     break;
                 case "BackupIntervalMinutes":
                     error = ValidateBackupInterval();
-                    break;
-                case "BackupToCloud":
-                    error = ValidateDDLNotNull(BackupToCloud);
                     break;
                 default:
                     Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);

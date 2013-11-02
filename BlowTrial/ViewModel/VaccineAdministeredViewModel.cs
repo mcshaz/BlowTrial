@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace BlowTrial.ViewModel
 {
-    public sealed class VaccineAdministeredViewModel : ViewModelBase, IDataErrorInfo
+    public sealed class VaccineAdministeredViewModel : NotifyChangeBase, IDataErrorInfo
     {
         #region Constructors
         public VaccineAdministeredViewModel(VaccineAdministeredModel vaccineModel, ObservableCollection<VaccineViewModel> vaccineList)

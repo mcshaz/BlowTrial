@@ -70,6 +70,24 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data Collection.
+        /// </summary>
+        public static string AppSettingsVM_DataCollection {
+            get {
+                return ResourceManager.GetString("AppSettingsVM_DataCollection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data Oversight.
+        /// </summary>
+        public static string AppSettingsVM_DataOversight {
+            get {
+                return ResourceManager.GetString("AppSettingsVM_DataOversight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BLOW Trial (BCG for low-birth-weight babies).
         /// </summary>
         public static string Blowtrial_ProjectName {
@@ -444,6 +462,33 @@ namespace BlowTrial.Properties {
         public static string Field_Error_TooLong {
             get {
                 return ResourceManager.GetString("Field_Error_TooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sites must have distinct colours.
+        /// </summary>
+        public static string GetAppSettingsModel_Error_DuplicateColours {
+            get {
+                return ResourceManager.GetString("GetAppSettingsModel_Error_DuplicateColours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sites must have distinct names.
+        /// </summary>
+        public static string GetAppSettingsModel_Error_DuplicateSiteName {
+            get {
+                return ResourceManager.GetString("GetAppSettingsModel_Error_DuplicateSiteName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is an error with one of the study sites you specified..
+        /// </summary>
+        public static string GetAppSettingsModel_Error_StudySite {
+            get {
+                return ResourceManager.GetString("GetAppSettingsModel_Error_StudySite", resourceCulture);
             }
         }
         
@@ -1155,6 +1200,42 @@ namespace BlowTrial.Properties {
         public static string ParticipantUpdateVM_InterventionArm {
             get {
                 return ResourceManager.GetString("ParticipantUpdateVM_InterventionArm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The trial will commence with this installation.
+        /// </summary>
+        public static string PreviouslyRandomisedOptions_False {
+            get {
+                return ResourceManager.GetString("PreviouslyRandomisedOptions_False", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Patients have been randomised by envelope.
+        /// </summary>
+        public static string PreviouslyRandomisedOptions_True {
+            get {
+                return ResourceManager.GetString("PreviouslyRandomisedOptions_True", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please select a colour.
+        /// </summary>
+        public static string StudySiteDataModel_Error_NoColour {
+            get {
+                return ResourceManager.GetString("StudySiteDataModel_Error_NoColour", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot retrospectively add data unless site is a data collecting site.
+        /// </summary>
+        public static string StudySiteDataModel_Error_PatientsPreviouslyRandomisedNotRelevant {
+            get {
+                return ResourceManager.GetString("StudySiteDataModel_Error_PatientsPreviouslyRandomisedNotRelevant", resourceCulture);
             }
         }
         

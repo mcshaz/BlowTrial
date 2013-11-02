@@ -23,30 +23,38 @@ namespace BlowTrial.Helpers
             return (from a in appData.AppDataSet
                     select a).FirstOrDefault();
         }
-        public static void SetBackupDetails(string path, int intervalMins, bool backupToCloud)
+        public static void SetBackupDetails(string path, int intervalMins, bool? backupToCloud = null)
         {
             using (var a = new MembershipContext())
             {
                 SetBackupDetails(path,intervalMins, backupToCloud,a);
             }
         }
-        public static void SetBackupDetails(string path, int intervalMins, bool backupToCloud,IAppDataSet appData)
+        public static void SetBackupDetails(string path, int intervalMins, bool? backupToCloud,IAppDataSet appDataProvider)
         {
             if (!Directory.Exists(path))
             {
                 throw new ArgumentException("the specified path does not exist", "path");
             }
-            try
+            var data = GetBackupDetails(appDataProvider);
+            if (data == null)
             {
-                appData.Database.ExecuteSqlCommand("delete from AppDataSet");
+                if (backupToCloud == null)
+                {
+                    throw new InvalidOperationException("BackupToCloud must be set if there is no database entry as yet");
+                }
+                appDataProvider.AppDataSet.Attach(new AppData
+                    {
+                        CloudDirectory = path, BackupIntervalMinutes = intervalMins, BackupToCloud = backupToCloud.Value
+                    });
             }
-            catch { }
-            appData.AppDataSet.Add(new AppData 
-            { CloudDirectory = path, 
-                BackupIntervalMinutes = intervalMins,
-                BackupToCloud = backupToCloud
-            });
-            appData.SaveChanges();
+            else
+            {
+                data.BackupIntervalMinutes = intervalMins;
+                data.CloudDirectory = path;
+                appDataProvider.AppDataSet.Attach(data);
+            }
+            appDataProvider.SaveChanges();
         }
 
     }

@@ -20,10 +20,9 @@ namespace BlowTrial.ViewModel
         public CloudDirectoryViewModel(CloudDirectoryModel cloudDirModel)
         {
             _cloudDirModel = cloudDirModel;
-            HasBackupDirectionBeenSet = cloudDirModel.BackupToCloud.HasValue;
             SaveCmd = new RelayCommand(Save, param=>IsValid);
             SelectDirectoryCmd = new RelayCommand(SelectDirectory);
-            CancelCmd = new RelayCommand(param => CloseCmd.Execute(param), param => HasBackupDirectionBeenSet);
+            CancelCmd = new RelayCommand(param => CloseCmd.Execute(param));
             IntervalTimeScale = 1;
         }
         #endregion
@@ -42,7 +41,6 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("CloudDirectory");
             }
         }
-        public bool HasBackupDirectionBeenSet { get; private set; }
         private int _intervalTimeScale;
         public int IntervalTimeScale
         {
@@ -70,19 +68,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("BackupInterval");
             }
         }
-        public bool? BackupToCloud
-        {
-            get
-            {
-                return _cloudDirModel.BackupToCloud;
-            }
-            set
-            {
-                if (_cloudDirModel.BackupToCloud == value) { return; }
-                _cloudDirModel.BackupToCloud = value;
-                NotifyPropertyChanged("BackupToCloud");
-            }
-        }
+
 
         #endregion
 
@@ -95,8 +81,7 @@ namespace BlowTrial.ViewModel
                 throw new InvalidOperationException("CloudDirectoryViewModel not valid - cannot call save");
             }
             AppDataService.SetBackupDetails(_cloudDirModel.CloudDirectory, 
-                _cloudDirModel.BackupIntervalMinutes.Value,
-                _cloudDirModel.BackupToCloud.Value);
+                _cloudDirModel.BackupIntervalMinutes.Value);
             CloseCmd.Execute(null);
         }
         public RelayCommand SelectDirectoryCmd { get; private set; }
@@ -134,15 +119,6 @@ namespace BlowTrial.ViewModel
                     };
                 }
                 return _intervalTimeScaleOptions;
-            }
-        }
-        KeyValuePair<bool?, string>[] _backupToCloudOptions;
-        public KeyValuePair<bool?, string>[] BackupToCloudOptions
-        {
-            get
-            {
-                return _backupToCloudOptions ?? 
-                    (_backupToCloudOptions = CreateBoolPairs(Strings.CloudDirectoryVm_DataCollectingSite, Strings.CloudDirectoryVm_DataReceivingSite));
             }
         }
         #endregion
