@@ -17,9 +17,9 @@ namespace BlowTrial.View
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class GetAppSettingsWizard : Window
+    public partial class BackupDirectionView : UserControl
     {
-        public GetAppSettingsWizard(GetAppSettingsWizardViewModel model)
+        public BackupDirectionView(BackupDirectionViewModel model)
         {
             DataContext = model;
             InitializeComponent();

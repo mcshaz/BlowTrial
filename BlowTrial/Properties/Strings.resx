@@ -614,4 +614,7 @@
   <data name="GetAppSettingsModel_Error_DuplicateSiteName" xml:space="preserve">
     <value>Sites must have distinct names</value>
   </data>
+  <data name="GetAppSettingsModel_Error_NoStudySites" xml:space="preserve">
+    <value>At least 1 study site must be nominated</value>
+  </data>
 </root>

@@ -1,0 +1,48 @@
+﻿<Window x:Class="BlowTrial.View.GetAppSettingsWizard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+        xmlns:vw="clr-namespace:BlowTrial.View"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters"
+        Title="Welcome" >
+    <Window.Resources>
+            <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
+    </Window.Resources>
+    <wpfToolkit:Wizard FinishButtonClosesWindow="True" x:Name="toolkitWizard">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="Finish">
+                <i:InvokeCommandAction Command="{Binding Path=Finish}"/>
+            </i:EventTrigger>
+            <i:EventTrigger EventName="PageChanged">
+                <i:InvokeCommandAction Command="{Binding Path=PageChanged}" CommandParameter="{Binding ElementName=toolkitWizard}" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+        <wpfToolkit:WizardPage x:Name="IntroPage" 
+                                   Title="Thank you for participating in BLOW trial (BCG for LOW birthweight babies)"
+                                   Description="This Wizard will walk you through setting up the information about your institution." />
+        <wpfToolkit:WizardPage x:Name="intallLocation" PageType="Interior"
+                                   Title="Location of this computer"
+                                   Description="The first step is to select whether you will be entering data from the hospital, or are part of an oversite comittee (that is, data will NOT be collected on this computer, but only analysed)"
+                                   DataContext="{Binding Path=BackupVM, Mode=OneWay}"
+                                   CanSelectNextPage="{Binding Path=IsValid, Mode=OneWay}"
+                                   >
+            <vw:BackupDirectionView />
+        </wpfToolkit:WizardPage>
+        <wpfToolkit:WizardPage x:Name="siteNames" PageType="Interior"
+                               DataContext="{Binding Path=StudySitesVM, Mode=OneWay}"
+                                   Title="All local sites"
+                                   Description="Please enter data about all sites for which this computer will be used to enter data."
+                               CanSelectNextPage="{Binding Path=IsValid, Mode=OneWay}"    
+                               >
+            <vw:StudySitesView />
+        </wpfToolkit:WizardPage>
+        <wpfToolkit:WizardPage x:Name="backupInfo" PageType="Interior"
+                               DataContext="{Binding Path=CloudVM, Mode=OneWay}"
+                                   Title="Cloud Directory"
+                                   Description="Please enter backup information"
+                                   CanFinish="{Binding Path=IsValid, Mode=OneWay}" >
+            <vw:BackupUserControlBase />
+        </wpfToolkit:WizardPage>
+    </wpfToolkit:Wizard>
+</Window>

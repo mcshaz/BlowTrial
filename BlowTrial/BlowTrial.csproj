@@ -85,6 +85,9 @@
     <Reference Include="Ionic.Zip.Reduced">
       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -99,6 +102,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -164,6 +170,7 @@
     <Compile Include="Infrastructure\Converters\BooleanInverterConverter.cs" />
     <Compile Include="Infrastructure\Converters\BooleanToGridLengthConverter.cs" />
     <Compile Include="Infrastructure\Converters\EnumToBooleanConverter.cs" />
+    <Compile Include="Infrastructure\Converters\GenericConverters.cs" />
     <Compile Include="Infrastructure\Converters\RowDefinitionExtended.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -188,7 +195,8 @@
     <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
-    <Compile Include="Models\GetAppSettingsModel.cs" />
+    <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
+    <Compile Include="Models\WizardModels\StudySitesModel.cs" />
     <Compile Include="Models\SummaryModels.cs" />
     <Compile Include="Models\VaccineAdministeredModel.cs" />
     <Compile Include="Security\MembershipRepository.cs" />
@@ -202,9 +210,11 @@
     <Compile Include="ViewModel\AllScreenedViewModel.cs" />
     <Compile Include="ViewModel\AuthenticationViewModel.cs" />
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
-    <Compile Include="ViewModel\CloudDirectoryViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
     <Compile Include="ViewModel\DataSummaryViewModel.cs" />
-    <Compile Include="ViewModel\GetAppSettingsWizardViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\StudySitesViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\NewPatientViewModel.cs" />
@@ -220,7 +230,7 @@
     <Compile Include="View\AllParticipantsView.xaml.cs">
       <DependentUpon>AllParticipantsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\BackupUserControlBase.xaml.cs">
+    <Compile Include="View\Wizard\BackupUserControlBase.xaml.cs">
       <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\CreateCsvView.xaml.cs">
@@ -241,7 +251,13 @@
     <Compile Include="View\ParticipantUpdateView.xaml.cs">
       <DependentUpon>ParticipantUpdateView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\GetAppSettingsWizard.xaml.cs">
+    <Compile Include="View\Wizard\BackupDirectionView.xaml.cs">
+      <DependentUpon>BackupDirectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Wizard\StudySitesView.xaml.cs">
+      <DependentUpon>StudySitesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Wizard\GetAppSettingsWizard.xaml.cs">
       <DependentUpon>GetAppSettingsWizard.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
@@ -268,7 +284,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\BackupUserControlBase.xaml">
+    <Page Include="View\Wizard\BackupUserControlBase.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -280,7 +296,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\GetAppSettingsWizard.xaml">
+    <Page Include="View\Wizard\BackupDirectionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Wizard\StudySitesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Wizard\GetAppSettingsWizard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

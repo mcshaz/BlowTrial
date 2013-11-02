@@ -10,18 +10,16 @@ using System.Windows.Media;
 
 namespace BlowTrial.Models
 {
-    public class GetAppSettingsModel :ValidationBase
+    public class StudySitesModel :ValidationBase
     {
-        public GetAppSettingsModel()
+        public StudySitesModel()
         {
-            StudySitesData = new List<StudySiteDataModel>();
-            _validatedProperties = new string[] { "PatientsPreviouslyRandomised", "StudySitesData", "BackupToCloud" };
+            StudySitesData = new List<StudySiteItemModel>();
+            _validatedProperties = new string[] { "StudySitesData" };
 
         }
-        public bool? BackupToCloud { get; set; }
-        public List<StudySiteDataModel> StudySitesData { get; private set; }
-        public bool PatientsPreviouslyRandomised { get; set; }
 
+        public List<StudySiteItemModel> StudySitesData { get; private set; }
 
         public override string GetValidationError(string propertyName)
         {
@@ -32,14 +30,8 @@ namespace BlowTrial.Models
 
             switch (propertyName)
             {
-                case "PatientsPreviouslyRandomised":
-                    error = ValidatePatientsPreviouslyRandomised();
-                    break;
                 case "StudySitesData":
                     error = ValidateStudySitesData();
-                    break;
-                case "BackupToCloud":
-                    error = ValidateDDLNotNull(BackupToCloud);
                     break;
                 default:
                     Debug.Fail("Unexpected property being validated on GetAppSettingsModel: " + propertyName);
@@ -54,25 +46,22 @@ namespace BlowTrial.Models
             {
                 return Strings.GetAppSettingsModel_Error_StudySite;
             }
-            return null;
-        }
-        string ValidatePatientsPreviouslyRandomised()
-        {
-            if (PatientsPreviouslyRandomised && BackupToCloud!=true)
+            var firstSite = StudySitesData.FirstOrDefault();
+            if (firstSite==null || firstSite.SiteName==null)
             {
-                return Strings.StudySiteDataModel_Error_PatientsPreviouslyRandomisedNotRelevant;
+                return Strings.GetAppSettingsModel_Error_NoStudySites;
             }
             return null;
         }
     }
 
-    public class StudySiteDataModel : ValidationBase
+    public class StudySiteItemModel : ValidationBase
     {
-        public StudySiteDataModel()
+        public StudySiteItemModel()
         {
             _validatedProperties = new string[] { "SiteBackgroundColour", "SiteTextColour", "SiteName" };
         }
-        public virtual GetAppSettingsModel AppSetting { get; set; }
+        public virtual StudySitesModel AllLocalSites { get; set; }
         public Guid Id { get; set; }
         public string SiteName { get; set; }
         public Color? SiteBackgroundColour { get; set; }
@@ -109,7 +98,7 @@ namespace BlowTrial.Models
                 return null;
             }
             string error = ValidateFieldNotEmpty(SiteName);
-            if (error == null && AppSetting.StudySitesData.Any(s => s.Id != Id && s.SiteName == SiteName))
+            if (error == null && AllLocalSites.StudySitesData.Any(s => s.Id != Id && s.SiteName == SiteName))
             {
                 error = Strings.GetAppSettingsModel_Error_DuplicateSiteName;
             }
@@ -123,7 +112,7 @@ namespace BlowTrial.Models
             {
                 error = Strings.StudySiteDataModel_Error_NoColour;
             }
-            if (error == null && AppSetting.StudySitesData.Any(s => s.Id != Id && s.SiteTextColour == SiteTextColour))
+            if (error == null && AllLocalSites.StudySitesData.Any(s => s.Id != Id && s.SiteTextColour == SiteTextColour))
             {
                 error = Strings.GetAppSettingsModel_Error_DuplicateColours;
             }
@@ -137,7 +126,7 @@ namespace BlowTrial.Models
             {
                 error = Strings.StudySiteDataModel_Error_NoColour;
             }
-            if (error == null && AppSetting.StudySitesData.Any(s => s.Id != Id && s.SiteBackgroundColour == SiteBackgroundColour))
+            if (error == null && AllLocalSites.StudySitesData.Any(s => s.Id != Id && s.SiteBackgroundColour == SiteBackgroundColour))
             {
                 error = Strings.GetAppSettingsModel_Error_DuplicateColours;
             }

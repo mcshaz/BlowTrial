@@ -484,6 +484,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to At least 1 study site must be nominated.
+        /// </summary>
+        public static string GetAppSettingsModel_Error_NoStudySites {
+            get {
+                return ResourceManager.GetString("GetAppSettingsModel_Error_NoStudySites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is an error with one of the study sites you specified..
         /// </summary>
         public static string GetAppSettingsModel_Error_StudySite {
