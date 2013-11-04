@@ -15,14 +15,13 @@ namespace BlowTrial.Models
 
         public bool PatientsPreviouslyRandomised { get; set; }
 
-
         public override string GetValidationError(string propertyName)
         {
-            if (propertyName == "PatientsPreviouslyRandomised")
-            {
-                return ValidatePatientsPreviouslyRandomised();
+           switch (propertyName)
+            { 
+                case "PatientsPreviouslyRandomised":
+                    return ValidatePatientsPreviouslyRandomised();
             }
-
             return base.GetValidationError(propertyName);
         }
         string ValidatePatientsPreviouslyRandomised()

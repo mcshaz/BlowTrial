@@ -4,16 +4,12 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:vw="clr-namespace:BlowTrial.View"
 >
-    <UserControl.Resources>
-        <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
-    </UserControl.Resources>
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
-        <vw:BackupUserControlBase DataContext="{Binding}"/>
+        <vw:BackupUserControlBase DataContext="{Binding Path=.}"/>
         <Line Grid.Row="2" Grid.RowSpan="2" 
                 VerticalAlignment="Top" Stroke="Gray" StrokeThickness="1"
                 X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />

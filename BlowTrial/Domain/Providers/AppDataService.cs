@@ -9,7 +9,7 @@ using System.Text;
 
 namespace BlowTrial.Helpers
 {
-    public static class BackupDataService
+    public static class ApplicationDataService
     {
         public static BackupDataSet GetBackupDetails()
         {
@@ -27,14 +27,14 @@ namespace BlowTrial.Helpers
                 CloudDirectories = appData.CloudDirectories.Select(c=>c.Path).ToList()
             };
         }
-        public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool? backupToCloud = null)
+        public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising=null)
         {
             using (var a = new MembershipContext())
             {
-                SetBackupDetails(cloudDirectories,intervalMins, backupToCloud,a);
+                SetBackupDetails(cloudDirectories,intervalMins, isTobackupToCloud,isEnvelopeRandomising,a);
             }
         }
-        public static void SetBackupDetails(IEnumerable<string> paths, int intervalMins, bool? backupToCloud,IBackupData appDataProvider)
+        internal static void SetBackupDetails(IEnumerable<string> paths, int intervalMins, bool? isTobackupToCloud, bool? isEnvelopeRandomising,IBackupData appDataProvider)
         {
             try
             {
@@ -52,14 +52,19 @@ namespace BlowTrial.Helpers
             var data = GetBackupDetails(appDataProvider);
             if (data == null)
             {
-                if (backupToCloud == null)
+                if (isTobackupToCloud == null)
                 {
-                    throw new InvalidOperationException("BackupToCloud must be set if there is no database entry as yet");
+                    throw new InvalidOperationException("IsToBackupToCloud must be set if there is no database entry as yet");
+                }
+                if (isEnvelopeRandomising == null)
+                {
+                    throw new InvalidOperationException("IsEnvelopeRandomising must be set if there is no database entry as yet");
                 }
                 appDataProvider.BackupDataSet.Attach(new BackupData
                 {
                     BackupIntervalMinutes = intervalMins, 
-                    IsBackingUpToCloud = backupToCloud.Value
+                    IsBackingUpToCloud = isTobackupToCloud.Value,
+                    IsEnvelopeRandomising = isEnvelopeRandomising.Value
                 });
             }
             else

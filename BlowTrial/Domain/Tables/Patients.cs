@@ -11,8 +11,8 @@ namespace BlowTrial.Domain.Tables
 {
     public abstract class Patient : ISharedRecord
     {
-        [DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)]
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
 	    public Guid Id {get; set;}
         [StringLength(256)]
 	    public string Name {get;set;}

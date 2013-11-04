@@ -25,9 +25,9 @@ namespace BlowTrial.ViewModel
         WizardPageViewModel _currentPage;
         RelayCommand _moveNextCommand;
         RelayCommand _movePreviousCommand;
-        IList<WizardPageViewModel> _pages;
+        List<WizardPageViewModel> _pages;
 
-        StudySitesModel _sitesModel;
+        StudySitesViewModel _sitesVM;
         BackupDirectionModel _backupModel;
 
         #endregion // Fields
@@ -124,7 +124,7 @@ namespace BlowTrial.ViewModel
 
         bool CanMoveToNextPage
         {
-            get { return this.CurrentPage != null && this.CurrentPage.IsValid(); }
+            get { return this.CurrentPage != null && this.CurrentPage.WasValidOnLastNotify; }
         }
 
         void MoveToNextPage()
@@ -185,7 +185,7 @@ namespace BlowTrial.ViewModel
         /// <summary>
         /// Returns a read-only collection of all page ViewModels.
         /// </summary>
-        public IList<WizardPageViewModel> Pages
+        public List<WizardPageViewModel> Pages
         {
             get
             {
@@ -205,30 +205,35 @@ namespace BlowTrial.ViewModel
             _pages = new List<WizardPageViewModel>();
             
             var backupDirectionVM = new BackupDirectionViewModel(_backupModel);
-            backupDirectionVM.PropertyChanged += backupDirVM_PropertyChanged;
+            backupDirectionVM.PropertyChanged += BackupDirectionVM_PropertyChanged;
             _pages.Add(backupDirectionVM);
+            var sitesModel = new StudySitesModel();
+            _sitesVM = new StudySitesViewModel(sitesModel);
+            _pages.Add(_sitesVM);
             _pages.Add(new CloudDirectoryViewModel(_backupModel));
+
         }
 
-        void backupDirVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        void BackupDirectionVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "BackupToCloud")
+            if (e.PropertyName=="IsBackingUpToCloud")
             {
-                var backupDirVM = (BackupDirectionViewModel)sender;
-                if (backupDirVM.BackupToCloud == null) { return; }
-                var studyModel = _pages[_pages.Count-1] as StudySitesViewModel;
-                if (backupDirVM.BackupToCloud.Value && studyModel!=null)
+                bool? isBackingUpToCloud = ((BackupDirectionViewModel)sender).IsBackingUpToCloud;
+                if (isBackingUpToCloud.HasValue)
                 {
-                    _pages.Remove(studyModel);
-                }
-                else if (!backupDirVM.BackupToCloud.Value && studyModel == null)
-                {
-                    _sitesModel = new StudySitesModel();
-                    _pages.Add(new StudySitesViewModel(_sitesModel));
+                    WizardPageViewModel page = (WizardPageViewModel)Pages.FirstOrDefault(p => p.Equals(_sitesVM));
+                    if (page==null && isBackingUpToCloud.Value)
+                    {
+                        Pages.Insert(1, (WizardPageViewModel)_sitesVM);
+                    }
+                    else if (page!=null && !isBackingUpToCloud.Value)
+                    {
+                        Pages.Remove(page);
+                    }
                 }
             }
-
         }
+
 
         int CurrentPageIndex
         {

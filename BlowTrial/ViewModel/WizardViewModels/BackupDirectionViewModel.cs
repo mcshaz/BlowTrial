@@ -16,6 +16,7 @@ namespace BlowTrial.ViewModel
     {
         #region fields
         BackupDirectionModel _backupModel;
+        string[] _validatedFields = new string[] { "PatientsPreviouslyRandomised", "IsBackingUpToCloud" };
         #endregion
 
         #region constructors
@@ -40,7 +41,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("PatientsPreviouslyRandomised");
             }
         }
-        public bool? BackupToCloud
+        public bool? IsBackingUpToCloud
         {
             get
             {
@@ -51,11 +52,12 @@ namespace BlowTrial.ViewModel
                 if (_backupModel.IsBackingUpToCloud == value) { return; }
                 _backupModel.IsBackingUpToCloud = value;
                 NotifyPropertyChanged("IsBackingUpToCloud");
+                if (value != true) { PatientsPreviouslyRandomised = false; }
             }
         }
         public override bool IsValid()
         {
-            return _backupModel.IsValid();
+            return _validatedFields.All(v=>_backupModel.GetValidationError(v)==null);
         }
         #endregion
 

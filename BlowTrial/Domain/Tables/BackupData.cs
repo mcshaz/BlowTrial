@@ -13,6 +13,7 @@ namespace BlowTrial.Domain.Tables
         [StringLength(1024)]
         public int BackupIntervalMinutes { get; set; }
         public bool IsBackingUpToCloud { get; set; }
+        public bool IsEnvelopeRandomising { get; set; }
     }
 
     public class CloudDirectory

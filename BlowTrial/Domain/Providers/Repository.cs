@@ -188,7 +188,6 @@ namespace BlowTrial.Domain.Providers
         {
             foreach (var v in vaccinesAdministered)
             {
-                v.RecordLastModified = DateTime.UtcNow;
                 _dbContext.VaccinesAdministered.Add(v);
             }
             _dbContext.SaveChanges();
@@ -197,7 +196,6 @@ namespace BlowTrial.Domain.Providers
         {
             foreach (Participant p in patients)
             {
-                p.RecordLastModified = DateTime.UtcNow;
                 _dbContext.Participants.Attach(p);
             }
             _dbContext.SaveChanges();
@@ -205,7 +203,6 @@ namespace BlowTrial.Domain.Providers
         public void Update(ScreenedPatient patient)
         {
             _dbContext.ScreenedPatients.Attach(patient);
-            patient.RecordLastModified = DateTime.UtcNow;
             _dbContext.SaveChanges();
         }
         public void Backup()
@@ -270,6 +267,14 @@ namespace BlowTrial.Domain.Providers
                     _dbContext.Vaccines.AddOrUpdate(downloadedDb.Vaccines.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
                     _dbContext.VaccinesAdministered.AddOrUpdate(downloadedDb.VaccinesAdministered.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
                     _dbContext.ProtocolViolations.AddOrUpdate(downloadedDb.ProtocolViolations.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    var knownSites = _dbContext.StudyCentres.Select(s=>s.Id).ToArray();
+                    var unknownSites = (from s in downloadedDb.StudyCentres
+                                     where !knownSites.Contains(s.Id)
+                                     select s).ToArray();
+                    foreach (StudyCentre s in unknownSites)
+                    {
+                        _dbContext.StudyCentres.Attach(s);
+                    }
                     _dbContext.SaveChanges();
                 }
             }

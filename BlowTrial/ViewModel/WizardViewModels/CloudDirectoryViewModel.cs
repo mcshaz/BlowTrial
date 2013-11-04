@@ -8,6 +8,8 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Linq;
+using System.Collections.ObjectModel;
+using System.Windows.Data;
 
 namespace BlowTrial.ViewModel
 {
@@ -25,11 +27,67 @@ namespace BlowTrial.ViewModel
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param));
             IntervalTimeScale = 1;
             DisplayName = Strings.CloudDirectoryViewModel_DisplayName;
+            SetupDirectoryItems();
+
+        }
+        void SetupDirectoryItems()
+        {
+            var directoryItemCollection = new ObservableCollection<DirectoryItemViewModel>(_cloudDirModel.CloudDirectoryItems.Select(c => new DirectoryItemViewModel(c)));
+            if (!directoryItemCollection.Any() || _cloudDirModel.IsBackingUpToCloud == false)
+            {
+                var directoryItem = new DirectoryItemViewModel(new DirectoryItemModel());
+                directoryItem.PropertyChanged += DirectoryItem_PropertyChanged;
+                directoryItemCollection.Add(directoryItem);
+            }
+            directoryItemCollection.CollectionChanged += CloudDirectories_CollectionChanged;
+            CloudDirectories = new ListCollectionView(directoryItemCollection);
+        }
+
+        void DirectoryItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "DirectoryPath")
+            {
+                var item = (DirectoryItemViewModel)sender;
+                if (item.IsValid())
+                {
+                    CloudDirectories.CommitNew();
+                    item.PropertyChanged -= DirectoryItem_PropertyChanged;
+                    _cloudDirModel.CloudDirectoryItems.Add(item.DirectoryItem);
+                    if(_cloudDirModel.IsBackingUpToCloud==false)
+                    {
+                        var directoryItem = new DirectoryItemViewModel(new DirectoryItemModel());
+                        CloudDirectories.AddNewItem(directoryItem);
+                        directoryItem.PropertyChanged += DirectoryItem_PropertyChanged;
+                    }
+                }
+                NotifyPropertyChanged("CloudDirectories");
+            }
+            
+        }
+
+        void CloudDirectories_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (DirectoryItemViewModel i in e.OldItems)
+                {
+                    _cloudDirModel.CloudDirectoryItems.Remove(i.DirectoryItem);
+                    i.PropertyChanged -= DirectoryItem_PropertyChanged;
+                }
+            }
+            if (e.NewItems!=null)
+            {
+                foreach (DirectoryItemViewModel i in e.NewItems)
+                {
+                    _cloudDirModel.CloudDirectoryItems.Add(i.DirectoryItem);
+                    i.PropertyChanged -= DirectoryItem_PropertyChanged;
+                }
+            }
         }
         #endregion
 
         #region Properties
-        public IList<DirectoryItemViewModel> CloudDirectories
+        public ListCollectionView CloudDirectories
         {
             get;
             private set;
@@ -68,7 +126,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand SaveCmd { get; private set; }
         public void Save(object param)
         {
-            BackupDataService.SetBackupDetails(
+            ApplicationDataService.SetBackupDetails(
                 _cloudDirModel.CloudDirectoryItems.Select(c=>c.DirectoryPath), 
                 _cloudDirModel.BackupIntervalMinutes.Value);
             CloseCmd.Execute(null);
@@ -147,10 +205,10 @@ namespace BlowTrial.ViewModel
 
     public sealed class DirectoryItemViewModel :NotifyChangeBase, IDataErrorInfo
     {
-        DirectoryItemModel _directoryItem;
+        
         public DirectoryItemViewModel(DirectoryItemModel directoryItem)
         {
-            _directoryItem = directoryItem;
+            DirectoryItem = directoryItem;
             SelectDirectoryCmd = new RelayCommand(SelectDirectory);
         }
 
@@ -158,16 +216,16 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _directoryItem.DirectoryPath;
+                return DirectoryItem.DirectoryPath;
             }
             set
             {
-                if (value == _directoryItem.DirectoryPath) { return; }
-                _directoryItem.DirectoryPath = value;
+                if (value == DirectoryItem.DirectoryPath) { return; }
+                DirectoryItem.DirectoryPath = value;
                 NotifyPropertyChanged("DirectoryPath");
             }
         }
-
+        public DirectoryItemModel DirectoryItem { get; private set; }
         public ICommand SelectDirectoryCmd { get; private set; }
         public void SelectDirectory(object param)
         {
@@ -204,7 +262,7 @@ namespace BlowTrial.ViewModel
         /// </summary>
         public bool IsValid()
         {
-            bool returnVal = _directoryItem.IsValid();
+            bool returnVal = DirectoryItem.IsValid();
             CommandManager.InvalidateRequerySuggested();
             return returnVal;
         }
@@ -212,7 +270,7 @@ namespace BlowTrial.ViewModel
 
         private string GetValidationError(string propertyName)
         {
-            string error = ((IDataErrorInfo)_directoryItem)[propertyName];
+            string error = ((IDataErrorInfo)DirectoryItem)[propertyName];
 
             // Dirty the commands registered with CommandManager,
             // such as our Save command, so that they are queried

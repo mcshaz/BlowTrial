@@ -16,6 +16,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using BlowTrial.Infrastructure.Extensions;
 using System.Windows.Media;
+using BlowTrial.Helpers;
 
 namespace BlowTrial.ViewModel
 {
@@ -25,12 +26,14 @@ namespace BlowTrial.ViewModel
 
         private NewPatientModel _newPatient;
 
+
         #endregion // Fields
 
         #region Constructor
 
         public NewPatientViewModel(IRepository repository, NewPatientModel patient) : base(repository)
         {
+            IsEnvelopeRandomising = ApplicationDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising; ;
             base.DisplayName = Strings.NewPatientVM_DisplayName;
             if (patient == null)
             {
@@ -45,6 +48,7 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
+        public bool IsEnvelopeRandomising { get; set; }
         public StudyCentreModel SelectedCentre
         {
             get
@@ -583,6 +587,10 @@ namespace BlowTrial.ViewModel
             if (MultipleSibling != null && MultipleSibling.IsMale == newParticipant.IsMale)
             {
                 RandomisingEngine.ForcePairedAllocation(newParticipant, MultipleSiblingId.Value,_repository);
+            }
+            else if (IsEnvelopeRandomising)
+            {
+                
             }
             else
             {

@@ -147,10 +147,10 @@
     <Compile Include="Domain\Tables\ProtocolViolation.cs" />
     <Compile Include="Domain\Tables\StudyCentre.cs" />
     <Compile Include="Domain\Tables\Vaccine.cs" />
-    <Compile Include="Helpers\AppDataService.cs" />
+    <Compile Include="Domain\Providers\AppDataService.cs" />
     <Compile Include="Helpers\Attached.cs" />
     <Compile Include="Helpers\DateTimeSplitter.cs" />
-    <Compile Include="Helpers\DbBackupService.cs" />
+    <Compile Include="Domain\Providers\DbBackupService.cs" />
     <Compile Include="Helpers\EventToCommand.cs" />
     <Compile Include="Helpers\Mediator.cs" />
     <Compile Include="Helpers\OutcomeAt28DaysSplitter.cs" />
@@ -168,6 +168,7 @@
     <Compile Include="Infrastructure\Converters\RowDefinitionExtended.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Infrastructure\Converters\StringToNullableIntConverter.cs" />
     <Compile Include="Infrastructure\CSV\EnumerableToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantDataToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantCsvModel.cs" />
@@ -272,7 +273,6 @@
     </Compile>
     <Page Include="MainWindowResources.xaml">
       <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Skins\MainSkin.xaml">
       <Generator>MSBuild:Compile</Generator>

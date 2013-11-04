@@ -1,10 +1,14 @@
 ﻿using BlowTrial.Domain.Interfaces;
 using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.SqlServerCompact;
+using System.Data.Entity.Validation;
 using System.Data.SqlServerCe;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -52,7 +56,55 @@ namespace BlowTrial.Domain.Providers
                 .WillCascadeOnDelete(false);
             */
         }
-
+        public override int SaveChanges()
+        {
+            try
+            {
+                CheckValidation();
+            }
+            catch (DbEntityValidationException)
+            {
+                throw;
+            }
+            DateTime updateTime = DateTime.UtcNow;
+            foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
+            {
+                var sr = ent as ISharedRecord;
+                if (sr != null)
+                {
+                    if (sr.Id == Guid.Empty) 
+                    {
+                        if (ent.State != EntityState.Added) { throw new InvalidOperationException("Guid was empty on a non add opertation!"); }
+                        sr.Id = new Guid(); 
+                    }
+                    if (ent.State != EntityState.Added || ent.State==EntityState.Modified) 
+                    { 
+                        sr.RecordLastModified = updateTime; 
+                    }
+                }
+            }
+            return base.SaveChanges();
+        }
+        [Conditional("DEBUG")]
+        void CheckValidation(string details = "")
+        {
+            var valCollection = this.GetValidationErrors();
+            if (!valCollection.Any()) { return; }
+            var valInfo = new System.Text.StringBuilder("The following entities did not meet following validation requirements: " + details + Environment.NewLine);
+            foreach (var valResults in valCollection)
+            {
+                valInfo.AppendFormat("Class -> {0}{1}", valResults.Entry.Entity.GetType().FullName, Environment.NewLine);
+                foreach (var valErr in valResults.ValidationErrors)
+                {
+                    valInfo.AppendFormat("----Property: {0} Error: {1}{2}",
+                    valErr.PropertyName,
+                    valErr.ErrorMessage,
+                    Environment.NewLine);
+                }
+                valInfo.AppendLine("------------------------------");
+            }
+            throw new DbEntityValidationException(valInfo.ToString());
+        }
         public string BackupDb()
         {
             //non ce sql to create .bak goes here instead
