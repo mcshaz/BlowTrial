@@ -21,7 +21,6 @@ namespace BlowTrial.View
     {
         public GetAppSettingsWizard()
         {
-            DataContext = new GetAppSettingsViewModel();
             InitializeComponent();
         }
     }

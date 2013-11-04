@@ -23,7 +23,7 @@ namespace BlowTrial.Models
         #endregion
 
         #region Properties
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public DateTime? AdministeredAt 
         { 
             get

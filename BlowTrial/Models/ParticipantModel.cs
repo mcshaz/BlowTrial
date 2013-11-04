@@ -14,7 +14,7 @@ using System.Linq.Expressions;
 
 namespace BlowTrial.Models
 {
-    public partial class ParticipantModel : IDataErrorInfo, IParticipant
+    public partial class ParticipantModel : IDataErrorInfo, IParticipant 
     {
         #region Constructors
 
@@ -27,7 +27,8 @@ namespace BlowTrial.Models
 
         #region Properties
 
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+        public int SiteId { get; set; }
         public string Name { get; set; }
         public string PhoneNumber { get; set; }
         public string HospitalIdentifier { get; set; }
@@ -37,7 +38,7 @@ namespace BlowTrial.Models
         public bool IsMale { get; set; }
         public DateTime DateTimeBirth { get; set; }
         public DateTime RegisteredAt { get; set; }
-        public int CentreId { get; set; }
+        public Guid CentreId { get; set; }
         public string RegisteringInvestigator { get; set; }
         public bool IsInterventionArm { get; set; }
         public bool? BcgAdverse { get; set; }
@@ -209,13 +210,12 @@ namespace BlowTrial.Models
 
         #region Validation
 
-        public bool IsValid
-        {
-            get
+        public bool IsValid()
+
             {
                 DateTime? now = DateTime.Now;
                 return (!ValidatedProperties.Any(v => GetValidationError(v, now) != null));
-            }
+            
         }
         readonly string[] ValidatedProperties = new string[]
         { 

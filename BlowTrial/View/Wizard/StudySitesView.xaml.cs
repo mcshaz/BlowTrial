@@ -19,9 +19,8 @@ namespace BlowTrial.View
     /// </summary>
     public partial class StudySitesView : UserControl
     {
-        public StudySitesView(StudySitesViewModel model)
+        public StudySitesView()
         {
-            DataContext = model;
             InitializeComponent();
         }
     }

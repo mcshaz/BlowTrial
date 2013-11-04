@@ -13,30 +13,31 @@ namespace BlowTrial.Domain.Providers
     [DbConfigurationType(typeof(ContextCeConfiguration))]
     public class TrialDataContext : DbContext, ITrialDataContext
     {
-        const string ParticipantDbPrefix = @"ParticipantData_Centre_";
-        static string GetDbName()
-        {
-            return ParticipantDbPrefix + System.Configuration.ConfigurationManager.AppSettings["CentreId"] + ".sdf";
-        }
+        const string ParticipantDbName = "ParticipantData";
+        const string ParticipantDb = ParticipantDbName + ".sdf";
         public static string GetDbPath()
         {
-            return ContextCeConfiguration.GetSqlCePath(GetDbName());
+            return ContextCeConfiguration.GetSqlCePath(ParticipantDb);
         }
-        static public string GetConnectionString()
+        const string DbPassword = "ABC";
+
+        static public string GetConnectionString(string dbPath)
         {
             return (new SqlCeConnectionStringBuilder
             {
-                  Password = "ABC",
-                  DataSource = GetDbPath()
+                  Password = DbPassword,
+                  DataSource = dbPath
             }).ToString();
         }
 
-        public TrialDataContext() : base(GetConnectionString()) { }
+        public TrialDataContext() : this(GetDbPath()) { }
+        public TrialDataContext(string dbPath) : base(GetConnectionString(dbPath)) { }
         public DbSet<ProtocolViolation> ProtocolViolations { get; set; }
         public DbSet<Vaccine> Vaccines { get; set; }
         public DbSet<VaccineAdministered> VaccinesAdministered { get; set; }
         public DbSet<Participant> Participants { get; set; }
         public DbSet<ScreenedPatient> ScreenedPatients { get; set; }
+        public DbSet<StudyCentre> StudyCentres { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.Configuration.LazyLoadingEnabled = false;
@@ -51,9 +52,34 @@ namespace BlowTrial.Domain.Providers
                 .WillCascadeOnDelete(false);
             */
         }
-        public string DbBackupPath
+
+        public string BackupDb()
         {
-            get { return GetDbPath(); }
+            //non ce sql to create .bak goes here instead
+            return GetDbPath();
+        }
+        public DateTime DbLastModifiedUtc()
+        {
+            return System.IO.File.GetLastWriteTimeUtc(GetDbPath());
+        }
+        //create an instance method purely for reflection
+        public string DbName
+        {
+            get { return ParticipantDbName; }
+        }
+        public ITrialDataContext AttachDb(string backupFilePath)
+        {
+            return AddDbFromBackup(backupFilePath);
+        }
+        public static TrialDataContext AddDbFromBackup(string backupFilePath)
+        {
+             //non ce sql to attach .bak goes here instead
+            return new TrialDataContext(backupFilePath);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
         }
     }
 

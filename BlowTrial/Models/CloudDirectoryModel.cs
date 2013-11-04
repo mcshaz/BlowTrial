@@ -20,9 +20,11 @@ namespace BlowTrial.Models
         {
             _validatedProperties = new string[]
             { 
-                "CloudDirectory",
+                "CloudDirectories",
                 "BackupIntervalMinutes",
+                "IsBackingUpToCloud"
             };
+            CloudDirectoryItems = new List<DirectoryItemModel>();
         }
         #endregion //Constructors
 
@@ -30,9 +32,19 @@ namespace BlowTrial.Models
         #endregion // Fields
 
         #region Properties
-        public string CloudDirectory { get; set; }
+        public IList<DirectoryItemModel> CloudDirectoryItems { get; private set; }
+        public IEnumerable<string> CloudDirectories
+        {
+            set
+            {
+                foreach (string s in value)
+                {
+                    CloudDirectoryItems.Add(new DirectoryItemModel{ DirectoryPath = s});
+                }
+            }
+        }
         public int? BackupIntervalMinutes { get; set; }
-
+        public bool? IsBackingUpToCloud { get; set; }
         #endregion
 
         #region Methods
@@ -49,11 +61,14 @@ namespace BlowTrial.Models
 
             switch (propertyName)
             {
-                case "CloudDirectory":
-                    error = ValidateCloudDirectory();
+                case "CloudDirectories":
+                    error = ValidateCloudDirectories();
                     break;
                 case "BackupIntervalMinutes":
                     error = ValidateBackupInterval();
+                    break;
+                case "IsBackingUpToCloud":
+                    error = ValidateDDLNotNull(IsBackingUpToCloud);
                     break;
                 default:
                     Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);
@@ -62,19 +77,19 @@ namespace BlowTrial.Models
 
             return error;
         }
-        string ValidateCloudDirectory()
+        string ValidateCloudDirectories()
         {
-            if (string.IsNullOrEmpty(CloudDirectory))
+            if (!CloudDirectoryItems.Any())
             {
-                return Strings.Field_Error_Empty;
+                return Strings.CloudDirectoryModel_Error_NoDirectories;
             }
-            if (CloudDirectory.Length > 1204)
+            if (CloudDirectoryItems.Any(c => !c.IsValid()))
             {
-                return Strings.CloudDirectory_Error_StringLengthTooLong;
+                return Strings.CloudDirectoryModel_Error_InValid;
             }
-            if (!Directory.Exists(CloudDirectory))
+            if (CloudDirectoryItems.Count > 1 && IsBackingUpToCloud!=false)
             {
-                return Strings.CloudDirectory_Error_DirectoryNotFound;
+                return Strings.CloudDirectoryModel_Error_ExcessDirectories;
             }
             return null;
         }
@@ -93,5 +108,46 @@ namespace BlowTrial.Models
         }
 
         #endregion // Validation
+    }
+    public class DirectoryItemModel : ValidationBase
+    {
+        public DirectoryItemModel()
+        {
+            _validatedProperties = new string[] { "DirectoryPath" };
+        }
+        public string DirectoryPath { get; set; }
+        string ValidateCloudDirectory()
+        {
+            if (string.IsNullOrEmpty(DirectoryPath))
+            {
+                return Strings.Field_Error_Empty;
+            }
+            if (DirectoryPath.Length > 1204)
+            {
+                return Strings.CloudDirectory_Error_StringLengthTooLong;
+            }
+            if (!Directory.Exists(DirectoryPath))
+            {
+                return Strings.CloudDirectory_Error_DirectoryNotFound;
+            }
+            return null;
+        }
+        public override string GetValidationError(string propertyName)
+        {
+            if (!_validatedProperties.Contains(propertyName))
+            { return null; }
+
+            string error = null;
+
+            switch (propertyName)
+            {
+                case "DirectoryPath":
+                    error = ValidateCloudDirectory();
+                    break;
+            }
+            return error;
+
+        }
+
     }
 }

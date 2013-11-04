@@ -18,19 +18,19 @@ namespace BlowTrial.ViewModel
         public VaccineAdministeredViewModel(VaccineAdministeredModel vaccineModel, ObservableCollection<VaccineViewModel> vaccineList)
         {
             VaccineList = vaccineList;
-            this._vaccineAdministeredModel = vaccineModel;
+            this.VaccineAdministeredModel = vaccineModel;
             SelectedVaccine = vaccineList.FirstOrDefault(l => l.Vaccine == vaccineModel.VaccineGiven);
         }
         #endregion
         #region Fields
         VaccineViewModel _selectedVaccine;
-        public VaccineAdministeredModel _vaccineAdministeredModel;
+        public VaccineAdministeredModel VaccineAdministeredModel { get; private set; }
         #endregion
 
         #region Properties
         public ObservableCollection<VaccineViewModel> VaccineList { get; private set; }
 
-        public int Id { get { return _vaccineAdministeredModel.Id; } }
+        public Guid Id { get { return VaccineAdministeredModel.Id; } }
         
         public VaccineViewModel SelectedVaccine
         {
@@ -47,23 +47,23 @@ namespace BlowTrial.ViewModel
                     value.IsGivenToThisPatient = true;
                 }
                 _selectedVaccine = value;
-                this._vaccineAdministeredModel.VaccineGiven = _selectedVaccine.Vaccine;
+                this.VaccineAdministeredModel.VaccineGiven = _selectedVaccine.Vaccine;
                 NotifyPropertyChanged("SelectedVaccine", "AdministeredAt", "EarliestDate");
             }
         }
 
-        public Vaccine VaccineGiven { get { return this._vaccineAdministeredModel.VaccineGiven; } }
+        public Vaccine VaccineGiven { get { return this.VaccineAdministeredModel.VaccineGiven; } }
 
         public DateTime? AdministeredAt 
         { 
             get
             {
-                return this._vaccineAdministeredModel.AdministeredAt;
+                return this.VaccineAdministeredModel.AdministeredAt;
             }
             set
             {
-                if (value == this._vaccineAdministeredModel.AdministeredAt) { return; }
-                this._vaccineAdministeredModel.AdministeredAt = value;
+                if (value == this.VaccineAdministeredModel.AdministeredAt) { return; }
+                this.VaccineAdministeredModel.AdministeredAt = value;
                 NotifyPropertyChanged("AdministeredAt", "SelectedVaccine");
             }
         }
@@ -74,18 +74,17 @@ namespace BlowTrial.ViewModel
             {
                 if (SelectedVaccine.Vaccine == null || SelectedVaccine.Vaccine.Name != Vaccine.BcgName())
                 {
-                    return _vaccineAdministeredModel.AdministeredTo.DateTimeBirth;
+                    return VaccineAdministeredModel.AdministeredTo.DateTimeBirth;
                 }
-                return _vaccineAdministeredModel.AdministeredTo.RegisteredAt;
+                return VaccineAdministeredModel.AdministeredTo.RegisteredAt;
             }
         }
 
-        public bool IsValid
-        {
-            get
+        public bool IsValid()
+
             {
-                return this._vaccineAdministeredModel.IsValid;
-            }
+                return this.VaccineAdministeredModel.IsValid();
+            
         }
         #endregion
 
@@ -101,7 +100,7 @@ namespace BlowTrial.ViewModel
             get
             {
                 if (propertyName == "SelectedVaccine") { propertyName = "VaccineGiven"; }
-                string error = ((IDataErrorInfo)_vaccineAdministeredModel)[propertyName];
+                string error = ((IDataErrorInfo)VaccineAdministeredModel)[propertyName];
                 CommandManager.InvalidateRequerySuggested();
                 return error;
             }

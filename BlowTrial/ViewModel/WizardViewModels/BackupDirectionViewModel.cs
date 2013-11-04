@@ -12,16 +12,17 @@ using System.Windows.Media;
 
 namespace BlowTrial.ViewModel
 {
-    public sealed class BackupDirectionViewModel : ViewModelBase, IDataErrorInfo
+    public sealed class BackupDirectionViewModel: WizardPageViewModel, IDataErrorInfo
     {
         #region fields
         BackupDirectionModel _backupModel;
         #endregion
 
         #region constructors
-        public BackupDirectionViewModel()
+        public BackupDirectionViewModel(BackupDirectionModel model)
         {
-            _backupModel = new BackupDirectionModel();
+            _backupModel = model;
+            DisplayName = Strings.BackupDirectionViewModel_DisplayName;
         }
         #endregion
 
@@ -43,21 +44,18 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _backupModel.BackupToCloud;
+                return _backupModel.IsBackingUpToCloud;
             }
             set
             {
-                if (_backupModel.BackupToCloud == value) { return; }
-                _backupModel.BackupToCloud = value;
-                NotifyPropertyChanged("BackupToCloud");
+                if (_backupModel.IsBackingUpToCloud == value) { return; }
+                _backupModel.IsBackingUpToCloud = value;
+                NotifyPropertyChanged("IsBackingUpToCloud");
             }
         }
-        public bool IsValid
+        public override bool IsValid()
         {
-            get
-            {
-                return _backupModel.IsValid;
-            }
+            return _backupModel.IsValid();
         }
         #endregion
 

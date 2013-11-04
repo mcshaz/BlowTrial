@@ -57,6 +57,7 @@ namespace BlowTrial
 
             //testfor and display starup wizard
             var wizard = new GetAppSettingsWizard();
+            wizard.DataContext = new GetAppSettingsViewModel();
             wizard.Show();
             return;
             // Create the ViewModel to which 

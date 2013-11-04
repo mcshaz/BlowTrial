@@ -12,7 +12,7 @@ using System.Windows.Media;
 
 namespace BlowTrial.ViewModel
 {
-    public sealed class StudySitesViewModel : ViewModelBase, IDataErrorInfo
+    public sealed class StudySitesViewModel : WizardPageViewModel, IDataErrorInfo
     {
         #region fields
         StudySitesModel _appModel;
@@ -20,14 +20,15 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region constructors
-        public StudySitesViewModel()
+        public StudySitesViewModel(StudySitesModel model)
         {
-            _appModel = new StudySitesModel();
+            _appModel = model;
             _studySitesData = new ObservableCollection<StudySiteItemViewModel>(
                 _appModel.StudySitesData.Select(s => new StudySiteItemViewModel(s)));
             _studySitesData.CollectionChanged += StudySitesData_CollectionChanged;
             _studySitesData.Add(NewSiteDataVM());
             StudySitesData = new ListCollectionView(_studySitesData);
+            DisplayName = Strings.StudySitesViewModel_DisplayName;
         }
         StudySiteItemViewModel NewSiteDataVM()
         {
@@ -63,7 +64,7 @@ namespace BlowTrial.ViewModel
         void NewSiteDataVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var newStudySiteVm = (StudySiteItemViewModel)sender;
-            if (newStudySiteVm.SiteName != null && newStudySiteVm.SiteModel.IsValid)
+            if (newStudySiteVm.SiteName != null && newStudySiteVm.SiteModel.IsValid())
             {
                 StudySitesData.CommitNew();
                 newStudySiteVm.PropertyChanged -= NewSiteDataVm_PropertyChanged;
@@ -75,12 +76,9 @@ namespace BlowTrial.ViewModel
         #region properties
         public ListCollectionView StudySitesData { get; private set; }
 
-        public bool IsValid
+        public override bool IsValid()
         {
-            get
-            {
-                return _appModel.IsValid;
-            }
+            return _appModel.IsValid();
         }
         #endregion
 

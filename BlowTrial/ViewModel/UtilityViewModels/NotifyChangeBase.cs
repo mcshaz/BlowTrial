@@ -56,13 +56,12 @@ namespace BlowTrial.ViewModel
         /// <param name="propertyName">The property that has a new value.</param>
         protected virtual void NotifyPropertyChanged(params string[] propertyNames)
         {
-            foreach (var propertyName in propertyNames)
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
             {
-                this.VerifyPropertyName(propertyName);
-
-                PropertyChangedEventHandler handler = this.PropertyChanged;
-                if (handler != null)
+                foreach (var propertyName in propertyNames)
                 {
+                    this.VerifyPropertyName(propertyName);
                     var e = new PropertyChangedEventArgs(propertyName);
                     handler(this, e);
                 }

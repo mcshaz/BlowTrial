@@ -614,7 +614,43 @@
   <data name="GetAppSettingsModel_Error_DuplicateSiteName" xml:space="preserve">
     <value>Sites must have distinct names</value>
   </data>
+  <data name="CloudDirectoryModel_Error_ExcessDirectories" xml:space="preserve">
+    <value>Only 1 directory can be nominated at a data collecting site</value>
+  </data>
+  <data name="CloudDirectoryModel_Error_InValid" xml:space="preserve">
+    <value>there is an error in the directories selected</value>
+  </data>
+  <data name="CloudDirectoryModel_Error_NoDirectories" xml:space="preserve">
+    <value>Please enter a direcory</value>
+  </data>
   <data name="GetAppSettingsModel_Error_NoStudySites" xml:space="preserve">
     <value>At least 1 study site must be nominated</value>
+  </data>
+  <data name="NewPatientModel_Error_NoStudyCentre" xml:space="preserve">
+    <value>A study site must be selected for this patient</value>
+  </data>
+  <data name="WizardView_Button_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="WizardView_Button_Finish" xml:space="preserve">
+    <value>Finish</value>
+  </data>
+  <data name="WizardView_Button_MoveNext" xml:space="preserve">
+    <value>Next &gt;</value>
+  </data>
+  <data name="WizardView_Button_MovePrevious" xml:space="preserve">
+    <value>&lt; Back</value>
+  </data>
+  <data name="WizardView_Header_Steps" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="BackupDirectionViewModel_DisplayName" xml:space="preserve">
+    <value>Application purpose</value>
+  </data>
+  <data name="CloudDirectoryViewModel_DisplayName" xml:space="preserve">
+    <value>Cloud Directory</value>
+  </data>
+  <data name="StudySitesViewModel_DisplayName" xml:space="preserve">
+    <value>Nominate Sites</value>
   </data>
 </root>

@@ -67,7 +67,7 @@ namespace BlowTrial.ViewModel
         /// Raised when this workspace should be removed from the UI.
         /// </summary>
         public event EventHandler RequestClose;
-        void OnRequestClose()
+        protected void OnRequestClose()
         {
             if (RequestClose != null)
             {

@@ -18,7 +18,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         void Add(Participant patient);
         void Add(ScreenedPatient patient);
-        void Update(int id,
+        void Update(Guid id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
                 bool? bcgAdverse,
@@ -28,15 +28,16 @@ namespace BlowTrial.Infrastructure.Interfaces
                 DateTime? dischargeDateTime,
                 DateTime? deathOrLastContactDateTime,
                 OutcomeAt28DaysOption outcomeAt28Days);
-        void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered);
-        void ClearParticipantVaccines(int participantId);
+        void Add(IEnumerable<VaccineAdministered> vaccinesAdministered);
+        void ClearParticipantVaccines(Guid participantId);
         void Update(IEnumerable<Participant> patients);
         void Update(ScreenedPatient patient);
         DbSet<Participant> Participants { get; }
         DbSet<ScreenedPatient> ScreenedPatients { get; }
         DbSet<VaccineAdministered> VaccinesAdministered { get; }
         DbSet<Vaccine> Vaccines { get; }
-        string BackupDirectory { get;  set; }
+        IEnumerable<string> CloudDirectories { get; set; }
+        IEnumerable<StudyCentreModel> LocalStudyCentres { get; }
         ParticipantsSummary GetParticipantSummary();
         ScreenedPatientsSummary GetScreenedPatientSummary();
         void Backup();

@@ -1,48 +1,203 @@
-﻿<Window x:Class="BlowTrial.View.GetAppSettingsWizard"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
-        xmlns:vw="clr-namespace:BlowTrial.View"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-        xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters"
-        Title="Welcome" >
+﻿<Window 
+          x:Class="BlowTrial.View.GetAppSettingsWizard"
+          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:vm="clr-namespace:BlowTrial.ViewModel"
+          xmlns:vw="clr-namespace:BlowTrial.View"
+          xmlns:res="clr-namespace:BlowTrial.Properties"
+  >
     <Window.Resources>
-            <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
-    </Window.Resources>
-    <wpfToolkit:Wizard FinishButtonClosesWindow="True" x:Name="toolkitWizard">
-        <i:Interaction.Triggers>
-            <i:EventTrigger EventName="Finish">
-                <i:InvokeCommandAction Command="{Binding Path=Finish}"/>
-            </i:EventTrigger>
-            <i:EventTrigger EventName="PageChanged">
-                <i:InvokeCommandAction Command="{Binding Path=PageChanged}" CommandParameter="{Binding ElementName=toolkitWizard}" />
-            </i:EventTrigger>
-        </i:Interaction.Triggers>
-        <wpfToolkit:WizardPage x:Name="IntroPage" 
-                                   Title="Thank you for participating in BLOW trial (BCG for LOW birthweight babies)"
-                                   Description="This Wizard will walk you through setting up the information about your institution." />
-        <wpfToolkit:WizardPage x:Name="intallLocation" PageType="Interior"
-                                   Title="Location of this computer"
-                                   Description="The first step is to select whether you will be entering data from the hospital, or are part of an oversite comittee (that is, data will NOT be collected on this computer, but only analysed)"
-                                   DataContext="{Binding Path=BackupVM, Mode=OneWay}"
-                                   CanSelectNextPage="{Binding Path=IsValid, Mode=OneWay}"
-                                   >
+
+        <!-- These four templates map a ViewModel to a View. -->
+        <DataTemplate DataType="{x:Type vm:BackupDirectionViewModel}">
             <vw:BackupDirectionView />
-        </wpfToolkit:WizardPage>
-        <wpfToolkit:WizardPage x:Name="siteNames" PageType="Interior"
-                               DataContext="{Binding Path=StudySitesVM, Mode=OneWay}"
-                                   Title="All local sites"
-                                   Description="Please enter data about all sites for which this computer will be used to enter data."
-                               CanSelectNextPage="{Binding Path=IsValid, Mode=OneWay}"    
-                               >
-            <vw:StudySitesView />
-        </wpfToolkit:WizardPage>
-        <wpfToolkit:WizardPage x:Name="backupInfo" PageType="Interior"
-                               DataContext="{Binding Path=CloudVM, Mode=OneWay}"
-                                   Title="Cloud Directory"
-                                   Description="Please enter backup information"
-                                   CanFinish="{Binding Path=IsValid, Mode=OneWay}" >
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:CloudDirectoryViewModel}">
             <vw:BackupUserControlBase />
-        </wpfToolkit:WizardPage>
-    </wpfToolkit:Wizard>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:StudySitesViewModel}">
+            <vw:StudySitesView />
+        </DataTemplate>
+
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Padding" Value="3.5,0" />
+            <Setter Property="Margin" Value="3.5" />
+            <Setter Property="MinWidth" Value="80" />
+        </Style>
+
+        <!-- This Style inherits from the Button style seen above. -->
+        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}" x:Key="moveNextButtonStyle">
+            <Setter Property="Content" Value="{x:Static res:Strings.WizardView_Button_MoveNext}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=IsOnLastPage}" Value="True">
+                    <Setter Property="Content" Value="{x:Static res:Strings.WizardView_Button_Finish}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- HEADERED CONTENT CONTROL STYLE -->
+        <Style TargetType="{x:Type HeaderedContentControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type HeaderedContentControl}">
+                        <StackPanel Margin="2,0">
+                            <Grid Margin="1,1,1,12" RenderTransformOrigin="0.5,0.5">
+                                <Rectangle
+                  Fill="BurlyWood"
+                  Height="3"
+                  Margin="10,0"
+                  Opacity="0.6"
+                  RadiusX="8"
+                  RadiusY="8"
+                  VerticalAlignment="Bottom" 
+                  />
+                                <ContentPresenter
+                  ContentSource="Header"
+                  TextBlock.FontSize="22"
+                  TextBlock.FontWeight="DemiBold"
+                  TextBlock.Foreground="Brown"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center" 
+                  />
+                                <Grid.Effect>
+                                    <DropShadowEffect Opacity="0.1" />
+                                </Grid.Effect>
+                                <Grid.RenderTransform>
+                                    <RotateTransform Angle="-3" />
+                                </Grid.RenderTransform>
+                            </Grid>
+                            <Grid>
+                                <Rectangle Fill="{TemplateBinding Background}" />
+                                <ContentPresenter ContentSource="Content" />
+                            </Grid>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- WIZARD STEP TEMPLATE -->
+        <DataTemplate x:Key="wizardStepTemplate">
+            <Border
+        x:Name="bdOuter"
+        BorderBrush="Black"
+        BorderThickness="0,0,1,1"
+        CornerRadius="12"
+        Margin="1,1,1,12"
+        Opacity="0.25"
+        SnapsToDevicePixels="True"
+        >
+                <Border
+          x:Name="bdInner"
+          Background="#FFFEFEFE"
+          BorderBrush="Brown"
+          BorderThickness="2,2,1,1"
+          CornerRadius="12"
+          Padding="2"
+          >
+                    <TextBlock
+            x:Name="txt"
+            Margin="4,0,0,0"
+            Text="{Binding Path=DisplayName}" 
+            />
+                </Border>
+            </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Path=IsCurrentPage}" Value="True">
+                    <Setter
+            TargetName="txt"
+            Property="FontWeight"
+            Value="Bold"
+            />
+                    <Setter
+            TargetName="bdInner"
+            Property="Background"
+            Value="BurlyWood" 
+            />
+                    <Setter
+            TargetName="bdOuter"
+            Property="Opacity"
+            Value="1" 
+            />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Background="#11000000" Margin="1">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <!-- WIZARD STEP LISTING -->
+        <HeaderedContentControl Header="{x:Static res:Strings.WizardView_Header_Steps}">
+            <ItemsControl 
+        ItemsSource="{Binding Path=Pages}" 
+        ItemTemplate="{StaticResource wizardStepTemplate}" 
+        />
+        </HeaderedContentControl>
+
+        <!-- CURRENT PAGE AREA -->
+        <Border Background="White" Grid.Column="1" Grid.Row="0">
+            <HeaderedContentControl 
+        Content="{Binding Path=CurrentPage}" 
+        Header="{Binding Path=CurrentPage.DisplayName}" 
+        />
+        </Border>
+
+        <Border
+      Grid.Column="0"
+      Grid.Row="1"
+      Background="LightGray"
+      Grid.ColumnSpan="2"
+      >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- NAVIGATION BUTTONS -->
+                <Grid
+          Grid.Column="2"
+          Grid.IsSharedSizeScope="True"
+          HorizontalAlignment="Right"          
+          >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="Buttons" />
+                        <ColumnDefinition SharedSizeGroup="Buttons" />
+                        <ColumnDefinition Width="11" />
+                        <ColumnDefinition SharedSizeGroup="Buttons" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+            Grid.Column="0"
+            Grid.Row="0"
+            Command="{Binding Path=MovePreviousCommand}"
+            Content="{x:Static res:Strings.WizardView_Button_MovePrevious}" 
+            />
+                    <Button
+            Grid.Column="1"
+            Grid.Row="0"
+            Command="{Binding Path=MoveNextCommand}"
+            Style="{StaticResource moveNextButtonStyle}" 
+            />
+                    <Button
+            Grid.Column="3"
+            Grid.Row="0"
+            Command="{Binding Path=CancelCommand}"
+            Content="{x:Static res:Strings.WizardView_Button_Cancel}"
+            />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

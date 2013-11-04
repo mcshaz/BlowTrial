@@ -21,7 +21,7 @@ using System.Windows.Threading;
 
 namespace BlowTrial.ViewModel
 {
-    public sealed class ParticipantUpdateViewModel : WorkspaceViewModel,IDataErrorInfo
+    public sealed class ParticipantUpdateViewModel : CrudWorkspaceViewModel,IDataErrorInfo
     {
         #region Fields
         ParticipantModel _participant;
@@ -33,7 +33,7 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Constructors
-        public ParticipantUpdateViewModel(IRepository repository, ParticipantModel participant) : base(repository)
+        public ParticipantUpdateViewModel(IRepository repository ,ParticipantModel participant) : base(repository)
         {
             _participant = participant;
             _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
@@ -66,11 +66,19 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public int Id
+        public Guid Id
         {
             get
             {
                 return _participant.Id;
+            }
+        }
+
+        public int SiteId
+        {
+            get
+            {
+                return _participant.SiteId;
             }
         }
 
@@ -635,6 +643,7 @@ namespace BlowTrial.ViewModel
                 _participant.VaccinesAdministered = (from r in _repository.VaccinesAdministered
                          where r.ParticipantId == _participant.Id
                          select r).ToList();
+                
             }
             if (_vaccinesAdministered != null)
             {
@@ -644,7 +653,7 @@ namespace BlowTrial.ViewModel
                 Mapper.Map<IEnumerable<VaccineAdministeredModel>>(_participant.VaccinesAdministered)
                 .Select(v=>new VaccineAdministeredViewModel(v, AllVaccinesAvailable)));
 
-            var newVaccineAdminVm = new VaccineAdministeredViewModel(new VaccineAdministeredModel { AdministeredTo = _participant }, AllVaccinesAvailable);
+            var newVaccineAdminVm = new VaccineAdministeredViewModel(new VaccineAdministeredModel { AdministeredTo = _participant, Id = Guid.NewGuid() }, AllVaccinesAvailable);
             newVaccineAdminVm.PropertyChanged += NewVaccineAdminVm_PropertyChanged;
             _vaccinesAdministered.Add(newVaccineAdminVm);
 
@@ -667,6 +676,12 @@ namespace BlowTrial.ViewModel
                     var viewModel = (VaccineAdministeredViewModel)v;
                     viewModel.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
                     viewModel.PropertyChanged -= VaccineAdminVm_PropertyChanged;
+
+                    var item = _participant.VaccinesAdministered.FirstOrDefault(va=>va.Id == viewModel.Id);
+                    if (item!=null)
+                    {
+                        _participant.VaccinesAdministered.Remove(item);
+                    }
                 }
             }
         }
@@ -684,14 +699,22 @@ namespace BlowTrial.ViewModel
                 var newVaccineAdminVm = (VaccineAdministeredViewModel)sender;
                 if (newVaccineAdminVm.AdministeredAt.HasValue && newVaccineAdminVm.VaccineGiven != null) 
                 {
-                    if (newVaccineAdminVm.IsValid)
+                    if (newVaccineAdminVm.IsValid())
                     {
                         VaccinesAdministeredLV.CommitNew();
+                        _participant.VaccinesAdministered.Add(new VaccineAdministered
+                            {
+                                Id = newVaccineAdminVm.Id,
+                                AdministeredAt = newVaccineAdminVm.AdministeredAt.Value,
+                                ParticipantId = _participant.Id,
+                                VaccineGiven = newVaccineAdminVm.VaccineGiven
+                            });
                         newVaccineAdminVm.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
-                        newVaccineAdminVm = new VaccineAdministeredViewModel(new VaccineAdministeredModel { AdministeredTo = _participant }, AllVaccinesAvailable);
+                        newVaccineAdminVm = new VaccineAdministeredViewModel(
+                            new VaccineAdministeredModel 
+                            { AdministeredTo = _participant, Id=Guid.NewGuid() }, AllVaccinesAvailable);
                         VaccinesAdministeredLV.AddNewItem(newVaccineAdminVm);
 
-                        newVaccineAdminVm.PropertyChanged += NewVaccineAdminVm_PropertyChanged;
                         newVaccineAdminVm.PropertyChanged += VaccineAdminVm_PropertyChanged;
                     }
                 }
@@ -704,7 +727,7 @@ namespace BlowTrial.ViewModel
         public ICommand SaveChanges { get; private set; }
         bool CanSave(object param)
         {
-            return (IsParticipantModelChanged && IsValid) || (IsVaccineAdminChanged  && _vaccinesAdministered.All(v => v.IsValid));
+            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && _vaccinesAdministered.All(v => v.IsValid()));
         }
         void Save(object param)
         {
@@ -728,18 +751,7 @@ namespace BlowTrial.ViewModel
             {
                 _repository.ClearParticipantVaccines(_participant.Id);
 
-                _participant.VaccinesAdministered = _vaccinesAdministered
-                    .DropLast(1)
-                    .Select(v => new VaccineAdministered 
-                    { 
-                        Id = v.Id, 
-                        VaccineGiven = v.VaccineGiven, 
-                        AdministeredAt = v.AdministeredAt.Value, 
-                        ParticipantId = _participant.Id 
-                    })
-                    .ToList();
-
-                _repository.AddOrUpdate(_participant.VaccinesAdministered);
+                _repository.Add(_participant.VaccinesAdministered);
                 IsVaccineAdminChanged = false;
             }
         }
@@ -764,7 +776,7 @@ namespace BlowTrial.ViewModel
                 string title;
                 string msg;
                 MessageBoxButton buttonOptions;
-                if (IsValid)
+                if (IsValid())
                 {
                     title = Strings.ParticipantUpdateVM_Confirm_SaveChanges_Title;
                     msg = Strings.ParticipantUpdateVM_Confirm_SaveChanges;
@@ -833,14 +845,12 @@ namespace BlowTrial.ViewModel
         /// <summary>
         /// Returns true if this object has no validation errors.
         /// </summary>
-        public bool IsValid
+        public override bool IsValid()
         {
-            get
-            {
-                bool returnVal = _participant.IsValid && !ValidatedProperties.Any(v => this.GetValidationError(v) != null);
-                CommandManager.InvalidateRequerySuggested();
-                return returnVal;
-            }
+            bool returnVal = _participant.IsValid() && !ValidatedProperties.Any(v => this.GetValidationError(v) != null);
+            CommandManager.InvalidateRequerySuggested();
+            return returnVal;
+            
         }
 
         static readonly string[] ValidatedProperties = 

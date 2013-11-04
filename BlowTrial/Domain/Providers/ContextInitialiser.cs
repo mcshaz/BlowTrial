@@ -33,7 +33,7 @@ namespace BlowTrial.Domain.Providers
     {
         protected override void Seed(TrialDataContext context)
         {
-            context.Vaccines.Add(new Vaccine{ Name = Vaccine.BcgName()});
+            context.Vaccines.Add(new Vaccine { Name = Vaccine.BcgName() }); //, Id = Guid.ParseExact()
             context.Vaccines.Add(new Vaccine { Name = Vaccine.OpvName() });
             context.Vaccines.Add(new Vaccine{ Name = Vaccine.HepBName() });
             context.SaveChanges();

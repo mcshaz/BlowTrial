@@ -1,6 +1,5 @@
 using AutoMapper;
 using BlowTrial.Infrastructure.Automapper;
-using BlowTrial.Infrastructure.AutoMapper;
 using System;
 using System.Diagnostics;
 
@@ -15,7 +14,6 @@ namespace DabTrial.Models
 
                 x.AddProfile<PatientProfiles>();
 
-                x.AddProfile<BackupConfigurations>();
 
                 x.AddProfile<VaccineAdministeredProfile>();
             });

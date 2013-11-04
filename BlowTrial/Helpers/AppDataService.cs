@@ -9,32 +9,45 @@ using System.Text;
 
 namespace BlowTrial.Helpers
 {
-    public static class AppDataService
+    public static class BackupDataService
     {
-        public static AppData GetBackupDetails()
+        public static BackupDataSet GetBackupDetails()
         {
             using (var a = new MembershipContext())
             {
                 return GetBackupDetails(a);
             }
         }
-        public static AppData GetBackupDetails(IAppDataSet appData)
+        public static BackupDataSet GetBackupDetails(IBackupData appData)
         {
-            return (from a in appData.AppDataSet
-                    select a).FirstOrDefault();
+            return new BackupDataSet
+            {
+                BackupData = (from a in appData.BackupDataSet
+                    select a).FirstOrDefault(),
+                CloudDirectories = appData.CloudDirectories.Select(c=>c.Path).ToList()
+            };
         }
-        public static void SetBackupDetails(string path, int intervalMins, bool? backupToCloud = null)
+        public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool? backupToCloud = null)
         {
             using (var a = new MembershipContext())
             {
-                SetBackupDetails(path,intervalMins, backupToCloud,a);
+                SetBackupDetails(cloudDirectories,intervalMins, backupToCloud,a);
             }
         }
-        public static void SetBackupDetails(string path, int intervalMins, bool? backupToCloud,IAppDataSet appDataProvider)
+        public static void SetBackupDetails(IEnumerable<string> paths, int intervalMins, bool? backupToCloud,IBackupData appDataProvider)
         {
-            if (!Directory.Exists(path))
+            try
             {
-                throw new ArgumentException("the specified path does not exist", "path");
+                appDataProvider.Database.ExecuteSqlCommand("Delete from CloudDirectories");
+            }
+            catch (System.Data.SqlClient.SqlException) { }
+            foreach (string p in paths)
+            {
+                if (!Directory.Exists(p))
+                {
+                    throw new ArgumentException("The path does not exist:" + p, "path");
+                }
+                appDataProvider.CloudDirectories.Add(new CloudDirectory { Path = p });
             }
             var data = GetBackupDetails(appDataProvider);
             if (data == null)
@@ -43,19 +56,24 @@ namespace BlowTrial.Helpers
                 {
                     throw new InvalidOperationException("BackupToCloud must be set if there is no database entry as yet");
                 }
-                appDataProvider.AppDataSet.Attach(new AppData
-                    {
-                        CloudDirectory = path, BackupIntervalMinutes = intervalMins, BackupToCloud = backupToCloud.Value
-                    });
+                appDataProvider.BackupDataSet.Attach(new BackupData
+                {
+                    BackupIntervalMinutes = intervalMins, 
+                    IsBackingUpToCloud = backupToCloud.Value
+                });
             }
             else
             {
-                data.BackupIntervalMinutes = intervalMins;
-                data.CloudDirectory = path;
-                appDataProvider.AppDataSet.Attach(data);
+                data.BackupData.BackupIntervalMinutes = intervalMins;
+                appDataProvider.BackupDataSet.Attach(data.BackupData);
             }
+
             appDataProvider.SaveChanges();
         }
-
+    }
+    public class BackupDataSet
+    {
+        public BackupData BackupData {get; set;}
+        public IEnumerable<string> CloudDirectories { get; set; }
     }
 }

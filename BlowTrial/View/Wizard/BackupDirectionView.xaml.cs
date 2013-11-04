@@ -19,9 +19,8 @@ namespace BlowTrial.View
     /// </summary>
     public partial class BackupDirectionView : UserControl
     {
-        public BackupDirectionView(BackupDirectionViewModel model)
+        public BackupDirectionView()
         {
-            DataContext = model;
             InitializeComponent();
         }
     }

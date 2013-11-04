@@ -3,15 +3,17 @@ using BlowTrial.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 
 namespace BlowTrial.Domain.Tables
 {
-    public abstract class Patient
+    public abstract class Patient : ISharedRecord
     {
+        [DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)]
         [Key]
-	    public int Id {get; set;}
+	    public Guid Id {get; set;}
         [StringLength(256)]
 	    public string Name {get;set;}
         [StringLength(256)]
@@ -27,7 +29,7 @@ namespace BlowTrial.Domain.Tables
 	    public bool IsMale {get;set;}
 	    public DateTime DateTimeBirth {get;set;}
 	    public DateTime RegisteredAt {get; set;}
-        public int CentreId { get; set; }
+        public Guid CentreId { get; set; }
         [StringLength(64)]
         public string RegisteringInvestigator { get; set; }
 
@@ -35,9 +37,11 @@ namespace BlowTrial.Domain.Tables
         [ForeignKey("RegisteredById")]
         public virtual Investigator RegisteredBy { get; set; }
         */
+        public DateTime RecordLastModified { get; set; }
     }
     public partial class Participant : Patient, IParticipant
     {
+        public int SiteId { get; set; }
         public bool IsInterventionArm { get; set; }
         public bool? BcgAdverse { get; set; }
         [StringLength(2056)]

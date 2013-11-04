@@ -15,10 +15,11 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using BlowTrial.Infrastructure.Extensions;
+using System.Windows.Media;
 
 namespace BlowTrial.ViewModel
 {
-    class NewPatientViewModel:WorkspaceViewModel, IDataErrorInfo
+    class NewPatientViewModel:CrudWorkspaceViewModel, IDataErrorInfo
     {        
         #region Fields
 
@@ -44,6 +45,43 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
+        public StudyCentreModel SelectedCentre
+        {
+            get
+            {
+                return _newPatient.StudyCentre;
+            }
+            set
+            {
+                if (value == _newPatient.StudyCentre) { return; }
+                _newPatient.StudyCentre = value;
+                NotifyPropertyChanged("StudyCentre", "BackgroundBrush", "TextBrush");
+            }
+        }
+        readonly Brush _defaultBackground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+        readonly Brush _defaultText = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
+        public Brush BackgroundBrush
+        {
+            get 
+            { 
+                if (SelectedCentre==null)
+                {
+                    return _defaultBackground;
+                }
+                return SelectedCentre.BackgroundColour;
+            }
+        }
+        public Brush TextBrush
+        {
+            get
+            {
+                if (SelectedCentre == null)
+                {
+                    return _defaultText;
+                }
+                return SelectedCentre.TextColour;
+            }
+        }
         public string Name
         {
 	        get
@@ -395,10 +433,7 @@ namespace BlowTrial.ViewModel
                 return _multipleSibling ?? (_multipleSibling = _repository.Participants.Find(MultipleSiblingId));
             }
         }
-        private int CentreId
-        {
-            get { return int.Parse(System.Configuration.ConfigurationManager.AppSettings["CentreId"]); }
-        }
+
         public DateTime Today
         {
             get { return DateTime.Today; }
@@ -484,6 +519,27 @@ namespace BlowTrial.ViewModel
                 return _wasGivenBcgPriorOptions ?? (_wasGivenBcgPriorOptions = CreateBoolPairs(Strings.NewPatient_BCGgiven, Strings.NewPatient_BCGnotGiven));
             }
         }
+
+        IEnumerable<KeyValuePair<StudyCentreModel, string>> _studyCentreOptions;
+        public IEnumerable<KeyValuePair<StudyCentreModel, string>> StudyCentreOptions
+        {
+            get
+            {
+                if (_studyCentreOptions==null)
+                {
+                    var studyCentres = _repository.LocalStudyCentres;
+                    _studyCentreOptions = studyCentres.Select(s => new KeyValuePair<StudyCentreModel, string>(s, s.Name));
+                    if (studyCentres.Skip(1).Any())
+                    {
+                        _studyCentreOptions = new KeyValuePair<StudyCentreModel, string>[]
+                        {
+                            new KeyValuePair<StudyCentreModel, string>(null, Strings.DropDownList_PleaseSelect)
+                        }.Concat(_studyCentreOptions);
+                    }
+                }
+                return _studyCentreOptions;
+            }
+        }
         #endregion // Listbox options
 
         #region Commands
@@ -492,12 +548,12 @@ namespace BlowTrial.ViewModel
         {
 	        get 
 	        { 
-		         return _newPatient.Id == 0;
+		         return _newPatient.Id == Guid.Empty;
             }
         }
         public bool CanRandomise(object parameter)
         {
-            return IsNewRecord && IsValid && _newPatient.OkToRandomise();
+            return IsNewRecord && WasValidOnLastNotify && _newPatient.OkToRandomise();
         }
         /// <summary>
         /// Saves the customer to the repository.  This method is invoked by the SaveCommand.
@@ -505,7 +561,7 @@ namespace BlowTrial.ViewModel
         /// 
         public void Randomise(object parameter)
         {
-            if (!IsValid || !_newPatient.OkToRandomise())
+            if (!IsValid() || !_newPatient.OkToRandomise())
             {
                 throw new InvalidOperationException("Underlying NewPatientModel does not validate");
             }
@@ -522,7 +578,7 @@ namespace BlowTrial.ViewModel
                 IsMale = _newPatient.IsMale.Value,
                 RegisteredAt = DateTime.Now,
                 RegisteringInvestigator = GetCurrentPrincipal().Identity.Name,
-                CentreId = CentreId
+                CentreId = SelectedCentre.Id
             };
             if (MultipleSibling != null && MultipleSibling.IsMale == newParticipant.IsMale)
             {
@@ -547,7 +603,7 @@ namespace BlowTrial.ViewModel
             var okToScreen = _newPatient.OkToScreen();
             if (okToScreen) { RefusedConsent = null; }
             else { okToScreen = RefusedConsent == true; }
-            return okToScreen && IsValid;
+            return okToScreen && WasValidOnLastNotify;
         }
         /// <summary>
         /// Saves the customer to the repository.  This method is invoked by the SaveCommand.
@@ -555,10 +611,6 @@ namespace BlowTrial.ViewModel
         /// 
         public void AddScreen(object parameter)
         {
-            if (!IsValid || !_newPatient.OkToScreen())
-            {
-                throw new InvalidOperationException("Underlying NewPatientModel does not validate");
-            }
             var screenedPt = new ScreenedPatient
             {
                 Name = _newPatient.Name,
@@ -572,7 +624,7 @@ namespace BlowTrial.ViewModel
                 IsMale = _newPatient.IsMale.Value,
                 RegisteredAt = DateTime.Now,
                 RegisteringInvestigator = GetCurrentPrincipal().Identity.Name,
-                CentreId = CentreId,
+                CentreId = SelectedCentre.Id,
                 BadInfectnImmune = _newPatient.BadInfectnImmune.Value,
                 BadMalform = _newPatient.BadMalform.Value,
                 LikelyDie24Hr = _newPatient.LikelyDie24Hr.Value,
@@ -631,14 +683,11 @@ namespace BlowTrial.ViewModel
         /// <summary>
         /// Returns true if this object has no validation errors.
         /// </summary>
-        public bool IsValid
+        public override bool IsValid()
         {
-            get
-            {
-                bool returnVal = _newPatient.IsValid && !ValidatedProperties.Any(v => this.GetValidationError(v) != null);
-                CommandManager.InvalidateRequerySuggested();
-                return returnVal;
-            }
+            bool returnVal = _newPatient.IsValid() && !ValidatedProperties.Any(v => this.GetValidationError(v) != null);
+            CommandManager.InvalidateRequerySuggested();
+            return returnVal;
         }
 
         readonly string[] ValidatedProperties = 

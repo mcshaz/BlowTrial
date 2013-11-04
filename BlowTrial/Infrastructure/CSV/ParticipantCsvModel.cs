@@ -9,14 +9,14 @@ namespace BlowTrial.Domain.Tables
 {
     public abstract class PatientCsvModel
     {
-	    public int Id {get; set;}
+	    public Guid Id {get; set;}
 	    public int AdmissionWeight {get;set;}
 	    public double GestAgeBirth {get;set;}
 	    public string Abnormalities {get;set;}
 	    public bool IsMale {get;set;}
 	    public DateTime DateTimeBirth {get;set;}
 	    public DateTime RegisteredAt {get; set;}
-        public int CentreId { get; set; }
+        public Guid CentreId { get; set; }
         public string RegisteringInvestigator { get; set; }
 
         /*

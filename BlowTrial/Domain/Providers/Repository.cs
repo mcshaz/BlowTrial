@@ -6,48 +6,52 @@ using BlowTrial.Models;
 using Ionic.Zip;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Data.Entity.Migrations;
 
 namespace BlowTrial.Domain.Providers
 {
     public class Repository : IRepository
     {
         #region Constructors
-        public Repository(Type iDataContextType) 
+        public Repository(Type iDataContextType) :this(TypeToConstructor(iDataContextType))
         {
-            _typeConstructor = iDataContextType.GetConstructor(System.Type.EmptyTypes);
-            _emptyObjects = new object[0];
-            _createContext = delegate { return (ITrialDataContext)_typeConstructor.Invoke(_emptyObjects); };
-            _dbContext = _createContext.Invoke();
             
 #if DEBUG
             if (iDataContextType.GetInterface("ITrialDataContext")==null)
             {
                 throw new ArgumentException("Argument iDataContextType must implement ITrialDataContext");
             }
-            if (_typeConstructor==null)
-            {
-                throw new ArgumentException("iDataContextType must have a constructor which takes no arguments");
-            }
 #endif
         }
         public Repository(Func<ITrialDataContext> createContext)
         {
             _createContext = createContext;
-            _dbContext = _createContext.Invoke();
-            _dbBackupPath = _dbContext.DbBackupPath;
+            _dbContext = _createContext.Invoke(); //keep connection alive
+            ZipExtractionDirectory = AppDomain.CurrentDomain.GetData("DataDirectory").ToString();
+        }
+        static Func<ITrialDataContext> TypeToConstructor(Type iDataContextType)
+        {
+            ConstructorInfo typeConstructor = iDataContextType.GetConstructor(System.Type.EmptyTypes);
+#if DEBUG
+            if (typeConstructor == null)
+            {
+                throw new ArgumentException("iDataContextType must have a constructor which takes no arguments");
+            }
+#endif
+            object[] _emptyObjects = new object[0];
+            return delegate { return (ITrialDataContext)typeConstructor.Invoke(_emptyObjects); };
         }
         #endregion // Constructors
         #region Members
-        private readonly ConstructorInfo _typeConstructor;
-        private readonly Object[] _emptyObjects;
         private readonly Func<ITrialDataContext> _createContext;
-        private string _dbBackupPath;
-        private string _zipPath;
+
         private ITrialDataContext _dbContext;
         #endregion // Members
 
@@ -56,19 +60,12 @@ namespace BlowTrial.Domain.Providers
         public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
-        public string BackupDirectory 
-        { 
-            get
-            {
-                return Path.GetDirectoryName(_zipPath);
-            }
-            set 
-            {
-                if (!Directory.Exists(value)) {throw new ArgumentException("specified directory does not exist");}
-                _zipPath = value + '\\' + Path.GetFileNameWithoutExtension(_dbBackupPath) + ".zip";
-            } 
+        public IEnumerable<string> CloudDirectories
+        {
+            get;
+            set;
         }
-        public string BackupFilePath { get { return _zipPath; } }
+
         public DbSet<Vaccine> Vaccines
         {
             get
@@ -97,28 +94,52 @@ namespace BlowTrial.Domain.Providers
                 return _dbContext.VaccinesAdministered;
             }
         }
+        IEnumerable<StudyCentreModel> _localStudyCentres;
+        public IEnumerable<StudyCentreModel> LocalStudyCentres 
+        {
+            get 
+            { 
+                return _localStudyCentres ??
+                        (_localStudyCentres = _dbContext.StudyCentres.ToArray().Select(s=>new StudyCentreModel
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            ArgbTextColour = s.ArgbTextColour,
+                            ArgbBackgroundColour = s.ArgbBackgroundColour
+                        }));
+            }
+        }
+        public string ZipExtractionDirectory { get; set; } //set to datadirectory on instantiation
         #endregion // Properties
 
         #region Methods
-        public void Add(Participant patient)
+        public void Add(Participant participant)
         {
-            _dbContext.Participants.Add(patient);
+            _dbContext.Participants.Add(participant);
+            if (participant.SiteId==0)
+            {
+                participant.SiteId = (from p in _dbContext.Participants
+                                      orderby p.SiteId descending
+                                      select p.SiteId).FirstOrDefault() + 1;
+            }
+            participant.RecordLastModified = DateTime.UtcNow;
             _dbContext.SaveChanges();
             if (this.ParticipantAdded != null)
             {
-                this.ParticipantAdded(this, new ParticipantEventArgs(patient));
+                this.ParticipantAdded(this, new ParticipantEventArgs(participant));
             }
         }
         public void Add(ScreenedPatient patient)
         {
             _dbContext.ScreenedPatients.Add(patient);
+            patient.RecordLastModified = DateTime.UtcNow;
             _dbContext.SaveChanges();
             if (this.ParticipantAdded != null)
             {
                 this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
             }
         }
-        public void Update(int id,
+        public void Update(Guid id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
                 bool? bcgAdverse,
@@ -139,6 +160,7 @@ namespace BlowTrial.Domain.Providers
             participant.DischargeDateTime = dischargeDateTime;
             participant.DeathOrLastContactDateTime = deathOrLastContactDateTime;
             participant.OutcomeAt28Days = outcomeAt28Days;
+            participant.RecordLastModified = DateTime.UtcNow;
             _dbContext.Participants.Attach(participant);
             _dbContext.SaveChanges();
             if (this.ParticipantUpdated != null)
@@ -146,7 +168,8 @@ namespace BlowTrial.Domain.Providers
                 this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
             }
         }
-        public void ClearParticipantVaccines(int participantId)
+
+        public void ClearParticipantVaccines(Guid participantId)
         {
             try
             {
@@ -161,18 +184,12 @@ namespace BlowTrial.Domain.Providers
                 }
             }
         }
-        public void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered)
+        public void Add(IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
-            foreach(var v in vaccinesAdministered)
+            foreach (var v in vaccinesAdministered)
             {
-                if (v.Id==0)
-                {
-                    _dbContext.VaccinesAdministered.Add(v);
-                }
-                else
-                {
-                    _dbContext.VaccinesAdministered.Attach(v);
-                }
+                v.RecordLastModified = DateTime.UtcNow;
+                _dbContext.VaccinesAdministered.Add(v);
             }
             _dbContext.SaveChanges();
         }
@@ -180,6 +197,7 @@ namespace BlowTrial.Domain.Providers
         {
             foreach (Participant p in patients)
             {
+                p.RecordLastModified = DateTime.UtcNow;
                 _dbContext.Participants.Attach(p);
             }
             _dbContext.SaveChanges();
@@ -187,55 +205,74 @@ namespace BlowTrial.Domain.Providers
         public void Update(ScreenedPatient patient)
         {
             _dbContext.ScreenedPatients.Attach(patient);
+            patient.RecordLastModified = DateTime.UtcNow;
             _dbContext.SaveChanges();
         }
         public void Backup()
         {
-            //to do - use static classes to check if not ce & use sql to create .bak file
-            BackupCe();
-        }
-        private void BackupCe()
-        {
-            if (string.IsNullOrEmpty(BackupFilePath))
+            string bakFileName = _dbContext.BackupDb();
+            FileInfo bakFile = new FileInfo(bakFileName);
+            if (!bakFile.Exists) { return; }
+#if DEBUG
+            if (!(CloudDirectories.Count() == 1))
             {
-                throw new InvalidOperationException("Cannot call backup method without setting backup directory property");
+                throw new InvalidOperationException("Backup called without cloud directories set to a single directory");
             }
-            var dbFile = new FileInfo(_dbBackupPath);
-            if (!dbFile.Exists) { return; }
-            var backupFile = new FileInfo(BackupFilePath);
-            if (backupFile.Exists && backupFile.LastWriteTime >= dbFile.LastWriteTime)
+#endif
+            string cloudPathWithoutExtension = CloudDirectories.First() + '\\' + Path.GetFileNameWithoutExtension(bakFileName) + '_' + LocalStudyCentres.First().Id.ToString();
+            string cloudZipName = cloudPathWithoutExtension + ".zip"; 
+            
+            var cloudFile = new FileInfo(cloudZipName);
+            if (cloudFile.Exists && cloudFile.LastWriteTimeUtc >= _dbContext.DbLastModifiedUtc())
             {
                 return;
             }
-            _dbContext.Dispose();
+            _dbContext.Dispose(); // only necessary for ce
+            string cloudBakName = cloudPathWithoutExtension + Path.GetExtension(bakFileName);
             using (ZipFile zip = new ZipFile())
             {
-                zip.AddFile(dbFile.FullName,"");
-                zip.Save(backupFile.FullName);
+                zip.AddFile(bakFile.FullName, "").FileName = cloudBakName;
+                zip.Save(cloudFile.FullName);
             }
             _dbContext = _createContext.Invoke();
         }
+
         public void Restore()
         {
-            if (string.IsNullOrEmpty(BackupFilePath))
-            {
-                throw new InvalidOperationException("Cannot call backup method without setting backup directory property");
-            }
-            var backupFile = new FileInfo(BackupFilePath);
-            if (!backupFile.Exists) { throw new FileNotFoundException("Database file not found", _dbBackupPath); }
-            var dbFile = new FileInfo(_dbBackupPath);
-            if (dbFile.Exists && backupFile.LastWriteTime <= dbFile.LastWriteTime)
-            {
-                return;
-            }
+            DateTime RecordLastModified = _dbContext.DbLastModifiedUtc(); //note this is all assuming user on backup end has no ability to modify data
+            var zipFiles = GetFilesUpdatedAfter(RecordLastModified, _dbContext.DbName);
+            if (!zipFiles.Any()) { return; }
             _dbContext.Dispose();
-            using (ZipFile zip1 = ZipFile.Read(backupFile.FullName))
+
+            List<string> bakFileNames = new List<string>(zipFiles.Count);
+            foreach (var zipFile in zipFiles)
             {
-                // here, we extract every entry, but we could extract conditionally
-                // based on entry name, size, date, checkbox status, etc.  
-                zip1[0].Extract(dbFile.DirectoryName, ExtractExistingFileAction.OverwriteSilently);
+                using (ZipFile readFile = ZipFile.Read(zipFile.FullName))
+                {
+                    //may want to check lastaccessed to check against as well but not sure if UTC - imperative for international data
+                    readFile[0].Extract(ZipExtractionDirectory, ExtractExistingFileAction.OverwriteSilently);
+                    bakFileNames.Add(readFile[0].FileName);
+                }
             }
+
             _dbContext = _createContext.Invoke();
+            AddOrUpdateBaks(bakFileNames, RecordLastModified);
+
+        }
+        void AddOrUpdateBaks(IEnumerable<string> bakFileNames, DateTime addOrUpdateAfter)
+        {
+            foreach (string fn in bakFileNames)
+            {
+                using (var downloadedDb = _dbContext.AttachDb(ZipExtractionDirectory + '\\' + fn))
+                {
+                    _dbContext.Participants.AddOrUpdate(downloadedDb.Participants.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    _dbContext.ScreenedPatients.AddOrUpdate(downloadedDb.ScreenedPatients.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    _dbContext.Vaccines.AddOrUpdate(downloadedDb.Vaccines.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    _dbContext.VaccinesAdministered.AddOrUpdate(downloadedDb.VaccinesAdministered.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    _dbContext.ProtocolViolations.AddOrUpdate(downloadedDb.ProtocolViolations.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    _dbContext.SaveChanges();
+                }
+            }
         }
         public ParticipantsSummary GetParticipantSummary()
         {
@@ -259,8 +296,26 @@ namespace BlowTrial.Domain.Providers
                 WasGivenBcgPriorCount = _dbContext.ScreenedPatients.Count(s => s.WasGivenBcgPrior)
             };
         }
+
         #endregion // Methods
 
+        ICollection<FileInfo> GetFilesUpdatedAfter(DateTime afterUtc, string filePrefix)
+        {
+            int prefixLen = filePrefix.Length;
+            List<FileInfo> returnVar = new List<FileInfo>();
+            foreach (string dirName in CloudDirectories)
+            {
+                DirectoryInfo di = new DirectoryInfo(dirName);
+                foreach (FileInfo f in di.GetFiles())
+                {
+                    if (f.LastWriteTimeUtc > afterUtc && f.Name.Substring(0,prefixLen)==filePrefix)
+                    {
+                        returnVar.Add(f);
+                    }
+                }
+            }
+            return returnVar;
+        }
         #region IDisposable Implementation
         //http://msdn.microsoft.com/en-us/library/vstudio/b1yfkh5e%28v=vs.100%29.aspx
         private bool _disposed = false;

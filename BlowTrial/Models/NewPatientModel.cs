@@ -31,6 +31,7 @@ namespace BlowTrial.Models
         {
             _validatedProperties = new string[]
             { 
+                "StudyCentre",
                 "Name",
                 "MothersName",
                 "HospitalIdentifier", 
@@ -55,7 +56,8 @@ namespace BlowTrial.Models
         #endregion // Fields
 
         #region Properties
-        public int Id {get; set;}
+        public Guid Id {get; set;}
+        public StudyCentreModel StudyCentre { get; set; }
 	    public string Name {get;set;}
         public string MothersName { get; set; }
 	    public string HospitalIdentifier {get;set;}
@@ -151,6 +153,9 @@ namespace BlowTrial.Models
 
             switch (propertyName)
             {
+                case "StudyCentre":
+                    error = ValidateStudyCentre();
+                    break;
                 case "Name":
                     error = ValidateFieldNotEmpty(Name);
                     break;
@@ -205,6 +210,14 @@ namespace BlowTrial.Models
             }
 
             return error;
+        }
+        string ValidateStudyCentre()
+        {
+            if (StudyCentre == null)
+            {
+                return Strings.NewPatientModel_Error_NoStudyCentre;
+            }
+            return null;
         }
         string ValidateAbnormalities()
         {

@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         xmlns:vw="clr-namespace:BlowTrial.View"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters" >
     <UserControl.Resources>
         <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
@@ -13,7 +12,7 @@
             <Style x:Key="enablePreviousEnrol" TargetType="ComboBox">
                 <Setter Property="IsEnabled" Value="False" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=BackupToCloud, Mode=OneWay}" Value="True" >
+                    <DataTrigger Binding="{Binding Path=IsBackingUpToCloud, Mode=OneWay}" Value="True" >
                         <Setter Property="IsEnabled" Value="True" />
                     </DataTrigger>
                 </Style.Triggers>
@@ -44,7 +43,7 @@
                         ItemsSource="{Binding Path=BackupToCloudOptions, Mode=OneTime}"
                         SelectedValuePath="Key" 
                         DisplayMemberPath="Value"
-                        SelectedValue="{Binding Path=BackupToCloud, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        SelectedValue="{Binding Path=IsBackingUpToCloud, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
         <ContentPresenter 
                         Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"

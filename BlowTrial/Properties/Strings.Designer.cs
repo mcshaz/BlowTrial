@@ -88,6 +88,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Application purpose.
+        /// </summary>
+        public static string BackupDirectionViewModel_DisplayName {
+            get {
+                return ResourceManager.GetString("BackupDirectionViewModel_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BLOW Trial (BCG for low-birth-weight babies).
         /// </summary>
         public static string Blowtrial_ProjectName {
@@ -183,6 +192,42 @@ namespace BlowTrial.Properties {
         public static string CloudDirectory_Error_StringLengthTooLong {
             get {
                 return ResourceManager.GetString("CloudDirectory_Error_StringLengthTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only 1 directory can be nominated at a data collecting site.
+        /// </summary>
+        public static string CloudDirectoryModel_Error_ExcessDirectories {
+            get {
+                return ResourceManager.GetString("CloudDirectoryModel_Error_ExcessDirectories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to there is an error in the directories selected.
+        /// </summary>
+        public static string CloudDirectoryModel_Error_InValid {
+            get {
+                return ResourceManager.GetString("CloudDirectoryModel_Error_InValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter a direcory.
+        /// </summary>
+        public static string CloudDirectoryModel_Error_NoDirectories {
+            get {
+                return ResourceManager.GetString("CloudDirectoryModel_Error_NoDirectories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cloud Directory.
+        /// </summary>
+        public static string CloudDirectoryViewModel_DisplayName {
+            get {
+                return ResourceManager.GetString("CloudDirectoryViewModel_DisplayName", resourceCulture);
             }
         }
         
@@ -808,6 +853,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A study site must be selected for this patient.
+        /// </summary>
+        public static string NewPatientModel_Error_NoStudyCentre {
+            get {
+                return ResourceManager.GetString("NewPatientModel_Error_NoStudyCentre", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Centile({0:P2}).
         /// </summary>
         public static string NewPatientVM_Centile {
@@ -1249,6 +1303,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nominate Sites.
+        /// </summary>
+        public static string StudySitesViewModel_DisplayName {
+            get {
+                return ResourceManager.GetString("StudySitesViewModel_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data for all enrolled participants.
         /// </summary>
         public static string TableOptions_Participant {
@@ -1326,6 +1389,51 @@ namespace BlowTrial.Properties {
         public static string WeeksOld {
             get {
                 return ResourceManager.GetString("WeeksOld", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string WizardView_Button_Cancel {
+            get {
+                return ResourceManager.GetString("WizardView_Button_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Finish.
+        /// </summary>
+        public static string WizardView_Button_Finish {
+            get {
+                return ResourceManager.GetString("WizardView_Button_Finish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Next &gt;.
+        /// </summary>
+        public static string WizardView_Button_MoveNext {
+            get {
+                return ResourceManager.GetString("WizardView_Button_MoveNext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt; Back.
+        /// </summary>
+        public static string WizardView_Button_MovePrevious {
+            get {
+                return ResourceManager.GetString("WizardView_Button_MovePrevious", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Steps.
+        /// </summary>
+        public static string WizardView_Header_Steps {
+            get {
+                return ResourceManager.GetString("WizardView_Header_Steps", resourceCulture);
             }
         }
     }

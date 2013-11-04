@@ -15,7 +15,6 @@ namespace BlowTrial.Domain.Tables
         [StringLength(128)]
         public string Password { get; set; }
         public DateTime LastLoginAt { get; set; }
-        public int? CentreId { get; set; }
 
         public virtual ICollection<Role> Roles { get; set; }
         /*

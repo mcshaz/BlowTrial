@@ -1,15 +1,18 @@
-﻿using BlowTrial.Properties;
+﻿using BlowTrial.Infrastructure.Interfaces;
+using BlowTrial.Properties;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlowTrial.Domain.Tables
 {
-    public class Vaccine
+    public class Vaccine : ISharedRecord
     {
         [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public Guid Id { get; set; }
         public string Name { get; set; }
+        public DateTime RecordLastModified { get; set; }
         public static string BcgName()
         {
             return Strings.Vaccine_Bcg;
@@ -35,12 +38,14 @@ namespace BlowTrial.Domain.Tables
         }
     }
     [Table(VaccineAdminTableName)]
-    public class VaccineAdministered
+    public class VaccineAdministered : ISharedRecord
     {
         [Key]
-        public int Id { get; set; }
-        public int VaccineId { get; set; }
-        public int ParticipantId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public Guid Id { get; set; }
+        public Guid VaccineId { get; set; }
+        public Guid ParticipantId { get; set; }
+        public DateTime RecordLastModified { get; set; }
         public DateTime AdministeredAt { get; set; }
         [ForeignKey("VaccineId")]
         public virtual Vaccine VaccineGiven { get; set; }

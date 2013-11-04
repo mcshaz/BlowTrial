@@ -42,7 +42,7 @@ namespace BlowTrial.Models
         }
         string ValidateStudySitesData()
         {
-            if (StudySitesData.Any(s=>!s.IsValid))
+            if (StudySitesData.Any(s=>!s.IsValid()))
             {
                 return Strings.GetAppSettingsModel_Error_StudySite;
             }

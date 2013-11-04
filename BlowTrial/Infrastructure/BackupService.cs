@@ -1,4 +1,5 @@
-﻿using BlowTrial.Infrastructure.Interfaces;
+﻿using BlowTrial.Helpers;
+using BlowTrial.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,15 @@ namespace BlowTrial.Infrastructure
     {
         #region Constructors
         private const int millisecsPerMin = 1000*60;
-        public BackupService(IRepository repo, int intervalMins, bool isToBackup)
+        public BackupService(IRepository repo, IBackupData backupData)
         {
             _repo = repo;
+            var backupDetails = BackupDataService.GetBackupDetails(backupData);
+            _repo.CloudDirectories = backupDetails.CloudDirectories;
             //use DispatcherTimer rather than dispatcher as CE does not handle multiple connections inevitable with multi threading
             _timer = new DispatcherTimer(DispatcherPriority.Normal);
-            _timer.Interval = new TimeSpan(0, intervalMins, 0);
-            if (isToBackup)
+            _timer.Interval = new TimeSpan(0, backupDetails.BackupData.BackupIntervalMinutes, 0);
+            if (backupDetails.BackupData.IsBackingUpToCloud)
             {
                 _handler = new EventHandler(Backup);
                 _isToBackup = true;
@@ -42,17 +45,6 @@ namespace BlowTrial.Infrastructure
         #endregion
 
         #region Properties
-        public string Directory 
-        { 
-            get
-            {
-                return _repo.BackupDirectory;
-            }
-            set
-            {
-                _repo.BackupDirectory = value;
-            }
-        }
         public int IntervalMins
         {
             get

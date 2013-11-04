@@ -85,9 +85,6 @@
     <Reference Include="Ionic.Zip.Reduced">
       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -102,9 +99,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -147,10 +141,11 @@
     <Compile Include="Domain\Providers\MembershipContext.cs" />
     <Compile Include="Domain\Providers\RepositoryEventArguments.cs" />
     <Compile Include="Domain\Providers\Repository.cs" />
-    <Compile Include="Domain\Tables\AppData.cs" />
+    <Compile Include="Domain\Tables\BackupData.cs" />
     <Compile Include="Domain\Tables\Investigator.cs" />
     <Compile Include="Domain\Tables\Patients.cs" />
     <Compile Include="Domain\Tables\ProtocolViolation.cs" />
+    <Compile Include="Domain\Tables\StudyCentre.cs" />
     <Compile Include="Domain\Tables\Vaccine.cs" />
     <Compile Include="Helpers\AppDataService.cs" />
     <Compile Include="Helpers\Attached.cs" />
@@ -161,7 +156,6 @@
     <Compile Include="Helpers\OutcomeAt28DaysSplitter.cs" />
     <Compile Include="Helpers\DetailsRequired.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
-    <Compile Include="Infrastructure\AutoMapper\BackupConfigurations.cs" />
     <Compile Include="Infrastructure\BackupService.cs" />
     <Compile Include="Infrastructure\Centiles\LMS.cs" />
     <Compile Include="Infrastructure\Centiles\Stats.cs" />
@@ -181,9 +175,10 @@
     <Compile Include="Infrastructure\Extensions\LinqExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringEnumerationExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringExtensions.cs" />
-    <Compile Include="Infrastructure\Interfaces\IAppDataSet.cs" />
+    <Compile Include="Infrastructure\Interfaces\IBackupData.cs" />
     <Compile Include="Infrastructure\Interfaces\IMembershipContext.cs" />
     <Compile Include="Infrastructure\Interfaces\IParticipant.cs" />
+    <Compile Include="Infrastructure\Interfaces\ISharedRecord.cs" />
     <Compile Include="Infrastructure\RandomisingEngine.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Infrastructure\AutoMapper\AutoMapperConfiguration.cs" />
@@ -195,6 +190,7 @@
     <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
+    <Compile Include="Models\StudyCentreModel.cs" />
     <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
     <Compile Include="Models\WizardModels\StudySitesModel.cs" />
     <Compile Include="Models\SummaryModels.cs" />
@@ -210,6 +206,7 @@
     <Compile Include="ViewModel\AllScreenedViewModel.cs" />
     <Compile Include="ViewModel\AuthenticationViewModel.cs" />
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
     <Compile Include="ViewModel\DataSummaryViewModel.cs" />
@@ -224,6 +221,7 @@
     <Compile Include="ViewModel\UtilityViewModels\WorkspaceViewModel.cs" />
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />
     <Compile Include="ViewModel\VaccineViewModels.cs" />
+    <Compile Include="ViewModel\WizardViewModels\WizardPageViewModel.cs" />
     <Compile Include="View\AllScreenedView.xaml.cs">
       <DependentUpon>AllScreenedView.xaml</DependentUpon>
     </Compile>

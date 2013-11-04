@@ -12,14 +12,11 @@ namespace BlowTrial.Infrastructure.AutoMapper
     {
         protected override void Configure()
         {
-            Mapper.CreateMap<AppData, CloudDirectoryModel>()
-                .ForMember(d => d.Error, o => o.Ignore())
-                .ForMember(d => d.IsValid, o => o.Ignore());
+            Mapper.CreateMap<BackupData, CloudDirectoryModel>()
+                .ForMember(d => d.Error, o => o.Ignore());
             Mapper.CreateMap<BackupService, CloudDirectoryModel>()
                 .ForMember(d => d.Error, o => o.Ignore())
-                .ForMember(d => d.IsValid, o => o.Ignore())
-                .ForMember(d => d.BackupIntervalMinutes, o => o.MapFrom(s => s.IntervalMins))
-                .ForMember(d => d.CloudDirectory, o => o.MapFrom(s => s.Directory));
+                .ForMember(d => d.BackupIntervalMinutes, o => o.MapFrom(s => s.IntervalMins));
         }
     }
 }

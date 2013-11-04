@@ -9,7 +9,7 @@ using System.Text;
 
 namespace BlowTrial.Domain.Providers
 {
-    public class MembershipContext : DbContext, IMembershipContext, IAppDataSet
+    public class MembershipContext : DbContext, IMembershipContext, IBackupData
     {
         public const string MembershipDbName = "BlowTrialMembership";
         static public string GetConnectionString()
@@ -23,7 +23,8 @@ namespace BlowTrial.Domain.Providers
         public MembershipContext() : base(GetConnectionString()) { }
         public DbSet<Investigator> Investigators { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<AppData> AppDataSet { get; set; }
+        public DbSet<BackupData> BackupDataSet { get; set; }
+        public DbSet<CloudDirectory> CloudDirectories { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

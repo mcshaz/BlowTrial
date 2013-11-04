@@ -52,17 +52,16 @@ namespace BlowTrial.Infrastructure
         /// <summary>
         /// Returns true if this object has no validation errors.
         /// </summary>
-        public bool IsValid
+        public bool IsValid()
         {
-            get
+            foreach (string property in _validatedProperties)
             {
-                foreach (string property in _validatedProperties)
-                {
-                    if (GetValidationError(property) != null)
-                    { return false; }
+                if (GetValidationError(property) != null)
+                { 
+                    return false; 
                 }
-                return true;
             }
+            return true;
         }
 
         protected IEnumerable<string> _validatedProperties;

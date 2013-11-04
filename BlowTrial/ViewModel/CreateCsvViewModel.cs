@@ -30,7 +30,7 @@ namespace BlowTrial.ViewModel
             : base(repository)
         {
             _model = csvModel;
-            SaveCmd = new RelayCommand(Save, param=>IsValid);
+            SaveCmd = new RelayCommand(Save, param=>IsValid());
             SelectFileCmd = new RelayCommand(SelectFile);
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param), param => true);
         }
@@ -70,7 +70,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand SaveCmd { get; private set; }
         public void Save(object param)
         {
-            if (!IsValid)
+            if (!IsValid())
             {
                 throw new InvalidOperationException("CreateCsvViewModel not valid - cannot call save");
             }
@@ -159,12 +159,11 @@ namespace BlowTrial.ViewModel
         /// <summary>
         /// Returns true if this object has no validation errors.
         /// </summary>
-        public bool IsValid
-        {
-            get
+        public bool IsValid()
+
             {
-                return _model.IsValid;
-            }
+                return _model.IsValid();
+            
         }
 
 

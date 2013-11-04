@@ -139,6 +139,7 @@ namespace BlowTrial.ViewModel
                 var ws = (WorkspaceViewModel)Workspaces[i];
                 Workspaces.Remove(ws);
             }
+            _backupService = null;
             ShowLogin();
         }
 
@@ -211,9 +212,12 @@ namespace BlowTrial.ViewModel
             {
                 cloudVM =
                     new CloudDirectoryViewModel
-                        (_backupService == null
-                            ? new CloudDirectoryModel()
-                            : Mapper.Map<CloudDirectoryModel>(_backupService)
+                        (new CloudDirectoryModel
+                            {
+                                 CloudDirectories = _repository.CloudDirectories,
+                                 BackupIntervalMinutes = _backupService.IntervalMins,
+                                 IsBackingUpToCloud = _backupService.IsToBackup
+                            }
                         );
 
                 this.Workspaces.Add(cloudVM);
@@ -241,8 +245,6 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        private int LoginAttempts { get; set; }
-
         private bool _isAuthorised;
         public bool IsAuthorised { 
             get { return _isAuthorised; }
@@ -259,29 +261,11 @@ namespace BlowTrial.ViewModel
             IsAuthorised = GetCurrentPrincipal().Identity.IsAuthenticated;
             if (!IsAuthorised)
             {
-                CloseCmd.Execute(null);
+                OnRequestClose();
             }
-            SetupBackup();
-        }
-        void SetupBackup()
-        {
-            var appData = AppDataService.GetBackupDetails();
-            if (appData == null)
+            using (var m = new MembershipContext())
             {
-                ShowCloudDirectory();
-            }
-            else
-            {
-                if (_backupService == null)
-                {
-                    _repository.BackupDirectory = appData.CloudDirectory;
-                    _backupService = new BackupService(_repository, appData.BackupIntervalMinutes, appData.BackupToCloud);
-                }
-                else
-                {
-                    _backupService.Directory = appData.CloudDirectory;
-                    _backupService.IntervalMins = appData.BackupIntervalMinutes;
-                }
+                _backupService = new BackupService(_repository, m);
             }
         }
         void OnWorkspacesChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -301,7 +285,6 @@ namespace BlowTrial.ViewModel
             WorkspaceViewModel workspace = (WorkspaceViewModel)sender;
             this.Workspaces.Remove(workspace);
             if (senderType == typeof(AuthenticationViewModel)) { HandleAuthorisationClose(); }
-            else if (senderType == typeof(CloudDirectoryViewModel)) { SetupBackup(); }
             if (!Workspaces.Any())
             {
                 DisplayName = Strings.MainWindowViewModel_WorkspaceName;
