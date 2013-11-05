@@ -1,15 +1,17 @@
 ﻿using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Infrastructure.Interfaces;
+using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.Helpers
 {
-    public static class ApplicationDataService
+    public static class BlowTrialDataService
     {
         public static BackupDataSet GetBackupDetails()
         {
@@ -41,6 +43,8 @@ namespace BlowTrial.Helpers
                 appDataProvider.Database.ExecuteSqlCommand("Delete from CloudDirectories");
             }
             catch (System.Data.SqlClient.SqlException) { }
+            catch (Exception) {throw;}
+
             foreach (string p in paths)
             {
                 if (!Directory.Exists(p))
@@ -50,7 +54,7 @@ namespace BlowTrial.Helpers
                 appDataProvider.CloudDirectories.Add(new CloudDirectory { Path = p });
             }
             var data = GetBackupDetails(appDataProvider);
-            if (data == null)
+            if (data.BackupData == null)
             {
                 if (isTobackupToCloud == null)
                 {
@@ -60,7 +64,7 @@ namespace BlowTrial.Helpers
                 {
                     throw new InvalidOperationException("IsEnvelopeRandomising must be set if there is no database entry as yet");
                 }
-                appDataProvider.BackupDataSet.Attach(new BackupData
+                appDataProvider.BackupDataSet.Add(new BackupData
                 {
                     BackupIntervalMinutes = intervalMins, 
                     IsBackingUpToCloud = isTobackupToCloud.Value,
@@ -72,8 +76,34 @@ namespace BlowTrial.Helpers
                 data.BackupData.BackupIntervalMinutes = intervalMins;
                 appDataProvider.BackupDataSet.Attach(data.BackupData);
             }
+            
 
             appDataProvider.SaveChanges();
+        }
+        public static bool AnyStudyCentres()
+        {
+            using (var t = new TrialDataContext())
+            {
+                return t.StudyCentres.Any();
+            }
+        }
+        public static void DefineNewStudyCentres(IEnumerable<StudySiteItemModel> newStudyCentres)
+        {
+            using (var t = new TrialDataContext())
+            {
+                if (t.StudyCentres.Any()) { throw new InvalidOperationException("Study Centres cannot be modified after creation"); }
+                foreach (StudySiteItemModel s in newStudyCentres)
+                {
+                    t.StudyCentres.Add(new Domain.Tables.StudyCentre
+                    {
+                        Id = s.Id,
+                        ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
+                        ArgbTextColour = s.SiteTextColour.Value.ToInt(),
+                        Name = s.SiteName
+                    });
+                }
+                t.SaveChanges();
+            }
         }
     }
     public class BackupDataSet

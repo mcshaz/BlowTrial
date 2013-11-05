@@ -33,9 +33,9 @@ namespace BlowTrial.Domain.Providers
     {
         protected override void Seed(TrialDataContext context)
         {
-            context.Vaccines.Add(new Vaccine { Name = Vaccine.BcgName() }); //, Id = Guid.ParseExact()
-            context.Vaccines.Add(new Vaccine { Name = Vaccine.OpvName() });
-            context.Vaccines.Add(new Vaccine{ Name = Vaccine.HepBName() });
+            context.Vaccines.Add(new Vaccine { Name = Vaccine.BcgName(), Id= Guid.ParseExact("8eeb3307-445c-475f-b150-a51a66559ae2","D") }); //, Id = Guid.ParseExact()
+            context.Vaccines.Add(new Vaccine { Name = Vaccine.OpvName(), Id = Guid.ParseExact("161a6935-3e1d-4362-9b23-eb6f49512fc9", "D") });
+            context.Vaccines.Add(new Vaccine { Name = Vaccine.HepBName(), Id = Guid.ParseExact("a756168a-2e0b-404b-a903-bc0cfd02f33f", "D") });
             context.SaveChanges();
         }
         /*

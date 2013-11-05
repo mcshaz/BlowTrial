@@ -35,6 +35,10 @@ namespace BlowTrial.Models
         public IList<DirectoryItemModel> CloudDirectoryItems { get; private set; }
         public IEnumerable<string> CloudDirectories
         {
+            get
+            {
+                return CloudDirectoryItems.Select(c => c.DirectoryPath);
+            }
             set
             {
                 foreach (string s in value)

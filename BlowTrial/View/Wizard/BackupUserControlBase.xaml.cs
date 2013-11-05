@@ -18,20 +18,11 @@ namespace BlowTrial.View
            
             var cols = cloudDirectoriesGrid.Columns;
 
+            double buttonWidth = cols[0].ActualWidth;
 
-            var col = cols[0];
-            col.Width = cloudDirectoriesGrid.ActualWidth/2;
+            var col = cols[1];
             col.MinWidth = col.ActualWidth;
-
-            double width = 0;
-            for (int i = 0; i < 2; i++)
-            {
-                width += cols[i].ActualWidth;
-            }
-
-            col = cols[2];
-            col.MinWidth = col.ActualWidth;
-            col.Width = cloudDirectoriesGrid.ActualWidth - width -5;
+            col.Width = cloudDirectoriesGrid.ActualWidth-buttonWidth;
         }
     }
 }

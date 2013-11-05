@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Windows.Input;
 using System.Linq;
 using BlowTrial.Models;
+using BlowTrial.Helpers;
 
 namespace BlowTrial.ViewModel
 {
@@ -23,10 +24,10 @@ namespace BlowTrial.ViewModel
         WizardPageViewModel _currentPage;
         RelayCommand _moveNextCommand;
         RelayCommand _movePreviousCommand;
+        RelayCommand _cancelCommand;
         List<WizardPageViewModel> _pages;
-
-        StudySitesViewModel _sitesVM;
-        BackupDirectionModel _backupModel;
+        StudySitesViewModel _sitesVm;
+        bool? _isAnyStudyCentres;
 
         #endregion // Fields
 
@@ -34,7 +35,6 @@ namespace BlowTrial.ViewModel
 
         public GetAppSettingsViewModel()
         {
-            _backupModel = new BackupDirectionModel();
             this.CurrentPage = this.Pages[0];
         }
 
@@ -52,8 +52,18 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return CloseCmd;
+                if (_cancelCommand == null)
+                    _cancelCommand = new RelayCommand(param => this.CancelOrder());
+
+                return _cancelCommand;
             }
+        }
+
+        void CancelOrder() // nullifying only relevant if the logic is occuring on another layer
+        {
+            SitesModel = null;
+            BackupModel = null;
+            this.OnRequestClose();
         }
 
 
@@ -128,6 +138,7 @@ namespace BlowTrial.ViewModel
                 }
                 else
                 {
+                    UploadData();
                     this.OnRequestClose();
                 }
             }
@@ -138,7 +149,8 @@ namespace BlowTrial.ViewModel
         #endregion // Commands
 
         #region Properties
-
+        public StudySitesModel SitesModel { get; private set; }
+        public BackupDirectionModel BackupModel { get; private set; }
         /// <summary>
         /// Returns the page ViewModel that the user is currently viewing.
         /// </summary>
@@ -173,6 +185,11 @@ namespace BlowTrial.ViewModel
             get { return this.CurrentPageIndex == this.Pages.Count - 1; }
         }
 
+        public bool IsAnyStudyCentres
+        {
+            get { return (_isAnyStudyCentres ?? (_isAnyStudyCentres = BlowTrialDataService.AnyStudyCentres())).Value; }
+        }
+
         /// <summary>
         /// Returns a read-only collection of all page ViewModels.
         /// </summary>
@@ -194,14 +211,18 @@ namespace BlowTrial.ViewModel
         void CreatePages()
         {
             _pages = new List<WizardPageViewModel>();
-            
-            var backupDirectionVM = new BackupDirectionViewModel(_backupModel);
+            BackupModel = new BackupDirectionModel();
+            var backupDirectionVM = new BackupDirectionViewModel(BackupModel);
             backupDirectionVM.PropertyChanged += BackupDirectionVM_PropertyChanged;
             _pages.Add(backupDirectionVM);
-            var sitesModel = new StudySitesModel();
-            _sitesVM = new StudySitesViewModel(sitesModel);
-            _pages.Add(_sitesVM);
-            _pages.Add(new CloudDirectoryViewModel(_backupModel));
+            if (!IsAnyStudyCentres)
+            {
+                SitesModel = new StudySitesModel();
+                _sitesVm = new StudySitesViewModel(SitesModel);
+                _pages.Add(_sitesVm);
+            }
+            
+            _pages.Add(new CloudDirectoryViewModel(BackupModel));
 
         }
 
@@ -212,10 +233,10 @@ namespace BlowTrial.ViewModel
                 bool? isBackingUpToCloud = ((BackupDirectionViewModel)sender).IsBackingUpToCloud;
                 if (isBackingUpToCloud.HasValue)
                 {
-                    WizardPageViewModel page = (WizardPageViewModel)Pages.FirstOrDefault(p => p.Equals(_sitesVM));
-                    if (page==null && isBackingUpToCloud.Value)
+                    WizardPageViewModel page = (WizardPageViewModel)Pages.FirstOrDefault(p => p.Equals(_sitesVm));
+                    if (page==null && isBackingUpToCloud.Value && !IsAnyStudyCentres)
                     {
-                        Pages.Insert(1, (WizardPageViewModel)_sitesVM);
+                        Pages.Insert(1, (WizardPageViewModel)_sitesVm);
                     }
                     else if (page!=null && !isBackingUpToCloud.Value)
                     {
@@ -225,6 +246,21 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        void UploadData()
+        {
+            if (BackupModel == null) { return; }
+            var details = BackupModel;
+            BlowTrialDataService.SetBackupDetails(
+                details.CloudDirectories,
+                details.BackupIntervalMinutes.Value,
+                details.IsBackingUpToCloud,
+                details.PatientsPreviouslyRandomised
+                );
+            if (SitesModel != null)
+            {
+                BlowTrialDataService.DefineNewStudyCentres(SitesModel.StudySitesData);
+            }
+        }
 
         int CurrentPageIndex
         {

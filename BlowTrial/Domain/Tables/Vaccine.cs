@@ -9,7 +9,7 @@ namespace BlowTrial.Domain.Tables
     public class Vaccine : ISharedRecord
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
         public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTime RecordLastModified { get; set; }
@@ -41,7 +41,7 @@ namespace BlowTrial.Domain.Tables
     public class VaccineAdministered : ISharedRecord
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
         public Guid Id { get; set; }
         public Guid VaccineId { get; set; }
         public Guid ParticipantId { get; set; }

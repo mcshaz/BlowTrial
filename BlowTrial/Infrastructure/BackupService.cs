@@ -16,7 +16,7 @@ namespace BlowTrial.Infrastructure
         public BackupService(IRepository repo, IBackupData backupData)
         {
             _repo = repo;
-            var backupDetails = ApplicationDataService.GetBackupDetails(backupData);
+            var backupDetails = BlowTrialDataService.GetBackupDetails(backupData);
             _repo.CloudDirectories = backupDetails.CloudDirectories;
             //use DispatcherTimer rather than dispatcher as CE does not handle multiple connections inevitable with multi threading
             _timer = new DispatcherTimer(DispatcherPriority.Normal);

@@ -98,15 +98,19 @@ namespace BlowTrial.Domain.Providers
         public IEnumerable<StudyCentreModel> LocalStudyCentres 
         {
             get 
-            { 
-                return _localStudyCentres ??
-                        (_localStudyCentres = _dbContext.StudyCentres.ToArray().Select(s=>new StudyCentreModel
-                        {
-                            Id = s.Id,
-                            Name = s.Name,
-                            ArgbTextColour = s.ArgbTextColour,
-                            ArgbBackgroundColour = s.ArgbBackgroundColour
-                        }));
+            {
+                if (_localStudyCentres == null)
+                {
+                    var studyCentres = _dbContext.StudyCentres.ToArray();
+                        _localStudyCentres = studyCentres.Select(s => new StudyCentreModel
+                         {
+                             Id = s.Id,
+                             Name = s.Name,
+                             ArgbTextColour = s.ArgbTextColour,
+                             ArgbBackgroundColour = s.ArgbBackgroundColour
+                         });
+                }
+                return _localStudyCentres;
             }
         }
         public string ZipExtractionDirectory { get; set; } //set to datadirectory on instantiation

@@ -69,7 +69,7 @@ namespace BlowTrial.Domain.Providers
             DateTime? updateTime = null;
             foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
             {
-                var sr = ent as ISharedRecord;
+                var sr = ent.Entity as ISharedRecord;
                 if (sr != null)
                 {
                     if (sr.Id == Guid.Empty) 
@@ -77,7 +77,7 @@ namespace BlowTrial.Domain.Providers
                         if (ent.State != EntityState.Added) { throw new InvalidOperationException("Guid was empty on a non add opertation!"); }
                         sr.Id = new Guid(); 
                     }
-                    if (ent.State != EntityState.Added || ent.State==EntityState.Modified) 
+                    if (ent.State == EntityState.Added || ent.State==EntityState.Modified) 
                     { 
                         sr.RecordLastModified = (updateTime ?? (updateTime = DateTime.UtcNow)).Value; 
                     }

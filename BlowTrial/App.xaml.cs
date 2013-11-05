@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Markup;
 using System.Linq;
 using System.IO;
+using BlowTrial.Helpers;
 
 namespace BlowTrial
 {
@@ -54,12 +55,7 @@ namespace BlowTrial
             CustomPrincipal customPrincipal = new CustomPrincipal();
             AppDomain.CurrentDomain.SetThreadPrincipal(customPrincipal);
             base.OnStartup(e);
-
-            //testfor and display starup wizard
-            var wizard = new GetAppSettingsWizard();
-            wizard.DataContext = new GetAppSettingsViewModel();
-            wizard.Show();
-            return;
+            
             // Create the ViewModel to which 
             // the main window binds.
             var mainWindowVm = new MainWindowViewModel();

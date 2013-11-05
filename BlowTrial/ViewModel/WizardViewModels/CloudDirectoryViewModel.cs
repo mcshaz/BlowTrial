@@ -141,7 +141,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand SaveCmd { get; private set; }
         public void Save(object param)
         {
-            ApplicationDataService.SetBackupDetails(
+            BlowTrialDataService.SetBackupDetails(
                 _cloudDirModel.CloudDirectoryItems.Select(c=>c.DirectoryPath), 
                 _cloudDirModel.BackupIntervalMinutes.Value);
             CloseCmd.Execute(null);

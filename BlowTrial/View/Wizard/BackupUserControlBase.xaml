@@ -34,28 +34,34 @@
               ItemsSource="{Binding Path=CloudDirectories, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
               HeadersVisibility="None"
               AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True">
+            <DataGrid.Resources>
+                <Style x:Key="gridErrorStyle" TargetType="{x:Type TextBox}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip" 
+                              Value="{Binding RelativeSource={RelativeSource Self},
+                                Path=(Validation.Errors).CurrentItem.ErrorContent}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
-            <DataGridTextColumn Binding="{Binding Path=DirectoryPath, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-            <DataGridTemplateColumn>
-                <DataGridTemplateColumn.CellTemplate>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 
                                   Command="{Binding Path=SelectDirectoryCmd}"
                                   Content="Select..." />
                         </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-            <DataGridTemplateColumn Width="Auto" >
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                            <TextBlock VerticalAlignment="Center" Style="{StaticResource errorStyle}"
-                                            Text="{Binding RelativeSource={RelativeSource
-                                                    FindAncestor, AncestorType={x:Type DataGridRow}},
-                                                    Path=(Validation.Errors).CurrentItem.ErrorContent}" 
-                                          />
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Path=DirectoryPath, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource gridErrorStyle}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
         <ContentPresenter 

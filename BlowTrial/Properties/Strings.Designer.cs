@@ -214,7 +214,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to there is an error in the directories selected.
+        ///   Looks up a localized string similar to There is an error in 1 of the selected direcories (hover mouse for details).
         /// </summary>
         public static string CloudDirectoryModel_Error_InValid {
             get {

@@ -1,13 +1,14 @@
-﻿using System;
+﻿using BlowTrial.Infrastructure.Interfaces;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Windows.Media;
 
 namespace BlowTrial.Domain.Tables
 {
-    public class StudyCentre
+    public class StudyCentre : ISharedRecord
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Key]
         public Guid Id { get; set; }
         [StringLength(128)]
         public String Name { get; set; }

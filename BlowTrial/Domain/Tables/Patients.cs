@@ -12,7 +12,7 @@ namespace BlowTrial.Domain.Tables
     public abstract class Patient : ISharedRecord
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
 	    public Guid Id {get; set;}
         [StringLength(256)]
 	    public string Name {get;set;}

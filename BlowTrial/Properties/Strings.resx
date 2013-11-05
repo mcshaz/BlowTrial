@@ -618,7 +618,7 @@
     <value>Only 1 directory can be nominated at a data collecting site</value>
   </data>
   <data name="CloudDirectoryModel_Error_InValid" xml:space="preserve">
-    <value>there is an error in the directories selected</value>
+    <value>There is an error in 1 of the selected direcories (hover mouse for details)</value>
   </data>
   <data name="CloudDirectoryModel_Error_NoDirectories" xml:space="preserve">
     <value>Please enter a direcory</value>

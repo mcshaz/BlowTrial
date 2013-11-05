@@ -33,7 +33,7 @@ namespace BlowTrial.ViewModel
 
         public NewPatientViewModel(IRepository repository, NewPatientModel patient) : base(repository)
         {
-            IsEnvelopeRandomising = ApplicationDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising; ;
+            IsEnvelopeRandomising = BlowTrialDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising; ;
             base.DisplayName = Strings.NewPatientVM_DisplayName;
             if (patient == null)
             {
@@ -44,12 +44,13 @@ namespace BlowTrial.ViewModel
             RandomiseCmd = new RelayCommand(Randomise, CanRandomise);
             ClearAllCmd = new RelayCommand(ClearAllFields, CanClear);
             AddScreenCmd = new RelayCommand(AddScreen, CanScreen);
+
         }
         #endregion
 
         #region Properties
         public bool IsEnvelopeRandomising { get; set; }
-        public StudyCentreModel SelectedCentre
+        public StudyCentreModel StudyCentre
         {
             get
             {
@@ -68,22 +69,22 @@ namespace BlowTrial.ViewModel
         {
             get 
             { 
-                if (SelectedCentre==null)
+                if (StudyCentre==null)
                 {
                     return _defaultBackground;
                 }
-                return SelectedCentre.BackgroundColour;
+                return StudyCentre.BackgroundColour;
             }
         }
         public Brush TextBrush
         {
             get
             {
-                if (SelectedCentre == null)
+                if (StudyCentre == null)
                 {
                     return _defaultText;
                 }
-                return SelectedCentre.TextColour;
+                return StudyCentre.TextColour;
             }
         }
         public string Name
@@ -532,14 +533,19 @@ namespace BlowTrial.ViewModel
                 if (_studyCentreOptions==null)
                 {
                     var studyCentres = _repository.LocalStudyCentres;
-                    _studyCentreOptions = studyCentres.Select(s => new KeyValuePair<StudyCentreModel, string>(s, s.Name));
+                    var returnVar = new List<KeyValuePair<StudyCentreModel, string>>(
+                        _repository.LocalStudyCentres
+                        .Select(s => new KeyValuePair<StudyCentreModel, string>(s, s.Name)));
                     if (studyCentres.Skip(1).Any())
                     {
-                        _studyCentreOptions = new KeyValuePair<StudyCentreModel, string>[]
-                        {
-                            new KeyValuePair<StudyCentreModel, string>(null, Strings.DropDownList_PleaseSelect)
-                        }.Concat(_studyCentreOptions);
+                        returnVar.Insert(1,
+                            new KeyValuePair<StudyCentreModel, string>(null, Strings.DropDownList_PleaseSelect));
                     }
+                    else
+                    {
+                        StudyCentre = returnVar.First().Key;
+                    }
+                    _studyCentreOptions = returnVar;
                 }
                 return _studyCentreOptions;
             }
@@ -582,7 +588,7 @@ namespace BlowTrial.ViewModel
                 IsMale = _newPatient.IsMale.Value,
                 RegisteredAt = DateTime.Now,
                 RegisteringInvestigator = GetCurrentPrincipal().Identity.Name,
-                CentreId = SelectedCentre.Id
+                CentreId = StudyCentre.Id
             };
             if (MultipleSibling != null && MultipleSibling.IsMale == newParticipant.IsMale)
             {
@@ -632,7 +638,7 @@ namespace BlowTrial.ViewModel
                 IsMale = _newPatient.IsMale.Value,
                 RegisteredAt = DateTime.Now,
                 RegisteringInvestigator = GetCurrentPrincipal().Identity.Name,
-                CentreId = SelectedCentre.Id,
+                CentreId = StudyCentre.Id,
                 BadInfectnImmune = _newPatient.BadInfectnImmune.Value,
                 BadMalform = _newPatient.BadMalform.Value,
                 LikelyDie24Hr = _newPatient.LikelyDie24Hr.Value,
