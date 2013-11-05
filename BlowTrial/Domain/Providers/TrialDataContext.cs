@@ -66,7 +66,7 @@ namespace BlowTrial.Domain.Providers
             {
                 throw;
             }
-            DateTime updateTime = DateTime.UtcNow;
+            DateTime? updateTime = null;
             foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
             {
                 var sr = ent as ISharedRecord;
@@ -79,7 +79,7 @@ namespace BlowTrial.Domain.Providers
                     }
                     if (ent.State != EntityState.Added || ent.State==EntityState.Modified) 
                     { 
-                        sr.RecordLastModified = updateTime; 
+                        sr.RecordLastModified = (updateTime ?? (updateTime = DateTime.UtcNow)).Value; 
                     }
                 }
             }

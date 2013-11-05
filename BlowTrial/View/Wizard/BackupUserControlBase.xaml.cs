@@ -15,15 +15,23 @@ namespace BlowTrial.View
         }
         private void CloudDirectoriesGrid_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
+           
             var cols = cloudDirectoriesGrid.Columns;
+
+
+            var col = cols[0];
+            col.Width = cloudDirectoriesGrid.ActualWidth/2;
+            col.MinWidth = col.ActualWidth;
+
             double width = 0;
-            for (int i=1; i<cols.Count;i++)
+            for (int i = 0; i < 2; i++)
             {
                 width += cols[i].ActualWidth;
             }
-            var col = cloudDirectoriesGrid.Columns[0];
-            col.Width = cloudDirectoriesGrid.ActualWidth - width;
+
+            col = cols[2];
             col.MinWidth = col.ActualWidth;
+            col.Width = cloudDirectoriesGrid.ActualWidth - width -5;
         }
     }
 }

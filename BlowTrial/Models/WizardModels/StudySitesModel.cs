@@ -93,10 +93,6 @@ namespace BlowTrial.Models
         }
         string ValidateSiteName()
         {
-            if (SiteBackgroundColour==null && SiteTextColour==null)
-            {
-                return null;
-            }
             string error = ValidateFieldNotEmpty(SiteName);
             if (error == null && AllLocalSites.StudySitesData.Any(s => s.Id != Id && s.SiteName == SiteName))
             {
@@ -107,8 +103,7 @@ namespace BlowTrial.Models
         string ValidateSiteTextColour()
         {
             string error = null;
-            if ((!string.IsNullOrEmpty(SiteName) || SiteBackgroundColour != null) 
-                && SiteTextColour == null)
+            if (SiteTextColour == null)
             {
                 error = Strings.StudySiteDataModel_Error_NoColour;
             }
@@ -121,8 +116,7 @@ namespace BlowTrial.Models
         string ValidateSiteBackgroundColour()
         {
             string error = null;
-            if ((!string.IsNullOrEmpty(SiteName) || SiteTextColour != null)
-                && SiteBackgroundColour == null)
+            if (SiteBackgroundColour == null)
             {
                 error = Strings.StudySiteDataModel_Error_NoColour;
             }

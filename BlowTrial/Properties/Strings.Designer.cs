@@ -196,6 +196,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate directories.
+        /// </summary>
+        public static string CloudDirectoryModel_Error_DuplicateDirectory {
+            get {
+                return ResourceManager.GetString("CloudDirectoryModel_Error_DuplicateDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only 1 directory can be nominated at a data collecting site.
         /// </summary>
         public static string CloudDirectoryModel_Error_ExcessDirectories {

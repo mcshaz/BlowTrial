@@ -35,15 +35,14 @@
               HeadersVisibility="None"
               AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True">
             <DataGrid.Columns>
-            <DataGridTextColumn Binding="{Binding DirectoryPath, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+            <DataGridTextColumn Binding="{Binding Path=DirectoryPath, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
             <DataGridTemplateColumn>
                 <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <Button Grid.Row="0" Grid.Column="2"
-                          Command="{Binding Path=SelectDirectoryCmd}"
-                          Content="..."
-                          Width="26"  />
-                    </DataTemplate>
+                        <DataTemplate>
+                            <Button 
+                                  Command="{Binding Path=SelectDirectoryCmd}"
+                                  Content="Select..." />
+                        </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
             <DataGridTemplateColumn Width="Auto" >
@@ -59,6 +58,10 @@
             </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+        <ContentPresenter 
+              Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+              Content="{Binding ElementName=cloudDirectoriesGrid, Path=(Validation.Errors).CurrentItem}"
+              />
 
 
         <!-- BackupInterval-->

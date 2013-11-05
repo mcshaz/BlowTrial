@@ -91,6 +91,10 @@ namespace BlowTrial.Models
             {
                 return Strings.CloudDirectoryModel_Error_ExcessDirectories;
             }
+            if (CloudDirectoryItems.GroupBy(i => i.DirectoryPath).Any(g => g.Count() > 1))
+            {
+                return Strings.CloudDirectoryModel_Error_DuplicateDirectory;
+            }
             return null;
         }
         private const int MinsInDay = 60 * 24;

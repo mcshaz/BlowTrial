@@ -16,19 +16,31 @@ namespace BlowTrial.ViewModel
     {
         #region fields
         StudySitesModel _appModel;
-        ObservableCollection<StudySiteItemViewModel> _studySitesData;
+
         #endregion
 
         #region constructors
         public StudySitesViewModel(StudySitesModel model)
         {
             _appModel = model;
-            _studySitesData = new ObservableCollection<StudySiteItemViewModel>(
+            StudySitesData = new ObservableCollection<StudySiteItemViewModel>(
                 _appModel.StudySitesData.Select(s => new StudySiteItemViewModel(s)));
-            _studySitesData.CollectionChanged += StudySitesData_CollectionChanged;
-            _studySitesData.Add(NewSiteDataVM());
-            StudySitesData = new ListCollectionView(_studySitesData);
+            StudySitesData.Add(NewSiteDataVM());
+            StudySitesData.CollectionChanged += StudySitesData_CollectionChanged;
+            
             DisplayName = Strings.StudySitesViewModel_DisplayName;
+        }
+
+        void StudySitesData_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                foreach (StudySiteItemViewModel i in e.OldItems)
+                {
+                    i.PropertyChanged -= NewSiteDataVm_PropertyChanged;
+                    _appModel.StudySitesData.Remove(i.SiteModel);
+                }
+            }
         }
         StudySiteItemViewModel NewSiteDataVM()
         {
@@ -41,40 +53,24 @@ namespace BlowTrial.ViewModel
             newVm.PropertyChanged += NewSiteDataVm_PropertyChanged;
             return newVm;
         }
-        void StudySitesData_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (e.OldItems != null)
-            {
-                foreach (StudySiteItemViewModel s in e.OldItems)
-                {
-                    _appModel.StudySitesData.Remove(s.SiteModel);
-                    s.PropertyChanged -= NewSiteDataVm_PropertyChanged;
-                }
-            }
-            if (e.NewItems != null)
-            {
-                foreach (StudySiteItemViewModel s in e.NewItems)
-                {
-                    _appModel.StudySitesData.Add(s.SiteModel);
-                }
-                NotifyPropertyChanged("StudySitesData");
-            }
-        }
 
         void NewSiteDataVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var newStudySiteVm = (StudySiteItemViewModel)sender;
             if (newStudySiteVm.SiteName != null && newStudySiteVm.SiteModel.IsValid())
             {
-                StudySitesData.CommitNew();
                 newStudySiteVm.PropertyChanged -= NewSiteDataVm_PropertyChanged;
-                StudySitesData.AddNewItem(NewSiteDataVM());
+                _appModel.StudySitesData.Add(newStudySiteVm.SiteModel);
+                var newVM = NewSiteDataVM();
+                StudySitesData.Add(newVM);
+                newVM.AllowBlanks = true;
+                NotifyPropertyChanged("StudySitesData");
             }
         }
         #endregion
 
         #region properties
-        public ListCollectionView StudySitesData { get; private set; }
+        public ObservableCollection<StudySiteItemViewModel> StudySitesData { get; private set; }
 
         public override bool IsValid()
         {
@@ -109,6 +105,7 @@ namespace BlowTrial.ViewModel
             SiteModel = siteModel;
         }
         public StudySiteItemModel SiteModel {get; private set;}
+        public bool AllowBlanks { get; set; }
         public string SiteName
         {
             get
@@ -169,6 +166,10 @@ namespace BlowTrial.ViewModel
         {
             get
             {
+                if (AllowBlanks && string.IsNullOrEmpty(SiteName) && SiteModel.SiteTextColour==null && SiteModel.SiteBackgroundColour==null)
+                {
+                    return null;
+                }
                 string error = this.GetValidationError(propertyName);
                 CommandManager.InvalidateRequerySuggested();
                 return error;

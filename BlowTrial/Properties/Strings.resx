@@ -653,4 +653,7 @@
   <data name="StudySitesViewModel_DisplayName" xml:space="preserve">
     <value>Nominate Sites</value>
   </data>
+  <data name="CloudDirectoryModel_Error_DuplicateDirectory" xml:space="preserve">
+    <value>Duplicate directories</value>
+  </data>
 </root>

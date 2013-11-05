@@ -20,8 +20,6 @@ namespace BlowTrial.ViewModel
     {
         #region Fields
 
-        RelayCommand _cancelCommand;
-
         WizardPageViewModel _currentPage;
         RelayCommand _moveNextCommand;
         RelayCommand _movePreviousCommand;
@@ -54,18 +52,11 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                if (_cancelCommand == null)
-                    _cancelCommand = new RelayCommand(param => this.CancelOrder());
-
-                return _cancelCommand;
+                return CloseCmd;
             }
         }
 
-        void CancelOrder()
-        {
-                
-            base.OnRequestClose();
-        }
+
 
         #endregion // CancelCommand
 

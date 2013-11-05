@@ -32,62 +32,77 @@ namespace BlowTrial.ViewModel
         }
         void SetupDirectoryItems()
         {
-            var directoryItemCollection = new ObservableCollection<DirectoryItemViewModel>(_cloudDirModel.CloudDirectoryItems.Select(c => new DirectoryItemViewModel(c)));
-            if (!directoryItemCollection.Any() || _cloudDirModel.IsBackingUpToCloud == false)
+            CloudDirectories = new ObservableCollection<DirectoryItemViewModel>();
+
+            foreach (var c in _cloudDirModel.CloudDirectoryItems)
             {
-                var directoryItem = new DirectoryItemViewModel(new DirectoryItemModel());
-                directoryItem.PropertyChanged += DirectoryItem_PropertyChanged;
-                directoryItemCollection.Add(directoryItem);
+                var vm = new DirectoryItemViewModel(c);
+                CloudDirectories.Add(vm);
             }
-            directoryItemCollection.CollectionChanged += CloudDirectories_CollectionChanged;
-            CloudDirectories = new ListCollectionView(directoryItemCollection);
+
+            CloudDirectories.CollectionChanged += CloudDirectories_CollectionChanged;
+
+            AddDirectoryItemVM();
         }
 
+        void CloudDirectories_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                foreach (DirectoryItemViewModel i in e.OldItems)
+                {
+                    i.PropertyChanged -= DirectoryItem_NewPropertyChanged;
+                    i.PropertyChanged -= DirectoryItem_PropertyChanged;
+                    _cloudDirModel.CloudDirectoryItems.Remove(i.DirectoryItem);
+                }
+            }
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                foreach (DirectoryItemViewModel i in e.NewItems)
+                {
+                    i.PropertyChanged += DirectoryItem_PropertyChanged;
+                }
+            }
+        }
+
+        void AddDirectoryItemVM()
+        {
+            if (!CloudDirectories.Any() || _cloudDirModel.IsBackingUpToCloud == false)
+            {
+                var newDir = new DirectoryItemViewModel(new DirectoryItemModel());
+                if (CloudDirectories.Any()) { newDir.AllowBlank = true; }
+                newDir.PropertyChanged += DirectoryItem_NewPropertyChanged;
+                CloudDirectories.Add(newDir);
+            }
+
+        }
         void DirectoryItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "DirectoryPath")
+            {
+                NotifyPropertyChanged("CloudDirectories");
+            }
+        }
+        void DirectoryItem_NewPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "DirectoryPath")
             {
                 var item = (DirectoryItemViewModel)sender;
                 if (item.IsValid())
                 {
-                    CloudDirectories.CommitNew();
-                    item.PropertyChanged -= DirectoryItem_PropertyChanged;
+                    item.PropertyChanged -= DirectoryItem_NewPropertyChanged;
+                    item.AllowBlank = false;
                     _cloudDirModel.CloudDirectoryItems.Add(item.DirectoryItem);
-                    if(_cloudDirModel.IsBackingUpToCloud==false)
-                    {
-                        var directoryItem = new DirectoryItemViewModel(new DirectoryItemModel());
-                        CloudDirectories.AddNewItem(directoryItem);
-                        directoryItem.PropertyChanged += DirectoryItem_PropertyChanged;
-                    }
+                    AddDirectoryItemVM();
                 }
-                NotifyPropertyChanged("CloudDirectories");
+                
             }
-            
         }
 
-        void CloudDirectories_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (e.OldItems != null)
-            {
-                foreach (DirectoryItemViewModel i in e.OldItems)
-                {
-                    _cloudDirModel.CloudDirectoryItems.Remove(i.DirectoryItem);
-                    i.PropertyChanged -= DirectoryItem_PropertyChanged;
-                }
-            }
-            if (e.NewItems!=null)
-            {
-                foreach (DirectoryItemViewModel i in e.NewItems)
-                {
-                    _cloudDirModel.CloudDirectoryItems.Add(i.DirectoryItem);
-                    i.PropertyChanged -= DirectoryItem_PropertyChanged;
-                }
-            }
-        }
         #endregion
 
         #region Properties
-        public ListCollectionView CloudDirectories
+        public ObservableCollection<DirectoryItemViewModel> CloudDirectories
         {
             get;
             private set;
@@ -210,7 +225,10 @@ namespace BlowTrial.ViewModel
         {
             DirectoryItem = directoryItem;
             SelectDirectoryCmd = new RelayCommand(SelectDirectory);
+            AllowBlank = false;
         }
+
+        public bool AllowBlank { get; set; }
 
         public string DirectoryPath
         {
@@ -247,6 +265,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
+                if (AllowBlank && string.IsNullOrEmpty(DirectoryPath)) { return null; }
                 string returnVal = this.GetValidationError(propertyName);
                 CommandManager.InvalidateRequerySuggested();
                 return returnVal;
