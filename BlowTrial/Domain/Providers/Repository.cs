@@ -184,9 +184,27 @@ namespace BlowTrial.Domain.Providers
                 this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
             }
         }
-
+        /// <summary>
+        /// Adds (if Id==0) or updates the repository
+        /// Enumerable is assumed to include all vaccines for 1 patient, and values not found in the enumerable are deleted
+        /// </summary>
+        /// <param name="vaccinesAdministered"></param>
         public void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
+            int participantId = vaccinesAdministered.First().ParticipantId;
+            var includedVaccineAdministeredIds = (from v in vaccinesAdministered 
+                                                  where v.Id != 0
+                                                  select v.Id);
+            var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
+                                                where !includedVaccineAdministeredIds.Contains(v.Id)
+                                                select v.Id).ToArray();
+            if (removeVaccineAdministeredIds.Any())
+            {
+                string sqlString = string.Format("DELETE FROM {0} WHERE Id IN ({1})",
+                    VaccineAdministered.VaccineAdminTableName,
+                    string.Join(",", removeVaccineAdministeredIds));
+                _dbContext.Database.ExecuteSqlCommand(sqlString);
+            }
             foreach (var v in vaccinesAdministered)
             {
                 if (v.Id == 0)

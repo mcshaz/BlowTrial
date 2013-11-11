@@ -714,6 +714,10 @@ namespace BlowTrial.ViewModel
                     if (item!=null)
                     {
                         _participant.VaccineModelsAdministered.Remove(item);
+                        if (item.VaccineGiven != null)
+                        {
+                            AllVaccinesAvailable.First(a => a.Vaccine == item.VaccineGiven).IsGivenToThisPatient = false;
+                        }
                     }
                 }
             }
@@ -756,7 +760,7 @@ namespace BlowTrial.ViewModel
         public ICommand SaveChanges { get; private set; }
         bool CanSave(object param)
         {
-            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && VaccinesAdministered.All(v => v.AllowEmptyRecord || v.VaccineAdministeredModel.IsValid()));
+            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && VaccinesAdministered.All(v => v.IsValid()));
         }
         void Save(object param)
         {

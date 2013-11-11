@@ -94,7 +94,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                if (AllowEmptyRecord && SelectedVaccine==null && AdministeredAt==null)
+                if (AllowEmptyRecord && IsEmpty())
                 {
                     return null;
                 }
@@ -105,12 +105,17 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        /*
+        bool IsEmpty()
+        {
+            return SelectedVaccine.Vaccine == null && AdministeredAt == null;
+        }
+
+
         public bool IsValid()
         {
+            if (AllowEmptyRecord && IsEmpty()) { return true; }
             return this.VaccineAdministeredModel.IsValid();
         }
-        */
 
         #endregion // IDataErrorInfo Members
 
