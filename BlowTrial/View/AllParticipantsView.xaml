@@ -74,8 +74,8 @@
                             Gender
                         </GridViewColumnHeader>
                     </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=Id}" >
-                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="Id">
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=HospitalIdentifier}" >
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="HospitalIdentifier">
                             Hospital Id
                         </GridViewColumnHeader>
                     </GridViewColumn>
@@ -86,13 +86,13 @@
                     </GridViewColumn>
 
                     <GridViewColumn>
-                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="DateTimeEnrollment">
-                            Date Of Enrollment
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="DateTimeEnrolment">
+                            Date Of Enrolment
                         </GridViewColumnHeader>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ContentPresenter 
-                                      Content="{Binding Path=DateTimeEnrollment}" 
+                                      Content="{Binding Path=DateTimeEnrolment}" 
                                       ContentStringFormat="d" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

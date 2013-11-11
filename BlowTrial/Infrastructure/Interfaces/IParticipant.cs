@@ -9,12 +9,12 @@ namespace BlowTrial.Infrastructure.Interfaces
 {
     interface IParticipant
     {
-        OutcomeAt28DaysOption OutcomeAt28Days {get; set;}
-        DateTime DateTimeBirth {get;set;}
-        DateTime? DischargeDateTime {get; set;}
-        DateTime? DeathOrLastContactDateTime {get;set;}
-        CauseOfDeathOption CauseOfDeath {get; set;}
-        bool IsInterventionArm {get; set;}
-        ICollection<VaccineAdministered> VaccinesAdministered {get; set;}
+        OutcomeAt28DaysOption OutcomeAt28Days {get;}
+        DateTime DateTimeBirth {get;}
+        DateTime? DischargeDateTime {get;}
+        DateTime? DeathOrLastContactDateTime {get;}
+        CauseOfDeathOption CauseOfDeath {get;}
+        bool IsInterventionArm {get;}
+        ICollection<VaccineAdministered> VaccinesAdministered {get;}
     }
 }

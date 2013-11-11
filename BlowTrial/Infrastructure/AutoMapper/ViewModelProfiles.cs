@@ -27,8 +27,16 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d=>d.DeathOrLastContactDate, o=>o.Ignore())
                 .ForMember(d => d.DeathOrLastContactTime, o => o.Ignore())
                 .ForMember(d => d.DischargeDate, o => o.Ignore())
-                .ForMember(d => d.DischargeTime, o => o.Ignore());
-                //.ForMember(s=>s.VaccinesAdministered, o=>o.MapFrom(d=>d.VaccinesAdministered));
+                .ForMember(d => d.DischargeTime, o => o.Ignore())
+                .ForMember(d=>d.VaccinesAdministered, o=>o.Ignore())
+                .ForMember(d=>d.VaccineModelsAdministered, o=>o.MapFrom(s=>s.VaccinesAdministered))
+                .ForMember(d=>d.StudyCentre, o=>o.Ignore())
+                .AfterMap((s,d) => {
+                    foreach (var v in d.VaccineModelsAdministered)
+                    {
+                        v.AdministeredTo = d;
+                    }
+                });
 
             Mapper.CreateMap<Participant, ParticipantCsvModel>()
                 .ForMember(d=>d.CauseOfDeathId, o=>o.MapFrom(s=>(int)s.CauseOfDeath))

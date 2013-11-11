@@ -18,7 +18,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         void Add(Participant patient);
         void Add(ScreenedPatient patient);
-        void Update(Guid id,
+        void Update(int id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
                 bool? bcgAdverse,
@@ -28,8 +28,7 @@ namespace BlowTrial.Infrastructure.Interfaces
                 DateTime? dischargeDateTime,
                 DateTime? deathOrLastContactDateTime,
                 OutcomeAt28DaysOption outcomeAt28Days);
-        void Add(IEnumerable<VaccineAdministered> vaccinesAdministered);
-        void ClearParticipantVaccines(Guid participantId);
+        void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
         void Update(ScreenedPatient patient);
         DbSet<Participant> Participants { get; }

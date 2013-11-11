@@ -8,10 +8,10 @@ namespace BlowTrial.Domain.Tables
     public class ProtocolViolation : ISharedRecord
     {
         [Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public Guid Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int Id { get; set; }
         [ForeignKey("Participant")]
-        public Guid ParticipantId { get; set; }
+        public int ParticipantId { get; set; }
         public DateTime TimeOfViolation { get; set; }
         public string Details { get; set; }
         public bool MajorViolation { get; set; }

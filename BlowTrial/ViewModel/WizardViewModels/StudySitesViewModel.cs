@@ -46,7 +46,6 @@ namespace BlowTrial.ViewModel
         {
             var newSite = new StudySiteItemModel
                 {
-                    Id = Guid.NewGuid(),
                     AllLocalSites = _appModel
                 };
             var newVm = new StudySiteItemViewModel(newSite);
@@ -63,7 +62,7 @@ namespace BlowTrial.ViewModel
                 _appModel.StudySitesData.Add(newStudySiteVm.SiteModel);
                 var newVM = NewSiteDataVM();
                 StudySitesData.Add(newVM);
-                newVM.AllowBlanks = true;
+                newVM.AllowEmptyRecord = true;
                 NotifyPropertyChanged("StudySitesData");
             }
         }
@@ -105,7 +104,7 @@ namespace BlowTrial.ViewModel
             SiteModel = siteModel;
         }
         public StudySiteItemModel SiteModel {get; private set;}
-        public bool AllowBlanks { get; set; }
+        public bool AllowEmptyRecord { get; set; }
         public string SiteName
         {
             get
@@ -159,6 +158,36 @@ namespace BlowTrial.ViewModel
                 return new SolidColorBrush( SiteBackgroundColour );
             }
         }
+        public int? Id
+        {
+            get { return SiteModel.Id; }
+            set
+            {
+                if (SiteModel.Id == value) { return; }
+                SiteModel.Id = value;
+                NotifyPropertyChanged("Id");
+            }
+        }
+        public string HospitalIdentifierMask
+        {
+            get { return SiteModel.HospitalIdentifierMask; }
+            set
+            {
+                if (SiteModel.HospitalIdentifierMask == value) { return; }
+                SiteModel.HospitalIdentifierMask = value;
+                NotifyPropertyChanged("HospitalIdentifierMask");
+            }
+        }
+        public string PhoneMask
+        {
+            get { return SiteModel.PhoneMask; }
+            set
+            {
+                if (SiteModel.PhoneMask == value) { return; }
+                SiteModel.PhoneMask = value;
+                NotifyPropertyChanged("PhoneMask");
+            }
+        }
 
         string IDataErrorInfo.Error { get { return null; } }
 
@@ -166,7 +195,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                if (AllowBlanks && string.IsNullOrEmpty(SiteName) && SiteModel.SiteTextColour==null && SiteModel.SiteBackgroundColour==null)
+                if (AllowEmptyRecord && AllPropertiesNull())
                 {
                     return null;
                 }
@@ -178,6 +207,16 @@ namespace BlowTrial.ViewModel
         string GetValidationError(string propertyName)
         {
             return ((IDataErrorInfo)SiteModel)[propertyName];
+        }
+
+        bool AllPropertiesNull()
+        {
+            return string.IsNullOrEmpty(SiteName) 
+                && SiteModel.SiteTextColour==null 
+                && SiteModel.SiteBackgroundColour==null
+                && SiteModel.Id==null
+                && string.IsNullOrEmpty(SiteModel.PhoneMask)
+                && string.IsNullOrEmpty(SiteModel.HospitalIdentifierMask);
         }
     }
 }

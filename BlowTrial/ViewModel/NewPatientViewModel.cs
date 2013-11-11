@@ -60,11 +60,19 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.StudyCentre) { return; }
                 _newPatient.StudyCentre = value;
-                NotifyPropertyChanged("StudyCentre", "BackgroundBrush", "TextBrush");
+                NotifyPropertyChanged("StudyCentre", "BackgroundBrush", "TextBrush", "HospitalIdentifierMask", "PhoneMask");
             }
         }
-        readonly Brush _defaultBackground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
-        readonly Brush _defaultText = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
+        public string HospitalIdentifierMask
+        {
+            get { return StudyCentre.HospitalIdentifierMask; }
+        }
+        public string PhoneMask
+        {
+            get { return StudyCentre.PhoneMask; }
+        }
+        static readonly Brush _defaultBackground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+        static readonly Brush _defaultText = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
         public Brush BackgroundBrush
         {
             get 
@@ -268,16 +276,16 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.TimeOfBirth) { return; }
                 _newPatient.TimeOfBirth = value;
-                NotifyPropertyChanged("TimeOfBirth", "IsYoungerThanMinEnrollTime");
+                NotifyPropertyChanged("TimeOfBirth", "IsYoungerThanMinEnrolTime");
             }
         }
-        public bool IsYoungerThanMinEnrollTime
+        public bool IsYoungerThanMinEnrolTime
         {
             get
             {
                 if (_newPatient.DateTimeBirth==null) {return false;}
                 var ageMins = (DateTime.Now - _newPatient.DateTimeBirth.Value).TotalMinutes;
-                return ageMins >= 0 && ageMins < NewPatientModel.MinEnrollAgeMins;
+                return ageMins >= 0 && ageMins < NewPatientModel.MinEnrolAgeMins;
             }
         }
         public bool? LikelyDie24Hr
@@ -606,7 +614,7 @@ namespace BlowTrial.ViewModel
             if (!false.Equals(parameter)) // for testing purposes, supress dialog
             {
                 string userMsg = (newParticipant.IsInterventionArm) ? Strings.NewPatient_ToIntervention : Strings.NewPatient_ToControl;
-                userMsg = string.Format(userMsg, _newPatient.Name + '(' + _newPatient.HospitalIdentifier + ')');
+                userMsg = string.Format(userMsg, _newPatient.Name + '(' + _newPatient.HospitalIdentifier + ')', _newPatient.Id);
                 MessageBox.Show(userMsg, Strings.NewPatient_SuccesfullyRandomised, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             ClearAllFields();
@@ -672,7 +680,7 @@ namespace BlowTrial.ViewModel
             if (_abnormalities!= null) { _abnormalities.Clear(); }
             _newPatient = new NewPatientModel();
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrollTime");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime");
         }
         #endregion
 

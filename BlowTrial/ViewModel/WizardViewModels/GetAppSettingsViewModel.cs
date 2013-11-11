@@ -36,6 +36,7 @@ namespace BlowTrial.ViewModel
         public GetAppSettingsViewModel()
         {
             this.CurrentPage = this.Pages[0];
+            WasCancelled = true;
         }
 
         #endregion // Constructor
@@ -61,8 +62,6 @@ namespace BlowTrial.ViewModel
 
         void CancelOrder() // nullifying only relevant if the logic is occuring on another layer
         {
-            SitesModel = null;
-            BackupModel = null;
             this.OnRequestClose();
         }
 
@@ -149,8 +148,9 @@ namespace BlowTrial.ViewModel
         #endregion // Commands
 
         #region Properties
-        public StudySitesModel SitesModel { get; private set; }
-        public BackupDirectionModel BackupModel { get; private set; }
+        StudySitesModel SitesModel { get; set; }
+        BackupDirectionModel BackupModel { get; set; }
+        public bool WasCancelled { get; private set; }
         /// <summary>
         /// Returns the page ViewModel that the user is currently viewing.
         /// </summary>
@@ -260,6 +260,7 @@ namespace BlowTrial.ViewModel
             {
                 BlowTrialDataService.DefineNewStudyCentres(SitesModel.StudySitesData);
             }
+            WasCancelled = false;
         }
 
         int CurrentPageIndex

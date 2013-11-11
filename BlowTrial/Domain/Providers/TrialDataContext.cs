@@ -10,6 +10,7 @@ using System.Data.Entity.Validation;
 using System.Data.SqlServerCe;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace BlowTrial.Domain.Providers
@@ -69,22 +70,22 @@ namespace BlowTrial.Domain.Providers
             DateTime? updateTime = null;
             foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
             {
-                var sr = ent.Entity as ISharedRecord;
-                if (sr != null)
                 {
-                    if (sr.Id == Guid.Empty) 
+                    var sr = ent.Entity as ISharedRecord;
+                    if (sr != null)
                     {
-                        if (ent.State != EntityState.Added) { throw new InvalidOperationException("Guid was empty on a non add opertation!"); }
-                        sr.Id = new Guid(); 
-                    }
-                    if (ent.State == EntityState.Added || ent.State==EntityState.Modified) 
-                    { 
-                        sr.RecordLastModified = (updateTime ?? (updateTime = DateTime.UtcNow)).Value; 
+                        if (ent.State == EntityState.Added || ent.State == EntityState.Modified)
+                        {
+                            if (sr.Id == 0) {throw new InvalidOperationException("Id was not set on a non add opertation!"); }
+                            sr.RecordLastModified = (updateTime ?? (updateTime = DateTime.UtcNow)).Value;
+                        }
                     }
                 }
             }
             return base.SaveChanges();
         }
+
+
         [Conditional("DEBUG")]
         void CheckValidation(string details = "")
         {

@@ -96,10 +96,13 @@ namespace BlowTrial.Helpers
                 {
                     t.StudyCentres.Add(new Domain.Tables.StudyCentre
                     {
-                        Id = s.Id,
+                        Id = s.Id.Value,
+                        DuplicateIdCheck = Guid.NewGuid(),
                         ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
                         ArgbTextColour = s.SiteTextColour.Value.ToInt(),
-                        Name = s.SiteName
+                        Name = s.SiteName,
+                        HospitalIdentifierMask = s.HospitalIdentifierMask,
+                        PhoneMask = s.PhoneMask
                     });
                 }
                 t.SaveChanges();

@@ -1,5 +1,6 @@
 ﻿using BlowTrial.Domain.Tables;
 using BlowTrial.Infrastructure;
+using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Properties;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace BlowTrial.Models
         #endregion
 
         #region Properties
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public DateTime? AdministeredAt 
         { 
             get
@@ -63,7 +64,7 @@ namespace BlowTrial.Models
         }
         string ValidateVaccine()
         {
-            if (this.VaccineGiven==null && this.AdministeredAt.HasValue)
+            if (this.VaccineGiven==null)
             {
                 return Strings.VaccineAdministeredModel_Error_NoVaccine;
             }
@@ -77,11 +78,7 @@ namespace BlowTrial.Models
         {
             if (this.AdministeredAt == null)
             {
-                if (this.VaccineGiven != null)
-                {
-                    return Strings.VaccineAdministeredModel_Error_NoAdminDate;
-                }
-                return null;
+                return Strings.VaccineAdministeredModel_Error_NoAdminDate;
             }
             if (AdministeredAt > DateTime.Today)
             {
@@ -100,7 +97,7 @@ namespace BlowTrial.Models
                 return string.Format(Strings.DateTime_Error_Date_MustComeAfter,
                     Strings.DateOfBirth);
             }
-            else if (VaccineGiven!=null && VaccineGiven.Name == Vaccine.BcgName() && AdministeredTo.RegisteredAt.Date > AdministeredAt)
+            else if (VaccineGiven!=null && VaccineGiven.IsBcg && AdministeredTo.RegisteredAt.Date > AdministeredAt)
             {
                 return string.Format(Strings.DateTime_Error_Date_MustComeAfter,
                     Strings.ParticipantModel_Error_RegistrationDate);

@@ -21,7 +21,7 @@ namespace BlowTrial.Domain.Tables
 
         public virtual ICollection<Role> Roles { get; set; }
         /*
-        public virtual ICollection<Participant> ParticipantsEnrolled { get; set; }
+        public virtual ICollection<Participant> ParticipantsEnroled { get; set; }
         public virtual ICollection<ScreenedPatient> ScreenedPatientsRegistered { get; set; }
         public virtual ICollection<ProtocolViolation> ReportedViolations { get; set; }
         */

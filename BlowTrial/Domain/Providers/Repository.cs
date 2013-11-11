@@ -14,6 +14,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Data.Entity.Migrations;
+using BlowTrial.Infrastructure.Exceptions;
+using System.Configuration;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -94,6 +96,18 @@ namespace BlowTrial.Domain.Providers
                 return _dbContext.VaccinesAdministered;
             }
         }
+        int _studyCentreIdIncrement;
+        int StudyCentreIdIncrement
+        {
+            get
+            {
+                if (_studyCentreIdIncrement == 0)
+                {
+                    _studyCentreIdIncrement = int.Parse(ConfigurationManager.AppSettings["StudyCentreIdIncrement"]);
+                }
+                return _studyCentreIdIncrement;
+            }
+        }
         IEnumerable<StudyCentreModel> _localStudyCentres;
         public IEnumerable<StudyCentreModel> LocalStudyCentres 
         {
@@ -107,7 +121,9 @@ namespace BlowTrial.Domain.Providers
                              Id = s.Id,
                              Name = s.Name,
                              ArgbTextColour = s.ArgbTextColour,
-                             ArgbBackgroundColour = s.ArgbBackgroundColour
+                             ArgbBackgroundColour = s.ArgbBackgroundColour,
+                             HospitalIdentifierMask = s.HospitalIdentifierMask,
+                             PhoneMask = s.PhoneMask
                          });
                 }
                 return _localStudyCentres;
@@ -119,14 +135,9 @@ namespace BlowTrial.Domain.Providers
         #region Methods
         public void Add(Participant participant)
         {
+            participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
             _dbContext.Participants.Add(participant);
-            if (participant.SiteId==0)
-            {
-                participant.SiteId = (from p in _dbContext.Participants
-                                      orderby p.SiteId descending
-                                      select p.SiteId).FirstOrDefault() + 1;
-            }
-            participant.RecordLastModified = DateTime.UtcNow;
+
             _dbContext.SaveChanges();
             if (this.ParticipantAdded != null)
             {
@@ -136,14 +147,15 @@ namespace BlowTrial.Domain.Providers
         public void Add(ScreenedPatient patient)
         {
             _dbContext.ScreenedPatients.Add(patient);
-            patient.RecordLastModified = DateTime.UtcNow;
+            patient.Id = GetNextId(_dbContext.Participants, patient.CentreId);
+
             _dbContext.SaveChanges();
             if (this.ParticipantAdded != null)
             {
                 this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
             }
         }
-        public void Update(Guid id,
+        public void Update(int id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
                 bool? bcgAdverse,
@@ -173,26 +185,19 @@ namespace BlowTrial.Domain.Providers
             }
         }
 
-        public void ClearParticipantVaccines(Guid participantId)
-        {
-            try
-            {
-                _dbContext.Database.ExecuteSqlCommand(
-                    string.Format("Delete from {0} where ParticipantId={1}", VaccineAdministered.VaccineAdminTableName ,participantId));
-            }
-            catch(System.Data.Common.DbException e)
-            {
-                if (e.Message.IndexOf("table does not exist", 0, StringComparison.InvariantCultureIgnoreCase)==-1)
-                {
-                    throw;
-                }
-            }
-        }
-        public void Add(IEnumerable<VaccineAdministered> vaccinesAdministered)
+        public void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
             foreach (var v in vaccinesAdministered)
             {
-                _dbContext.VaccinesAdministered.Add(v);
+                if (v.Id == 0)
+                {
+                    v.Id = GetNextId(_dbContext.VaccinesAdministered, (v.ParticipantId / StudyCentreIdIncrement) * StudyCentreIdIncrement);
+                    _dbContext.VaccinesAdministered.Add(v);
+                }
+                else
+                {
+                    _dbContext.VaccinesAdministered.Attach(v);
+                }
             }
             _dbContext.SaveChanges();
         }
@@ -262,23 +267,27 @@ namespace BlowTrial.Domain.Providers
         }
         void AddOrUpdateBaks(IEnumerable<string> bakFileNames, DateTime addOrUpdateAfter)
         {
+            List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
             foreach (string fn in bakFileNames)
             {
                 using (var downloadedDb = _dbContext.AttachDb(ZipExtractionDirectory + '\\' + fn))
                 {
+                    var knownSiteIds = knownSites.Select(s=>s.DuplicateIdCheck);
+                    var newSites = downloadedDb.StudyCentres.Where(s=>!knownSiteIds.Contains(s.DuplicateIdCheck));
+                    foreach (StudyCentre s in newSites)
+                    {
+                        if (knownSites.Any(k=>k.Id == s.Id))
+                        {
+                            throw new DuplicateDataKeyException("Duplicate key for site Id:" + s.Id.ToString());
+                        }
+                        _dbContext.StudyCentres.Attach(s);
+                        knownSites.Add(s);
+                    }
                     _dbContext.Participants.AddOrUpdate(downloadedDb.Participants.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
                     _dbContext.ScreenedPatients.AddOrUpdate(downloadedDb.ScreenedPatients.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
                     _dbContext.Vaccines.AddOrUpdate(downloadedDb.Vaccines.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
                     _dbContext.VaccinesAdministered.AddOrUpdate(downloadedDb.VaccinesAdministered.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
                     _dbContext.ProtocolViolations.AddOrUpdate(downloadedDb.ProtocolViolations.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
-                    var knownSites = _dbContext.StudyCentres.Select(s=>s.Id).ToArray();
-                    var unknownSites = (from s in downloadedDb.StudyCentres
-                                     where !knownSites.Contains(s.Id)
-                                     select s).ToArray();
-                    foreach (StudyCentre s in unknownSites)
-                    {
-                        _dbContext.StudyCentres.Attach(s);
-                    }
                     _dbContext.SaveChanges();
                 }
             }
@@ -304,6 +313,24 @@ namespace BlowTrial.Domain.Providers
                 RefusedConsentCount = _dbContext.ScreenedPatients.Count(s => s.RefusedConsent==true),
                 WasGivenBcgPriorCount = _dbContext.ScreenedPatients.Count(s => s.WasGivenBcgPrior)
             };
+        }
+
+        int GetNextId(IQueryable<ISharedRecord> recordSet, int startingIndex)
+        {
+            int endIndex = startingIndex + StudyCentreIdIncrement;
+            int returnVar = (from r in recordSet
+                             where r.Id >= startingIndex && r.Id < endIndex
+                             select r.Id).DefaultIfEmpty().Max();
+            if (returnVar == 0) { returnVar = startingIndex; }
+            else 
+            { 
+                returnVar++; 
+                if (returnVar == endIndex)
+                {
+                    throw new DataKeyOutOfRangeException("Database has exceeded maximum size for site");
+                }
+            }
+            return returnVar;
         }
 
         #endregion // Methods

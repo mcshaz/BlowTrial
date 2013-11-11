@@ -9,10 +9,22 @@ namespace BlowTrial.Models
 {
     public class StudyCentreModel
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public String Name { get; set; }
-        public int ArgbTextColour { set { TextColour = new SolidColorBrush(value.ToColor()); } }
-        public int ArgbBackgroundColour { set { BackgroundColour = new SolidColorBrush(value.ToColor()); } }
+        public int ArgbTextColour 
+        { 
+            set 
+            { 
+                TextColour = new SolidColorBrush(value.ToColor()); 
+            } 
+        }
+        public int ArgbBackgroundColour 
+        { 
+            set 
+            { 
+                BackgroundColour = new SolidColorBrush(value.ToColor()); 
+            } 
+        }
         public Brush TextColour
         {
             get;
@@ -23,5 +35,7 @@ namespace BlowTrial.Models
             get;
             private set;
         }
+        public string PhoneMask { get; set; }
+        public string HospitalIdentifierMask { get; set; }
     }
 }

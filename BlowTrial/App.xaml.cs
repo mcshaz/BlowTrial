@@ -54,7 +54,6 @@ namespace BlowTrial
             //Security
             CustomPrincipal customPrincipal = new CustomPrincipal();
             AppDomain.CurrentDomain.SetThreadPrincipal(customPrincipal);
-            base.OnStartup(e);
             
             // Create the ViewModel to which 
             // the main window binds.

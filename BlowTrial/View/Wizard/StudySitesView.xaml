@@ -21,6 +21,9 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Site Id" Binding="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridTextColumn Header="Phone Number Mask" Binding="{Binding Path=PhoneMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridTextColumn Header="Hospital Identifier Mask" Binding="{Binding Path=HospitalIdentifierMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridTemplateColumn Header="Site Background Colour" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -55,5 +58,11 @@
                           Content="{Binding ElementName=studySitesGrid, Path=(Validation.Errors).CurrentItem}"
                           />
         <TextBlock>*please choose a name and a colour for each site which is: easy to read, and difficult to confuse</TextBlock>
+        <TextBlock>
+            Click here to see a 
+            <Hyperlink NavigateUri="http://doc.xceedsoft.com/products/xceedwpfdatagrid/Masked_Editors.html" RequestNavigate="Hyperlink_RequestNavigate" >
+                dictionary of acceptable mask characters
+            </Hyperlink>
+        </TextBlock>
     </StackPanel>
 </UserControl>

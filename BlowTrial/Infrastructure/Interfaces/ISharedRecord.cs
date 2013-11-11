@@ -7,7 +7,7 @@ namespace BlowTrial.Infrastructure.Interfaces
 {
     interface ISharedRecord
     {
-        Guid Id { get; set; }
+        int Id { get; set; }
         DateTime RecordLastModified { get; set; }
     }
 }

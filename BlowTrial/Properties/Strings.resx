@@ -211,7 +211,7 @@
   </data>
   <data name="MainWindowViewModel_Command_RegisterNewPatient" xml:space="preserve">
     <value>Register New Patient</value>
-    <comment>Display name for the command that allows the user to enroll a new patient (combined screening and registration).</comment>
+    <comment>Display name for the command that allows the user to enrol a new patient (combined screening and registration).</comment>
   </data>
   <data name="MainWindowViewModel_Command_ViewParticipants" xml:space="preserve">
     <value>Participants</value>
@@ -338,11 +338,11 @@
     <comment>Caption on messagebox when succesfully randomised</comment>
   </data>
   <data name="NewPatient_ToControl" xml:space="preserve">
-    <value>{0} has been randomised to the CONTROL arm. Please give only give BCG &amp; OPV once nearing discharge.</value>
+    <value>{0} has been randomised to the CONTROL arm with an ID of {1}. Please give only give BCG &amp; OPV once nearing discharge.</value>
     <comment>String format display message when randomised to control arm</comment>
   </data>
   <data name="NewPatient_ToIntervention" xml:space="preserve">
-    <value>{0} has been randomised to the INTERVENTION arm. Please give BCG &amp; OPV as soon as possible.</value>
+    <value>{0} has been randomised to the INTERVENTION arm with an ID of {1}. Please give BCG &amp; OPV as soon as possible.</value>
     <comment>String format display message when randomised to intervention arm</comment>
   </data>
   <data name="ParticipantModel_Describe_DateTimeDischarge" xml:space="preserve">
@@ -366,12 +366,12 @@
     <comment>The error when the last weight is less than 50% of birth weight</comment>
   </data>
   <data name="ParticipantModel_Error_RegistrationDate" xml:space="preserve">
-    <value>the date of enrollment in the study</value>
-    <comment>the description of date of enrollment in study</comment>
+    <value>the date of enrolment in the study</value>
+    <comment>the description of date of enrolment in study</comment>
   </data>
   <data name="ParticipantModel_Error_RegistrationDateTime" xml:space="preserve">
-    <value>the time of enrollment in the study</value>
-    <comment>the description of time of enrollment in study</comment>
+    <value>the time of enrolment in the study</value>
+    <comment>the description of time of enrolment in study</comment>
   </data>
   <data name="ParticipantModel_Error_WeightAfterLastContact" xml:space="preserve">
     <value>The date of last weight cannot be after the date of death or last known contact</value>
@@ -655,5 +655,20 @@
   </data>
   <data name="CloudDirectoryModel_Error_DuplicateDirectory" xml:space="preserve">
     <value>Duplicate directories</value>
+  </data>
+  <data name="Int_Error_LessThan1" xml:space="preserve">
+    <value>Value must be greater than 0</value>
+  </data>
+  <data name="StudySitesModel_Error_DuplicateId" xml:space="preserve">
+    <value>Each site identifier must be unique</value>
+  </data>
+  <data name="StudySitesModel_Error_InvalidMultiple" xml:space="preserve">
+    <value>Value must be an exact multiple of {0}</value>
+  </data>
+  <data name="Mask_Error_InvalidCharacters" xml:space="preserve">
+    <value>The mask can only contain characters [0 9 # L ? A a &amp; C . &gt; &lt; ! \ "]</value>
+  </data>
+  <data name="Mask_Error_TooLong" xml:space="preserve">
+    <value>The mask must not be more than {0} characters long</value>
   </data>
 </root>

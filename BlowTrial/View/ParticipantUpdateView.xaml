@@ -29,6 +29,10 @@
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap">
                 <Run Foreground="Blue">
+                    Study Site:
+                </Run>
+                <Run Foreground="Chocolate" Text="{Binding Path=StudyCentreName, Mode=OneWay}" />
+                <Run Foreground="Blue">
                     Name:
                 </Run>
                 <Run Foreground="Chocolate" Text="{Binding Path=Name, Mode=OneWay}" />
@@ -55,8 +59,17 @@
             </TextBlock>
             <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.Row="1" Margin="0,10,0,0" >
                 <StackPanel>
-                    <Grid Margin="0,0,5,0">
+                    <Grid Margin="0,0,5,0" Background="{Binding Path=BackgroundColour, Mode=OneWay}">
                         <Grid.Resources>
+                            <Style TargetType="Label" >
+                                <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay}" />
+                            </Style>
+                            <Style TargetType="TextBlock" >
+                                <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay}" />
+                            </Style>
+                            <Style TargetType="RadioButton" >
+                                <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay}" />
+                            </Style>
                             <Style x:Key="ShowIfDischarged" TargetType="{x:Type ex:RowDefinitionExtended}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding DischargedBy28Days, Mode=OneWay}" Value="false">
@@ -152,7 +165,7 @@
                   />
                         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" >
                             <DatePicker x:Name="dischargeDatePicker" Width="120" SelectedDate="{Binding Path=DischargeDate, ValidatesOnDataErrors=True, 
-                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrollment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday,Mode=OneWay}"/>
+                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday,Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="dischargeTimeTxt" Text="{Binding Path=DischargeTime, StringFormat=hh\\:mm, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Margin="10,0" Mask="90:00" Width="50" TextAlignment="Center"/>
                         </StackPanel>
@@ -204,7 +217,7 @@
                       />
                         <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Stretch" >
                             <DatePicker x:Name="deathOrContactDatePicker" Width="120" SelectedDate="{Binding Path=DeathOrLastContactDate, ValidatesOnDataErrors=True, 
-                            UpdateSourceTrigger=PropertyChanged}"  DisplayDateStart="{Binding DischargeOrEnrollment, Mode=OneWay}" DisplayDateEnd="{Binding Today, Mode=OneWay}"/>
+                            UpdateSourceTrigger=PropertyChanged}"  DisplayDateStart="{Binding DischargeOrEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding Today, Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="deathOrContactTimeTxt" Text="{Binding Path=DeathOrLastContactTime, StringFormat=hh\\:mm, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}" Grid.Row="5" Grid.Column="1" Margin="10,0" Mask="90:00" Width="50" TextAlignment="Center" />
                         </StackPanel>
@@ -319,7 +332,7 @@
                         <DatePicker Grid.Row="20" Grid.Column="2" x:Name="lastWeightDatePicker" Width="120" 
                             HorizontalAlignment="Left"
                             SelectedDate="{Binding Path=LastWeightDate, ValidatesOnDataErrors=True, 
-                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrollment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday, Mode=OneWay}" />
+                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday, Mode=OneWay}" />
                         <ContentPresenter 
                           Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=lastWeightDatePicker, Path=(Validation.Errors).CurrentItem}"
@@ -329,7 +342,7 @@
                     <DockPanel  Margin="10">
                     <TextBlock DockPanel.Dock="Left" Text="Vaccines:" 
                                HorizontalAlignment="Right" Margin="5,5,15,5"/>
-                        <DataGrid DockPanel.Dock="Right" Grid.Row="22" Grid.Column="2" ItemsSource="{Binding Path=VaccinesAdministeredLV}"
+                        <DataGrid DockPanel.Dock="Right" Grid.Row="22" Grid.Column="2" ItemsSource="{Binding Path=VaccinesAdministered}"
                               AutoGenerateColumns="False"  CanUserDeleteRows="True">
 
                         <DataGrid.Columns>

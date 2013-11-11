@@ -12,8 +12,8 @@ namespace BlowTrial.Domain.Tables
     public abstract class Patient : ISharedRecord
     {
         [Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
-	    public Guid Id {get; set;}
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+	    public int Id {get; set;}
         [StringLength(256)]
 	    public string Name {get;set;}
         [StringLength(256)]
@@ -29,19 +29,17 @@ namespace BlowTrial.Domain.Tables
 	    public bool IsMale {get;set;}
 	    public DateTime DateTimeBirth {get;set;}
 	    public DateTime RegisteredAt {get; set;}
-        public Guid CentreId { get; set; }
+        [ForeignKey("Centre")]
+        public int CentreId { get; set; }
         [StringLength(64)]
         public string RegisteringInvestigator { get; set; }
 
-        /*
-        [ForeignKey("RegisteredById")]
-        public virtual Investigator RegisteredBy { get; set; }
-        */
         public DateTime RecordLastModified { get; set; }
+
+        public virtual StudyCentre Centre { get; set; }
     }
     public partial class Participant : Patient, IParticipant
     {
-        public int SiteId { get; set; }
         public bool IsInterventionArm { get; set; }
         public bool? BcgAdverse { get; set; }
         [StringLength(2056)]

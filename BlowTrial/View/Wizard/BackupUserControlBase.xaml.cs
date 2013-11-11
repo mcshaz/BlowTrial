@@ -22,7 +22,7 @@ namespace BlowTrial.View
 
             var col = cols[1];
             col.MinWidth = col.ActualWidth;
-            col.Width = cloudDirectoriesGrid.ActualWidth-buttonWidth;
+            col.Width = cloudDirectoriesGrid.ActualWidth-buttonWidth-2;
         }
     }
 }

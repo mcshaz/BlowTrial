@@ -15,7 +15,7 @@ namespace BlowTrial.ViewModel
     public sealed class VaccineAdministeredViewModel : NotifyChangeBase, IDataErrorInfo
     {
         #region Constructors
-        public VaccineAdministeredViewModel(VaccineAdministeredModel vaccineModel, ObservableCollection<VaccineViewModel> vaccineList)
+        public VaccineAdministeredViewModel(VaccineAdministeredModel vaccineModel, IEnumerable<VaccineViewModel> vaccineList)
         {
             VaccineList = vaccineList;
             this.VaccineAdministeredModel = vaccineModel;
@@ -28,9 +28,9 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
-        public ObservableCollection<VaccineViewModel> VaccineList { get; private set; }
+        public IEnumerable<VaccineViewModel> VaccineList { get; private set; }
 
-        public Guid Id { get { return VaccineAdministeredModel.Id; } }
+        public int Id { get { return VaccineAdministeredModel.Id; } }
         
         public VaccineViewModel SelectedVaccine
         {
@@ -72,7 +72,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                if (SelectedVaccine.Vaccine == null || SelectedVaccine.Vaccine.Name != Vaccine.BcgName())
+                if (SelectedVaccine.Vaccine == null || !SelectedVaccine.Vaccine.IsBcg)
                 {
                     return VaccineAdministeredModel.AdministeredTo.DateTimeBirth;
                 }
@@ -80,12 +80,7 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public bool IsValid()
-
-            {
-                return this.VaccineAdministeredModel.IsValid();
-            
-        }
+        public bool AllowEmptyRecord { get; set; }
         #endregion
 
         #region Methods
@@ -99,12 +94,23 @@ namespace BlowTrial.ViewModel
         {
             get
             {
+                if (AllowEmptyRecord && SelectedVaccine==null && AdministeredAt==null)
+                {
+                    return null;
+                }
                 if (propertyName == "SelectedVaccine") { propertyName = "VaccineGiven"; }
                 string error = ((IDataErrorInfo)VaccineAdministeredModel)[propertyName];
                 CommandManager.InvalidateRequerySuggested();
                 return error;
             }
         }
+
+        /*
+        public bool IsValid()
+        {
+            return this.VaccineAdministeredModel.IsValid();
+        }
+        */
 
         #endregion // IDataErrorInfo Members
 

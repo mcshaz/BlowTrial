@@ -16,6 +16,7 @@ using System.Linq;
 using System.Windows.Data;
 using AutoMapper;
 using System.Windows.Threading;
+using BlowTrial.View;
 
 
 namespace BlowTrial.ViewModel

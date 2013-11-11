@@ -16,13 +16,13 @@ namespace BlowTrial.Models
     {
         #region Constants
         private const string HospitalIdFormat = @"^\d{7}$";
-        public const int MaxAgeDaysEnroll = 21;
+        public const int MaxAgeDaysEnrol = 21;
         public const int MaxAgeDaysScreen = 180;
         public const int MinGestAgeBirth = 23;
         public const int MaxGestAgeBirth = 43;
         public const int MinBirthWeightGrams = 350;
         public const int MaxBirthWeightGrams = 1999;
-        public const int MinEnrollAgeMins = 60;
+        public const int MinEnrolAgeMins = 60;
         #endregion
 
         #region Constructors
@@ -138,7 +138,7 @@ namespace BlowTrial.Models
             if (DateTimeBirth == null) { return false; }
             var now = DateTime.Now;
             var age = now -this.DateTimeBirth.Value;
-            return age.Days < MaxAgeDaysEnroll && age.TotalMinutes >= MinEnrollAgeMins;
+            return age.Days < MaxAgeDaysEnrol && age.TotalMinutes >= MinEnrolAgeMins;
         }
         #endregion
 
@@ -163,7 +163,7 @@ namespace BlowTrial.Models
                     error = ValidateFieldNotEmpty(MothersName);
                     break;
                 case "HospitalIdentifier":
-                    error = ValidateFieldNotEmpty(HospitalIdentifier) ?? this.ValidateHospitalId();
+                    error = ValidateHospitalId();
                     break;
                 case "AdmissionWeight":
                     error = this.ValidateWeight();
@@ -245,11 +245,15 @@ namespace BlowTrial.Models
         }
         string ValidateHospitalId()
         {
+            string error = ValidateFieldNotEmpty(HospitalIdentifier);
+            /*
+            //not relevant now mask is in use
             if (!Regex.IsMatch(HospitalIdentifier, HospitalIdFormat))
             {
                 return Strings.NewPatient_Error_InvalidHospitalIdentifier;
             }
-            return null;
+            */
+            return error;
         }
 
         string ValidateWeight()

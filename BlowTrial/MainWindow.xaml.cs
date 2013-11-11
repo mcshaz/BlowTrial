@@ -6,6 +6,7 @@ using DabTrial.Models;
 using System;
 using System.Data.Entity;
 using System.Windows;
+using System.Linq;
 
 namespace BlowTrial
 {
@@ -22,35 +23,49 @@ namespace BlowTrial
             DataContext = model;
             Closing += model.OnClosing;
             Closed += MainWindow_Closed;
-            EnsureAppIsSetup();
-            InitializeComponent();
-        }
 
-        static void EnsureAppIsSetup()
-        {
-            var backup = BlowTrialDataService.GetBackupDetails();
-            if (backup.BackupData == null)
+            if (BlowTrialDataService.GetBackupDetails().BackupData == null)
             {
-                //testfor and display starup wizard
-                var wizard = new GetAppSettingsWizard();
-                GetAppSettingsViewModel appSettings = new GetAppSettingsViewModel();
-                wizard.DataContext = appSettings;
-                EventHandler wizardHandler = null;
-                wizardHandler = delegate
-                {
-                    wizard.Close();
-                    wizard = null;
-                    appSettings.RequestClose -= wizardHandler;
-                };
-                appSettings.RequestClose += wizardHandler;
-                wizard.ShowDialog();
+                DisplayAppSettingsWizard();
             }
+            else
+            {
+                using (var t = new TrialDataContext())
+                {
+                    if (!t.StudyCentres.Any())
+                    {
+                         DisplayAppSettingsWizard();
+                    }
+                }
+            }
+            InitializeComponent();
         }
 
         void MainWindow_Closed(object sender, System.EventArgs e)
         {
             Closing -= ((MainWindowViewModel)DataContext).OnClosing;
             Closed -= MainWindow_Closed;
+        }
+
+        static void DisplayAppSettingsWizard()
+        {
+            //testfor and display starup wizard
+            var wizard = new GetAppSettingsWizard();
+            GetAppSettingsViewModel appSettings = new GetAppSettingsViewModel();
+            wizard.DataContext = appSettings;
+            EventHandler wizardHandler = null;
+            wizardHandler = delegate
+            {
+                wizard.Close();
+                wizard = null;
+                appSettings.RequestClose -= wizardHandler;
+            };
+            appSettings.RequestClose += wizardHandler;
+            wizard.ShowDialog();
+            if (appSettings.WasCancelled) // user cancel
+            {
+                Application.Current.Shutdown();
+            }
         }
     }
 }

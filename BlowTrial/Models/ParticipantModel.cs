@@ -1,4 +1,5 @@
 ﻿using BlowTrial.Domain.Outcomes;
+using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure.Interfaces;
@@ -14,7 +15,7 @@ using System.Linq.Expressions;
 
 namespace BlowTrial.Models
 {
-    public partial class ParticipantModel : IDataErrorInfo, IParticipant 
+    public partial class ParticipantModel : IDataErrorInfo, IParticipant
     {
         #region Constructors
 
@@ -27,8 +28,7 @@ namespace BlowTrial.Models
 
         #region Properties
 
-        public Guid Id { get; set; }
-        public int SiteId { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string PhoneNumber { get; set; }
         public string HospitalIdentifier { get; set; }
@@ -38,7 +38,7 @@ namespace BlowTrial.Models
         public bool IsMale { get; set; }
         public DateTime DateTimeBirth { get; set; }
         public DateTime RegisteredAt { get; set; }
-        public Guid CentreId { get; set; }
+        public int CentreId { get; set; }
         public string RegisteringInvestigator { get; set; }
         public bool IsInterventionArm { get; set; }
         public bool? BcgAdverse { get; set; }
@@ -52,8 +52,20 @@ namespace BlowTrial.Models
 
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
+        public StudyCentreModel StudyCentre { get; set; }
 
-        public ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
+        public ICollection<VaccineAdministeredModel> VaccineModelsAdministered { get; set; }
+
+        /// <summary>
+        /// To implement IParticipant - mapping Id only at this point
+        /// </summary>
+        public ICollection<VaccineAdministered> VaccinesAdministered
+        {
+            get
+            {
+                return VaccineModelsAdministered.Select(v => new VaccineAdministered { Id = v.Id }).ToList();
+            }
+        }
 
         public TimeSpan Age
         {
@@ -420,7 +432,7 @@ namespace BlowTrial.Models
                 p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime==null || p.CauseOfDeath == CauseOfDeathOption.Missing)))
                         ? DataRequiredOption.DetailsMissing
-                        :(p.IsInterventionArm && !p.VaccinesAdministered.Any(v=>v.VaccineGiven.Name==Strings.Vaccine_Bcg))
+                        :(p.IsInterventionArm && !p.VaccinesAdministered.Any(v=>v.Id == DataContextInitialiser.Bcg.Id))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
                                 ? (p.DateTimeBirth > born28Prior) //in sql server DbFunctions.DiffDays(DateTimeBirth, DateTime.Now) < 28

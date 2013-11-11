@@ -18,6 +18,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using BlowTrial.Infrastructure.Centiles;
 using System.Windows.Threading;
+using System.Windows.Media;
 
 namespace BlowTrial.ViewModel
 {
@@ -28,7 +29,6 @@ namespace BlowTrial.ViewModel
         OutcomeAt28DaysSplitter _outcomeSplitter;
         DispatcherTimer _ageTimer;
 
-        ObservableCollection<VaccineAdministeredViewModel> _vaccinesAdministered;
         ObservableCollection<VaccineViewModel> _allVaccinesAvailable;
         #endregion
 
@@ -39,7 +39,7 @@ namespace BlowTrial.ViewModel
             _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
             SaveChanges = new RelayCommand(Save, CanSave);
 
-            CreateVaccineList();
+            AttachCollections();
 
             _ageTimer = new DispatcherTimer(DispatcherPriority.Normal)
             {
@@ -52,7 +52,7 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
-        public ListCollectionView VaccinesAdministeredLV { get; private set; } // of List<VaccineAdministeredViewModel>
+        public ObservableCollection<VaccineAdministeredViewModel> VaccinesAdministered { get; private set; } 
 
         public bool IsParticipantModelChanged { get; private set; }
 
@@ -66,7 +66,31 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public Guid Id
+        public string StudyCentreName
+        {
+            get
+            {
+                return _participant.StudyCentre.Name;
+            }
+        }
+
+        public Brush TextColour
+        {
+            get
+            {
+                return _participant.StudyCentre.TextColour;
+            }
+        }
+
+        public Brush BackgroundColour
+        {
+            get
+            {
+                return _participant.StudyCentre.BackgroundColour;
+            }
+        }
+
+        public int Id
         {
             get
             {
@@ -74,11 +98,11 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public int SiteId
+        public int CentreId
         {
             get
             {
-                return _participant.SiteId;
+                return _participant.CentreId;
             }
         }
 
@@ -187,7 +211,7 @@ namespace BlowTrial.ViewModel
         {
             get { return _participant.DateTimeBirth; }
         }
-        public DateTime DateTimeEnrollment
+        public DateTime DateTimeEnrolment
         {
             get { return _participant.RegisteredAt; }
         }
@@ -290,7 +314,7 @@ namespace BlowTrial.ViewModel
                 if (_participant.DischargeDate == value) { return; }
                 _participant.DischargeDate = value;
                 IsParticipantModelChanged = true;
-                NotifyPropertyChanged("DischargeDate", "DischargeTime", "DischargeOrEnrollment");
+                NotifyPropertyChanged("DischargeDate", "DischargeTime", "DischargeOrEnrolment");
             }
         }
         public TimeSpan? DischargeTime
@@ -495,12 +519,12 @@ namespace BlowTrial.ViewModel
                 return IsKnownDead == true || PostDischargeOutcomeKnown == false;
             }
         }
-        public DateTime DischargeOrEnrollment
+        public DateTime DischargeOrEnrolment
         {
             get
             {
                 return DischargeDate
-                    ?? DateTimeEnrollment;
+                    ?? DateTimeEnrolment;
             }
         }
         public DateTime DeathLastContactOrToday
@@ -636,52 +660,68 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        void CreateVaccineList()
+        void AttachCollections()
         {
-            if (_participant.VaccinesAdministered == null)
+            if (_participant.VaccineModelsAdministered == null)
             {
-                _participant.VaccinesAdministered = (from r in _repository.VaccinesAdministered
+                _participant.VaccineModelsAdministered = Mapper.Map<List<VaccineAdministeredModel>>((from r in _repository.VaccinesAdministered
                          where r.ParticipantId == _participant.Id
-                         select r).ToList();
+                         select r).ToList());
                 
             }
-            if (_vaccinesAdministered != null)
+            if (_participant.StudyCentre == null)
             {
-                _vaccinesAdministered.Clear(); // remove event handlers
+                _participant.StudyCentre = _repository.LocalStudyCentres.First(s => s.Id == _participant.CentreId);
             }
-            _vaccinesAdministered = new ObservableCollection<VaccineAdministeredViewModel>(
-                Mapper.Map<IEnumerable<VaccineAdministeredModel>>(_participant.VaccinesAdministered)
-                .Select(v=>new VaccineAdministeredViewModel(v, AllVaccinesAvailable)));
-
-            var newVaccineAdminVm = new VaccineAdministeredViewModel(new VaccineAdministeredModel { AdministeredTo = _participant, Id = Guid.NewGuid() }, AllVaccinesAvailable);
-            newVaccineAdminVm.PropertyChanged += NewVaccineAdminVm_PropertyChanged;
-            _vaccinesAdministered.Add(newVaccineAdminVm);
-
-            foreach (var v in _vaccinesAdministered)
+            if (VaccinesAdministered != null)
             {
-                v.PropertyChanged += VaccineAdminVm_PropertyChanged;
+                VaccinesAdministered.Clear(); // remove event handlers
+            }
+            else
+            {
+                VaccinesAdministered = new ObservableCollection<VaccineAdministeredViewModel>();
+                VaccinesAdministered.CollectionChanged += VaccinesAdministered_CollectionChanged;
             }
 
-            VaccinesAdministeredLV = new ListCollectionView(_vaccinesAdministered);
-
-            _vaccinesAdministered.CollectionChanged+=VaccinesAdministered_CollectionChanged;
+            foreach (VaccineAdministeredModel model in _participant.VaccineModelsAdministered)
+            {
+                VaccineAdministeredViewModel vm = new VaccineAdministeredViewModel (model, AllVaccinesAvailable);
+                VaccinesAdministered.Add(vm);
+            }
+            VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
         }
-
+        VaccineAdministeredViewModel NewVaccineAdministeredViewModel()
+        {
+            var returnVar = new VaccineAdministeredViewModel(
+                new VaccineAdministeredModel
+                {
+                    AdministeredTo = _participant
+                }
+                , AllVaccinesAvailable) { AllowEmptyRecord = true };
+            returnVar.PropertyChanged += NewVaccineAdminVm_PropertyChanged;
+            return returnVar;
+        }
         private void VaccinesAdministered_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Remove)
+            if (e.OldItems != null)
             {
-                foreach (var v in e.OldItems)
+                foreach (VaccineAdministeredViewModel v in e.OldItems)
                 {
-                    var viewModel = (VaccineAdministeredViewModel)v;
-                    viewModel.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
-                    viewModel.PropertyChanged -= VaccineAdminVm_PropertyChanged;
+                    v.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
+                    v.PropertyChanged -= VaccineAdminVm_PropertyChanged;
 
-                    var item = _participant.VaccinesAdministered.FirstOrDefault(va=>va.Id == viewModel.Id);
+                    var item = _participant.VaccineModelsAdministered.FirstOrDefault(va=>va == v.VaccineAdministeredModel);
                     if (item!=null)
                     {
-                        _participant.VaccinesAdministered.Remove(item);
+                        _participant.VaccineModelsAdministered.Remove(item);
                     }
+                }
+            }
+            if (e.NewItems != null)
+            {
+                foreach (VaccineAdministeredViewModel v in e.NewItems)
+                {
+                    v.PropertyChanged += VaccineAdminVm_PropertyChanged;
                 }
             }
         }
@@ -699,23 +739,12 @@ namespace BlowTrial.ViewModel
                 var newVaccineAdminVm = (VaccineAdministeredViewModel)sender;
                 if (newVaccineAdminVm.AdministeredAt.HasValue && newVaccineAdminVm.VaccineGiven != null) 
                 {
-                    if (newVaccineAdminVm.IsValid())
+                    if (newVaccineAdminVm.VaccineAdministeredModel.IsValid())
                     {
-                        VaccinesAdministeredLV.CommitNew();
-                        _participant.VaccinesAdministered.Add(new VaccineAdministered
-                            {
-                                Id = newVaccineAdminVm.Id,
-                                AdministeredAt = newVaccineAdminVm.AdministeredAt.Value,
-                                ParticipantId = _participant.Id,
-                                VaccineGiven = newVaccineAdminVm.VaccineGiven
-                            });
+                        _participant.VaccineModelsAdministered.Add(newVaccineAdminVm.VaccineAdministeredModel);
                         newVaccineAdminVm.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
-                        newVaccineAdminVm = new VaccineAdministeredViewModel(
-                            new VaccineAdministeredModel 
-                            { AdministeredTo = _participant, Id=Guid.NewGuid() }, AllVaccinesAvailable);
-                        VaccinesAdministeredLV.AddNewItem(newVaccineAdminVm);
-
-                        newVaccineAdminVm.PropertyChanged += VaccineAdminVm_PropertyChanged;
+                        newVaccineAdminVm.AllowEmptyRecord = false;
+                        VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
                     }
                 }
             }
@@ -727,7 +756,7 @@ namespace BlowTrial.ViewModel
         public ICommand SaveChanges { get; private set; }
         bool CanSave(object param)
         {
-            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && _vaccinesAdministered.All(v => v.IsValid()));
+            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && VaccinesAdministered.All(v => v.AllowEmptyRecord || v.VaccineAdministeredModel.IsValid()));
         }
         void Save(object param)
         {
@@ -749,9 +778,14 @@ namespace BlowTrial.ViewModel
             }
             if (IsVaccineAdminChanged)
             {
-                _repository.ClearParticipantVaccines(_participant.Id);
-
-                _repository.Add(_participant.VaccinesAdministered);
+                _repository.AddOrUpdate(_participant.VaccineModelsAdministered.Select
+                    (v => new VaccineAdministered 
+                    {
+                        Id = v.Id,
+                        ParticipantId = _participant.Id,
+                        AdministeredAt = v.AdministeredAt.Value,
+                        VaccineId = v.VaccineGiven.Id
+                    }));
                 IsVaccineAdminChanged = false;
             }
         }

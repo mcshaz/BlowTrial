@@ -1,4 +1,5 @@
-﻿using BlowTrial.Infrastructure.Interfaces;
+﻿using BlowTrial.Domain.Providers;
+using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Properties;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -9,42 +10,27 @@ namespace BlowTrial.Domain.Tables
     public class Vaccine : ISharedRecord
     {
         [Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public Guid Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int Id { get; set; }
         public string Name { get; set; }
         public DateTime RecordLastModified { get; set; }
-        public static string BcgName()
-        {
-            return Strings.Vaccine_Bcg;
-        }
-        public static string OpvName()
-        {
-            return Strings.Vaccine_Opv;
-        }
-        public static string HepBName()
-        {
-            return Strings.Vaccine_HepB;
-        }
+
         public bool IsBcg
         {
             get
             {
-                return IsBcgName(Name);
+                return this.Id == DataContextInitialiser.Bcg.Id;
             }
-        }
-        public static bool IsBcgName(string vaccineName)
-        {
-            return vaccineName == BcgName();
         }
     }
     [Table(VaccineAdminTableName)]
     public class VaccineAdministered : ISharedRecord
     {
         [Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public Guid Id { get; set; }
-        public Guid VaccineId { get; set; }
-        public Guid ParticipantId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int Id { get; set; }
+        public int VaccineId { get; set; }
+        public int ParticipantId { get; set; }
         public DateTime RecordLastModified { get; set; }
         public DateTime AdministeredAt { get; set; }
         [ForeignKey("VaccineId")]

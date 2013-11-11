@@ -556,6 +556,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Value must be greater than 0.
+        /// </summary>
+        public static string Int_Error_LessThan1 {
+            get {
+                return ResourceManager.GetString("Int_Error_LessThan1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login to BLOW trial.
         /// </summary>
         public static string MainWindowViewModel_Command_Login {
@@ -615,6 +624,24 @@ namespace BlowTrial.Properties {
         public static string MainWindowViewModel_WorkspaceName {
             get {
                 return ResourceManager.GetString("MainWindowViewModel_WorkspaceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The mask can only contain characters [0 9 # L ? A a &amp; C . &gt; &lt; ! \ &quot;].
+        /// </summary>
+        public static string Mask_Error_InvalidCharacters {
+            get {
+                return ResourceManager.GetString("Mask_Error_InvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The mask must not be more than {0} characters long.
+        /// </summary>
+        public static string Mask_Error_TooLong {
+            get {
+                return ResourceManager.GetString("Mask_Error_TooLong", resourceCulture);
             }
         }
         
@@ -844,7 +871,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm. Please give only give BCG &amp; OPV once nearing discharge..
+        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1}. Please give only give BCG &amp; OPV once nearing discharge..
         /// </summary>
         public static string NewPatient_ToControl {
             get {
@@ -853,7 +880,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm. Please give BCG &amp; OPV as soon as possible..
+        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm with an ID of {1}. Please give BCG &amp; OPV as soon as possible..
         /// </summary>
         public static string NewPatient_ToIntervention {
             get {
@@ -1042,7 +1069,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to the date of enrollment in the study.
+        ///   Looks up a localized string similar to the date of enrolment in the study.
         /// </summary>
         public static string ParticipantModel_Error_RegistrationDate {
             get {
@@ -1051,7 +1078,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to the time of enrollment in the study.
+        ///   Looks up a localized string similar to the time of enrolment in the study.
         /// </summary>
         public static string ParticipantModel_Error_RegistrationDateTime {
             get {
@@ -1308,6 +1335,24 @@ namespace BlowTrial.Properties {
         public static string StudySiteDataModel_Error_PatientsPreviouslyRandomisedNotRelevant {
             get {
                 return ResourceManager.GetString("StudySiteDataModel_Error_PatientsPreviouslyRandomisedNotRelevant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Each site identifier must be unique.
+        /// </summary>
+        public static string StudySitesModel_Error_DuplicateId {
+            get {
+                return ResourceManager.GetString("StudySitesModel_Error_DuplicateId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value must be an exact multiple of {0}.
+        /// </summary>
+        public static string StudySitesModel_Error_InvalidMultiple {
+            get {
+                return ResourceManager.GetString("StudySitesModel_Error_InvalidMultiple", resourceCulture);
             }
         }
         

@@ -29,7 +29,7 @@
     <UpdateUrl>https://github.com/mcshaz/BlowTrial/releases/download/v0.1-dev/BlowTrial.Deployable.zip/</UpdateUrl>
     <WebPage>publish.htm</WebPage>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>0.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -172,13 +172,16 @@
     <Compile Include="Infrastructure\CSV\EnumerableToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantDataToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantCsvModel.cs" />
+    <Compile Include="Infrastructure\Exceptions\DataKeyException.cs" />
     <Compile Include="Infrastructure\Extensions\ColorExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\LinqExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringEnumerationExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringExtensions.cs" />
     <Compile Include="Infrastructure\Interfaces\IBackupData.cs" />
     <Compile Include="Infrastructure\Interfaces\IMembershipContext.cs" />
-    <Compile Include="Infrastructure\Interfaces\IParticipant.cs" />
+    <Compile Include="Infrastructure\Interfaces\IParticipant.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Infrastructure\Interfaces\ISharedRecord.cs" />
     <Compile Include="Infrastructure\RandomisingEngine.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
@@ -186,7 +189,7 @@
     <Compile Include="Infrastructure\AutoMapper\ViewModelProfiles.cs" />
     <Compile Include="Infrastructure\Interfaces\ITrialDataContext.cs" />
     <Compile Include="Infrastructure\Interfaces\IRepository.cs" />
-    <Compile Include="Infrastructure\Interfaces\User.cs" />
+    <Compile Include="Infrastructure\Interfaces\IUser.cs" />
     <Compile Include="Infrastructure\ValidationBase.cs" />
     <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
