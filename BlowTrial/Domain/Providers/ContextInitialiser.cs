@@ -10,11 +10,12 @@ namespace BlowTrial.Domain.Providers
 {
     class MembershipContextInitialiser : DropCreateDatabaseIfModelChanges<MembershipContext>
     {
+        internal const string Administrator = "Administrator";
         protected override void Seed(MembershipContext context)
         {
             var admin = new Role
             {
-                Name = "Administrator"
+                Name = Administrator
             };
             context.Roles.Add(admin);
             context.SaveChanges();

@@ -229,7 +229,7 @@ namespace BlowTrial.Models
                 return (!ValidatedProperties.Any(v => GetValidationError(v, now) != null));
             
         }
-        readonly string[] ValidatedProperties = new string[]
+        static readonly string[] ValidatedProperties = new string[]
         { 
             "OutcomeAt28Days",
             "LastContactWeight", 

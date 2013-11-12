@@ -15,8 +15,5 @@ namespace BlowTrial.Security
         }
         public DbSet<Investigator> Investigators { get; set; }
         public DbSet<Role> Roles { get; set; }
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-        }
     }
 }

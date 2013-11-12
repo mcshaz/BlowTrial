@@ -576,7 +576,7 @@
     <value>Screening log</value>
   </data>
   <data name="Field_Error_TooLong" xml:space="preserve">
-    <value>The text entered must be less than {0} characters long</value>
+    <value>Must be less than {0} characters long</value>
   </data>
   <data name="MainWindowViewModel_Command_ViewScreenedPatients" xml:space="preserve">
     <value>Screened Patients</value>
@@ -670,5 +670,17 @@
   </data>
   <data name="Mask_Error_TooLong" xml:space="preserve">
     <value>The mask must not be more than {0} characters long</value>
+  </data>
+  <data name="CreateNewUserModel_Error_PasswordsDontMatch" xml:space="preserve">
+    <value>The passwords do not match</value>
+  </data>
+  <data name="CreateNewUserViewModel_DisplayName" xml:space="preserve">
+    <value>Create New Investigator</value>
+  </data>
+  <data name="CreateNewUserViewModel_Error_UserExists" xml:space="preserve">
+    <value>That name is already in use</value>
+  </data>
+  <data name="Field_Error_TooShort" xml:space="preserve">
+    <value>Must be at least {0} characters long</value>
   </data>
 </root>

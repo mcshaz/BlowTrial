@@ -286,6 +286,33 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The passwords do not match.
+        /// </summary>
+        public static string CreateNewUserModel_Error_PasswordsDontMatch {
+            get {
+                return ResourceManager.GetString("CreateNewUserModel_Error_PasswordsDontMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create New Investigator.
+        /// </summary>
+        public static string CreateNewUserViewModel_DisplayName {
+            get {
+                return ResourceManager.GetString("CreateNewUserViewModel_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That name is already in use.
+        /// </summary>
+        public static string CreateNewUserViewModel_Error_UserExists {
+            get {
+                return ResourceManager.GetString("CreateNewUserViewModel_Error_UserExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Awaiting discharge, death or 28 day outcome.
         /// </summary>
         public static string DataRequiredOption_AwaitingOutcomeOr28 {
@@ -511,11 +538,20 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The text entered must be less than {0} characters long.
+        ///   Looks up a localized string similar to Must be less than {0} characters long.
         /// </summary>
         public static string Field_Error_TooLong {
             get {
                 return ResourceManager.GetString("Field_Error_TooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Must be at least {0} characters long.
+        /// </summary>
+        public static string Field_Error_TooShort {
+            get {
+                return ResourceManager.GetString("Field_Error_TooShort", resourceCulture);
             }
         }
         

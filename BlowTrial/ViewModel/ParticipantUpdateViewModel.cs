@@ -718,6 +718,11 @@ namespace BlowTrial.ViewModel
                         {
                             AllVaccinesAvailable.First(a => a.Vaccine == item.VaccineGiven).IsGivenToThisPatient = false;
                         }
+                        IsVaccineAdminChanged = true;
+                    }
+                    else // must be the create new row
+                    {
+                        VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
                     }
                 }
             }
@@ -782,11 +787,10 @@ namespace BlowTrial.ViewModel
             }
             if (IsVaccineAdminChanged)
             {
-                _repository.AddOrUpdate(_participant.VaccineModelsAdministered.Select
+                _repository.AddOrUpdateVaccinesFor(_participant.Id, _participant.VaccineModelsAdministered.Select
                     (v => new VaccineAdministered 
                     {
                         Id = v.Id,
-                        ParticipantId = _participant.Id,
                         AdministeredAt = v.AdministeredAt.Value,
                         VaccineId = v.VaccineGiven.Id
                     }));

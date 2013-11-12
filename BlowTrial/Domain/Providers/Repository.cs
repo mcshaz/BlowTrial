@@ -185,18 +185,16 @@ namespace BlowTrial.Domain.Providers
             }
         }
         /// <summary>
-        /// Adds (if Id==0) or updates the repository
-        /// Enumerable is assumed to include all vaccines for 1 patient, and values not found in the enumerable are deleted
+        /// Adds or updates all vaccines attached to participant.VaccinesAdministered
         /// </summary>
         /// <param name="vaccinesAdministered"></param>
-        public void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered)
+        public void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
-            int participantId = vaccinesAdministered.First().ParticipantId;
-            var includedVaccineAdministeredIds = (from v in vaccinesAdministered 
+            var includedVaccineAdministeredIds = (from v in vaccinesAdministered
                                                   where v.Id != 0
                                                   select v.Id);
             var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
-                                                where !includedVaccineAdministeredIds.Contains(v.Id)
+                                                where v.ParticipantId == participantId && !includedVaccineAdministeredIds.Contains(v.Id)
                                                 select v.Id).ToArray();
             if (removeVaccineAdministeredIds.Any())
             {

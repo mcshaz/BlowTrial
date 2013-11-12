@@ -57,7 +57,7 @@ namespace BlowTrial.ViewModel
         private void Login(object parameter)
         {
             PasswordBox passwordBox = parameter as PasswordBox;
-            string clearTextPassword = passwordBox.Password;
+            var clearTextPassword = passwordBox.SecurePassword;
             try
             {
                 //Validate credentials through the authentication service

@@ -155,6 +155,7 @@
     <Compile Include="Helpers\Mediator.cs" />
     <Compile Include="Helpers\OutcomeAt28DaysSplitter.cs" />
     <Compile Include="Helpers\DetailsRequired.cs" />
+    <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\BackupService.cs" />
     <Compile Include="Infrastructure\Centiles\LMS.cs" />
@@ -194,6 +195,7 @@
     <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
+    <Compile Include="Models\CreateNewUserModel.cs" />
     <Compile Include="Models\StudyCentreModel.cs" />
     <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
     <Compile Include="Models\WizardModels\StudySitesModel.cs" />
@@ -210,6 +212,7 @@
     <Compile Include="ViewModel\AllScreenedViewModel.cs" />
     <Compile Include="ViewModel\AuthenticationViewModel.cs" />
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
+    <Compile Include="ViewModel\CreateNewUserViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
@@ -231,6 +234,9 @@
     </Compile>
     <Compile Include="View\AllParticipantsView.xaml.cs">
       <DependentUpon>AllParticipantsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\CreateNewUserView.xaml.cs">
+      <DependentUpon>CreateNewUserView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Wizard\BackupUserControlBase.xaml.cs">
       <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
@@ -282,6 +288,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\AllScreenedView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\CreateNewUserView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

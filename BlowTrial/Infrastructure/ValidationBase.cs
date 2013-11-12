@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -36,6 +37,23 @@ namespace BlowTrial.Infrastructure
                 return Strings.Field_Error_Empty;
             }
             return null;
+        }
+        public static string ValidateFieldLength(string toValidate, int minLength, int maxLength)
+        {
+            Debug.Assert(minLength < maxLength);
+            string error = ValidateFieldNotEmpty(toValidate);
+            if (error==null)
+            {
+                if (toValidate.Length < minLength)
+                {
+                    error = string.Format(Strings.Field_Error_TooShort, minLength);
+                }
+                else if (toValidate.Length > maxLength)
+                {
+                    error = string.Format(Strings.Field_Error_TooLong, maxLength);
+                }
+            }
+            return error;
         }
         public static string ValidateFieldNotEmpty<T>(Nullable<T> toValidate) where T : struct
         {

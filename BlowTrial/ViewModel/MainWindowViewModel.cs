@@ -44,6 +44,7 @@ namespace BlowTrial.ViewModel
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
+            CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
 
             ShowLogin();
         }
@@ -101,6 +102,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand ShowCloudDirectoryCmd {get; private set;}
         public RelayCommand ShowCreateCsvCmd { get; private set; }
         public RelayCommand LogoutCmd { get; private set; }
+        public RelayCommand CreateNewUserCmd { get; private set; }
 
         #endregion // Commands
 
@@ -155,6 +157,15 @@ namespace BlowTrial.ViewModel
             }
             this.SetActiveWorkspace(newPatientVM);
             base.DisplayName = Strings.MainWindowViewModel_Command_RegisterNewPatient;
+        }
+        void ShowCreateNewUser()
+        {
+            IsAuthorised = false;
+            var allParticipantsVM = new CreateNewUserViewModel(new MembershipContext());
+            allParticipantsVM.ChangeToThisUserOnSave = GetCurrentPrincipal().Identity.Name == "Admin";
+            this.Workspaces.Add(allParticipantsVM);
+            this.SetActiveWorkspace(allParticipantsVM);
+            base.DisplayName = allParticipantsVM.DisplayName;
         }
 
         void ShowAllParticipants()
@@ -259,14 +270,38 @@ namespace BlowTrial.ViewModel
         
         void HandleAuthorisationClose()
         {
-            IsAuthorised = GetCurrentPrincipal().Identity.IsAuthenticated;
-            if (!IsAuthorised)
+            var identity = GetCurrentPrincipal().Identity;
+            if (identity.Name == "Admin")
             {
-                OnRequestClose();
+                ShowCreateNewUser();
             }
-            using (var m = new MembershipContext())
+            else
             {
-                _backupService = new BackupService(_repository, m);
+                IsAuthorised = identity.IsAuthenticated;
+                if (IsAuthorised)
+                {
+                    using (var m = new MembershipContext())
+                    {
+                        _backupService = new BackupService(_repository, m);
+                    }
+                }
+                else
+                {
+                    OnRequestClose();
+                }
+            }
+        }
+        void HandleCreateNewUserClose(CreateNewUserViewModel vm)
+        {
+            vm.MembershipContext.Dispose();
+            var identity = GetCurrentPrincipal().Identity;
+            if (identity == null || identity.IsAuthenticated==false || identity.Name=="Admin")
+            {
+                Logout();
+            }
+            else
+            {
+                IsAuthorised = true;
             }
         }
         void OnWorkspacesChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -286,6 +321,7 @@ namespace BlowTrial.ViewModel
             WorkspaceViewModel workspace = (WorkspaceViewModel)sender;
             this.Workspaces.Remove(workspace);
             if (senderType == typeof(AuthenticationViewModel)) { HandleAuthorisationClose(); }
+            else if (senderType == typeof(CreateNewUserViewModel)) { HandleCreateNewUserClose((CreateNewUserViewModel)workspace); }
             if (!Workspaces.Any())
             {
                 DisplayName = Strings.MainWindowViewModel_WorkspaceName;

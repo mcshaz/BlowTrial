@@ -24,20 +24,6 @@ namespace BlowTrial
             Closing += model.OnClosing;
             Closed += MainWindow_Closed;
 
-            if (BlowTrialDataService.GetBackupDetails().BackupData == null)
-            {
-                DisplayAppSettingsWizard();
-            }
-            else
-            {
-                using (var t = new TrialDataContext())
-                {
-                    if (!t.StudyCentres.Any())
-                    {
-                         DisplayAppSettingsWizard();
-                    }
-                }
-            }
             InitializeComponent();
         }
 
@@ -45,27 +31,8 @@ namespace BlowTrial
         {
             Closing -= ((MainWindowViewModel)DataContext).OnClosing;
             Closed -= MainWindow_Closed;
+            Application.Current.Shutdown(0);
         }
 
-        static void DisplayAppSettingsWizard()
-        {
-            //testfor and display starup wizard
-            var wizard = new GetAppSettingsWizard();
-            GetAppSettingsViewModel appSettings = new GetAppSettingsViewModel();
-            wizard.DataContext = appSettings;
-            EventHandler wizardHandler = null;
-            wizardHandler = delegate
-            {
-                wizard.Close();
-                wizard = null;
-                appSettings.RequestClose -= wizardHandler;
-            };
-            appSettings.RequestClose += wizardHandler;
-            wizard.ShowDialog();
-            if (appSettings.WasCancelled) // user cancel
-            {
-                Application.Current.Shutdown();
-            }
-        }
     }
 }

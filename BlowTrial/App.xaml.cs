@@ -54,6 +54,23 @@ namespace BlowTrial
             //Security
             CustomPrincipal customPrincipal = new CustomPrincipal();
             AppDomain.CurrentDomain.SetThreadPrincipal(customPrincipal);
+
+            ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
+            //test if wizard needs to run
+            if (BlowTrialDataService.GetBackupDetails().BackupData == null)
+            {
+                DisplayAppSettingsWizard();
+            }
+            else
+            {
+                bool anyCentres;
+                using (var t = new TrialDataContext())
+                {
+                    anyCentres = t.StudyCentres.Any();
+                }
+                if (!anyCentres) { DisplayAppSettingsWizard(); }
+            }
+
             
             // Create the ViewModel to which 
             // the main window binds.
@@ -74,6 +91,27 @@ namespace BlowTrial
             mainWindowVm.RequestClose += handler;
 
             window.Show();
+        }
+
+        static void DisplayAppSettingsWizard()
+        {
+            //testfor and display starup wizard
+            var wizard = new GetAppSettingsWizard();
+            GetAppSettingsViewModel appSettings = new GetAppSettingsViewModel();
+            wizard.DataContext = appSettings;
+            EventHandler wizardHandler = null;
+            wizardHandler = delegate
+            {
+                wizard.Close();
+                wizard = null;
+                appSettings.RequestClose -= wizardHandler;
+            };
+            appSettings.RequestClose += wizardHandler;
+            wizard.ShowDialog();
+            if (appSettings.WasCancelled) // user cancel
+            {
+                Application.Current.Shutdown(259);
+            }
         }
     }
 }

@@ -28,7 +28,7 @@ namespace BlowTrial.Infrastructure.Interfaces
                 DateTime? dischargeDateTime,
                 DateTime? deathOrLastContactDateTime,
                 OutcomeAt28DaysOption outcomeAt28Days);
-        void AddOrUpdate(IEnumerable<VaccineAdministered> vaccinesAdministered);
+        void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
         void Update(ScreenedPatient patient);
         DbSet<Participant> Participants { get; }
