@@ -601,6 +601,24 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cease entering envelope randomised patients.
+        /// </summary>
+        public static string MainWindow_StopEnvelopeRandomisingCaption {
+            get {
+                return ResourceManager.GetString("MainWindow_StopEnvelopeRandomisingCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This step cannot be undone. Click OK only if all patients randomised by envelope have been entered into the &apos;New Patient&apos; form..
+        /// </summary>
+        public static string MainWindow_StopEnvelopeRandomisingMsg {
+            get {
+                return ResourceManager.GetString("MainWindow_StopEnvelopeRandomisingMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login to BLOW trial.
         /// </summary>
         public static string MainWindowViewModel_Command_Login {
@@ -921,6 +939,42 @@ namespace BlowTrial.Properties {
         public static string NewPatient_ToIntervention {
             get {
                 return ResourceManager.GetString("NewPatient_ToIntervention", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Both weight and gender do not match the envelope number.
+        /// </summary>
+        public static string NewPatientModel_Error_EnvelopeDualIncorrect {
+            get {
+                return ResourceManager.GetString("NewPatientModel_Error_EnvelopeDualIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The gender is incorrect for that envelope.
+        /// </summary>
+        public static string NewPatientModel_Error_EnvelopeGenderIncorrect {
+            get {
+                return ResourceManager.GetString("NewPatientModel_Error_EnvelopeGenderIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No envelope is labeled with that number.
+        /// </summary>
+        public static string NewPatientModel_Error_EnvelopeNotFound {
+            get {
+                return ResourceManager.GetString("NewPatientModel_Error_EnvelopeNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The patient&apos;s weight is incorrect for that envelope.
+        /// </summary>
+        public static string NewPatientModel_Error_EnvelopeWeightIncorrect {
+            get {
+                return ResourceManager.GetString("NewPatientModel_Error_EnvelopeWeightIncorrect", resourceCulture);
             }
         }
         

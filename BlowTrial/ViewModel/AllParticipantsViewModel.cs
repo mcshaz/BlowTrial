@@ -30,7 +30,7 @@ namespace BlowTrial.ViewModel
             GetAllParticipants();
 
             SortGridView = new RelayCommand(SortParticipants, param=>true);
-            ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null);
+            ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null && _updateWindow==null);
 
             Mediator.Register("MainWindowClosing", OnMainWindowClosing);
         }
@@ -45,7 +45,7 @@ namespace BlowTrial.ViewModel
                 .Select(p => new ParticipantUpdateViewModel(_repository,Mapper.Map<ParticipantModel>(p)))
                 .ToList();
             AllParticipants = new ListCollectionView(participantVMs);
-            AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DetailsPending"));
+            AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequired"));
             AllParticipants.SortDescriptions.Add(new SortDescription("DataRequired", ListSortDirection.Ascending));
         }
 
@@ -78,10 +78,7 @@ namespace BlowTrial.ViewModel
 
         #region ICommands
         public RelayCommand ShowUpdateDetails { get; private set; }
-        bool CanShowUpdateWindow(object param)
-        {
-            return _updateWindow == null;
-        }
+
         void ShowUpdateWindow(object param)
         {
             _updateWindow = new ParticipantUpdateView(SelectedParticipant);

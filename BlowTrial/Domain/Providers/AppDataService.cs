@@ -13,6 +13,19 @@ namespace BlowTrial.Helpers
 {
     public static class BlowTrialDataService
     {
+        public static void StopEnvelopeRandomising()
+        {
+            using (var a = new MembershipContext())
+            {
+                StopEnvelopeRandomising(a);
+            }
+        }
+        public static void StopEnvelopeRandomising(IBackupData appData)
+        {
+            var data = appData.BackupDataSet.First();
+            data.IsEnvelopeRandomising = false;
+            appData.SaveChanges();
+        }
         public static BackupDataSet GetBackupDetails()
         {
             using (var a = new MembershipContext())

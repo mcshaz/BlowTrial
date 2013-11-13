@@ -683,4 +683,22 @@
   <data name="Field_Error_TooShort" xml:space="preserve">
     <value>Must be at least {0} characters long</value>
   </data>
+  <data name="NewPatientModel_Error_EnvelopeDualIncorrect" xml:space="preserve">
+    <value>Both weight and gender do not match the envelope number</value>
+  </data>
+  <data name="NewPatientModel_Error_EnvelopeGenderIncorrect" xml:space="preserve">
+    <value>The gender is incorrect for that envelope</value>
+  </data>
+  <data name="NewPatientModel_Error_EnvelopeNotFound" xml:space="preserve">
+    <value>No envelope is labeled with that number</value>
+  </data>
+  <data name="NewPatientModel_Error_EnvelopeWeightIncorrect" xml:space="preserve">
+    <value>The patient's weight is incorrect for that envelope</value>
+  </data>
+  <data name="MainWindow_StopEnvelopeRandomisingCaption" xml:space="preserve">
+    <value>Cease entering envelope randomised patients</value>
+  </data>
+  <data name="MainWindow_StopEnvelopeRandomisingMsg" xml:space="preserve">
+    <value>This step cannot be undone. Click OK only if all patients randomised by envelope have been entered into the 'New Patient' form.</value>
+  </data>
 </root>

@@ -30,6 +30,7 @@ namespace BlowTrial.Models
 
         public int Id { get; set; }
         public string Name { get; set; }
+        public string MothersName { get; set; }
         public string PhoneNumber { get; set; }
         public string HospitalIdentifier { get; set; }
         public int AdmissionWeight { get; set; }

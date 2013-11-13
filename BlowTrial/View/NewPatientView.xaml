@@ -5,6 +5,7 @@
   xmlns:vw="clr-namespace:BlowTrial.View"
   xmlns:s="clr-namespace:System;assembly=mscorlib"
   xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+  xmlns:ex="clr-namespace:BlowTrial.Infrastructure.Converters"
   HorizontalAlignment="Stretch"
   VerticalAlignment="Top"
   >
@@ -24,6 +25,19 @@
                     </Style>
                     <Style TargetType="TextBlock" >
                         <Setter Property="Foreground" Value="{Binding Path=TextBrush, Mode=OneWay}" />
+                    </Style>
+
+                    <Style x:Key="envelopeNumberRequired" TargetType="{x:Type ex:RowDefinitionExtended}" >
+                        <Setter Property="Visible" Value="false" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Value="true" />
+                                    <Condition Binding="{Binding Path=OkToRandomise, Mode=OneWay}" Value="true" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visible" Value="true" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
                     </Style>
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>
@@ -64,9 +78,12 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="30" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <ex:RowDefinitionExtended Style="{StaticResource envelopeNumberRequired}" Height="Auto" />
+                    <ex:RowDefinitionExtended Style="{StaticResource envelopeNumberRequired}" Height="30" />
                 </Grid.RowDefinitions>
 
-                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="31" VerticalAlignment="Stretch" Width="6" />
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="33" VerticalAlignment="Stretch" Width="6" />
                 <!-- Hospital -->
                 <Label 
                   Grid.Row="0" Grid.Column="0" 
@@ -441,6 +458,23 @@
                     <ContentPresenter 
                         Content="{Binding ElementName=multipleSiblingIdTxt, Path=(Validation.Errors).CurrentItem}" />
                 </StackPanel>
+
+                <!-- EnvelopeNumber -->
+                <Label 
+                  Grid.Row="32" Grid.Column="0" 
+                  Content="Envelope Number:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=envelopeNumberTxt}" 
+                  />
+                <TextBox
+                  x:Name="envelopeNumberTxt"
+                  Grid.Row="32" Grid.Column="2" 
+                  Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+                <ContentPresenter 
+                  Grid.Row="33" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=envelopeNumberTxt, Path=(Validation.Errors).CurrentItem}"
+                  />
            
             </Grid>
         </ScrollViewer>

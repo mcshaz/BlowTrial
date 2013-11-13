@@ -21,8 +21,11 @@ namespace BlowTrial.View
         void CreateNewUserView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             CreateNewUserViewModel vm = (CreateNewUserViewModel)DataContext;
-            passwordErrors.Text = ((IDataErrorInfo)vm)["EncryptedPassword"];
-            confirmPasswordErrors.Text = ((IDataErrorInfo)vm)["ConfirmEncryptedPassword"];
+            if (vm != null)
+            {
+                passwordErrors.Text = ((IDataErrorInfo)vm)["EncryptedPassword"];
+                confirmPasswordErrors.Text = ((IDataErrorInfo)vm)["ConfirmEncryptedPassword"];
+            }
         }
 
         private void passwordBox_PasswordChanged(object sender, RoutedEventArgs e)

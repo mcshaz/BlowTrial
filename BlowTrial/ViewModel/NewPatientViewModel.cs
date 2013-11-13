@@ -33,7 +33,6 @@ namespace BlowTrial.ViewModel
 
         public NewPatientViewModel(IRepository repository, NewPatientModel patient) : base(repository)
         {
-            IsEnvelopeRandomising = BlowTrialDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising; ;
             base.DisplayName = Strings.NewPatientVM_DisplayName;
             if (patient == null)
             {
@@ -49,7 +48,27 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
-        public bool IsEnvelopeRandomising { get; set; }
+        public bool IsEnvelopeRandomising 
+        { 
+            get
+            {
+                return _newPatient.IsEnvelopeRandomising;
+            }
+        }
+        public int? EnvelopeNumber
+        {
+            get
+            {
+                return _newPatient.EnvelopeNumber;
+            }
+            set
+            {
+                if (value == _newPatient.EnvelopeNumber) { return; }
+                _newPatient.EnvelopeNumber = value;
+                NotifyPropertyChanged("EnvelopeNumber");
+            }
+        }
+        
         public StudyCentreModel StudyCentre
         {
             get
@@ -105,7 +124,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.Name) { return; }
 		        _newPatient.Name=value;
-                NotifyPropertyChanged("Name", "DisplayName", "OkToRandomise");
+                NotifyPropertyChanged("Name", "DisplayName", "OkToRandomise", "EnvelopeNumber");
 	        }
         }
         public string HospitalIdentifier
@@ -118,7 +137,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.HospitalIdentifier) { return; }
 		        _newPatient.HospitalIdentifier=value;
-                NotifyPropertyChanged("HospitalIdentifier", "DisplayName", "OkToRandomise");
+                NotifyPropertyChanged("HospitalIdentifier", "DisplayName", "OkToRandomise", "EnvelopeNumber");
 	        }
         }
         public string PhoneNumber
@@ -157,7 +176,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.AdmissionWeight) { return; }
 		        _newPatient.AdmissionWeight=value;
-                NotifyPropertyChanged("AdmissionWeight", "OkToRandomise");
+                NotifyPropertyChanged("AdmissionWeight", "OkToRandomise", "EnvelopeNumber");
                 CalculateWtCentile();
 	        }
         }
@@ -171,7 +190,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.GestAgeWeeks) { return; }
 		        _newPatient.GestAgeWeeks=value;
-                NotifyPropertyChanged("GestAgeWeeks", "GestAgeDays", "OkToRandomise");
+                NotifyPropertyChanged("GestAgeWeeks", "GestAgeDays", "OkToRandomise", "EnvelopeNumber");
                 CalculateWtCentile();
 	        }
         }
@@ -249,7 +268,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.IsMale) { return; }
 		        _newPatient.IsMale=value;
-                NotifyPropertyChanged("IsMale", "OkToRandomise");
+                NotifyPropertyChanged("IsMale", "OkToRandomise", "EnvelopeNumber");
                 CalculateWtCentile();
 	        }
         }
@@ -263,7 +282,7 @@ namespace BlowTrial.ViewModel
 	        {
                 if (value == _newPatient.DateOfBirth) { return; }
                 _newPatient.DateOfBirth = value;
-                NotifyPropertyChanged("DateOfBirth", "OkToRandomise", "TimeOfBirth");
+                NotifyPropertyChanged("DateOfBirth", "OkToRandomise", "EnvelopeNumber", "TimeOfBirth");
 	        }
         }
         public TimeSpan? TimeOfBirth
@@ -344,7 +363,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                NotifyPropertyChanged("OkToRandomise");
+                NotifyPropertyChanged("OkToRandomise", "EnvelopeNumber");
                 return (LikelyDie24Hr==false &&
                     BadMalform==false && 
                     BadInfectnImmune==false &&
@@ -361,7 +380,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.RefusedConsent) { return; }
 		        _newPatient.RefusedConsent=value;
-                NotifyPropertyChanged("RefusedConsent", "OkToRandomise");
+                NotifyPropertyChanged("RefusedConsent", "OkToRandomise", "EnvelopeNumber");
 	        }
         }
         public int? MultipleSiblingId
@@ -396,7 +415,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return CanRandomise(null);
+                return _newPatient.OkToRandomise();
             }
         }
         public override string DisplayName
@@ -566,7 +585,7 @@ namespace BlowTrial.ViewModel
         {
 	        get 
 	        { 
-		         return _newPatient.Id == Guid.Empty;
+		         return _newPatient.Id == 0;
             }
         }
         public bool CanRandomise(object parameter)
@@ -604,7 +623,15 @@ namespace BlowTrial.ViewModel
             }
             else if (IsEnvelopeRandomising)
             {
-                
+                Envelope envelope = EnvelopeDetails.GetEnvelope(EnvelopeNumber.Value);
+                newParticipant.BlockNumber = envelope.BlockNumber;
+                newParticipant.BlockSize = envelope.BlockSize;
+                newParticipant.IsInterventionArm = envelope.IsInterventionArm;
+                newParticipant.Id = EnvelopeNumber.Value;
+                if (newParticipant.Id < StudyCentre.Id)
+                {
+                    newParticipant.Id += StudyCentre.Id;
+                }
             }
             else
             {
@@ -614,7 +641,7 @@ namespace BlowTrial.ViewModel
             if (!false.Equals(parameter)) // for testing purposes, supress dialog
             {
                 string userMsg = (newParticipant.IsInterventionArm) ? Strings.NewPatient_ToIntervention : Strings.NewPatient_ToControl;
-                userMsg = string.Format(userMsg, _newPatient.Name + '(' + _newPatient.HospitalIdentifier + ')', _newPatient.Id);
+                userMsg = string.Format(userMsg, newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')', newParticipant.Id);
                 MessageBox.Show(userMsg, Strings.NewPatient_SuccesfullyRandomised, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             ClearAllFields();
@@ -679,8 +706,9 @@ namespace BlowTrial.ViewModel
         {
             if (_abnormalities!= null) { _abnormalities.Clear(); }
             _newPatient = new NewPatientModel();
+            StudyCentre = StudyCentreOptions.First().Key;
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber");
         }
         #endregion
 

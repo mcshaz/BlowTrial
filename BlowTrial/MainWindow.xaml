@@ -24,8 +24,10 @@
                 <MenuItem Header="_Options" >
                     <MenuItem Header="_Cloud Directory" Command="{Binding Path=ShowCloudDirectoryCmd}" />
                     <MenuItem Header="_Export as CSV" Command="{Binding Path=ShowCreateCsvCmd}" />
+                    <MenuItem Header="Create _New User" Command="{Binding Path=CreateNewUserCmd}" />
                     <MenuItem Header="Change _Password" IsEnabled="False" />
                     <MenuItem Header="Manage _Users" IsEnabled="False"/>
+                    <MenuItem Header="Start computerised randomising" Command="{Binding Path=StopEnvelopeCmd}" />
                 </MenuItem>
                 <MenuItem Header="_Help" />
             </Menu>

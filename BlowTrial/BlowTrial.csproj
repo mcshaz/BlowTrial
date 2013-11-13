@@ -184,7 +184,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Infrastructure\Interfaces\ISharedRecord.cs" />
-    <Compile Include="Infrastructure\RandomisingEngine.cs" />
+    <Compile Include="Infrastructure\Randomising\Envelopes.cs" />
+    <Compile Include="Infrastructure\Randomising\RandomisingEngine.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Infrastructure\AutoMapper\AutoMapperConfiguration.cs" />
     <Compile Include="Infrastructure\AutoMapper\ViewModelProfiles.cs" />

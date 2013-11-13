@@ -17,6 +17,7 @@ using System.Windows.Data;
 using AutoMapper;
 using System.Windows.Threading;
 using BlowTrial.View;
+using System.Windows;
 
 
 namespace BlowTrial.ViewModel
@@ -45,7 +46,8 @@ namespace BlowTrial.ViewModel
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
-
+            bool isEnvelopeRandomising = BlowTrialDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising;
+            StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => isEnvelopeRandomising);
             ShowLogin();
         }
 
@@ -103,7 +105,16 @@ namespace BlowTrial.ViewModel
         public RelayCommand ShowCreateCsvCmd { get; private set; }
         public RelayCommand LogoutCmd { get; private set; }
         public RelayCommand CreateNewUserCmd { get; private set; }
+        public RelayCommand StopEnvelopeCmd { get; private set; }
 
+        static void StopEnvelopeRandomising()
+        {
+            var result = MessageBox.Show(Strings.MainWindow_StopEnvelopeRandomisingMsg,Strings.MainWindow_StopEnvelopeRandomisingCaption, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.OK)
+            {
+                BlowTrialDataService.StopEnvelopeRandomising();
+            }
+        }
         #endregion // Commands
 
         #region Workspaces
@@ -298,6 +309,10 @@ namespace BlowTrial.ViewModel
             if (identity == null || identity.IsAuthenticated==false || identity.Name=="Admin")
             {
                 Logout();
+            }
+            else if (vm.ChangeToThisUserOnSave)
+            {
+                HandleAuthorisationClose();
             }
             else
             {

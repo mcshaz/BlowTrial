@@ -74,6 +74,14 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        public string MothersName
+        {
+            get
+            {
+                return _participant.MothersName;
+            }
+        }
+
         public Brush TextColour
         {
             get
@@ -134,6 +142,11 @@ namespace BlowTrial.ViewModel
                 _participant.PhoneNumber = value;
                 NotifyPropertyChanged("PhoneNumber");
             }
+        }
+
+        public string PhoneMask
+        {
+            get { return _participant.StudyCentre.PhoneMask; }
         }
 
         public string TrialArm
@@ -558,7 +571,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("WtForAgeCentile");
             }
         }
-        public string DetailsPending
+        public string DataRequired
         {
             get
             {
@@ -858,6 +871,7 @@ namespace BlowTrial.ViewModel
                                 .First(p => p.Id == _participant.Id));
             IsParticipantModelChanged = IsVaccineAdminChanged = false;
             _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
+            AttachCollections();
         }
 
         #endregion

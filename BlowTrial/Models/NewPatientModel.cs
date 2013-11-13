@@ -15,7 +15,6 @@ namespace BlowTrial.Models
     public class NewPatientModel : ValidationBase
     {
         #region Constants
-        private const string HospitalIdFormat = @"^\d{7}$";
         public const int MaxAgeDaysEnrol = 21;
         public const int MaxAgeDaysScreen = 180;
         public const int MinGestAgeBirth = 23;
@@ -47,7 +46,8 @@ namespace BlowTrial.Models
                 "WasGivenBcgPrior",
                 "RefusedConsent",
                 "PhoneNumber",
-                "Abnormalities"
+                "Abnormalities",
+                "EnvelopeNumber"
             };
         }
         #endregion //Constructors
@@ -56,13 +56,25 @@ namespace BlowTrial.Models
         #endregion // Fields
 
         #region Properties
-        public Guid Id {get; set;}
+        public int Id {get; set;}
         public StudyCentreModel StudyCentre { get; set; }
 	    public string Name {get;set;}
         public string MothersName { get; set; }
 	    public string HospitalIdentifier {get;set;}
         public string PhoneNumber { get; set; }
 	    public int? AdmissionWeight {get;set;}
+        int? _envelopeNumber;
+        public int? EnvelopeNumber {
+            get {return _envelopeNumber;}
+            set
+            {
+                if (value.HasValue && !IsEnvelopeRandomising)
+                {
+                    throw new InvalidOperationException("Data integrity under threat - envelope value assigned when not envelope randomising");
+                }
+                _envelopeNumber = value;
+            }
+        }
         public double GestAgeBirth
         {
             get { return (double)GestAgeWeeks + (double)GestAgeDays / 7; }
@@ -114,17 +126,27 @@ namespace BlowTrial.Models
         public bool? RefusedConsent { get; set; }
         public bool? Missed { get; set; }
         public int? MultipleSiblingId { get; set; }
+        bool? _isEnvelopeRandomising;
+        public bool IsEnvelopeRandomising
+        {
+            get
+            {
+                return (_isEnvelopeRandomising ??
+                    (_isEnvelopeRandomising = BlowTrialDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising)).Value;
+            }
+        }
         #endregion
 
         #region Methods
+
         public bool OkToRandomise()
         {
-            return (LikelyDie24Hr==false &&
-                BadMalform==false &&
-                WasGivenBcgPrior==false &&
-                RefusedConsent==false &&
-                BadInfectnImmune==false
-                && AgeOkToRandomise());
+            return (LikelyDie24Hr == false &&
+                BadMalform == false &&
+                WasGivenBcgPrior == false &&
+                RefusedConsent == false &&
+                BadInfectnImmune == false &&
+                AgeOkToRandomise());
         }
         public bool OkToScreen()
         {
@@ -204,12 +226,45 @@ namespace BlowTrial.Models
                 case "Abnormalities":
                     error = ValidateAbnormalities();
                     break;
+                case "EnvelopeNumber":
+                    error = ValidateEnvelopeNumber();
+                    break;
                 default:
                     Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);
                     break;
             }
 
             return error;
+        }
+        string ValidateEnvelopeNumber()
+        {
+            if (!(IsEnvelopeRandomising && OkToRandomise())) { return null; }
+            if (EnvelopeNumber==null)
+            {
+                return Strings.Field_Error_Empty;
+            }
+            else
+            {
+                var envelope = EnvelopeDetails.GetEnvelope(EnvelopeNumber.Value);
+                if (envelope==null)
+                {
+                    return Strings.NewPatientModel_Error_EnvelopeNotFound;
+                }
+                if (AdmissionWeight >= envelope.WeightLessThan ||
+                    (envelope.WeightLessThan != 1000 && AdmissionWeight < envelope.WeightLessThan - 500))
+                {
+                    if (envelope.IsMale != IsMale)
+                    {
+                        return Strings.NewPatientModel_Error_EnvelopeDualIncorrect;
+                    }
+                    return Strings.NewPatientModel_Error_EnvelopeWeightIncorrect;
+                }
+                if (envelope.IsMale != IsMale)
+                {
+                    return Strings.NewPatientModel_Error_EnvelopeGenderIncorrect;
+                }
+            }
+            return null;
         }
         string ValidateStudyCentre()
         {
