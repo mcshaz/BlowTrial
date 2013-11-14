@@ -677,8 +677,8 @@ namespace BlowTrial.ViewModel
                 BadInfectnImmune = _newPatient.BadInfectnImmune.Value,
                 BadMalform = _newPatient.BadMalform.Value,
                 LikelyDie24Hr = _newPatient.LikelyDie24Hr.Value,
-                RefusedConsent = _newPatient.RefusedConsent.Value,
-                Missed = _newPatient.Missed.Value,
+                RefusedConsent = _newPatient.RefusedConsent,
+                Missed = _newPatient.Missed,
                 WasGivenBcgPrior = _newPatient.WasGivenBcgPrior.Value
             };
             _repository.Add(screenedPt);

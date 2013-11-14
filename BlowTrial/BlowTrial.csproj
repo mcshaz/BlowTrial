@@ -181,6 +181,7 @@
     <Compile Include="Infrastructure\Extensions\LinqExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringEnumerationExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\StringExtensions.cs" />
+    <Compile Include="Infrastructure\Interfaces\ICleanup.cs" />
     <Compile Include="Infrastructure\Interfaces\IBackupData.cs" />
     <Compile Include="Infrastructure\Interfaces\IMembershipContext.cs" />
     <Compile Include="Infrastructure\Interfaces\IParticipant.cs">

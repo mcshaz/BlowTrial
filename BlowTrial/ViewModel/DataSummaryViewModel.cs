@@ -40,7 +40,7 @@ namespace BlowTrial.ViewModel
             {
                 ScreenedPatientData.LikelyDie24HrCount++;
             }
-            if (e.NewScreenedPatient.Missed)
+            if (e.NewScreenedPatient.Missed==true)
             {
                 ScreenedPatientData.MissedCount++;
             }

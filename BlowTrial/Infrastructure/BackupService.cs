@@ -9,7 +9,7 @@ using System.Windows.Threading;
 
 namespace BlowTrial.Infrastructure
 {
-    public class BackupService
+    public class BackupService : ICleanup
     {
         #region Constructors
         private const int millisecsPerMin = 1000*60;
@@ -73,16 +73,32 @@ namespace BlowTrial.Infrastructure
         }
         #endregion
 
+        #region ICleanup implementation
+        bool _isCleanedup;
+        public void Cleanup()
+        {
+            Cleanup(true);
+            GC.SuppressFinalize(this);
+        }
+        void Cleanup(bool isCleaningUp)
+        {
+            if (!_isCleanedup)
+            {
+                _timer.Tick -= _handler;
+                _timer.Stop();
+                if (isCleaningUp && _isToBackup)
+                {
+                    Backup(this, new EventArgs());
+                }
+                _isCleanedup = true;
+            }
+        }
+        #endregion
         #region finalizer
 
         ~BackupService()
         {
-            if (_isToBackup)
-            {
-                Backup(this, new EventArgs());
-            }
-            _timer.Tick -= _handler;
-            _timer.Stop(); 
+            Cleanup(false);
         }
         #endregion // IDiposable
     }

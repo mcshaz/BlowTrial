@@ -3,13 +3,14 @@
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+    xmlns:myCon="clr-namespace:BlowTrial.Infrastructure.Converters"
   >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
                 <ResourceDictionary>
-
+                    <myCon:BoolToStringConverter x:Key="BoolToGender" FalseValue="Female" TrueValue="Male" />
                     <GroupStyle x:Key="DetailsGroupStyle">
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
@@ -49,9 +50,23 @@
           AlternatingRowBackground="AliceBlue"
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"
           ItemsSource="{Binding Path=AllScreened}"
-          AutoGenerateColumns="True" CanUserAddRows="False" CanUserDeleteRows="False"
+          AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
           CanUserSortColumns="True" IsReadOnly="True"
           >
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path=Name, Mode=OneWay}" Header="Name" />
+	            <DataGridTextColumn Binding="{Binding Path=HospitalIdentifier, Mode=OneWay}" Header="Hospital Id" />
+	            <DataGridTextColumn Binding="{Binding Path=AdmissionWeight, Mode=OneWay}" Header="Admission Weight" />
+                <DataGridTextColumn Binding="{Binding Path=GestAgeBirth, Mode=OneWay, StringFormat=n0}" Header="Gestation at birth" />
+                <DataGridTextColumn Binding="{Binding Path=IsMale, Mode=OneWay, Converter={StaticResource BoolToGender}}" Header="Gender" />
+	            <DataGridTextColumn Binding="{Binding Path=DateTimeBirth, Mode=OneWay}" Header="Date of birth" />
+	            <DataGridTextColumn Binding="{Binding Path=RegisteredAt, Mode=OneWay}" Header="Detaills entered" />
+                <DataGridCheckBoxColumn Binding="{Binding Path=LikelyDie24Hr, Mode=OneWay}" Header="Likely to die within 24" />
+                <DataGridCheckBoxColumn Binding="{Binding Path=BadMalform, Mode=OneWay}" Header="Malformation" />
+                <DataGridCheckBoxColumn Binding="{Binding Path=BadInfectnImmune, Mode=OneWay}" Header="Infection/Immune" />
+                <DataGridCheckBoxColumn Binding="{Binding Path=WasGivenBcgPrior, Mode=OneWay}" Header="BCG prior" />
+                <DataGridCheckBoxColumn Binding="{Binding Path=RefusedConsent, Mode=OneWay}" Header="Consent Refused" />
+            </DataGrid.Columns>
         </DataGrid>   
     </ScrollViewer>
 </UserControl>

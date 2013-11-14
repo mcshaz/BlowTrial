@@ -70,7 +70,7 @@
                                 <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay}" />
                             </Style>
                             <Style TargetType="TextBlock" >
-                                <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay}" />
+                                <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay, FallbackValue=Red}" />
                             </Style>
                             <Style TargetType="RadioButton" >
                                 <Setter Property="Foreground" Value="{Binding Path=TextColour, Mode=OneWay}" />

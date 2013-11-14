@@ -339,7 +339,7 @@ namespace BlowTrial.Domain.Providers
                 BadInfectnImmuneCount = _dbContext.ScreenedPatients.Count(s => s.BadInfectnImmune),
                 BadMalformCount = _dbContext.ScreenedPatients.Count(s => s.BadMalform),
                 LikelyDie24HrCount = _dbContext.ScreenedPatients.Count(s => s.LikelyDie24Hr),
-                MissedCount = _dbContext.ScreenedPatients.Count(s => s.Missed),
+                MissedCount = _dbContext.ScreenedPatients.Count(s => s.Missed==true),
                 RefusedConsentCount = _dbContext.ScreenedPatients.Count(s => s.RefusedConsent==true),
                 WasGivenBcgPriorCount = _dbContext.ScreenedPatients.Count(s => s.WasGivenBcgPrior)
             };
