@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         xmlns:vw="clr-namespace:BlowTrial.View"
-        xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters" >
+        >
     <UserControl.Resources>
         <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
     </UserControl.Resources>
@@ -21,7 +21,8 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Site Id" Binding="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridTextColumn Header="Site Id" Binding="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}" />
+                <DataGridTextColumn Header="Maximum Participant Allocations" Binding="{Binding Path=MaxParticipantAllocations, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}" />
                 <DataGridTextColumn Header="Phone Number Mask" Binding="{Binding Path=PhoneMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridTextColumn Header="Hospital Identifier Mask" Binding="{Binding Path=HospitalIdentifierMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridTemplateColumn Header="Site Background Colour" >

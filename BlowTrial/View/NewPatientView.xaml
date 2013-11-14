@@ -6,6 +6,7 @@
   xmlns:s="clr-namespace:System;assembly=mscorlib"
   xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
   xmlns:ex="clr-namespace:BlowTrial.Infrastructure.Converters"
+
   HorizontalAlignment="Stretch"
   VerticalAlignment="Top"
   >

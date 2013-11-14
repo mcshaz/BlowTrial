@@ -57,20 +57,20 @@ namespace BlowTrial
 
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
             //test if wizard needs to run
-            if (BlowTrialDataService.GetBackupDetails().BackupData == null)
+            bool displayWizard = (BlowTrialDataService.GetBackupDetails().BackupData == null);
+
+            if (!displayWizard)
             {
-                DisplayAppSettingsWizard();
-            }
-            else
-            {
-                bool anyCentres;
                 using (var t = new TrialDataContext())
                 {
-                    anyCentres = t.StudyCentres.Any();
+                    displayWizard = !t.StudyCentres.Any();
                 }
-                if (!anyCentres) { DisplayAppSettingsWizard(); }
             }
-
+            if (displayWizard && !DisplayAppSettingsWizard())
+            {
+                Shutdown(259);
+                return;
+            }
             
             // Create the ViewModel to which 
             // the main window binds.
@@ -93,7 +93,11 @@ namespace BlowTrial
             window.Show();
         }
 
-        static void DisplayAppSettingsWizard()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>true if app settings were succesfully added to the appropriate repositories</returns>
+        static bool DisplayAppSettingsWizard()
         {
             //testfor and display starup wizard
             var wizard = new GetAppSettingsWizard();
@@ -108,10 +112,7 @@ namespace BlowTrial
             };
             appSettings.RequestClose += wizardHandler;
             wizard.ShowDialog();
-            if (appSettings.WasCancelled) // user cancel
-            {
-                Application.Current.Shutdown(259);
-            }
+            return !appSettings.WasCancelled; // user cancel
         }
     }
 }

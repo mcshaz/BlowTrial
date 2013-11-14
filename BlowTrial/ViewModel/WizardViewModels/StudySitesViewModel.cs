@@ -135,7 +135,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return SiteModel.SiteTextColour ?? Color.FromArgb(255, 0, 0, 0);
+                return SiteModel.SiteTextColour;
             }
             set
             {
@@ -188,7 +188,16 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("PhoneMask");
             }
         }
-
+        public int? MaxParticipantAllocations
+        {
+            get { return SiteModel.MaxParticipantAllocations; }
+            set
+            {
+                if (SiteModel.MaxParticipantAllocations == value) { return; }
+                SiteModel.MaxParticipantAllocations = value;
+                NotifyPropertyChanged("MaxParticipantAllocations");
+            }
+        }
         string IDataErrorInfo.Error { get { return null; } }
 
         string IDataErrorInfo.this[string propertyName]
@@ -215,6 +224,7 @@ namespace BlowTrial.ViewModel
                 && SiteModel.SiteTextColour==null 
                 && SiteModel.SiteBackgroundColour==null
                 && SiteModel.Id==null
+                && SiteModel.MaxParticipantAllocations == null
                 && string.IsNullOrEmpty(SiteModel.PhoneMask)
                 && string.IsNullOrEmpty(SiteModel.HospitalIdentifierMask);
         }

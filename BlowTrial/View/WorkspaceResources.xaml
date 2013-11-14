@@ -1,10 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters">
-    <con:EnumToBooleanConverter x:Key="enumConverter" />
-    <con:BoolInverterConverter x:Key="boolInvertConvert" />
-    <con:NullableBoolConverter x:Key="nullBoolConvert" />
-    <con:IsNotNullConverter x:Key="isNotNullConvert" />
+                    xmlns:myCon="clr-namespace:BlowTrial.Infrastructure.Converters" >
+    <myCon:EnumToBooleanConverter x:Key="enumConverter" />
+    <myCon:BoolInverterConverter x:Key="boolInvertConvert" />
+    <myCon:NullableBoolConverter x:Key="nullBoolConvert" />
+    <myCon:IsNotNullConverter x:Key="isNotNullConvert" />
     <BooleanToVisibilityConverter x:Key="boolToVisConverter" />
 
     <Style x:Key="errorStyle" TargetType="TextBlock">

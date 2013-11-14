@@ -708,7 +708,7 @@ namespace BlowTrial.ViewModel
             _newPatient = new NewPatientModel();
             StudyCentre = StudyCentreOptions.First().Key;
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise");
         }
         #endregion
 
@@ -743,7 +743,8 @@ namespace BlowTrial.ViewModel
         readonly string[] ValidatedProperties = 
         { 
             "HospitalIdentifier",
-            "MultipleSiblingId"
+            "MultipleSiblingId",
+            "EnvelopeNumber"
         };
         protected string GetValidationError(string propertyName)
         {
@@ -759,6 +760,9 @@ namespace BlowTrial.ViewModel
                     case "MultipleSiblingId":
                         error = this.ValidateSiblingId();
                         break;
+                    case "EnvelopeNumber":
+                        error = this.ValidateEnvelopeNumber();
+                        break;
                     default:
                         Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);
                         break;
@@ -766,7 +770,17 @@ namespace BlowTrial.ViewModel
             }
             return error;
         }
-
+        string ValidateEnvelopeNumber()
+        {
+            if (IsNewRecord && EnvelopeNumber.HasValue)
+            {
+                if(_repository.Participants.Any(p=>p.Id == EnvelopeNumber.Value))
+                {
+                    return Strings.NewPatientViewModel_Error_EnvelopeInDb;
+                }
+            }
+            return null;
+        }
         string ValidateNewIdentifier()
         {
             if (IsNewRecord)

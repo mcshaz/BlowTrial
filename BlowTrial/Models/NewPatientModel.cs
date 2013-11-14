@@ -53,6 +53,7 @@ namespace BlowTrial.Models
         #endregion //Constructors
 
         #region Fields
+        string _hospitalIdentifier;
         #endregion // Fields
 
         #region Properties
@@ -60,7 +61,14 @@ namespace BlowTrial.Models
         public StudyCentreModel StudyCentre { get; set; }
 	    public string Name {get;set;}
         public string MothersName { get; set; }
-	    public string HospitalIdentifier {get;set;}
+        public string HospitalIdentifier
+        {
+            get { return _hospitalIdentifier; }
+            set
+            {
+                _hospitalIdentifier = value.ToUpper();
+            }
+        }
         public string PhoneNumber { get; set; }
 	    public int? AdmissionWeight {get;set;}
         int? _envelopeNumber;
@@ -132,7 +140,7 @@ namespace BlowTrial.Models
             get
             {
                 return (_isEnvelopeRandomising ??
-                    (_isEnvelopeRandomising = BlowTrialDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising)).Value;
+                    (_isEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising())).Value;
             }
         }
         #endregion
@@ -242,6 +250,10 @@ namespace BlowTrial.Models
             if (EnvelopeNumber==null)
             {
                 return Strings.Field_Error_Empty;
+            }
+            else if (EnvelopeNumber > StudyCentre.MaxIdForSite || EnvelopeNumber < StudyCentre.Id)
+            {
+                return string.Format(Strings.NewPatientModel_Error_IdOutOfRangeForSite,  StudyCentre.Id, StudyCentre.MaxIdForSite);
             }
             else
             {

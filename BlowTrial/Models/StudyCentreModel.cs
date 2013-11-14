@@ -37,5 +37,6 @@ namespace BlowTrial.Models
         }
         public string PhoneMask { get; set; }
         public string HospitalIdentifierMask { get; set; }
+        public int MaxIdForSite { get; set; }
     }
 }

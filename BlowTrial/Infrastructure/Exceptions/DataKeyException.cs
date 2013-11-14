@@ -28,4 +28,12 @@ namespace BlowTrial.Infrastructure.Exceptions
         {
         }
     }
+    [Serializable]
+    public class OverlappingDataKeyRangeException : Exception
+    {
+        public OverlappingDataKeyRangeException(string message)
+            : base(message)
+        {
+        }
+    }
 }

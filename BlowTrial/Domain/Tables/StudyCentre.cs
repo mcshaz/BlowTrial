@@ -21,6 +21,7 @@ namespace BlowTrial.Domain.Tables
         public string PhoneMask { get; set; }
         [StringLength(16)]
         public string HospitalIdentifierMask { get; set; }
+        public int MaxIdForSite { get; set; }
 
         public DateTime RecordLastModified { get; set; }
 

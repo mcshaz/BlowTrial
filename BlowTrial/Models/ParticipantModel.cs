@@ -2,6 +2,7 @@
 using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
+using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Properties;
 using System;
@@ -70,7 +71,7 @@ namespace BlowTrial.Models
 
         public TimeSpan Age
         {
-            get { return (DateTime.Today - DateTimeBirth);  }
+            get { return (DateTime.Now - DateTimeBirth);  }
         }
         TimeSpan CgaBirth
         {
@@ -224,11 +225,9 @@ namespace BlowTrial.Models
         #region Validation
 
         public bool IsValid()
-
-            {
+        {
                 DateTime? now = DateTime.Now;
-                return (!ValidatedProperties.Any(v => GetValidationError(v, now) != null));
-            
+                return (!ValidatedProperties.Any(v => GetValidationError(v, now) != null));  
         }
         static readonly string[] ValidatedProperties = new string[]
         { 
@@ -322,19 +321,36 @@ namespace BlowTrial.Models
             }
             return null;
         }
+        enum RandomisationCategories { lowestWeight, midWeight, highestWeight}
         string ValidateWeight()
         {
             if (LastContactWeight.HasValue)
             {
-                var weightchange = (double)LastContactWeight / (double)AdmissionWeight;
-                if (weightchange < 0.5)
+                var weightChange = (double)LastContactWeight / (double)AdmissionWeight;
+                RandomisationCategories weightCat = LastContactWeight<RandomisingEngine.BlockWeight1?
+                    RandomisationCategories.lowestWeight
+                    :LastContactWeight<RandomisingEngine.BlockWeight2? 
+                        RandomisationCategories.midWeight
+                        :RandomisationCategories.highestWeight;
+                int? daysOldAtWeight = (LastWeightDate.HasValue)?
+                    (LastWeightDate.Value-DateTimeBirth.Date).Days
+                    :(int?)null;
+                if (weightChange < 0.8 || 
+                    weightChange > 1.6 ||
+                    (weightCat == RandomisationCategories.midWeight && weightChange >1.5) ||
+                    (weightCat == RandomisationCategories.lowestWeight && weightChange >1.4) ||
+                    (daysOldAtWeight.HasValue && 
+                    (daysOldAtWeight<21 && (weightChange > 1.4 ||
+                    (weightCat == RandomisationCategories.midWeight && weightChange >1.35) ||
+                    (weightCat == RandomisationCategories.lowestWeight && weightChange >1.3))) ||
+                    (daysOldAtWeight<14 && weightChange >1.25)))
                 {
                     return string.Format(Strings.ParticipantModel_Error_LastWeightChange, AdmissionWeight);
                 }
-                if (LastContactWeight == null && LastWeightDate.HasValue)
-                {
-                    return Strings.ParticipantModel_Error_WeightNotFound;
-                }
+            }
+            else if (LastWeightDate.HasValue)
+            {
+                return Strings.ParticipantModel_Error_WeightNotFound;
             }
             return null;
         }
@@ -416,6 +432,12 @@ namespace BlowTrial.Models
             }
             return error;
 
+        }
+        #endregion //validation
+        #region Methods
+        static double RateOfChange(double startingValue,double finishingValue ,double timeUnitsElapsed)
+        {
+            return Math.Pow(2, Math.Log(finishingValue / startingValue, 2) / timeUnitsElapsed); // work in log 2 as ? performance advantage for binary systems
         }
         #endregion
         static OutcomeAt28DaysOption[] DeathOrLastContactRequiredIf = new OutcomeAt28DaysOption[]

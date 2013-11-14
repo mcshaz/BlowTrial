@@ -46,7 +46,7 @@ namespace BlowTrial.ViewModel
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
-            bool isEnvelopeRandomising = BlowTrialDataService.GetBackupDetails().BackupData.IsEnvelopeRandomising;
+            bool isEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising();
             StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => isEnvelopeRandomising);
             ShowLogin();
         }
@@ -107,12 +107,13 @@ namespace BlowTrial.ViewModel
         public RelayCommand CreateNewUserCmd { get; private set; }
         public RelayCommand StopEnvelopeCmd { get; private set; }
 
-        static void StopEnvelopeRandomising()
+        void StopEnvelopeRandomising()
         {
             var result = MessageBox.Show(Strings.MainWindow_StopEnvelopeRandomisingMsg,Strings.MainWindow_StopEnvelopeRandomisingCaption, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (result == MessageBoxResult.OK)
             {
                 BlowTrialDataService.StopEnvelopeRandomising();
+                StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => false);
             }
         }
         #endregion // Commands

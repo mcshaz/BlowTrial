@@ -26,6 +26,18 @@ namespace BlowTrial.Helpers
             data.IsEnvelopeRandomising = false;
             appData.SaveChanges();
         }
+        public static bool IsEnvelopeRandomising()
+        {
+            using (var a = new MembershipContext())
+            {
+                return IsEnvelopeRandomising(a);
+            }
+        }
+        public static bool IsEnvelopeRandomising(IBackupData appData)
+        {
+            return (from a in appData.BackupDataSet
+                    select a.IsEnvelopeRandomising).First();
+        }
         public static BackupDataSet GetBackupDetails()
         {
             using (var a = new MembershipContext())
@@ -112,10 +124,11 @@ namespace BlowTrial.Helpers
                         Id = s.Id.Value,
                         DuplicateIdCheck = Guid.NewGuid(),
                         ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
-                        ArgbTextColour = s.SiteTextColour.Value.ToInt(),
+                        ArgbTextColour = s.SiteTextColour.ToInt(),
                         Name = s.SiteName,
                         HospitalIdentifierMask = s.HospitalIdentifierMask,
-                        PhoneMask = s.PhoneMask
+                        PhoneMask = s.PhoneMask,
+                        MaxIdForSite = s.MaxIdForSite().Value
                     });
                 }
                 t.SaveChanges();

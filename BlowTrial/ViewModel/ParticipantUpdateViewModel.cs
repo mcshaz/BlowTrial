@@ -11,7 +11,6 @@ using BlowTrial.Infrastructure.Extensions;
 using System.Windows;
 using BlowTrial.Domain.Outcomes;
 using MvvmExtraLite.Helpers;
-using System.Windows.Data;
 using BlowTrial.Domain.Tables;
 using AutoMapper;
 using System.Collections.ObjectModel;
@@ -669,7 +668,7 @@ namespace BlowTrial.ViewModel
             else
             {
                 WtForAgeCentile = string.Format(Strings.NewPatientVM_Centile,
-                    WeightData.CumSnormWtForAge(((double)LastContactWeight.Value)/1000, LastWeightDate.Value - DateTimeBirth, _participant.GestAgeBirth, _participant.IsMale));
+                    WeightData.CumSnormWtForAge(((double)LastContactWeight.Value)/1000, LastWeightDate.Value - DateTimeBirth.Date, _participant.GestAgeBirth, _participant.IsMale));
             }
         }
 

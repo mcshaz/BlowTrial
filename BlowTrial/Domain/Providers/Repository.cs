@@ -96,18 +96,6 @@ namespace BlowTrial.Domain.Providers
                 return _dbContext.VaccinesAdministered;
             }
         }
-        int _studyCentreIdIncrement;
-        int StudyCentreIdIncrement
-        {
-            get
-            {
-                if (_studyCentreIdIncrement == 0)
-                {
-                    _studyCentreIdIncrement = int.Parse(ConfigurationManager.AppSettings["StudyCentreIdIncrement"]);
-                }
-                return _studyCentreIdIncrement;
-            }
-        }
         IEnumerable<StudyCentreModel> _localStudyCentres;
         public IEnumerable<StudyCentreModel> LocalStudyCentres 
         {
@@ -123,7 +111,8 @@ namespace BlowTrial.Domain.Providers
                              ArgbTextColour = s.ArgbTextColour,
                              ArgbBackgroundColour = s.ArgbBackgroundColour,
                              HospitalIdentifierMask = s.HospitalIdentifierMask,
-                             PhoneMask = s.PhoneMask
+                             PhoneMask = s.PhoneMask,
+                             MaxIdForSite = s.MaxIdForSite
                          });
                 }
                 return _localStudyCentres;
@@ -135,7 +124,22 @@ namespace BlowTrial.Domain.Providers
         #region Methods
         public void Add(Participant participant)
         {
-            participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
+            if (BlowTrial.Helpers.BlowTrialDataService.IsEnvelopeRandomising())
+            {
+                var centre= LocalStudyCentres.First(c=>c.Id == participant.CentreId);
+                if (participant.Id < centre.Id)
+                {
+                    throw new DataKeyOutOfRangeException("Database key does not correspond to site");
+                }
+                else if (participant.Id > centre.MaxIdForSite)
+                {
+                    throw new DataKeyOutOfRangeException("Database has exceeded maximum size for site");
+                }
+            }
+            else
+            {
+                participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
+            }
             _dbContext.Participants.Add(participant);
 
             _dbContext.SaveChanges();
@@ -203,11 +207,14 @@ namespace BlowTrial.Domain.Providers
                     string.Join(",", removeVaccineAdministeredIds));
                 _dbContext.Database.ExecuteSqlCommand(sqlString);
             }
+            int studyCentreId = (from p in _dbContext.Participants
+                                 where p.Id == participantId
+                                 select p.CentreId).First();
             foreach (var v in vaccinesAdministered)
             {
                 if (v.Id == 0)
                 {
-                    v.Id = GetNextId(_dbContext.VaccinesAdministered, (v.ParticipantId / StudyCentreIdIncrement) * StudyCentreIdIncrement);
+                    v.Id = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);
                     _dbContext.VaccinesAdministered.Add(v);
                 }
                 else
@@ -296,6 +303,13 @@ namespace BlowTrial.Domain.Providers
                         {
                             throw new DuplicateDataKeyException("Duplicate key for site Id:" + s.Id.ToString());
                         }
+                        var overlappingSite = knownSites.FirstOrDefault(k=>s.Id <= k.MaxIdForSite && s.MaxIdForSite >= k.Id);
+                        if (overlappingSite != null)
+                        {
+                            throw new OverlappingDataKeyRangeException(string.Format("Potential for patient data overwrite - existing site Ids ({0}-{1}), new site Ids ({2}-{3})",
+                                overlappingSite.Id, overlappingSite.MaxIdForSite,
+                                s.Id, s.MaxIdForSite));
+                        }
                         _dbContext.StudyCentres.Attach(s);
                         knownSites.Add(s);
                     }
@@ -331,20 +345,17 @@ namespace BlowTrial.Domain.Providers
             };
         }
 
-        int GetNextId(IQueryable<ISharedRecord> recordSet, int startingIndex)
+        int GetNextId(IQueryable<ISharedRecord> recordSet, int studyCentreId)
         {
-            int endIndex = startingIndex + StudyCentreIdIncrement;
+            int maxIdForSite = LocalStudyCentres.First(s=>s.Id == studyCentreId).MaxIdForSite;
             int returnVar = (from r in recordSet
-                             where r.Id >= startingIndex && r.Id < endIndex
+                             where r.Id >= studyCentreId && r.Id <= maxIdForSite
                              select r.Id).DefaultIfEmpty().Max();
-            if (returnVar == 0) { returnVar = startingIndex; }
-            else 
-            { 
-                returnVar++; 
-                if (returnVar == endIndex)
-                {
-                    throw new DataKeyOutOfRangeException("Database has exceeded maximum size for site");
-                }
+            if (returnVar == 0) { returnVar = studyCentreId; }
+            returnVar++; 
+            if (returnVar > maxIdForSite)
+            {
+                throw new DataKeyOutOfRangeException("Database has exceeded maximum size for site");
             }
             return returnVar;
         }

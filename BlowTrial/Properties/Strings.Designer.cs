@@ -556,7 +556,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sites must have distinct colours.
+        ///   Looks up a localized string similar to Sites must have perceptually different colours.
         /// </summary>
         public static string GetAppSettingsModel_Error_DuplicateColours {
             get {
@@ -588,6 +588,15 @@ namespace BlowTrial.Properties {
         public static string GetAppSettingsModel_Error_StudySite {
             get {
                 return ResourceManager.GetString("GetAppSettingsModel_Error_StudySite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Negative values are not allowed.
+        /// </summary>
+        public static string Int_Error_LessThan0 {
+            get {
+                return ResourceManager.GetString("Int_Error_LessThan0", resourceCulture);
             }
         }
         
@@ -925,7 +934,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1}. Please give only give BCG &amp; OPV once nearing discharge..
+        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1:n0}. Please give only give BCG &amp; OPV once nearing discharge..
         /// </summary>
         public static string NewPatient_ToControl {
             get {
@@ -979,11 +988,29 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Id numbers for this site must be between {0} and {1}.
+        /// </summary>
+        public static string NewPatientModel_Error_IdOutOfRangeForSite {
+            get {
+                return ResourceManager.GetString("NewPatientModel_Error_IdOutOfRangeForSite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A study site must be selected for this patient.
         /// </summary>
         public static string NewPatientModel_Error_NoStudyCentre {
             get {
                 return ResourceManager.GetString("NewPatientModel_Error_NoStudyCentre", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details for that envelope number have already been entered.
+        /// </summary>
+        public static string NewPatientViewModel_Error_EnvelopeInDb {
+            get {
+                return ResourceManager.GetString("NewPatientViewModel_Error_EnvelopeInDb", resourceCulture);
             }
         }
         
@@ -1150,7 +1177,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The last known weight must not be less than 50% of birth weight ({0}g).
+        ///   Looks up a localized string similar to The weight has changed too dramatically from birth ({0}g).
         /// </summary>
         public static string ParticipantModel_Error_LastWeightChange {
             get {
@@ -1411,6 +1438,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The background colour must contrast with the error colour (red).
+        /// </summary>
+        public static string StudySiteDataModel_Error_BackgroundAndErrorMatch {
+            get {
+                return ResourceManager.GetString("StudySiteDataModel_Error_BackgroundAndErrorMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please select a colour.
         /// </summary>
         public static string StudySiteDataModel_Error_NoColour {
@@ -1429,6 +1465,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The text colour must contrast with the background colour.
+        /// </summary>
+        public static string StudySiteDataModel_Error_TextAndBackgroundMatch {
+            get {
+                return ResourceManager.GetString("StudySiteDataModel_Error_TextAndBackgroundMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Each site identifier must be unique.
         /// </summary>
         public static string StudySitesModel_Error_DuplicateId {
@@ -1443,6 +1488,15 @@ namespace BlowTrial.Properties {
         public static string StudySitesModel_Error_InvalidMultiple {
             get {
                 return ResourceManager.GetString("StudySitesModel_Error_InvalidMultiple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Id range overlaps with the Id range for another site.
+        /// </summary>
+        public static string StudySitesModel_Error_OverlappingIdRanges {
+            get {
+                return ResourceManager.GetString("StudySitesModel_Error_OverlappingIdRanges", resourceCulture);
             }
         }
         
