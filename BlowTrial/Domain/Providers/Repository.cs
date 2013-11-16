@@ -112,7 +112,8 @@ namespace BlowTrial.Domain.Providers
                              ArgbBackgroundColour = s.ArgbBackgroundColour,
                              HospitalIdentifierMask = s.HospitalIdentifierMask,
                              PhoneMask = s.PhoneMask,
-                             MaxIdForSite = s.MaxIdForSite
+                             MaxIdForSite = s.MaxIdForSite,
+                             DuplicateIdCheck = s.DuplicateIdCheck // needed for backup
                          });
                 }
                 return _localStudyCentres;
@@ -248,7 +249,7 @@ namespace BlowTrial.Domain.Providers
                 throw new InvalidOperationException("Backup called without cloud directories set to a single directory");
             }
 #endif
-            string cloudPathWithoutExtension = CloudDirectories.First() + '\\' + Path.GetFileNameWithoutExtension(bakFileName) + '_' + LocalStudyCentres.First().Id.ToString();
+            string cloudPathWithoutExtension = CloudDirectories.First() + '\\' + Path.GetFileNameWithoutExtension(bakFileName) + '_' + LocalStudyCentres.First().DuplicateIdCheck.ToString("N");
             string cloudZipName = cloudPathWithoutExtension + ".zip"; 
             
             var cloudFile = new FileInfo(cloudZipName);

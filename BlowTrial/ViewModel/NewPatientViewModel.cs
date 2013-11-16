@@ -88,7 +88,7 @@ namespace BlowTrial.ViewModel
         }
         public string PhoneMask
         {
-            get { return StudyCentre.PhoneMask; }
+            get { return (StudyCentre==null)?null:StudyCentre.PhoneMask; }
         }
         static readonly Brush _defaultBackground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
         static readonly Brush _defaultText = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
@@ -565,7 +565,7 @@ namespace BlowTrial.ViewModel
                         .Select(s => new KeyValuePair<StudyCentreModel, string>(s, s.Name)));
                     if (studyCentres.Skip(1).Any())
                     {
-                        returnVar.Insert(1,
+                        returnVar.Insert(0,
                             new KeyValuePair<StudyCentreModel, string>(null, Strings.DropDownList_PleaseSelect));
                     }
                     else
@@ -705,10 +705,10 @@ namespace BlowTrial.ViewModel
         private void ClearAllFields()
         {
             if (_abnormalities!= null) { _abnormalities.Clear(); }
-            _newPatient = new NewPatientModel();
             StudyCentre = StudyCentreOptions.First().Key;
+            _newPatient = new NewPatientModel();
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired");
         }
         #endregion
 

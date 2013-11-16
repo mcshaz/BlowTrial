@@ -10,6 +10,7 @@ namespace BlowTrial.Models
     public class StudyCentreModel
     {
         public int Id { get; set; }
+        public Guid DuplicateIdCheck { get; set; }
         public String Name { get; set; }
         public int ArgbTextColour 
         { 

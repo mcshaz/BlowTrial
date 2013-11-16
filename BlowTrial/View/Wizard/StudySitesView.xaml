@@ -11,6 +11,26 @@
         <DataGrid DockPanel.Dock="Right" Grid.Row="22" Grid.Column="2" ItemsSource="{Binding Path=StudySitesData, ValidatesOnDataErrors=True,UpdateSourceTrigger=PropertyChanged}"
                               AutoGenerateColumns="False" CanUserDeleteRows="True" 
                                CanUserAddRows="False" x:Name="studySitesGrid">
+            <DataGrid.Resources>
+                <Style TargetType="{x:Type TextBox}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip" 
+                              Value="{Binding RelativeSource={RelativeSource Self},
+                                Path=(Validation.Errors).CurrentItem.ErrorContent}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="{x:Type wpfToolkit:ColorPicker}">
+                    <Style.Triggers>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter Property="ToolTip" 
+                              Value="{Binding RelativeSource={RelativeSource Self},
+                                Path=(Validation.Errors).CurrentItem.ErrorContent}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTemplateColumn MinWidth="150" Header="Site Name" >
                     <DataGridTemplateColumn.CellTemplate>
@@ -21,10 +41,37 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Site Id" Binding="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}" />
-                <DataGridTextColumn Header="Maximum Participant Allocations" Binding="{Binding Path=MaxParticipantAllocations, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}" />
-                <DataGridTextColumn Header="Phone Number Mask" Binding="{Binding Path=PhoneMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-                <DataGridTextColumn Header="Hospital Identifier Mask" Binding="{Binding Path=HospitalIdentifierMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridTemplateColumn Header="Site Id">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}"
+                                                 Foreground="{Binding Path=SiteTextBrush, Mode=OneWay}"
+                                                 Background="{Binding Path=SiteBackgroundBrush, Mode=OneWay}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Maximum Participant Allocations" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Path=MaxParticipantAllocations, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Phone Number Mask" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Path=PhoneMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Hospital Identifier Mask" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Path=HospitalIdentifierMask, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Site Background Colour" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -39,6 +86,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <!--
                 <DataGridTemplateColumn Width="*" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -51,6 +99,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                -->
             </DataGrid.Columns>
         </DataGrid>
         <ContentPresenter 
@@ -58,7 +107,8 @@
                           HorizontalAlignment="Left"
                           Content="{Binding ElementName=studySitesGrid, Path=(Validation.Errors).CurrentItem}"
                           />
-        <TextBlock>*please choose a name and a colour for each site which is: easy to read, and difficult to confuse</TextBlock>
+        <TextBlock>Hover mouse over any fields <Span><Border VerticalAlignment="Bottom" BorderThickness="1" BorderBrush="Red"><TextBlock>outlined in red</TextBlock></Border></Span> for error details</TextBlock>
+        <TextBlock>*Please choose a name and a colour for each site which is: easy to read, and difficult to confuse</TextBlock>
         <TextBlock>
             Click here to see a 
             <Hyperlink NavigateUri="http://doc.xceedsoft.com/products/xceedwpfdatagrid/Masked_Editors.html" RequestNavigate="Hyperlink_RequestNavigate" >

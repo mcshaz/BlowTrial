@@ -65,8 +65,8 @@ namespace BlowTrial.Models
         {
             _validatedProperties = new string[] { "Id", "SiteBackgroundColour", "SiteTextColour","SiteName", "PhoneMask", "HospitalIdentifierMask", "MaxParticipantAllocations" };
             PhoneMask = "(000) 0000-0000";
-            HospitalIdentifierMask = "L000000";
-            SiteTextColour = new Color() { R = 0, G = 0, B = 0, A = 255 };
+            HospitalIdentifierMask = ">L000000";
+            SiteTextColour = DefaultTextColor;
         }
         #endregion
         #region fields
@@ -74,14 +74,15 @@ namespace BlowTrial.Models
         static IColorSpaceComparison _colourSpacecomparison;
         Color? _siteBackgroundColour;
         Color _siteTextColour;
-        const double minColourDif = 20;
+        const double minColourDif = 10;
         const double minContrastDif = 30;
+        public static readonly Color DefaultTextColor = new Color() { R = 0, G = 0, B = 0, A = 255 };
         #endregion
         IColorSpaceComparison ColourSpacecomparison
         {
             get
             {
-                return _colourSpacecomparison ?? (_colourSpacecomparison = new Cie1976Comparison());
+                return _colourSpacecomparison ?? (_colourSpacecomparison = new CieDe2000Comparison());
             }
         }
         public virtual StudySitesModel AllLocalSites { get; set; }
@@ -231,20 +232,19 @@ namespace BlowTrial.Models
         }
         string ValidateSiteBackgroundColour()
         {
-            string error = null;
             if (SiteBackgroundColour == null)
             {
-                error = Strings.StudySiteDataModel_Error_NoColour;
+                return Strings.StudySiteDataModel_Error_NoColour;
             }
-            if (error == null && AllLocalSites.StudySitesData.Any(s => s.Id != Id && s.SiteBackgroundRgb.Compare(SiteBackgroundRgb, this.ColourSpacecomparison) < minColourDif))
+            if (AllLocalSites.StudySitesData.Any(s => s.Id != Id && s.SiteBackgroundRgb != null && s.SiteBackgroundRgb.Compare(SiteBackgroundRgb, this.ColourSpacecomparison) < minColourDif))
             {
-                error = Strings.GetAppSettingsModel_Error_DuplicateColours;
+                return Strings.GetAppSettingsModel_Error_DuplicateColours;
             }
-            if (error == null && ErrorColour.Compare(SiteBackgroundRgb, this.ColourSpacecomparison) < minContrastDif)
+            if (ErrorColour.Compare(SiteBackgroundRgb, this.ColourSpacecomparison) < minContrastDif)
             {
-                error = Strings.StudySiteDataModel_Error_BackgroundAndErrorMatch;
+                return Strings.StudySiteDataModel_Error_BackgroundAndErrorMatch;
             }
-            return error;
+            return null;
         }
         //static readonly char[] InvalidMaskChars = "09#L?Aa&C.><!\\\"".ToCharArray();
         static string ValidateMask(string mask, int stringLength)

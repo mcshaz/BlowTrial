@@ -56,13 +56,19 @@ namespace BlowTrial.ViewModel
         void NewSiteDataVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var newStudySiteVm = (StudySiteItemViewModel)sender;
-            if (newStudySiteVm.SiteName != null && newStudySiteVm.SiteModel.IsValid())
+            if (!newStudySiteVm.AllPropertiesNull())
             {
-                newStudySiteVm.PropertyChanged -= NewSiteDataVm_PropertyChanged;
-                _appModel.StudySitesData.Add(newStudySiteVm.SiteModel);
-                var newVM = NewSiteDataVM();
-                StudySitesData.Add(newVM);
-                newVM.AllowEmptyRecord = true;
+                if (newStudySiteVm.IsValid())
+                {
+                    newStudySiteVm.PropertyChanged -= NewSiteDataVm_PropertyChanged;
+                    var newVM = NewSiteDataVM();
+                    StudySitesData.Add(newVM);
+                    newVM.AllowEmptyRecord = true;
+                }
+                else if (!_appModel.StudySitesData.Contains(newStudySiteVm.SiteModel))
+                {
+                    _appModel.StudySitesData.Add(newStudySiteVm.SiteModel);
+                }
                 NotifyPropertyChanged("StudySitesData");
             }
         }
@@ -217,11 +223,15 @@ namespace BlowTrial.ViewModel
         {
             return ((IDataErrorInfo)SiteModel)[propertyName];
         }
+        public bool IsValid()
+        {
+            return SiteModel.IsValid();
+        }
 
-        bool AllPropertiesNull()
+        internal bool AllPropertiesNull()
         {
             return string.IsNullOrEmpty(SiteName) 
-                && SiteModel.SiteTextColour==null 
+                && SiteModel.SiteTextColour==StudySiteItemModel.DefaultTextColor 
                 && SiteModel.SiteBackgroundColour==null
                 && SiteModel.Id==null
                 && SiteModel.MaxParticipantAllocations == null

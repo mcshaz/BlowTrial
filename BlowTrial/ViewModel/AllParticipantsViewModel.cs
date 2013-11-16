@@ -44,9 +44,16 @@ namespace BlowTrial.ViewModel
             var participantVMs = _repository.Participants.Include("VaccinesAdministered").Include("VaccinesAdministered.VaccineGiven").ToArray()
                 .Select(p => new ParticipantUpdateViewModel(_repository,Mapper.Map<ParticipantModel>(p)))
                 .ToList();
+
             AllParticipants = new ListCollectionView(participantVMs);
             AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequired"));
             AllParticipants.SortDescriptions.Add(new SortDescription("DataRequired", ListSortDirection.Ascending));
+
+            if(_repository.LocalStudyCentres.Skip(1).Any())
+            {
+                AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentreName"));
+                AllParticipants.SortDescriptions.Add(new SortDescription("StudyCentreName", ListSortDirection.Ascending));
+            }
         }
 
         #endregion // Constructor
