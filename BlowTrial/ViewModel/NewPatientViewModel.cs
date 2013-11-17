@@ -84,7 +84,7 @@ namespace BlowTrial.ViewModel
         }
         public string HospitalIdentifierMask
         {
-            get { return StudyCentre.HospitalIdentifierMask; }
+            get { return (StudyCentre==null)?null:StudyCentre.HospitalIdentifierMask; }
         }
         public string PhoneMask
         {

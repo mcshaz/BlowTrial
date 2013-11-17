@@ -165,6 +165,7 @@
     <Compile Include="Infrastructure\BackupService.cs" />
     <Compile Include="Infrastructure\Centiles\LMS.cs" />
     <Compile Include="Infrastructure\Centiles\Stats.cs" />
+    <Compile Include="Infrastructure\Converters\StudyCentreModelToNameConverter.cs" />
     <Compile Include="Infrastructure\Converters\NotNullConverter.cs" />
     <Compile Include="Infrastructure\Converters\NullableBoolConverter.cs" />
     <Compile Include="Infrastructure\Converters\BooleanInverterConverter.cs" />

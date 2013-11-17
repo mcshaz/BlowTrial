@@ -27,19 +27,6 @@
                     <Style TargetType="TextBlock" >
                         <Setter Property="Foreground" Value="{Binding Path=TextBrush, Mode=OneWay}" />
                     </Style>
-
-                    <Style x:Key="envelopeNumberRequired" TargetType="{x:Type ex:RowDefinitionExtended}" >
-                        <Setter Property="Visible" Value="false" />
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Value="true" />
-                                    <Condition Binding="{Binding Path=OkToRandomise, Mode=OneWay}" Value="true" />
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="Visible" Value="true" />
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -80,8 +67,8 @@
                     <RowDefinition Height="30" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="30" />
-                    <ex:RowDefinitionExtended Style="{StaticResource envelopeNumberRequired}" Height="Auto" />
-                    <ex:RowDefinitionExtended Style="{StaticResource envelopeNumberRequired}" Height="30" />
+                    <ex:RowDefinitionExtended Visible="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Height="Auto" />
+                    <ex:RowDefinitionExtended Visible="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Height="30" />
                 </Grid.RowDefinitions>
 
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="33" VerticalAlignment="Stretch" Width="6" />
@@ -470,6 +457,7 @@
                 <TextBox
                   x:Name="envelopeNumberTxt"
                   Grid.Row="32" Grid.Column="2" 
+                  IsEnabled="{Binding Path=OkToRandomise, Mode=OneWay}"
                   Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                   />
                 <ContentPresenter 

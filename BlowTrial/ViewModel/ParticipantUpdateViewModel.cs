@@ -65,6 +65,13 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        public StudyCentreModel StudyCentre
+        {
+            get
+            {
+                return _participant.StudyCentre;
+            }
+        }
         public string StudyCentreName
         {
             get

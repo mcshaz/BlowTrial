@@ -11,7 +11,7 @@
                 <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
                 <ResourceDictionary>
 
-                    <GroupStyle x:Key="DetailsGroupStyle">
+                    <GroupStyle x:Key="DetailsRequiredGroupStyle">
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
                                 <TextBlock 
@@ -21,7 +21,22 @@
                                     Foreground="White"
                                     Margin="1"
                                     Padding="4,2,0,2"
-                                    Text="{Binding Name}" 
+                                    Text="{Binding Name, Mode=OneWay}" 
+                                    />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                    <GroupStyle x:Key="SiteNameGroupStyle">
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock 
+                                    x:Name="txt" 
+                                    Background="{Binding Path=Items[0].BackgroundColour, Mode=OneWay}"
+                                    FontWeight="Bold"
+                                    Foreground="{Binding Path=Items[0].TextColour, Mode=OneWay}"
+                                    Margin="1"
+                                    Padding="4,2,0,2"
+                                    Text="{Binding Path=Name, Mode=OneWay}" 
                                     />
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
@@ -54,7 +69,10 @@
           >
             <ListView.GroupStyle>
                 <StaticResourceExtension 
-                  ResourceKey="DetailsGroupStyle" 
+                  ResourceKey="DetailsRequiredGroupStyle" 
+                  />
+                <StaticResourceExtension 
+                  ResourceKey="SiteNameGroupStyle" 
                   />
             </ListView.GroupStyle>
             <ListView.View>

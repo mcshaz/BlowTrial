@@ -75,7 +75,7 @@ namespace BlowTrial.Models
         Color? _siteBackgroundColour;
         Color _siteTextColour;
         const double minColourDif = 10;
-        const double minContrastDif = 30;
+        const double minContrastDif = 25;
         public static readonly Color DefaultTextColor = new Color() { R = 0, G = 0, B = 0, A = 255 };
         #endregion
         IColorSpaceComparison ColourSpacecomparison

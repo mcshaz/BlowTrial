@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BlowTrial.Domain.Providers;
+using BlowTrial.Infrastructure.Converters;
 using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Models;
 using BlowTrial.Properties;
@@ -51,8 +52,8 @@ namespace BlowTrial.ViewModel
 
             if(_repository.LocalStudyCentres.Skip(1).Any())
             {
-                AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentreName"));
-                AllParticipants.SortDescriptions.Add(new SortDescription("StudyCentreName", ListSortDirection.Ascending));
+                AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentre", new StudyCentreModelToNameConverter()));
+                //AllParticipants.SortDescriptions.Add(new SortDescription("StudyCentreName", ListSortDirection.Ascending));
             }
         }
 
