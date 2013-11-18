@@ -62,8 +62,8 @@ namespace BlowTrial.ViewModel
                 {
                     newStudySiteVm.PropertyChanged -= NewSiteDataVm_PropertyChanged;
                     var newVM = NewSiteDataVM();
-                    StudySitesData.Add(newVM);
                     newVM.AllowEmptyRecord = true;
+                    StudySitesData.Add(newVM);
                 }
                 else if (!_appModel.StudySitesData.Contains(newStudySiteVm.SiteModel))
                 {
@@ -235,8 +235,8 @@ namespace BlowTrial.ViewModel
                 && SiteModel.SiteBackgroundColour==null
                 && SiteModel.Id==null
                 && SiteModel.MaxParticipantAllocations == null
-                && string.IsNullOrEmpty(SiteModel.PhoneMask)
-                && string.IsNullOrEmpty(SiteModel.HospitalIdentifierMask);
+                && SiteModel.PhoneMask == StudySiteItemModel.DefaultPhoneMask
+                && SiteModel.HospitalIdentifierMask == StudySiteItemModel.DefaultHospitalIdentifierMask;
         }
     }
 }

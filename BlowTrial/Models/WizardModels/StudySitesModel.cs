@@ -61,11 +61,13 @@ namespace BlowTrial.Models
     public class StudySiteItemModel : ValidationBase
     {
         #region constructor
+        public const string DefaultPhoneMask = "(000) 0000-0000";
+        public const string DefaultHospitalIdentifierMask = ">L000000";
         public StudySiteItemModel()
         {
             _validatedProperties = new string[] { "Id", "SiteBackgroundColour", "SiteTextColour","SiteName", "PhoneMask", "HospitalIdentifierMask", "MaxParticipantAllocations" };
-            PhoneMask = "(000) 0000-0000";
-            HospitalIdentifierMask = ">L000000";
+            PhoneMask = DefaultPhoneMask;
+            HospitalIdentifierMask = DefaultHospitalIdentifierMask;
             SiteTextColour = DefaultTextColor;
         }
         #endregion
