@@ -14,18 +14,12 @@ namespace BlowTrial.Domain.Tables
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
 	    public int Id {get; set;}
-        [StringLength(256)]
-	    public string Name {get;set;}
-        [StringLength(256)]
-        public string MothersName { get; set; }
-        [StringLength(16)]
-        public string PhoneNumber { get; set; }
         [StringLength(128)]
 	    public string HospitalIdentifier {get;set;}
+        [StringLength(512)]
+        public string Abnormalities { get; set; }
 	    public int AdmissionWeight {get;set;}
 	    public double GestAgeBirth {get;set;}
-        [StringLength(512)]
-	    public string Abnormalities {get;set;}
 	    public bool IsMale {get;set;}
 	    public DateTime DateTimeBirth {get;set;}
 	    public DateTime RegisteredAt {get; set;}
@@ -40,6 +34,12 @@ namespace BlowTrial.Domain.Tables
     }
     public partial class Participant : Patient, IParticipant
     {
+        [StringLength(256)]
+        public string Name { get; set; }
+        [StringLength(256)]
+        public string MothersName { get; set; }
+        [StringLength(16)]
+        public string PhoneNumber { get; set; }
         public bool IsInterventionArm { get; set; }
         public bool? BcgAdverse { get; set; }
         [StringLength(2056)]

@@ -187,10 +187,10 @@ namespace BlowTrial.Models
                     error = ValidateStudyCentre();
                     break;
                 case "Name":
-                    error = ValidateFieldNotEmpty(Name);
+                    error = ValidateName();
                     break;
                 case "MothersName":
-                    error = ValidateFieldNotEmpty(MothersName);
+                    error = ValidateMothersName();
                     break;
                 case "HospitalIdentifier":
                     error = ValidateHospitalId();
@@ -243,6 +243,22 @@ namespace BlowTrial.Models
             }
 
             return error;
+        }
+        string ValidateName()
+        {
+            if (OkToRandomise())
+            {
+                return ValidateFieldNotEmpty(Name);
+            }
+            return null;
+        }
+        string ValidateMothersName()
+        {
+            if (OkToRandomise())
+            {
+                return ValidateFieldNotEmpty(MothersName);
+            }
+            return null;
         }
         string ValidateEnvelopeNumber()
         {
@@ -300,7 +316,7 @@ namespace BlowTrial.Models
             const int maxLength = 16;
             if (string.IsNullOrEmpty(PhoneNumber))
             {
-                return Strings.Field_Error_Empty;
+                return (OkToRandomise())?Strings.Field_Error_Empty:null;
             }
             
             if (PhoneNumber.Length > maxLength)

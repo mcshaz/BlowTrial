@@ -380,7 +380,7 @@ namespace BlowTrial.ViewModel
 	        {
 		        if (value == _newPatient.RefusedConsent) { return; }
 		        _newPatient.RefusedConsent=value;
-                NotifyPropertyChanged("RefusedConsent", "OkToRandomise", "EnvelopeNumber");
+                NotifyPropertyChanged("RefusedConsent", "OkToRandomise", "EnvelopeNumber", "Name", "MothersName", "PhoneNumber");
 	        }
         }
         public int? MultipleSiblingId
@@ -662,14 +662,11 @@ namespace BlowTrial.ViewModel
         {
             var screenedPt = new ScreenedPatient
             {
-                Name = _newPatient.Name,
-                MothersName = _newPatient.MothersName,
                 HospitalIdentifier = _newPatient.HospitalIdentifier,
                 AdmissionWeight = _newPatient.AdmissionWeight.Value,
                 GestAgeBirth = _newPatient.GestAgeBirth,
                 DateTimeBirth = _newPatient.DateTimeBirth.Value,
                 Abnormalities = _newPatient.Abnormalities,
-                PhoneNumber = _newPatient.PhoneNumber,
                 IsMale = _newPatient.IsMale.Value,
                 RegisteredAt = DateTime.Now,
                 RegisteringInvestigator = GetCurrentPrincipal().Identity.Name,
