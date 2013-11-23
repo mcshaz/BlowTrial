@@ -47,8 +47,8 @@ namespace BlowTrial.Infrastructure
         public static void ForcePairedAllocation(Participant newParticipant, int pairedParticipantId, IRepository repos)
         {
             var currentBlock = GetCurrentBlock(newParticipant, repos).ToList();
-            newParticipant.IsInterventionArm = repos.Participants
-                .Find(pairedParticipantId)
+            newParticipant.IsInterventionArm = repos
+                .FindParticipant(pairedParticipantId)
                 .IsInterventionArm;
             if (currentBlock.Count==0) 
             {
@@ -79,7 +79,7 @@ namespace BlowTrial.Infrastructure
         public const int BlockWeight2 = 1500;
         private static IEnumerable<Participant> GetCurrentBlock(Participant newParticipant, IRepository repos)
         {
-            IQueryable<Participant> weightQuery = repos.Participants.Where(p=> p.IsMale == newParticipant.IsMale);
+            IQueryable<Participant> weightQuery = repos.Participants.Where(p=> p.IsMale == newParticipant.IsMale && p.CentreId == newParticipant.CentreId);
             if (newParticipant.AdmissionWeight<BlockWeight1)
             {
                 weightQuery = weightQuery.Where(p=>p.AdmissionWeight<BlockWeight1);

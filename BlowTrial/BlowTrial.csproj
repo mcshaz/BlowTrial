@@ -31,8 +31,8 @@
     <MinimumRequiredVersion>0.9.0.9</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>12</ApplicationRevision>
-    <ApplicationVersion>0.9.0.%2a</ApplicationVersion>
+    <ApplicationRevision>13</ApplicationRevision>
+    <ApplicationVersion>0.9.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -191,18 +191,21 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Infrastructure\Interfaces\ISharedRecord.cs" />
+    <Compile Include="Infrastructure\Interfaces\ITrialDataContext.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Infrastructure\Randomising\Envelopes.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingEngine.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Infrastructure\AutoMapper\AutoMapperConfiguration.cs" />
-    <Compile Include="Infrastructure\AutoMapper\ViewModelProfiles.cs" />
-    <Compile Include="Infrastructure\Interfaces\ITrialDataContext.cs" />
+    <Compile Include="Infrastructure\AutoMapper\ModelProfiles.cs" />
     <Compile Include="Infrastructure\Interfaces\IRepository.cs" />
     <Compile Include="Infrastructure\Interfaces\IUser.cs" />
     <Compile Include="Infrastructure\ValidationBase.cs" />
     <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
+    <Compile Include="Models\ProtocolViolationModel.cs" />
     <Compile Include="Models\CreateNewUserModel.cs" />
     <Compile Include="Models\StudyCentreModel.cs" />
     <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
@@ -217,10 +220,12 @@
     <Compile Include="Security\CustomIdentity.cs" />
     <Compile Include="Security\CustomPrincipal.cs" />
     <Compile Include="ViewModel\AllParticipantsViewModel.cs" />
+    <Compile Include="ViewModel\AllViolationsViewModel.cs" />
     <Compile Include="ViewModel\AllScreenedViewModel.cs" />
     <Compile Include="ViewModel\AuthenticationViewModel.cs" />
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
     <Compile Include="ViewModel\CreateNewUserViewModel.cs" />
+    <Compile Include="ViewModel\ProtocolViolationViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
@@ -237,6 +242,9 @@
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />
     <Compile Include="ViewModel\VaccineViewModels.cs" />
     <Compile Include="ViewModel\WizardViewModels\WizardPageViewModel.cs" />
+    <Compile Include="View\AllViolationsView.xaml.cs">
+      <DependentUpon>AllViolationsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\AllScreenedView.xaml.cs">
       <DependentUpon>AllScreenedView.xaml</DependentUpon>
     </Compile>
@@ -245,6 +253,9 @@
     </Compile>
     <Compile Include="View\CreateNewUserView.xaml.cs">
       <DependentUpon>CreateNewUserView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ProtocolViolationView.xaml.cs">
+      <DependentUpon>ProtocolViolationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Wizard\BackupUserControlBase.xaml.cs">
       <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
@@ -295,11 +306,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="View\AllViolationsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\AllScreenedView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\CreateNewUserView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\ProtocolViolationView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

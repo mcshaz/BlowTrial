@@ -24,4 +24,13 @@ namespace BlowTrial.Domain.Providers
 
         public ScreenedPatient NewScreenedPatient { get; private set; }
     }
+    public class ProtocolViolationEventArgs : EventArgs
+    {
+        public ProtocolViolationEventArgs(ProtocolViolation newViolation)
+        {
+            NewViolation = newViolation;
+        }
+
+        public ProtocolViolation NewViolation { get; private set; }
+    }
 }

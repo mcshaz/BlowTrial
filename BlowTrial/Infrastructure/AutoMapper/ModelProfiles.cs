@@ -43,6 +43,8 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.OutcomeAt28Id, o => o.MapFrom(s => (int)s.OutcomeAt28Days));
 
             Mapper.CreateMap<ScreenedPatient, ScreenedPatientCsvModel>();
+
+            Mapper.CreateMap<ProtocolViolation, ProtocolViolationModel>();
         }
     }
 

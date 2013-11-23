@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 
@@ -16,6 +17,9 @@ namespace BlowTrial.Domain.Interfaces
         DbSet<ProtocolViolation> ProtocolViolations { get; set; }
         DbSet<StudyCentre> StudyCentres { get; set; }
         Database Database { get; }
+
+        DbEntityEntry Entry(object entity);
+        DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         /// <summary>
         /// Backs up the db and returns the file path to the newly created backup
         /// </summary>

@@ -16,6 +16,7 @@ using System.Text;
 using System.Data.Entity.Migrations;
 using BlowTrial.Infrastructure.Exceptions;
 using System.Configuration;
+using System.Data.Entity.Infrastructure;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -51,6 +52,7 @@ namespace BlowTrial.Domain.Providers
             return delegate { return (ITrialDataContext)typeConstructor.Invoke(_emptyObjects); };
         }
         #endregion // Constructors
+
         #region Members
         private readonly Func<ITrialDataContext> _createContext;
 
@@ -60,6 +62,7 @@ namespace BlowTrial.Domain.Providers
         #region Properties
         public event EventHandler<ParticipantEventArgs> ParticipantAdded;
         public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
+        public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         public IEnumerable<string> CloudDirectories
@@ -68,32 +71,39 @@ namespace BlowTrial.Domain.Providers
             set;
         }
 
-        public DbSet<Vaccine> Vaccines
+        public DbQuery<Vaccine> Vaccines
         {
             get
             {
-                return _dbContext.Vaccines;
+                return _dbContext.Vaccines.AsNoTracking();
             }
         }
-        public DbSet<Participant> Participants
+        public DbQuery<Participant> Participants
         {
             get
             {
-                return _dbContext.Participants;
+                return _dbContext.Participants.AsNoTracking();
             }
         }
-        public DbSet<ScreenedPatient> ScreenedPatients
+        public DbQuery<ScreenedPatient> ScreenedPatients
         {
             get
             {
-                return _dbContext.ScreenedPatients;
+                return _dbContext.ScreenedPatients.AsNoTracking();
             }
         }
-        public DbSet<VaccineAdministered> VaccinesAdministered
+        public DbQuery<VaccineAdministered> VaccinesAdministered
         {
             get
             {
-                return _dbContext.VaccinesAdministered;
+                return _dbContext.VaccinesAdministered.AsNoTracking();
+            }
+        }
+        public DbQuery<ProtocolViolation> ProtocolViolations
+        {
+            get
+            {
+                return _dbContext.ProtocolViolations.AsNoTracking();
             }
         }
         IEnumerable<StudyCentreModel> _localStudyCentres;
@@ -123,6 +133,10 @@ namespace BlowTrial.Domain.Providers
         #endregion // Properties
 
         #region Methods
+        public Participant FindParticipant(int participantId)
+        {
+            return _dbContext.Participants.Find(participantId);
+        }
         public void Add(Participant participant)
         {
             if (BlowTrial.Helpers.BlowTrialDataService.IsEnvelopeRandomising())
@@ -160,7 +174,44 @@ namespace BlowTrial.Domain.Providers
                 this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
             }
         }
-        public void Update(int id,
+
+        public void AddOrUpdate(ProtocolViolation violation)
+        {
+            if (violation.ParticipantId == 0)
+            {
+                throw new ArgumentException("Participant Id must have a value");
+            }
+            if (violation.Id==0)
+            { 
+                int centreId = (from p in _dbContext.Participants
+                                where p.Id == violation.ParticipantId
+                                select p.CentreId).First();
+                violation.Id = GetNextId(_dbContext.ProtocolViolations, centreId);
+                violation.ReportingTimeLocal = DateTime.Now;
+                violation.ReportingInvestigator = System.Threading.Thread.CurrentPrincipal.Identity.Name;
+                _dbContext.ProtocolViolations.Add(violation);
+                if (this.ProtocolViolationAdded != null)
+                {
+                    this.ProtocolViolationAdded(this, new ProtocolViolationEventArgs(violation));
+                }
+            }
+            else
+            {
+                ProtocolViolation attachedViol = _dbContext.ProtocolViolations.Local.FirstOrDefault(v => v.Id == violation.Id);
+                if (attachedViol == null)
+                {
+                    _dbContext.ProtocolViolations.Attach(violation);
+                }
+                else
+                {
+                    _dbContext.Entry(attachedViol).CurrentValues.SetValues(violation);
+                }
+                _dbContext.Entry(violation).State = EntityState.Modified;
+            }
+            _dbContext.SaveChanges();
+        }
+
+        public void UpdateParticipant(int id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
                 bool? bcgAdverse,
@@ -182,7 +233,16 @@ namespace BlowTrial.Domain.Providers
             participant.DeathOrLastContactDateTime = deathOrLastContactDateTime;
             participant.OutcomeAt28Days = outcomeAt28Days;
             participant.RecordLastModified = DateTime.UtcNow;
-            _dbContext.Participants.Attach(participant);
+            Participant attachedParticipant = _dbContext.Participants.Local.FirstOrDefault(p => p.Id == participant.Id);
+            if (attachedParticipant == null)
+            {
+                _dbContext.Participants.Attach(participant);
+            }
+            else
+            {
+                _dbContext.Entry(attachedParticipant).CurrentValues.SetValues(participant);
+            }
+            _dbContext.Entry(participant).State = EntityState.Modified;
             _dbContext.SaveChanges();
             if (this.ParticipantUpdated != null)
             {
@@ -220,7 +280,16 @@ namespace BlowTrial.Domain.Providers
                 }
                 else
                 {
-                    _dbContext.VaccinesAdministered.Attach(v);
+                    VaccineAdministered attachedVA = _dbContext.VaccinesAdministered.Local.FirstOrDefault(vax => vax.Id == v.Id);
+                    if (attachedVA == null)
+                    {
+                        _dbContext.VaccinesAdministered.Attach(v);
+                    }
+                    else
+                    {
+                        _dbContext.Entry(attachedVA).CurrentValues.SetValues(v);
+                    }
+                    _dbContext.Entry(v).State = EntityState.Modified;
                 }
             }
             _dbContext.SaveChanges();
@@ -229,13 +298,31 @@ namespace BlowTrial.Domain.Providers
         {
             foreach (Participant p in patients)
             {
-                _dbContext.Participants.Attach(p);
+                Participant attachedParticipant = _dbContext.Participants.Local.FirstOrDefault(part => part.Id == p.Id);
+                if (attachedParticipant == null)
+                {
+                    _dbContext.Participants.Attach(p);
+                }
+                else
+                {
+                    _dbContext.Entry(attachedParticipant).CurrentValues.SetValues(p);
+                }
+                _dbContext.Entry(p).State = EntityState.Modified;
             }
             _dbContext.SaveChanges();
         }
         public void Update(ScreenedPatient patient)
         {
-            _dbContext.ScreenedPatients.Attach(patient);
+            ScreenedPatient attachedPatient = _dbContext.ScreenedPatients.Local.FirstOrDefault(p => p.Id == patient.Id);
+            if (attachedPatient == null)
+            {
+                _dbContext.ScreenedPatients.Attach(patient);
+            }
+            else
+            {
+                _dbContext.Entry(attachedPatient).CurrentValues.SetValues(patient);
+            }
+            _dbContext.Entry(patient).State = EntityState.Modified;
             _dbContext.SaveChanges();
         }
         public void Backup()
@@ -311,7 +398,7 @@ namespace BlowTrial.Domain.Providers
                                 overlappingSite.Id, overlappingSite.MaxIdForSite,
                                 s.Id, s.MaxIdForSite));
                         }
-                        _dbContext.StudyCentres.Attach(s);
+                        _dbContext.StudyCentres.Attach(s); //because context will have been renewed, this should not cause a duplicate key exception
                         knownSites.Add(s);
                     }
                     _dbContext.Participants.AddOrUpdate(downloadedDb.Participants.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
@@ -361,8 +448,6 @@ namespace BlowTrial.Domain.Providers
             return returnVar;
         }
 
-        #endregion // Methods
-
         ICollection<FileInfo> GetFilesUpdatedAfter(DateTime afterUtc, string filePrefix)
         {
             int prefixLen = filePrefix.Length;
@@ -372,7 +457,7 @@ namespace BlowTrial.Domain.Providers
                 DirectoryInfo di = new DirectoryInfo(dirName);
                 foreach (FileInfo f in di.GetFiles())
                 {
-                    if (f.LastWriteTimeUtc > afterUtc && f.Name.Substring(0,prefixLen)==filePrefix)
+                    if (f.LastWriteTimeUtc > afterUtc && f.Name.Substring(0, prefixLen) == filePrefix)
                     {
                         returnVar.Add(f);
                     }
@@ -380,6 +465,9 @@ namespace BlowTrial.Domain.Providers
             }
             return returnVar;
         }
+
+        #endregion // Methods
+
         #region IDisposable Implementation
         //http://msdn.microsoft.com/en-us/library/vstudio/b1yfkh5e%28v=vs.100%29.aspx
         private bool _disposed = false;

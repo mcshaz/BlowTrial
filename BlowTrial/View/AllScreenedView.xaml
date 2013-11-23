@@ -54,7 +54,6 @@
           CanUserSortColumns="True" IsReadOnly="True"
           >
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Path=Name, Mode=OneWay}" Header="Name" />
 	            <DataGridTextColumn Binding="{Binding Path=HospitalIdentifier, Mode=OneWay}" Header="Hospital Id" />
 	            <DataGridTextColumn Binding="{Binding Path=AdmissionWeight, Mode=OneWay}" Header="Admission Weight" />
                 <DataGridTextColumn Binding="{Binding Path=GestAgeBirth, Mode=OneWay, StringFormat=n0}" Header="Gestation at birth" />

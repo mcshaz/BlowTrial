@@ -47,7 +47,7 @@ namespace BlowTrial.ViewModel
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
             bool isEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising();
-            StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => isEnvelopeRandomising);
+            StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => IsAuthorised && isEnvelopeRandomising);
             ShowLogin();
         }
 
@@ -97,7 +97,11 @@ namespace BlowTrial.ViewModel
 
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_ViewSummary,
-                    new RelayCommand(param => this.ShowSummaryData(), param => IsAuthorised))
+                    new RelayCommand(param => this.ShowSummaryData(), param => IsAuthorised)),
+
+                new CommandViewModel(
+                    Strings.MainWindowViewModel_Command_ViewProtocolViolations,
+                    new RelayCommand(param => this.ShowViolations(), param => IsAuthorised))
 
             };
         }
@@ -213,6 +217,17 @@ namespace BlowTrial.ViewModel
             }
             this.SetActiveWorkspace(summaryVM);
             base.DisplayName = Strings.MainWindowViewModel_Command_ViewSummary;
+        }
+        void ShowViolations()
+        {
+            AllViolationsViewModel violVM = (AllViolationsViewModel)Workspaces.FirstOrDefault(w => w is AllViolationsViewModel);
+            if (violVM == null)
+            {
+                violVM = new AllViolationsViewModel(_repository);
+                this.Workspaces.Add(violVM);
+            }
+            this.SetActiveWorkspace(violVM);
+            base.DisplayName = Strings.MainWindowViewModel_Command_ViewProtocolViolations;
         }
         void showCreateCsv()
         {

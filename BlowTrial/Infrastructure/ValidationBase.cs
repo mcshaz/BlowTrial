@@ -70,7 +70,7 @@ namespace BlowTrial.Infrastructure
         /// <summary>
         /// Returns true if this object has no validation errors.
         /// </summary>
-        public bool IsValid()
+        public virtual bool IsValid()
         {
             foreach (string property in _validatedProperties)
             {

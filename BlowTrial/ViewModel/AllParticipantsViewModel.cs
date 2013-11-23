@@ -30,8 +30,9 @@ namespace BlowTrial.ViewModel
             _repository.ParticipantAdded += OnParticipantAdded;
             GetAllParticipants();
 
-            SortGridView = new RelayCommand(SortParticipants, param=>true);
+            SortGridView = new RelayCommand(SortParticipants);
             ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null && _updateWindow==null);
+            CreateProtocolViolation = new RelayCommand(ShowProtocolViolation, param => SelectedParticipant != null);
 
             Mediator.Register("MainWindowClosing", OnMainWindowClosing);
         }
@@ -119,6 +120,27 @@ namespace BlowTrial.ViewModel
                 _isAscending[propertyName] = true;
             }
             if (propertyName == "Id") { NotifyPropertyChanged("IsIdSort"); }
+        }
+
+        public RelayCommand CreateProtocolViolation { get; private set;}
+        void ShowProtocolViolation(object param)
+        {
+            var viol = new ProtocolViolationModel
+            {
+                Participant = SelectedParticipant.Participant
+            };
+            var violVM = new ProtocolViolationViewModel(_repository, viol);
+            var violView = new ProtocolViolationView(violVM);
+
+            EventHandler violCloseHandler = null;
+            violCloseHandler = delegate
+            {
+                violView.Close();
+                violVM.RequestClose -= violCloseHandler;
+            };
+
+            violVM.RequestClose += violCloseHandler;
+            violView.ShowDialog();
         }
         #endregion
 

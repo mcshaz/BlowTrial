@@ -12,7 +12,6 @@ namespace BlowTrial.Domain.Tables
         public int Id { get; set; }
         [ForeignKey("Participant")]
         public int ParticipantId { get; set; }
-        public DateTime TimeOfViolation { get; set; }
         public string Details { get; set; }
         public bool MajorViolation { get; set; }
         public string ReportingInvestigator { get; set; }

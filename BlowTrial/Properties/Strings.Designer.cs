@@ -655,6 +655,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Protocol Violations.
+        /// </summary>
+        public static string MainWindowViewModel_Command_ViewProtocolViolations {
+            get {
+                return ResourceManager.GetString("MainWindowViewModel_Command_ViewProtocolViolations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Screened Patients.
         /// </summary>
         public static string MainWindowViewModel_Command_ViewScreened {
@@ -1011,6 +1020,24 @@ namespace BlowTrial.Properties {
         public static string NewPatientViewModel_Error_EnvelopeInDb {
             get {
                 return ResourceManager.GetString("NewPatientViewModel_Error_EnvelopeInDb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is a problem with the envelope ({0}). Click OK to continue (and a major protocol violation will be automatically logged), or click cancel and correct any errors..
+        /// </summary>
+        public static string NewPatientViewModel_SoftError_Envelope {
+            get {
+                return ResourceManager.GetString("NewPatientViewModel_SoftError_Envelope", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue despite error?.
+        /// </summary>
+        public static string NewPatientViewModel_SoftError_WarningMsg {
+            get {
+                return ResourceManager.GetString("NewPatientViewModel_SoftError_WarningMsg", resourceCulture);
             }
         }
         
@@ -1434,6 +1461,42 @@ namespace BlowTrial.Properties {
         public static string PreviouslyRandomisedOptions_True {
             get {
                 return ResourceManager.GetString("PreviouslyRandomisedOptions_True", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Protocol Violation.
+        /// </summary>
+        public static string ProtocolViolationVM_Edit {
+            get {
+                return ResourceManager.GetString("ProtocolViolationVM_Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Major.
+        /// </summary>
+        public static string ProtocolViolationVM_Major {
+            get {
+                return ResourceManager.GetString("ProtocolViolationVM_Major", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minor.
+        /// </summary>
+        public static string ProtocolViolationVM_Minor {
+            get {
+                return ResourceManager.GetString("ProtocolViolationVM_Minor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Register Protocol Violation.
+        /// </summary>
+        public static string ProtocolViolationVM_Register {
+            get {
+                return ResourceManager.GetString("ProtocolViolationVM_Register", resourceCulture);
             }
         }
         

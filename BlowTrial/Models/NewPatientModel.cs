@@ -174,7 +174,24 @@ namespace BlowTrial.Models
 
         #region Validation
 
+        public override bool IsValid()
+        {
+            foreach (string property in _validatedProperties)
+            {
+                if (GetValidationError(property, true) != null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public override string GetValidationError(string propertyName)
+        {
+            return GetValidationError(propertyName, false);
+        }
+
+        public string GetValidationError(string propertyName, bool hardErrorsOnly)
         {
             if (!_validatedProperties.Contains(propertyName))
             { return null; }
@@ -235,7 +252,7 @@ namespace BlowTrial.Models
                     error = ValidateAbnormalities();
                     break;
                 case "EnvelopeNumber":
-                    error = ValidateEnvelopeNumber();
+                    error = ValidateEnvelopeNumber(hardErrorsOnly);
                     break;
                 default:
                     Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);
@@ -260,9 +277,12 @@ namespace BlowTrial.Models
             }
             return null;
         }
-        string ValidateEnvelopeNumber()
+        string ValidateEnvelopeNumber(bool hardErrorsOnly)
         {
-            if (!(IsEnvelopeRandomising && OkToRandomise())) { return null; }
+            if (!(IsEnvelopeRandomising && OkToRandomise())) 
+            {
+                return null; 
+            }
             if (EnvelopeNumber==null)
             {
                 return Strings.Field_Error_Empty;
@@ -278,18 +298,21 @@ namespace BlowTrial.Models
                 {
                     return Strings.NewPatientModel_Error_EnvelopeNotFound;
                 }
-                if (AdmissionWeight >= envelope.WeightLessThan ||
-                    (envelope.WeightLessThan != 1000 && AdmissionWeight < envelope.WeightLessThan - 500))
+                if (!hardErrorsOnly)
                 {
+                    if (AdmissionWeight >= envelope.WeightLessThan ||
+                        (envelope.WeightLessThan != 1000 && AdmissionWeight < envelope.WeightLessThan - 500))
+                    {
+                        if (envelope.IsMale != IsMale)
+                        {
+                            return Strings.NewPatientModel_Error_EnvelopeDualIncorrect;
+                        }
+                        return Strings.NewPatientModel_Error_EnvelopeWeightIncorrect;
+                    }
                     if (envelope.IsMale != IsMale)
                     {
-                        return Strings.NewPatientModel_Error_EnvelopeDualIncorrect;
+                        return Strings.NewPatientModel_Error_EnvelopeGenderIncorrect;
                     }
-                    return Strings.NewPatientModel_Error_EnvelopeWeightIncorrect;
-                }
-                if (envelope.IsMale != IsMale)
-                {
-                    return Strings.NewPatientModel_Error_EnvelopeGenderIncorrect;
                 }
             }
             return null;

@@ -719,4 +719,25 @@
   <data name="StudySiteDataModel_Error_TextAndBackgroundMatch" xml:space="preserve">
     <value>The text colour must contrast with the background colour</value>
   </data>
+  <data name="ProtocolViolationVM_Edit" xml:space="preserve">
+    <value>Edit Protocol Violation</value>
+  </data>
+  <data name="ProtocolViolationVM_Major" xml:space="preserve">
+    <value>Major</value>
+  </data>
+  <data name="ProtocolViolationVM_Minor" xml:space="preserve">
+    <value>Minor</value>
+  </data>
+  <data name="ProtocolViolationVM_Register" xml:space="preserve">
+    <value>Register Protocol Violation</value>
+  </data>
+  <data name="MainWindowViewModel_Command_ViewProtocolViolations" xml:space="preserve">
+    <value>Protocol Violations</value>
+  </data>
+  <data name="NewPatientViewModel_SoftError_Envelope" xml:space="preserve">
+    <value>There is a problem with the envelope ({0}). Click OK to continue (and a major protocol violation will be automatically logged), or click cancel and correct any errors.</value>
+  </data>
+  <data name="NewPatientViewModel_SoftError_WarningMsg" xml:space="preserve">
+    <value>Continue despite error?</value>
+  </data>
 </root>

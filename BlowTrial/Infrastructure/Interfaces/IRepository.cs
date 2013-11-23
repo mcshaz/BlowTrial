@@ -5,6 +5,7 @@ using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 
@@ -15,10 +16,11 @@ namespace BlowTrial.Infrastructure.Interfaces
         event EventHandler<ParticipantEventArgs> ParticipantAdded;
         event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         event EventHandler<ParticipantEventArgs> ParticipantUpdated;
+        event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         void Add(Participant patient);
         void Add(ScreenedPatient patient);
-        void Update(int id,
+        void UpdateParticipant(int id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
                 bool? bcgAdverse,
@@ -31,10 +33,13 @@ namespace BlowTrial.Infrastructure.Interfaces
         void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
         void Update(ScreenedPatient patient);
-        DbSet<Participant> Participants { get; }
-        DbSet<ScreenedPatient> ScreenedPatients { get; }
-        DbSet<VaccineAdministered> VaccinesAdministered { get; }
-        DbSet<Vaccine> Vaccines { get; }
+        void AddOrUpdate(ProtocolViolation violation);
+        DbQuery<Participant> Participants { get; }
+        DbQuery<ScreenedPatient> ScreenedPatients { get; }
+        DbQuery<VaccineAdministered> VaccinesAdministered { get; }
+        DbQuery<Vaccine> Vaccines { get; }
+        DbQuery<ProtocolViolation> ProtocolViolations { get; }
+        Participant FindParticipant(int participantId);
         IEnumerable<string> CloudDirectories { get; set; }
         IEnumerable<StudyCentreModel> LocalStudyCentres { get; }
         ParticipantsSummary GetParticipantSummary();

@@ -51,6 +51,11 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
+        public ParticipantModel Participant
+        {
+            get { return _participant; }
+        }
+
         public ObservableCollection<VaccineAdministeredViewModel> VaccinesAdministered { get; private set; } 
 
         public bool IsParticipantModelChanged { get; private set; }
@@ -790,7 +795,7 @@ namespace BlowTrial.ViewModel
         {
             if (IsParticipantModelChanged)
             {
-                _repository.Update(
+                _repository.UpdateParticipant(
                     id : _participant.Id,
                     causeOfDeath : _participant.CauseOfDeath,
                     bcgAdverseDetail : _participant.BcgAdverseDetail,

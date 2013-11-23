@@ -462,7 +462,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _multipleSibling ?? (_multipleSibling = _repository.Participants.Find(MultipleSiblingId));
+                return _multipleSibling ?? (_multipleSibling = _repository.FindParticipant(MultipleSiblingId.Value));
             }
         }
 
@@ -592,6 +592,40 @@ namespace BlowTrial.ViewModel
         {
             return IsNewRecord && WasValidOnLastNotify && _newPatient.OkToRandomise();
         }
+        const string CancelString = "userCancelled";
+        string ValidateEnvelopeSoftErrors()
+        {
+            if (!IsValid())
+            {
+                throw new InvalidOperationException("Can only validate soft errors after hard errors have been removed");
+            }
+            if (!IsEnvelopeRandomising)
+            {
+                return null;
+            }
+            string envelopeSoftError = ((IDataErrorInfo)_newPatient)["EnvelopeNumber"];
+            if (envelopeSoftError != null)
+            {
+                string userMsg = string.Format(Strings.NewPatientViewModel_SoftError_Envelope, envelopeSoftError);
+                var result = MessageBox.Show(userMsg, Strings.NewPatientViewModel_SoftError_WarningMsg, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Cancel)
+                {
+                    return CancelString;
+                }
+                Envelope envelope = EnvelopeDetails.GetEnvelope(EnvelopeNumber.Value);
+                int bottomWeightRange = envelope.WeightLessThan == 1000 ?
+                    0 :
+                    envelope.WeightLessThan - 500;
+                return string.Format("Randomised incorrectly - envelope {0} was designated for a {1}-{2}g {3}, but patient is a {4}g {5}",
+                    EnvelopeNumber,
+                    bottomWeightRange,
+                    envelope.WeightLessThan - 1,
+                    envelope.IsMale ? "Male" : "Female",
+                    AdmissionWeight,
+                    IsMale.Value ? "Male" : "Female");
+            }
+            return null;
+        }
         /// <summary>
         /// Saves the customer to the repository.  This method is invoked by the SaveCommand.
         /// </summary>
@@ -601,6 +635,15 @@ namespace BlowTrial.ViewModel
             if (!IsValid() || !_newPatient.OkToRandomise())
             {
                 throw new InvalidOperationException("Underlying NewPatientModel does not validate");
+            }
+            string violationString = null;
+            if (IsEnvelopeRandomising) 
+            {
+                violationString = ValidateEnvelopeSoftErrors();
+                if (violationString == CancelString)
+                {
+                    return;
+                }
             }
             Participant newParticipant = new Participant
             {
@@ -638,6 +681,16 @@ namespace BlowTrial.ViewModel
                 RandomisingEngine.CreateAllocation(newParticipant,_repository);
             }
             _repository.Add(newParticipant);
+            if (violationString !=null)
+            {
+                var violation = new ProtocolViolation
+                {
+                    MajorViolation = true,
+                    Details = violationString,
+                    ParticipantId = newParticipant.Id,
+                };
+                _repository.AddOrUpdate(violation);
+            }
             if (!false.Equals(parameter)) // for testing purposes, supress dialog
             {
                 string userMsg = (newParticipant.IsInterventionArm) ? Strings.NewPatient_ToIntervention : Strings.NewPatient_ToControl;
@@ -717,7 +770,7 @@ namespace BlowTrial.ViewModel
         {
             get 
             { 
-                string error = this.GetValidationError(propertyName);
+                string error = this.GetValidationError(propertyName, false);
                 CommandManager.InvalidateRequerySuggested();
                 return error;
             }
@@ -732,7 +785,7 @@ namespace BlowTrial.ViewModel
         /// </summary>
         public override bool IsValid()
         {
-            bool returnVal = _newPatient.IsValid() && !ValidatedProperties.Any(v => this.GetValidationError(v) != null);
+            bool returnVal = _newPatient.IsValid() && !ValidatedProperties.Any(v => this.GetValidationError(v, true) != null);
             CommandManager.InvalidateRequerySuggested();
             return returnVal;
         }
@@ -743,9 +796,9 @@ namespace BlowTrial.ViewModel
             "MultipleSiblingId",
             "EnvelopeNumber"
         };
-        protected string GetValidationError(string propertyName)
+        protected string GetValidationError(string propertyName, bool hardErrorsOnly)
         {
-            string error = ((IDataErrorInfo)_newPatient)[propertyName];
+            string error = _newPatient.GetValidationError(propertyName, hardErrorsOnly);
 
             if (error==null && ValidatedProperties.Contains(propertyName))
             {
