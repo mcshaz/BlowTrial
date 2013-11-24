@@ -9,7 +9,7 @@ using System.IO;
 
 namespace BlowTrial.Models
 {
-    public enum TableOptions { Participant = 0, ScreenedPatients }
+    public enum TableOptions { Participant = 0, ScreenedPatients, ProtocolViolations }
     public class CreateCsvModel : ValidationBase
     {
         public CreateCsvModel()

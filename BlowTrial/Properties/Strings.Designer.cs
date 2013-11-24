@@ -1582,6 +1582,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All protocol violations.
+        /// </summary>
+        public static string TableOptions_ProtocolViolations {
+            get {
+                return ResourceManager.GetString("TableOptions_ProtocolViolations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Screening log.
         /// </summary>
         public static string TableOptions_ScreenedPatients {

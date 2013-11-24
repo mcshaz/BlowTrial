@@ -740,4 +740,7 @@
   <data name="NewPatientViewModel_SoftError_WarningMsg" xml:space="preserve">
     <value>Continue despite error?</value>
   </data>
+  <data name="TableOptions_ProtocolViolations" xml:space="preserve">
+    <value>All protocol violations</value>
+  </data>
 </root>

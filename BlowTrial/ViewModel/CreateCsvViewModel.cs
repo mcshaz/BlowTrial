@@ -1,13 +1,10 @@
-﻿using BlowTrial.Helpers;
-using BlowTrial.Infrastructure.Interfaces;
+﻿using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Models;
-using BlowTrial.Properties;
 using MvvmExtraLite.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Input;
-using System.Diagnostics;
 using AutoMapper;
 using BlowTrial.Domain.Tables;
 using System.Linq;
@@ -93,6 +90,11 @@ namespace BlowTrial.ViewModel
                     var screened = Mapper.Map<ScreenedPatientCsvModel[]>(_repository.ScreenedPatients.ToArray());
                     var csvEncodedScreened = CSVconversion.IListToStrings<ScreenedPatientCsvModel>(screened);
                     File.WriteAllLines(_model.Filename, csvEncodedScreened);
+                    break;
+                case TableOptions.ProtocolViolations:
+                    var viol = _repository.ProtocolViolations.ToArray();
+                    var csvEncodedViols = CSVconversion.IListToStrings<ProtocolViolation>(viol);
+                    File.WriteAllLines(_model.Filename, csvEncodedViols);
                     break;
                 default:
                     throw new InvalidOperationException("save called no table selected");

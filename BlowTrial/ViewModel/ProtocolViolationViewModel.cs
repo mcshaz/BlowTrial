@@ -17,6 +17,7 @@ using System.Windows.Input;
 using BlowTrial.Infrastructure.Extensions;
 using System.Windows.Media;
 using BlowTrial.Helpers;
+using AutoMapper;
 
 namespace BlowTrial.ViewModel
 {
@@ -248,7 +249,14 @@ namespace BlowTrial.ViewModel
                         break;
                     case MessageBoxResult.Cancel:
                         return false;
-                    default: //OK in Proceed ? OK/Cancel and No In Close without saving? yes/no/cancel
+                    case MessageBoxResult.No:
+                        if (!IsNewRecord)
+                        {
+                            _violation = Mapper.Map<ProtocolViolationModel>(_repository.FindViolation(_violation.Id));
+                            NotifyPropertyChanged("Details", "AbbrevDetails", "MajorViolation", "SeverityDescription");
+                        }
+                        break;
+                    default: //OK in Proceed 
                         break;
                 }
             }

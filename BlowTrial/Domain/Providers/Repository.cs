@@ -137,6 +137,10 @@ namespace BlowTrial.Domain.Providers
         {
             return _dbContext.Participants.Find(participantId);
         }
+        public ProtocolViolation FindViolation(int violationId)
+        {
+            return _dbContext.ProtocolViolations.Find(violationId);
+        }
         public void Add(Participant participant)
         {
             if (BlowTrial.Helpers.BlowTrialDataService.IsEnvelopeRandomising())
