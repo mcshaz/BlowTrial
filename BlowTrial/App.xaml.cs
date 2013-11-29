@@ -11,6 +11,9 @@ using System.Windows.Markup;
 using System.Linq;
 using System.IO;
 using BlowTrial.Helpers;
+using log4net;
+using log4net.Appender;
+using log4net.Config;
 
 namespace BlowTrial
 {
@@ -45,7 +48,6 @@ namespace BlowTrial
             {
                 Directory.CreateDirectory(baseDir);
             }
-
             AppDomain.CurrentDomain.SetData("DataDirectory", baseDir);
 
             //Application initialisation
@@ -113,6 +115,16 @@ namespace BlowTrial
             appSettings.RequestClose += wizardHandler;
             wizard.ShowDialog();
             return !appSettings.WasCancelled; // user cancel
+        }
+        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+#if DEBUG
+            throw e.Exception;
+#else
+            Log.Debug("Application_DispatcherUnhandledException", e.Exception);
+            e.Handled = true;
+#endif
         }
     }
 }
