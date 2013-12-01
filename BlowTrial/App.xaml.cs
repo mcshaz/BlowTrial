@@ -40,7 +40,10 @@ namespace BlowTrial
         }
         protected override void OnStartup(StartupEventArgs e)
         {
+#if !DEBUG
+            this.DispatcherUnhandledException += Application_DispatcherUnhandledException;
             log4net.Config.XmlConfigurator.Configure();
+#endif
             base.OnStartup(e);
 
             //Set data directory
@@ -116,15 +119,69 @@ namespace BlowTrial
             wizard.ShowDialog();
             return !appSettings.WasCancelled; // user cancel
         }
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-#if DEBUG
-            throw e.Exception;
-#else
-            Log.Debug("Application_DispatcherUnhandledException", e.Exception);
-            e.Handled = true;
-#endif
+            Log.Error("Application_DispatcherUnhandledException", e.Exception);
+            if (Log.IsErrorEnabled)
+            {
+                try
+                {
+                    string fn = GetLogOutputPath();
+                    if (fn != null)
+                    {
+                        MoveLogFileToCloud(fn);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Application_DispatcherUnhandled_ExceptionOnImplementation", ex);
+                    return;
+                }
+            }
+        }
+        static string GetLogOutputPath()
+        {
+            BackupDataSet bak = BlowTrialDataService.GetBackupDetails();
+            if (bak != null)
+            {
+                string dir = bak.CloudDirectories.FirstOrDefault();
+                if (dir != null)
+                {
+                    // if environment.machinename not working due to duplicate names, could try
+                    //var searcher = new System.Management.ManagementObjectSearcher("select * from " + Key);
+                    // key = Win32_DiskDrive or Win32_Processor
+                    return Path.Combine(dir, GetSafeFilename(string.Format("log_{0}.txt",Environment.MachineName)));
+                }
+            }
+            return null;
+        }
+        static string GetSafeFilename(string filename, string seperator="_")
+        {
+            return string.Join(seperator, filename.Split(Path.GetInvalidFileNameChars()));
+        }
+        static bool MoveLogFileToCloud(string cloudFileName)
+        {
+            foreach (var appender in LogManager.GetRepository().GetAppenders())
+            {
+                var fileAppender = appender as FileAppender;
+                if (fileAppender != null)
+                {
+                    string fn = fileAppender.File;
+                    try 
+                    {
+                        File.Copy(fn, cloudFileName,true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("MoveLogFileToCloud", ex);
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+
         }
     }
 }

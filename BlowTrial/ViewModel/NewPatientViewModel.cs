@@ -26,7 +26,6 @@ namespace BlowTrial.ViewModel
 
         private NewPatientModel _newPatient;
 
-
         #endregion // Fields
 
         #region Constructor
@@ -48,6 +47,11 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
+        public bool RecordAltered
+        {
+            get;
+            private set;
+        }
         public bool IsEnvelopeRandomising 
         { 
             get
@@ -65,6 +69,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.EnvelopeNumber) { return; }
                 _newPatient.EnvelopeNumber = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("EnvelopeNumber");
             }
         }
@@ -79,6 +84,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.StudyCentre) { return; }
                 _newPatient.StudyCentre = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("StudyCentre", "BackgroundBrush", "TextBrush", "HospitalIdentifierMask", "PhoneMask");
             }
         }
@@ -123,7 +129,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.Name) { return; }
-		        _newPatient.Name=value;
+                _newPatient.Name = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("Name", "DisplayName", "OkToRandomise", "EnvelopeNumber");
 	        }
         }
@@ -136,7 +143,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.HospitalIdentifier) { return; }
-		        _newPatient.HospitalIdentifier=value;
+                _newPatient.HospitalIdentifier = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("HospitalIdentifier", "DisplayName", "OkToRandomise", "EnvelopeNumber");
 	        }
         }
@@ -150,6 +158,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.PhoneNumber) { return; }
                 _newPatient.PhoneNumber = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("PhoneNumber");
             }
         }
@@ -163,6 +172,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.MothersName) { return; }
                 _newPatient.MothersName = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("MothersName");
             }
         }
@@ -175,7 +185,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.AdmissionWeight) { return; }
-		        _newPatient.AdmissionWeight=value;
+                _newPatient.AdmissionWeight = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("AdmissionWeight", "OkToRandomise", "EnvelopeNumber");
                 CalculateWtCentile();
 	        }
@@ -189,7 +200,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.GestAgeWeeks) { return; }
-		        _newPatient.GestAgeWeeks=value;
+                _newPatient.GestAgeWeeks = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("GestAgeWeeks", "GestAgeDays", "OkToRandomise", "EnvelopeNumber");
                 CalculateWtCentile();
 	        }
@@ -203,7 +215,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.GestAgeDays) { return; }
-		        _newPatient.GestAgeDays=value;
+                _newPatient.GestAgeDays = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("GestAgeWeeks", "GestAgeDays");
                 CalculateWtCentile();
 	        }
@@ -255,6 +268,7 @@ namespace BlowTrial.ViewModel
             _newPatient.Abnormalities = (from a in _abnormalities
                                          where !string.IsNullOrWhiteSpace(a.Description)
                                          select a.Description).ToSeparatedList(';');
+            RecordAltered = true;
             NotifyPropertyChanged("Abnormalities");
         }
 
@@ -267,7 +281,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.IsMale) { return; }
-		        _newPatient.IsMale=value;
+                _newPatient.IsMale = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("IsMale", "OkToRandomise", "EnvelopeNumber");
                 CalculateWtCentile();
 	        }
@@ -282,6 +297,7 @@ namespace BlowTrial.ViewModel
 	        {
                 if (value == _newPatient.DateOfBirth) { return; }
                 _newPatient.DateOfBirth = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("DateOfBirth", "OkToRandomise", "EnvelopeNumber", "TimeOfBirth");
 	        }
         }
@@ -295,6 +311,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _newPatient.TimeOfBirth) { return; }
                 _newPatient.TimeOfBirth = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("TimeOfBirth", "IsYoungerThanMinEnrolTime");
             }
         }
@@ -316,7 +333,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.LikelyDie24Hr) { return; }
-		        _newPatient.LikelyDie24Hr=value;
+                _newPatient.LikelyDie24Hr = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("LikelyDie24Hr", "IsConsentRequired");
 	        }
         }
@@ -329,7 +347,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.BadMalform) { return; }
-		        _newPatient.BadMalform=value;
+                _newPatient.BadMalform = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("BadMalform", "IsConsentRequired");
 	        }
         }
@@ -342,7 +361,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.BadInfectnImmune) { return; }
-		        _newPatient.BadInfectnImmune=value;
+                _newPatient.BadInfectnImmune = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("BadInfectnImmune", "IsConsentRequired");
 	        }
         }
@@ -355,7 +375,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.WasGivenBcgPrior) { return; }
-		        _newPatient.WasGivenBcgPrior=value;
+                _newPatient.WasGivenBcgPrior = value;
+                RecordAltered = true;
 		        NotifyPropertyChanged("WasGivenBcgPrior", "IsConsentRequired");
 	        }
         }
@@ -379,7 +400,8 @@ namespace BlowTrial.ViewModel
 	        set
 	        {
 		        if (value == _newPatient.RefusedConsent) { return; }
-		        _newPatient.RefusedConsent=value;
+                _newPatient.RefusedConsent = value;
+                RecordAltered = true;
                 NotifyPropertyChanged("RefusedConsent", "OkToRandomise", "EnvelopeNumber", "Name", "MothersName", "PhoneNumber");
 	        }
         }
@@ -394,6 +416,7 @@ namespace BlowTrial.ViewModel
                 if (value == _newPatient.MultipleSiblingId) { return; }
                 _newPatient.MultipleSiblingId = value;
                 _multipleSibling = null;
+                RecordAltered = true;
                 NotifyPropertyChanged("MultipleSiblingId");
             }
         }
@@ -462,7 +485,11 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _multipleSibling ?? (_multipleSibling = _repository.FindParticipant(MultipleSiblingId.Value));
+                if (_multipleSibling == null && MultipleSiblingId.HasValue)
+                {
+                    _multipleSibling = _repository.FindParticipant(MultipleSiblingId.Value);
+                }
+                return _multipleSibling;
             }
         }
 
@@ -755,10 +782,11 @@ namespace BlowTrial.ViewModel
         private void ClearAllFields()
         {
             if (_abnormalities!= null) { _abnormalities.Clear(); }
-            StudyCentre = StudyCentreOptions.First().Key;
             _newPatient = new NewPatientModel();
+            StudyCentre = StudyCentreOptions.First().Key;
             _wtForAgeCentile = null;
             NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired");
+            RecordAltered = false;
         }
         #endregion
 

@@ -94,6 +94,7 @@ namespace BlowTrial.Infrastructure
             }
         }
         #endregion
+
         #region finalizer
 
         ~BackupService()

@@ -240,7 +240,7 @@
     <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
-    <Compile Include="ViewModel\DataSummaryViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\DataSummaryViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\StudySitesViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
