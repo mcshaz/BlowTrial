@@ -14,6 +14,7 @@ using BlowTrial.Helpers;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
+using System.Deployment.Application;
 
 namespace BlowTrial
 {
@@ -41,6 +42,15 @@ namespace BlowTrial
         protected override void OnStartup(StartupEventArgs e)
         {
 #if !DEBUG
+            if (_log == null)
+            {
+                _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            }
+            string deployVersion = GetClickOnceVersion();
+            if (deployVersion != null)
+            {
+                ThreadContext.Properties["deploymentVersion"] = deployVersion;
+            }
             this.DispatcherUnhandledException += Application_DispatcherUnhandledException;
             log4net.Config.XmlConfigurator.Configure();
 #endif
@@ -119,11 +129,11 @@ namespace BlowTrial
             wizard.ShowDialog();
             return !appSettings.WasCancelled; // user cancel
         }
-        static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        static ILog _log;
         void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            Log.Error("Application_DispatcherUnhandledException", e.Exception);
-            if (Log.IsErrorEnabled)
+            _log.Error("Application_DispatcherUnhandledException", e.Exception);
+            if (_log.IsErrorEnabled)
             {
                 try
                 {
@@ -135,10 +145,23 @@ namespace BlowTrial
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Application_DispatcherUnhandled_ExceptionOnImplementation", ex);
+                    _log.Error("Application_DispatcherUnhandled_ImplementationException", ex);
                     return;
                 }
             }
+        }
+        static string GetClickOnceVersion()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                var myVersion = ApplicationDeployment.CurrentDeployment.CurrentVersion;
+                return string.Format("v{0}.{1}.{2}.{3}",
+                    myVersion.Major,
+                    myVersion.Minor,
+                    myVersion.Build,
+                    myVersion.Revision);
+            }
+            return null;
         }
         static string GetLogOutputPath()
         {
@@ -174,7 +197,7 @@ namespace BlowTrial
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("MoveLogFileToCloud", ex);
+                        _log.Error("MoveLogFileToCloud", ex);
                         return false;
                     }
                     return true;
