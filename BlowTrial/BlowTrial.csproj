@@ -31,7 +31,7 @@
     <MinimumRequiredVersion>1.0.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -175,8 +175,6 @@
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\BackupService.cs" />
-    <Compile Include="Infrastructure\Centiles\LMS.cs" />
-    <Compile Include="Infrastructure\Centiles\Stats.cs" />
     <Compile Include="Infrastructure\Converters\StudyCentreModelToNameConverter.cs" />
     <Compile Include="Infrastructure\Converters\NotNullConverter.cs" />
     <Compile Include="Infrastructure\Converters\NullableBoolConverter.cs" />
@@ -214,7 +212,6 @@
     <Compile Include="Infrastructure\Interfaces\IRepository.cs" />
     <Compile Include="Infrastructure\Interfaces\IUser.cs" />
     <Compile Include="Infrastructure\ValidationBase.cs" />
-    <Compile Include="Infrastructure\Centiles\WeightData.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
     <Compile Include="Models\ProtocolViolationModel.cs" />
@@ -442,7 +439,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\StatsForAge\StatsForAge.csproj">
+      <Project>{bd45a88d-c81d-4160-83f4-6058ec553b6f}</Project>
+      <Name>StatsForAge</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="amd64\Microsoft.VC90.CRT\msvcr90.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

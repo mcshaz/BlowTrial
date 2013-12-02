@@ -15,6 +15,7 @@ using log4net;
 using log4net.Appender;
 using log4net.Config;
 using System.Deployment.Application;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial
 {
@@ -174,14 +175,10 @@ namespace BlowTrial
                     // if environment.machinename not working due to duplicate names, could try
                     //var searcher = new System.Management.ManagementObjectSearcher("select * from " + Key);
                     // key = Win32_DiskDrive or Win32_Processor
-                    return Path.Combine(dir, GetSafeFilename(string.Format("log_{0}.txt",Environment.MachineName)));
+                    return Path.Combine(dir, StringExtensions.GetSafeFilename(string.Format("log_{0}.txt", Environment.MachineName)));
                 }
             }
             return null;
-        }
-        static string GetSafeFilename(string filename, string seperator="_")
-        {
-            return string.Join(seperator, filename.Split(Path.GetInvalidFileNameChars()));
         }
         static bool MoveLogFileToCloud(string cloudFileName)
         {

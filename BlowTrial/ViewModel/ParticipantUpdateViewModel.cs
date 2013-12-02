@@ -15,9 +15,9 @@ using BlowTrial.Domain.Tables;
 using AutoMapper;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using BlowTrial.Infrastructure.Centiles;
 using System.Windows.Threading;
 using System.Windows.Media;
+using StatsForAge.DataSets;
 
 namespace BlowTrial.ViewModel
 {
@@ -679,8 +679,11 @@ namespace BlowTrial.ViewModel
             }
             else
             {
+                var weightData = new UKWeightData();
+                int gestAgeWeeks = (int)_participant.GestAgeBirth;
+                int gestAgeDays = (int)Math.Round((_participant.GestAgeBirth - (double)gestAgeWeeks)*7);
                 WtForAgeCentile = string.Format(Strings.NewPatientVM_Centile,
-                    WeightData.CumSnormWtForAge(((double)LastContactWeight.Value)/1000, LastWeightDate.Value - DateTimeBirth.Date, _participant.GestAgeBirth, _participant.IsMale));
+                    weightData.CumSnormForAge((double)LastContactWeight.Value / 1000, (LastWeightDate.Value - DateTimeBirth.Date).Days, _participant.IsMale, gestAgeWeeks, gestAgeDays));
             }
         }
 

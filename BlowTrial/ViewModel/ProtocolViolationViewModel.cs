@@ -1,6 +1,5 @@
 ﻿using BlowTrial.Domain.Tables;
 using BlowTrial.Infrastructure;
-using BlowTrial.Infrastructure.Centiles;
 using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Models;
 using BlowTrial.Properties;

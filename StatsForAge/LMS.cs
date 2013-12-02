@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BlowTrial.Infrastructure.Centiles
+namespace StatsForAge
 {
     public class LMS
     {
