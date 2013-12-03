@@ -84,10 +84,7 @@ namespace BlowTrial.Infrastructure
 
         protected IEnumerable<string> _validatedProperties;
 
-        public virtual string GetValidationError(string propertyName)
-        {
-            throw new NotImplementedException("this method must be overriden");
-        }
+        public abstract string GetValidationError(string propertyName);
         #endregion
     }
 }

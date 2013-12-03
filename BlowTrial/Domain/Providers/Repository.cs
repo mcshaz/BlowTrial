@@ -277,6 +277,7 @@ namespace BlowTrial.Domain.Providers
                                  select p.CentreId).First();
             foreach (var v in vaccinesAdministered)
             {
+                v.ParticipantId = participantId;
                 if (v.Id == 0)
                 {
                     v.Id = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);

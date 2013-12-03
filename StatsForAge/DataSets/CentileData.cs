@@ -19,7 +19,9 @@ namespace StatsForAge
         #region const
         public const int TermGestation = 40;
         public const double DaysPerMonth = 365.25 / 12;
-        const double maximumGestationalCorrection = 43;
+        const double WeeksPerMonth = DaysPerMonth / 7;
+        const double MaximumGestationalCorrection = 43;
+        const double CeaseCorrectingDaysOfAge = DaysPerMonth * 24;
         #endregion
 
         public GenderRange GestAgeRange
@@ -46,86 +48,77 @@ namespace StatsForAge
         #endregion
 
         #region methods
-        public double CumSnormForAge(double value, int daysOfAge, bool isMale, int gestAgeInWeeksAtBirth = TermGestation, int gestAgeInDaysAtBirth = 0)
+
+        public double CumSnormForAge(double value, double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {
-            double totalWeeksGestation = (double)gestAgeInWeeksAtBirth + (double)gestAgeInDaysAtBirth/7;
-            return CumSnormForAge(value, daysOfAge, isMale, totalWeeksGestation);
-        }
-        double CumSnormForAge(double value, int daysOfAge, bool isMale, double gestAgeInWeeksAtBirth)
-        {
-            return LMSForAge(daysOfAge, isMale, gestAgeInWeeksAtBirth).CumSnormfromParams(value);
+            return LMSForAge(daysOfAge, isMale, totalWeeksGestAtBirth).CumSnormfromParams(value);
         }
 
-        double ZForAge(double value, int daysOfAge, bool isMale, int gestAgeInWeeksAtBirth = TermGestation, int gestAgeInDaysAtBirth = 0)
+        public double ZForAge(double value, double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {
-            double totalWeeksGestation = (double)gestAgeInWeeksAtBirth + (double)gestAgeInDaysAtBirth / 7;
-            return ZForAge(value, daysOfAge, isMale, totalWeeksGestation);
+            return LMSForAge(daysOfAge, isMale, totalWeeksGestAtBirth).ZfromParams(value);
         }
-        double ZForAge(double value, int daysOfAge, bool isMale, double gestAgeInWeeksAtBirth)
+        const double roundingFactor = 0.00001;
+        public LMS LMSForAge(double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {
-            return LMSForAge(daysOfAge, isMale, gestAgeInWeeksAtBirth).ZfromParams(value);
-        }
-        LMS LMSForAge(int daysOfAge, bool isMale, double gestAgeAtBirth)
-        {
-            if (isMale && (gestAgeAtBirth < GestAgeRange.MaleRange.Min) || 
-                (!isMale && gestAgeAtBirth < GestAgeRange.FemaleRange.Min))
+            if (isMale && (totalWeeksGestAtBirth < GestAgeRange.MaleRange.Min) || 
+                (!isMale && totalWeeksGestAtBirth < GestAgeRange.FemaleRange.Min))
             {
-                throw new ArgumentOutOfRangeException("gestAgeAtBirth", gestAgeAtBirth, string.Format("must be greater than {0}", (isMale ? GestAgeRange.MaleRange : GestAgeRange.FemaleRange).Min));
+                throw new ArgumentOutOfRangeException("totalWeeksGestAtBirth", totalWeeksGestAtBirth, string.Format("must be greater than {0} - check GestAgeRange property prior to calling", (isMale ? GestAgeRange.MaleRange : GestAgeRange.FemaleRange).Min));
             }
-            if (gestAgeAtBirth > maximumGestationalCorrection)
+            if (totalWeeksGestAtBirth > MaximumGestationalCorrection)
             {
-                gestAgeAtBirth = maximumGestationalCorrection;
+                totalWeeksGestAtBirth = MaximumGestationalCorrection;
             }
             if (daysOfAge < 0)
             {
                 throw new ArgumentOutOfRangeException("daysOfAge", daysOfAge, "must be >= 0");
             }
-
-            int lookupAge = (int)(daysOfAge / 7 + gestAgeAtBirth);
+            if (daysOfAge > CeaseCorrectingDaysOfAge) 
+            {
+                totalWeeksGestAtBirth = TermGestation;
+            }
+            double lookupTotalAge = daysOfAge/7 + totalWeeksGestAtBirth;
+            int lookupAge = (int)(lookupTotalAge+roundingFactor);
             int maxVal = isMale?GestAgeRange.MaleRange.Max:GestAgeRange.FemaleRange.Max;
             if (lookupAge == maxVal)
             {
+                int nextLookupAge = lookupAge + 1;
                 return LMSForGestAge(lookupAge, isMale)
-                    .LinearInterpolate(LMSForAgeWeeks(++lookupAge - TermGestation, isMale), DaysToWeekFraction(daysOfAge));
+                    .LinearInterpolate(LMSForAgeWeeks(nextLookupAge - TermGestation, isMale), lookupTotalAge - (double)lookupAge);
             }
             if (lookupAge < maxVal)
             {
+                int nextLookupAge = lookupAge + 1;
                 return LMSForGestAge(lookupAge, isMale)
-                    .LinearInterpolate(LMSForGestAge(++lookupAge, isMale), DaysToWeekFraction(daysOfAge));
+                    .LinearInterpolate(LMSForGestAge(nextLookupAge, isMale), lookupTotalAge - (double)lookupAge);
             }
-            lookupAge -= TermGestation;
+            lookupTotalAge -= TermGestation;
+            lookupAge = (int)(lookupTotalAge + roundingFactor);
             maxVal = isMale ? AgeWeeksRange.MaleRange.Max : AgeWeeksRange.FemaleRange.Max;
             if (lookupAge == maxVal)
             {
-                double ageMonthsLookup = Math.Ceiling(daysOfAge / DaysPerMonth);
-                double weeksMaxInDays = (double)maxVal * 7;
-                double fraction = ((double)daysOfAge - weeksMaxInDays) / (ageMonthsLookup * DaysPerMonth - weeksMaxInDays);
+                double ageMonthsLookup = Math.Ceiling((daysOfAge + totalWeeksGestAtBirth - TermGestation) / DaysPerMonth);
+                double fraction = (lookupTotalAge - (double)maxVal) / (ageMonthsLookup * WeeksPerMonth - (double)maxVal);
                 return LMSForAgeWeeks(lookupAge, isMale)
                     .LinearInterpolate(LMSForAgeMonths((int)ageMonthsLookup, isMale), fraction);
             }
             if (lookupAge < maxVal)
             {
+                int nextLookupAge = lookupAge + 1;
                 return LMSForAgeWeeks(lookupAge, isMale)
-                    .LinearInterpolate(LMSForAgeWeeks(++lookupAge, isMale), DaysToWeekFraction(daysOfAge));
+                    .LinearInterpolate(LMSForAgeWeeks(nextLookupAge, isMale), lookupTotalAge - (double)lookupAge);
             }
-            lookupAge = (int)(daysOfAge / DaysPerMonth);
+            lookupTotalAge = (daysOfAge + totalWeeksGestAtBirth - TermGestation)/DaysPerMonth;
+            lookupAge = (int)(lookupTotalAge + roundingFactor);
             maxVal = (isMale ? AgeMonthsRange.MaleRange.Max : AgeMonthsRange.FemaleRange.Max);
             if (lookupAge > maxVal) 
             {
                 return LMSForAgeMonths(maxVal, isMale); 
             }
+            int nextAge = lookupAge + 1;
             return LMSForAgeMonths(lookupAge, isMale)
-                .LinearInterpolate(LMSForAgeMonths(++lookupAge, isMale), DaysToMonthFraction(daysOfAge));
-        }
-        static double DaysToWeekFraction(double days)
-        {
-            double weeks = (days / 7);
-            return weeks - Math.Floor(weeks);
-        }
-        static double DaysToMonthFraction(double days)
-        {
-            double months = (days / DaysPerMonth);
-            return months - Math.Floor(months);
+                .LinearInterpolate(LMSForAgeMonths(nextAge, isMale), lookupTotalAge - (double)lookupAge);
         }
 
         #endregion

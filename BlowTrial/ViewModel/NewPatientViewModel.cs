@@ -90,11 +90,11 @@ namespace BlowTrial.ViewModel
         }
         public string HospitalIdentifierMask
         {
-            get { return (StudyCentre==null)?null:StudyCentre.HospitalIdentifierMask; }
+            get { return (StudyCentre==null)?string.Empty:StudyCentre.HospitalIdentifierMask; }
         }
         public string PhoneMask
         {
-            get { return (StudyCentre==null)?null:StudyCentre.PhoneMask; }
+            get { return (StudyCentre==null)?string.Empty:StudyCentre.PhoneMask; }
         }
         static readonly Brush _defaultBackground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
         static readonly Brush _defaultText = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
@@ -514,7 +514,7 @@ namespace BlowTrial.ViewModel
             {
                 var weightData = new UKWeightData();
                 WtForAgeCentile = string.Format(Strings.NewPatientVM_Centile ,
-                    weightData.CumSnormForAge((double)AdmissionWeight.Value / 1000, 0, IsMale.Value, GestAgeWeeks.Value, GestAgeDays ?? 0));
+                    weightData.CumSnormForAge((double)AdmissionWeight.Value / 1000, 0, IsMale.Value, (double)GestAgeWeeks.Value + (double)(GestAgeDays ?? 0)/7));
             }
         }
         void UpdateDateNotified(object args)
@@ -759,6 +759,13 @@ namespace BlowTrial.ViewModel
                 Missed = _newPatient.Missed,
                 WasGivenBcgPrior = _newPatient.WasGivenBcgPrior.Value
             };
+            if (GetValidationError("HospitalIdentifier",true)!=null)
+            {
+                log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType).Error(
+                    string.Format("duplicate value got through on Id:{0}, okToScreen:{1} , wasValid:{2}, isValid:{3}",
+                    screenedPt.HospitalIdentifier,
+                    _newPatient.OkToScreen(), WasValidOnLastNotify, IsValid()));
+            }
             _repository.Add(screenedPt);
             //NotifyPropertyChanged("DisplayName");
             ClearAllFields();

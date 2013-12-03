@@ -81,7 +81,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand SaveChangesCmd { get; private set; }
         void SaveChanges(object param)
         {
-            var roles = MembershipContext.Roles.Where(r => r.Name == MembershipContextInitialiser.Administrator).ToList();
+            var roles = MembershipContext.Roles.Where(r => r.Name == "Administrator").ToList();
             var newUser = new Domain.Tables.Investigator
                 {
                     Id = Guid.NewGuid(),

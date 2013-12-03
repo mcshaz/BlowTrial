@@ -31,7 +31,7 @@
     <MinimumRequiredVersion>1.0.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -212,6 +212,8 @@
     <Compile Include="Infrastructure\Interfaces\IRepository.cs" />
     <Compile Include="Infrastructure\Interfaces\IUser.cs" />
     <Compile Include="Infrastructure\ValidationBase.cs" />
+    <Compile Include="Migrations\MembershipConfiguration.cs" />
+    <Compile Include="Migrations\TrialDataConfiguration.cs" />
     <Compile Include="Models\CloudDirectoryModel.cs" />
     <Compile Include="Models\CreateCsvModel.cs" />
     <Compile Include="Models\ProtocolViolationModel.cs" />
@@ -221,7 +223,6 @@
     <Compile Include="Models\WizardModels\StudySitesModel.cs" />
     <Compile Include="Models\SummaryModels.cs" />
     <Compile Include="Models\VaccineAdministeredModel.cs" />
-    <Compile Include="Security\MembershipRepository.cs" />
     <Compile Include="Models\ParticipantModel.cs" />
     <Compile Include="Models\NewPatientModel.cs" />
     <Compile Include="Security\AnnonymousIdentity.cs" />
