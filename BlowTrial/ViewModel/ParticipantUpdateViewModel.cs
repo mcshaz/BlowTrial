@@ -364,7 +364,7 @@ namespace BlowTrial.ViewModel
                 if (_participant.DeathOrLastContactDate == value) { return; }
                 _participant.DeathOrLastContactDate = value;
                 IsParticipantModelChanged = true;
-                NotifyPropertyChanged("DeathOrLastContactDate", "DeathOrLastContactTime", "LastPossibleDischarge", "LastPossibleDate");
+                NotifyPropertyChanged("DeathOrLastContactDate", "DeathOrLastContactTime", "DeathLastContactOrToday");
             }
         }
         public TimeSpan? DeathOrLastContactTime
@@ -494,6 +494,7 @@ namespace BlowTrial.ViewModel
                 {
                     _participant.DeathOrLastContactDate = null;
                     _participant.DeathOrLastContactTime = null;
+                    _participant.CauseOfDeath = CauseOfDeathOption.Missing;
                 }
                 NotifyPropertyChanged("OutcomeAt28Days", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath","DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
             }

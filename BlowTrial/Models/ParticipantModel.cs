@@ -434,12 +434,15 @@ namespace BlowTrial.Models
 
         }
         #endregion //validation
+
         #region Methods
         static double RateOfChange(double startingValue,double finishingValue ,double timeUnitsElapsed)
         {
             return Math.Pow(2, Math.Log(finishingValue / startingValue, 2) / timeUnitsElapsed); // work in log 2 as ? performance advantage for binary systems
         }
         #endregion
+
+        #region Static Methods
         static OutcomeAt28DaysOption[] DeathOrLastContactRequiredIf = new OutcomeAt28DaysOption[]
         {
             OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
@@ -447,6 +450,8 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DischargedAndLikelyToHaveDied,
             OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived
         };
+        #endregion
+
         #region DataRequired
         internal static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequired()
         {

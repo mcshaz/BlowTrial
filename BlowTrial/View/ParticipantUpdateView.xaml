@@ -194,7 +194,7 @@
                             <DatePicker x:Name="dischargeDatePicker" Width="120" SelectedDate="{Binding Path=DischargeDate, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday,Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="dischargeTimeTxt" 
-                                                      Value="{Binding Path=DischargeTime, StringFormat=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
+                                                      Value="{Binding Path=DischargeTime, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
                                                       IncludeLiteralsInValue="True"
                                                       IncludePromptInValue="False"
                                                       ValueDataType="{x:Type s:String}"
@@ -250,7 +250,7 @@
                             <DatePicker x:Name="deathOrContactDatePicker" Width="120" SelectedDate="{Binding Path=DeathOrLastContactDate, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}"  DisplayDateStart="{Binding DischargeOrEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding Today, Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="deathOrContactTimeTxt" 
-                                                      Value="{Binding Path=DeathOrLastContactTime, StringFormat=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
+                                                      Value="{Binding Path=DeathOrLastContactTime, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
                                                       IncludeLiteralsInValue="True"
                                                       IncludePromptInValue="False"
                                                       ValueDataType="{x:Type s:String}"

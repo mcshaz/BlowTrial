@@ -31,7 +31,7 @@
     <MinimumRequiredVersion>1.0.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -175,6 +175,8 @@
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\BackupService.cs" />
+    <Compile Include="Infrastructure\Converters\NullableDateTimeConverter.cs" />
+    <Compile Include="Infrastructure\Converters\NullableTimeSpanConverter.cs" />
     <Compile Include="Infrastructure\Converters\StudyCentreModelToNameConverter.cs" />
     <Compile Include="Infrastructure\Converters\NotNullConverter.cs" />
     <Compile Include="Infrastructure\Converters\NullableBoolConverter.cs" />

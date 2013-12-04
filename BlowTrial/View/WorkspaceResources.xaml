@@ -6,6 +6,7 @@
     <myCon:NullableBoolConverter x:Key="nullBoolConvert" />
     <myCon:IsNotNullConverter x:Key="isNotNullConvert" />
     <BooleanToVisibilityConverter x:Key="boolToVisConverter" />
+    <myCon:NullableTimeSpanConverter x:Key="nullTimeConvert" />
 
     <Style x:Key="errorStyle" TargetType="TextBlock">
         <Setter Property="FontStyle" Value="Italic" />

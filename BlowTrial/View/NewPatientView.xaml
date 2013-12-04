@@ -225,8 +225,8 @@
                       x:Name="dateOfBirthDatePicker" Width="120" SelectedDate="{Binding Path=DateOfBirth, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}"  
                         DisplayDateEnd="{Binding Path=Today, Mode=OneWay}" DisplayDateStart="{Binding Path=MinScreeningDate, Mode=OneWay}"/>
-                    <wpfToolkit:MaskedTextBox Value="{Binding Path=TimeOfBirth, StringFormat=hh\\:mm, ValidatesOnDataErrors=True,     
-                        UpdateSourceTrigger=PropertyChanged}" 
+                    <wpfToolkit:MaskedTextBox Value="{Binding Path=TimeOfBirth, ValidatesOnDataErrors=True,     
+                        UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm}" 
                             IncludePromptInValue="False"
                             IncludeLiteralsInValue="True"
                             ValueDataType="{x:Type s:String}"
@@ -243,7 +243,7 @@
                     -->
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
-                    <TextBlock Text="As patient is less than 60 minutes old, they may be screened but not enrolled yet" TextWrapping="Wrap" Style="{StaticResource siteColour}"
+                    <TextBlock Text="patient is &lt; 60 minutes old - they may be screened but not enrolled yet" TextWrapping="Wrap" Style="{StaticResource siteColour}"
                              Visibility="{Binding Path=IsYoungerThanMinEnrolTime, Converter={StaticResource boolToVisConverter}, Mode=OneWay}" />
                     <ContentPresenter 
                             Content="{Binding ElementName=dateOfBirthDatePicker, Path=(Validation.Errors).CurrentItem}"/>
