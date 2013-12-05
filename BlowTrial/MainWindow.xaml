@@ -29,7 +29,9 @@
                     <MenuItem Header="Manage _Users" IsEnabled="False"/>
                     <MenuItem Header="Start computerised randomising" Command="{Binding Path=StopEnvelopeCmd}" />
                 </MenuItem>
-                <MenuItem Header="_Help" />
+                <MenuItem Header="_Help" >
+                    <MenuItem Header="{Binding Path=Version, Mode=OneWay}" IsEnabled="False" />
+                </MenuItem>
             </Menu>
         </DockPanel>
 

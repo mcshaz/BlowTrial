@@ -40,8 +40,7 @@ namespace BlowTrial.ViewModel
         public MainWindowViewModel() : this(new Repository(()=>new TrialDataContext())) { }
         public MainWindowViewModel(IRepository repository) : base(repository)
         {
-            //base.DisplayName = Strings.MainWindowViewModel_WorkspaceName;
-            //display Login
+            this.Version = BlowTrial.App.GetClickOnceVersion() ?? "Development Version";
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
@@ -58,6 +57,8 @@ namespace BlowTrial.ViewModel
         {
             get { return Strings.Blowtrial_ProjectName; }
         }
+
+        public String Version { get; private set; }
         #endregion // Properties
 
         #region Commands

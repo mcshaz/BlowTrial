@@ -74,8 +74,21 @@ namespace BlowTrial
 
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
             //test if wizard needs to run
-            bool displayWizard = (BlowTrialDataService.GetBackupDetails().BackupData == null);
-
+            bool displayWizard;
+#if !DEBUG
+            try
+            {
+#endif
+                displayWizard = (BlowTrialDataService.GetBackupDetails().BackupData == null);
+#if !DEBUG      
+            }
+            catch(Exception ex)
+            {
+                _log.Error("App_FirstDatabaseAccessException", ex);
+                MessageBox.Show("An error has occured trying to access the database - this may be because of access permissions or the database pasword may have changed. An error has been logged, but this file will have to be attached and emailed to the application developer");
+                throw;
+            }
+#endif
             if (!displayWizard)
             {
                 using (var t = new TrialDataContext())
@@ -151,7 +164,7 @@ namespace BlowTrial
                 }
             }
         }
-        static string GetClickOnceVersion()
+        public static string GetClickOnceVersion()
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
