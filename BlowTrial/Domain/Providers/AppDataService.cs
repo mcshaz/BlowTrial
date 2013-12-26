@@ -13,6 +13,21 @@ namespace BlowTrial.Helpers
 {
     public static class BlowTrialDataService
     {
+        public static Exception TestConnection()
+        {
+            try
+            {
+                using (var a = new MembershipContext())
+                {
+                    a.CloudDirectories.Any();
+                }
+            }
+            catch(Exception ex)
+            {
+                return ex;
+            }
+            return null;
+        }
         public static void StopEnvelopeRandomising()
         {
             using (var a = new MembershipContext())

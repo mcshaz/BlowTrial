@@ -66,7 +66,16 @@ namespace BlowTrial
             AppDomain.CurrentDomain.SetData("DataDirectory", baseDir);
 
             //Application initialisation
-            AutoMapperConfiguration.Configure();
+            try
+            { 
+                AutoMapperConfiguration.Configure();
+            }
+            catch (Exception ex)
+            {
+                _log.Error("App_AutomapperConfigurationException", ex);
+                MessageBox.Show("An error has occured with automapper. An error has been logged, but this file will have to be attached and emailed to the application developer");
+                throw;
+            }
 
             //Security
             CustomPrincipal customPrincipal = new CustomPrincipal();
@@ -74,21 +83,26 @@ namespace BlowTrial
 
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
             //test if wizard needs to run
-            bool displayWizard;
-#if !DEBUG
+
             try
             {
-#endif
-                displayWizard = (BlowTrialDataService.GetBackupDetails().BackupData == null);
-#if !DEBUG      
+                using (var db = new TrialDataContext())
+                {
+                    db.Participants.Any();
+                }
+                using (var db = new MembershipContext())
+                {
+                    db.CloudDirectories.Any();
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _log.Error("App_FirstDatabaseAccessException", ex);
                 MessageBox.Show("An error has occured trying to access the database - this may be because of access permissions or the database pasword may have changed. An error has been logged, but this file will have to be attached and emailed to the application developer");
                 throw;
             }
-#endif
+
+            bool displayWizard = (BlowTrialDataService.GetBackupDetails().BackupData == null);
             if (!displayWizard)
             {
                 using (var t = new TrialDataContext())
