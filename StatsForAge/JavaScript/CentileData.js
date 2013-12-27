@@ -48,18 +48,16 @@
             if (lookupAge == maxVal)
             {
                 nextLookupAge = lookupAge + 1;
-                return linearInterpolate(
-                    argObj.lMSForGestAge(lookupAge, isMale),
+                return argObj.lMSForGestAge(lookupAge, isMale).linearInterpolate(
                     argObj.lMSForAgeWeeks(nextLookupAge - TermGestation, isMale),
-                    lookupTotalAge - lookupAge);
+                    lookupTotalAge - lookupAge));
             }
             if (lookupAge < maxVal)
             {
                 nextLookupAge = lookupAge + 1;
-                return linearInterpolate(
-                    argObj.lMSForGestAge(lookupAge, isMale),
+                return argObj.lMSForGestAge(lookupAge, isMale).linearInterpolate(
                     argObj.lMSForGestAge(nextLookupAge, isMale),
-                    lookupTotalAge - lookupAge);
+                    lookupTotalAge - lookupAge));
             }
             lookupTotalAge -= TermGestation;
             lookupAge = parseInt(lookupTotalAge + roundingFactor);
@@ -68,18 +66,16 @@
             {
                 ageMonthsLookup = Math.Ceiling((daysOfAge + totalWeeksGestAtBirth - TermGestation) / DaysPerMonth);
                 fraction = (lookupTotalAge - maxVal) / (ageMonthsLookup * WeeksPerMonth - maxVal);
-                return linearInterpolate(
-                    argObj.lMSForAgeWeeks(lookupAge, isMale),
+                return argObj.lMSForAgeWeeks(lookupAge, isMale).linearInterpolate(
                     argObj.lMSForAgeMonths(ageMonthsLookup, isMale),
-                    fraction);
+                    fraction));
             }
             if (lookupAge < maxVal)
             {
                 nextLookupAge = lookupAge + 1;
-                return linearInterpolate(
-                    lMSForAgeWeeks(lookupAge, isMale),
+                return lMSForAgeWeeks(lookupAge, isMale).linearInterpolate(
                     argObj.lMSForAgeWeeks(nextLookupAge, isMale), 
-                    lookupTotalAge - lookupAge);
+                    lookupTotalAge - lookupAge));
             }
             lookupTotalAge = (daysOfAge + totalWeeksGestAtBirth - TermGestation)/DaysPerMonth;
             lookupAge = parseInt(lookupTotalAge + roundingFactor);
@@ -89,10 +85,9 @@
                 return argObj.lMSForAgeMonths(maxVal, isMale); 
             }
             nextLookupAge = lookupAge + 1;
-            return linearInterpolate(
-                argObj.lMSForAgeMonths(lookupAge, isMale),
-                argObj.lMSForAgeMonths(nextLookupAge, isMale),
-                lookupTotalAge - lookupAge);
+            return argObj.lMSForAgeMonths(lookupAge, isMale).linearInterpolate(
+				argObj.lMSForAgeMonths(nextLookupAge, isMale),
+				lookupTotalAge - lookupAge));
         };
     }
 
@@ -118,14 +113,14 @@
         this.s = s;
     }
 
-    function linearInterpolate(start, interpolWith, fraction) {
+    Lms.prototype.linearInterpolate(interpolWith, fraction) {
         if (fraction < 0 || fraction > 1) {
             throw ("fraction must be between 0 and 1");
         }
         var oppFraction = 1 - fraction;
         return new Lms(
-            oppFraction * start.l + fraction * interpolWith.l,
-            oppFraction * start.m + fraction * interpolWith.m,
-            oppFraction * start.s + fraction * interpolWith.s
+            oppFraction * this.l + fraction * interpolWith.l,
+            oppFraction * this.m + fraction * interpolWith.m,
+            oppFraction * this.s + fraction * interpolWith.s
         );
     }

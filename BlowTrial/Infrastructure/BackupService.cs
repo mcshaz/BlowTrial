@@ -77,16 +77,11 @@ namespace BlowTrial.Infrastructure
         bool _isCleanedup;
         public void Cleanup()
         {
-            Cleanup(true);
-            GC.SuppressFinalize(this);
-        }
-        void Cleanup(bool isCleaningUp)
-        {
             if (!_isCleanedup)
             {
                 _timer.Tick -= _handler;
                 _timer.Stop();
-                if (isCleaningUp && _isToBackup)
+                if (_isToBackup)
                 {
                     Backup(this, new EventArgs());
                 }
@@ -94,13 +89,5 @@ namespace BlowTrial.Infrastructure
             }
         }
         #endregion
-
-        #region finalizer
-
-        ~BackupService()
-        {
-            Cleanup(false);
-        }
-        #endregion // IDiposable
     }
 }
