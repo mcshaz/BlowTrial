@@ -904,7 +904,8 @@ namespace BlowTrial.ViewModel
 
         void OnAgeIncrementing(object sender, EventArgs e)
         {
-            NotifyPropertyChanged("AgeDays", "CGA", "Today", "DeathLastContactOrToday", "Is28Days");
+            NotifyPropertyChanged("AgeDays", "CGA", "Today", "DeathLastContactOrToday");
+            SetListsBoxes();
             _ageTimer.Interval = IntervalToSameTime(_participant.DateTimeBirth);
         }
 

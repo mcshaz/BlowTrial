@@ -1609,7 +1609,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 28 days of age.
+        ///   Looks up a localized string similar to 28 days old ({0:g}).
         /// </summary>
         public static string TimeInterval_28days {
             get {

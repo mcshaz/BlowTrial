@@ -25,6 +25,8 @@ namespace BlowTrial.Models
         #region Fields
         const double TicksPerWeek = TimeSpan.TicksPerDay * 7;
         TimeSpan _cgabirth;
+        bool _is28Days;
+        DateTime? _becomes28On;
         #endregion //Fields
 
         #region Properties
@@ -72,6 +74,14 @@ namespace BlowTrial.Models
         public TimeSpan Age
         {
             get { return (DateTime.Now - DateTimeBirth);  }
+        }
+
+        private DateTime Becomes28On
+        {
+            get
+            {
+                return (_becomes28On ?? (_becomes28On = DateTimeBirth.AddDays(28))).Value;
+            }
         }
         TimeSpan CgaBirth
         {
@@ -400,20 +410,19 @@ namespace BlowTrial.Models
             splitter.ValidateIsAfter(Strings.ParticipantModel_Error_RegistrationDateTime,
                 RegisteredAt,
                 ref error);
-            
-            DateTime? bestDate = splitter.DateAndTime ?? splitter.Date;
-            if (bestDate.HasValue && (bestDate.Value - DateTimeBirth).TotalDays > 28)
+            DateTime nowVal = now ?? DateTime.Now;
+            if (nowVal >= Becomes28On)
             {
                 splitter.ValidateIsBefore(
-                    Strings.TimeInterval_28days,
-                    DateTimeBirth.AddDays(28),
+                    string.Format(Strings.TimeInterval_28days, Becomes28On),
+                    Becomes28On,
                     ref error);
             }
             else
             {
                 splitter.ValidateIsBefore(
                     Strings.DateTime_Now,
-                    now ?? DateTime.Now,
+                    nowVal,
                     ref error);
             }
         }

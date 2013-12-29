@@ -747,6 +747,6 @@
     <value>enrollment</value>
   </data>
   <data name="TimeInterval_28days" xml:space="preserve">
-    <value>28 days of age</value>
+    <value>28 days old ({0:g})</value>
   </data>
 </root>

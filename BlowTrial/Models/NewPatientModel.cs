@@ -447,6 +447,7 @@ namespace BlowTrial.Models
             }
             var error = _dateTimeEnrollmentSplitter.ValidateNotEmpty();
             _dateTimeEnrollmentSplitter.ValidateIsAfter(Strings.DateOfBirth, DateTimeBirth.Value, ref error);
+            _dateTimeEnrollmentSplitter.ValidateIsBefore(Strings.DateTime_Now, DateTime.Now, ref error);
             return error;
         }
         string ValidateConsent()

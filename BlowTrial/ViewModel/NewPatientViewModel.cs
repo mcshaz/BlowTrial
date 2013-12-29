@@ -328,7 +328,8 @@ namespace BlowTrial.ViewModel
                     var enrol = _newPatient.DateTimeOfEnrollment;
                     if (dob.HasValue && !_isEnrollmentDateTimeAssigned)
                     {
-                        _newPatient.DateTimeOfEnrollment = dob.Value.AddHours(2);
+                        DateTime defaultEnrol = new DateTime[] {dob.Value.AddHours(2), DateTime.Now}.Min(d=>d);
+                        _newPatient.DateTimeOfEnrollment = defaultEnrol;
                     }
                     NotifyPropertyChanged("DateOfEnrollment", "TimeOfEnrollment");
                 }
