@@ -39,6 +39,8 @@ namespace BlowTrial.Models
                 "GestAgeDays",
                 "DateOfBirth",
                 "TimeOfBirth",
+                "DateOfEnrollment",
+                "TimeOfEnrollment",
                 "IsMale",
                 "LikelyDie24Hr",
                 "BadMalform",
@@ -66,7 +68,8 @@ namespace BlowTrial.Models
             get { return _hospitalIdentifier; }
             set
             {
-                _hospitalIdentifier = value.ToUpper();
+                if (string.IsNullOrWhiteSpace(value)) { _hospitalIdentifier = null; }
+                else { _hospitalIdentifier = value.ToUpper(); }
             }
         }
         public string PhoneNumber { get; set; }
@@ -111,6 +114,7 @@ namespace BlowTrial.Models
 	    public string Abnormalities {get;set;}
 	    public bool? IsMale {get;set;}
         DateTimeSplitter _dateTimeBirthSplitter = new DateTimeSplitter();
+        DateTimeSplitter _dateTimeEnrollmentSplitter = new DateTimeSplitter();
 	    public DateTime? DateTimeBirth 
         {
             get { return _dateTimeBirthSplitter.DateAndTime; }
@@ -127,6 +131,21 @@ namespace BlowTrial.Models
             set { _dateTimeBirthSplitter.Time = value; }
         }
         public DateTime? DateOfAdmission { get; set; }
+        public DateTime? DateTimeOfEnrollment
+        {
+            get { return _dateTimeEnrollmentSplitter.DateAndTime; }
+            set { _dateTimeEnrollmentSplitter.DateAndTime = value; }
+        }
+        public DateTime? DateOfEnrollment
+        {
+            get { return _dateTimeEnrollmentSplitter.Date; }
+            set { _dateTimeEnrollmentSplitter.Date = value; }
+        }
+        public TimeSpan? TimeOfEnrollment
+        {
+            get { return _dateTimeEnrollmentSplitter.Time; }
+            set { _dateTimeEnrollmentSplitter.Time = value; }
+        }
         public bool? LikelyDie24Hr { get; set; }
         public bool? BadMalform { get; set; }
         public bool? BadInfectnImmune { get; set; }
@@ -166,8 +185,8 @@ namespace BlowTrial.Models
         private bool AgeOkToRandomise()
         {
             if (DateTimeBirth == null) { return false; }
-            var now = DateTime.Now;
-            var age = now -this.DateTimeBirth.Value;
+            var enrol = DateTimeOfEnrollment ?? DateTime.Now;
+            var age = enrol -this.DateTimeBirth.Value;
             return age.Days < MaxAgeDaysEnrol && age.TotalMinutes >= MinEnrolAgeMins;
         }
         #endregion
@@ -226,6 +245,12 @@ namespace BlowTrial.Models
                     break;
                 case "DateOfBirth":
                     error = this.ValidateDob().DateError;
+                    break;
+                case "TimeOfEnrollment":
+                    error = this.ValidateEnrollment().TimeError;
+                    break;
+                case "DateOfEnrollment":
+                    error = this.ValidateEnrollment().DateError;
                     break;
                 case "IsMale":
                     error = ValidateDDLNotNull(IsMale);
@@ -402,7 +427,7 @@ namespace BlowTrial.Models
         DateTimeErrorString ValidateDob()
         {
             var error = _dateTimeBirthSplitter.ValidateNotEmpty();
-            var now = DateTime.Now;
+            DateTime now = DateTime.Now;
             _dateTimeBirthSplitter.ValidateIsBefore(Strings.DateTime_Now, now, ref error);
             if (error.DateError == null && DateTimeBirth.HasValue)
             {
@@ -412,6 +437,16 @@ namespace BlowTrial.Models
                     error.DateError = Strings.NewPatient_Error_DOBtooOld;
                 }
             }
+            return error;
+        }
+        DateTimeErrorString ValidateEnrollment()
+        {
+            if (!(IsEnvelopeRandomising && OkToRandomise())) 
+            { 
+                return new DateTimeErrorString(); 
+            }
+            var error = _dateTimeEnrollmentSplitter.ValidateNotEmpty();
+            _dateTimeEnrollmentSplitter.ValidateIsAfter(Strings.DateOfBirth, DateTimeBirth.Value, ref error);
             return error;
         }
         string ValidateConsent()

@@ -35,7 +35,7 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                    
+
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -78,9 +78,11 @@
                     <RowDefinition Height="30" />
                     <ex:RowDefinitionExtended Visible="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Height="Auto" />
                     <ex:RowDefinitionExtended Visible="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Height="30" />
+                    <ex:RowDefinitionExtended Visible="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Height="Auto" />
+                    <ex:RowDefinitionExtended Visible="{Binding Path=IsEnvelopeRandomising, Mode=OneWay}" Height="30" />
                 </Grid.RowDefinitions>
 
-                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="33" VerticalAlignment="Stretch" Width="6" />
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="35" VerticalAlignment="Stretch" Width="6" />
                 <!-- Hospital -->
                 <Label 
                   Grid.Row="0" Grid.Column="0" 
@@ -421,14 +423,14 @@
                   Grid.Row="29" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                   Content="{Binding ElementName=phoneNumberTxt, Path=(Validation.Errors).CurrentItem}"
                   />
-                
+
                 <!--MultipleSiblingId-->
                 <Label 
                   Grid.Row="30" Grid.Column="0" 
                   HorizontalAlignment="Right"
                   Target="{Binding ElementName=hasSiblingEnrolledChk}" >
                     <TextBlock TextWrapping="Wrap">
-                        Has a twin or triplet enrolled in this trial:
+                        Twin already enrolled (check &amp; then enter DAB trial ID):
                     </TextBlock>
                 </Label>
                 <CheckBox Grid.Row="30" Grid.Column="2" x:Name="hasSiblingEnrolledChk" Margin="6,1,0,0" VerticalAlignment="Center"
@@ -473,13 +475,40 @@
                   x:Name="envelopeNumberTxt"
                   Grid.Row="32" Grid.Column="2" 
                   IsEnabled="{Binding Path=OkToRandomise, Mode=OneWay}"
-                  Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
                   />
                 <ContentPresenter 
                   Grid.Row="33" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                   Content="{Binding ElementName=envelopeNumberTxt, Path=(Validation.Errors).CurrentItem}"
                   />
-
+                <!-- DateTime Enrollment-->
+                <Label 
+                  Grid.Row="34" Grid.Column="0" 
+                  Content="Date/Time of Enrollment:" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=dateOfEnrollmentDatePicker}" 
+                  />
+                <StackPanel Orientation="Horizontal" Grid.Row="34" Grid.Column="2" HorizontalAlignment="Stretch" >
+                    <DatePicker
+                      x:Name="dateOfEnrollmentDatePicker" Width="120" SelectedDate="{Binding Path=DateOfEnrollment, ValidatesOnDataErrors=True, 
+                            UpdateSourceTrigger=PropertyChanged}"  
+                        DisplayDateEnd="{Binding Path=Today, Mode=OneWay}" DisplayDateStart="{Binding Path=MinScreeningDate, Mode=OneWay}"
+                        IsEnabled="{Binding Path=OkToRandomise, Mode=OneWay}" />
+                    <wpfToolkit:MaskedTextBox Value="{Binding Path=TimeOfEnrollment, ValidatesOnDataErrors=True,     
+                        UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm}" 
+                            IncludePromptInValue="False"
+                            IncludeLiteralsInValue="True"
+                            ValueDataType="{x:Type s:String}"
+                            Grid.Row="16" Grid.Column="1" Margin="10,0" x:Name="timeOfEnrollmentTxt" 
+                            Mask="90:00" Width="50" TextAlignment="Center"
+                            IsEnabled="{Binding Path=OkToRandomise, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="35" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+                    <ContentPresenter 
+                            Content="{Binding ElementName=dateOfEnrollmentDatePicker, Path=(Validation.Errors).CurrentItem}"/>
+                    <ContentPresenter 
+                          Content="{Binding ElementName=timeOfEnrollmentTxt, Path=(Validation.Errors).CurrentItem}" Margin="5,0,0,0"/>
+                </StackPanel>
             </Grid>
         </ScrollViewer>
         <Line Grid.Row="1" Grid.RowSpan="2" 

@@ -25,6 +25,7 @@ namespace BlowTrial.ViewModel
         #region Fields
 
         private NewPatientModel _newPatient;
+        private bool _isEnrollmentDateTimeAssigned;
 
         #endregion // Fields
 
@@ -299,6 +300,14 @@ namespace BlowTrial.ViewModel
                 _newPatient.DateOfBirth = value;
                 RecordAltered = true;
                 NotifyPropertyChanged("DateOfBirth", "OkToRandomise", "EnvelopeNumber", "TimeOfBirth");
+                if (IsEnvelopeRandomising) 
+                {
+                    if (!DateOfEnrollment.HasValue)
+                    {
+                        _newPatient.DateOfEnrollment = value.Value;
+                    }
+                    NotifyPropertyChanged("DateOfEnrollment", "TimeOfEnrollment");
+                }
 	        }
         }
         public TimeSpan? TimeOfBirth
@@ -313,6 +322,47 @@ namespace BlowTrial.ViewModel
                 _newPatient.TimeOfBirth = value;
                 RecordAltered = true;
                 NotifyPropertyChanged("TimeOfBirth", "IsYoungerThanMinEnrolTime");
+                if (IsEnvelopeRandomising)
+                {
+                    var dob = _newPatient.DateTimeBirth;
+                    var enrol = _newPatient.DateTimeOfEnrollment;
+                    if (dob.HasValue && !_isEnrollmentDateTimeAssigned)
+                    {
+                        _newPatient.DateTimeOfEnrollment = dob.Value.AddHours(2);
+                    }
+                    NotifyPropertyChanged("DateOfEnrollment", "TimeOfEnrollment");
+                }
+                NotifyPropertyChanged("OkToRandomise");
+            }
+        }
+        public DateTime? DateOfEnrollment
+        {
+            get
+            {
+                return _newPatient.DateOfEnrollment;
+            }
+            set
+            {
+                if (value == _newPatient.DateOfEnrollment) { return; }
+                _newPatient.DateOfEnrollment = value;
+                RecordAltered = true;
+                _isEnrollmentDateTimeAssigned = true;
+                NotifyPropertyChanged("DateOfEnrollment", "TimeOfEnrollment", "OkToRandomise");
+            }
+        }
+        public TimeSpan? TimeOfEnrollment
+        {
+            get
+            {
+                return _newPatient.TimeOfEnrollment;
+            }
+            set
+            {
+                if (value == _newPatient.TimeOfEnrollment) { return; }
+                _newPatient.TimeOfEnrollment = value;
+                RecordAltered = true;
+                _isEnrollmentDateTimeAssigned = true;
+                NotifyPropertyChanged("DateOfEnrollment", "TimeOfEnrollment", "DateOfBirth", "TimeOfBirth");
             }
         }
         public bool IsYoungerThanMinEnrolTime
@@ -660,10 +710,12 @@ namespace BlowTrial.ViewModel
         /// 
         public void Randomise(object parameter)
         {
+#if DEBUG
             if (!IsValid() || !_newPatient.OkToRandomise())
             {
                 throw new InvalidOperationException("Underlying NewPatientModel does not validate");
             }
+#endif
             string violationString = null;
             if (IsEnvelopeRandomising) 
             {
@@ -684,7 +736,7 @@ namespace BlowTrial.ViewModel
                 Abnormalities =_newPatient.Abnormalities,
                 PhoneNumber = _newPatient.PhoneNumber,
                 IsMale = _newPatient.IsMale.Value,
-                RegisteredAt = DateTime.Now,
+                RegisteredAt = _newPatient.DateTimeOfEnrollment ?? DateTime.Now,
                 RegisteringInvestigator = GetCurrentPrincipal().Identity.Name,
                 CentreId = StudyCentre.Id
             };
@@ -793,8 +845,9 @@ namespace BlowTrial.ViewModel
             _newPatient = new NewPatientModel();
             StudyCentre = StudyCentreOptions.First().Key;
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "DateOfEnrollment", "TimeOfEnrollment","LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired");
             RecordAltered = false;
+            _isEnrollmentDateTimeAssigned = false;
         }
         #endregion
 
@@ -836,7 +889,7 @@ namespace BlowTrial.ViewModel
         {
             string error = _newPatient.GetValidationError(propertyName, hardErrorsOnly);
 
-            if (error==null && ValidatedProperties.Contains(propertyName))
+            if ((error == null && ValidatedProperties.Contains(propertyName)) || (!hardErrorsOnly && propertyName == "EnvelopeNumber"))
             {
                 switch (propertyName)
                 {
@@ -847,7 +900,7 @@ namespace BlowTrial.ViewModel
                         error = this.ValidateSiblingId();
                         break;
                     case "EnvelopeNumber":
-                        error = this.ValidateEnvelopeNumber();
+                        error = this.ValidateEnvelopeNumber() ?? error;
                         break;
                     default:
                         Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);

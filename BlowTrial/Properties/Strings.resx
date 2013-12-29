@@ -743,4 +743,7 @@
   <data name="TableOptions_ProtocolViolations" xml:space="preserve">
     <value>All protocol violations</value>
   </data>
+  <data name="NewPatientModel_DateTimeEnrollment" xml:space="preserve">
+    <value>enrollment</value>
+  </data>
 </root>
