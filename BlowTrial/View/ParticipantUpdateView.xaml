@@ -192,7 +192,7 @@
                   />
                         <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Stretch" >
                             <DatePicker x:Name="dischargeDatePicker" Width="120" SelectedDate="{Binding Path=DischargeDate, ValidatesOnDataErrors=True, 
-                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday,Mode=OneWay}"/>
+                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactTodayOr28,Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="dischargeTimeTxt" 
                                                       Value="{Binding Path=DischargeTime, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
                                                       IncludeLiteralsInValue="True"
@@ -248,7 +248,7 @@
                       />
                         <StackPanel Orientation="Horizontal" Grid.Row="8" Grid.Column="2" HorizontalAlignment="Stretch" >
                             <DatePicker x:Name="deathOrContactDatePicker" Width="120" SelectedDate="{Binding Path=DeathOrLastContactDate, ValidatesOnDataErrors=True, 
-                            UpdateSourceTrigger=PropertyChanged}"  DisplayDateStart="{Binding DischargeOrEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding Today, Mode=OneWay}"/>
+                            UpdateSourceTrigger=PropertyChanged}"  DisplayDateStart="{Binding DischargeOrEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding TodayOr28, Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="deathOrContactTimeTxt" 
                                                       Value="{Binding Path=DeathOrLastContactTime, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
                                                       IncludeLiteralsInValue="True"
@@ -367,7 +367,7 @@
                         <DatePicker Grid.Row="22" Grid.Column="2" x:Name="lastWeightDatePicker" Width="120" 
                             HorizontalAlignment="Left"
                             SelectedDate="{Binding Path=LastWeightDate, ValidatesOnDataErrors=True, 
-                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactOrToday, Mode=OneWay}" />
+                            UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding DateTimeEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactTodayOr28, Mode=OneWay}" />
                         <ContentPresenter 
                           Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=lastWeightDatePicker, Path=(Validation.Errors).CurrentItem}"
@@ -410,7 +410,7 @@
                                         <DatePicker SelectedDate="{Binding Path=AdministeredAt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                                                     DisplayDateStart="{Binding Path=EarliestDate, Mode=OneWay}" 
                                                     DisplayDateEnd="{Binding RelativeSource={RelativeSource FindAncestor, 
-                                                        AncestorType={x:Type Window}}, Path=DataContext.DeathLastContactOrToday, Mode=OneWay}" />
+                                                        AncestorType={x:Type Window}}, Path=DataContext.DeathLastContactTodayOr28, Mode=OneWay}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

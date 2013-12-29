@@ -76,7 +76,7 @@ namespace BlowTrial.Models
             get { return (DateTime.Now - DateTimeBirth);  }
         }
 
-        private DateTime Becomes28On
+        public DateTime Becomes28On
         {
             get
             {

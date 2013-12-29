@@ -552,23 +552,22 @@ namespace BlowTrial.ViewModel
                     ?? DateTimeEnrolment;
             }
         }
-        public DateTime DeathLastContactOrToday
+        public DateTime DeathLastContactTodayOr28
         {
             get
             {
                 return DeathOrLastContactDate
-                    ?? Today;
+                    ?? TodayOr28;
             }
         }
 
-        public DateTime Today // such a silly property is for the upper bound of the datepickers
+        public DateTime TodayOr28 // such a silly property is for the upper bound of the datepickers
         {
             get
             {
-                return DateTime.Today;
+                return new DateTime[]{DateTime.Today, _participant.Becomes28On}.Min(d=>d);
             }
         }
-
         private string _wtForAgeCentile;
         public string WtForAgeCentile
         {
@@ -904,7 +903,7 @@ namespace BlowTrial.ViewModel
 
         void OnAgeIncrementing(object sender, EventArgs e)
         {
-            NotifyPropertyChanged("AgeDays", "CGA", "Today", "DeathLastContactOrToday");
+            NotifyPropertyChanged("AgeDays", "CGA", "TodayOr28", "DeathLastContactOrToday");
             SetListsBoxes();
             _ageTimer.Interval = IntervalToSameTime(_participant.DateTimeBirth);
         }
