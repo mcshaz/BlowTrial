@@ -387,7 +387,7 @@ namespace BlowTrial.Models
             if (OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days)
             {
                 error = _dischargeDateTime.ValidateNotEmpty();
-                ValidateIsBetweenRegistrationAndNow(ref error, _dischargeDateTime, now);
+                ValidateIsBetweenRegistrationAndNowOr28(ref error, _dischargeDateTime, now);
             }
             else
             {
@@ -395,15 +395,27 @@ namespace BlowTrial.Models
             }
             return error;
         }
-        void ValidateIsBetweenRegistrationAndNow(ref DateTimeErrorString error,DateTimeSplitter splitter, DateTime? now = null)
+        void ValidateIsBetweenRegistrationAndNowOr28(ref DateTimeErrorString error,DateTimeSplitter splitter, DateTime? now = null)
         {
-            splitter.ValidateIsBefore(
-                Strings.DateTime_Now,
-                now ?? DateTime.Now,
-                ref error);
             splitter.ValidateIsAfter(Strings.ParticipantModel_Error_RegistrationDateTime,
                 RegisteredAt,
                 ref error);
+            
+            DateTime? bestDate = splitter.DateAndTime ?? splitter.Date;
+            if (bestDate.HasValue && (bestDate.Value - DateTimeBirth).TotalDays > 28)
+            {
+                splitter.ValidateIsBefore(
+                    Strings.TimeInterval_28days,
+                    DateTimeBirth.AddDays(28),
+                    ref error);
+            }
+            else
+            {
+                splitter.ValidateIsBefore(
+                    Strings.DateTime_Now,
+                    now ?? DateTime.Now,
+                    ref error);
+            }
         }
         DateTimeErrorString ValidateDeathOrLastContactDateTime(DateTime? now = null)
         {
@@ -416,7 +428,7 @@ namespace BlowTrial.Models
                     return new DateTimeErrorString();
             }
             DateTimeErrorString error = _deathOrLastContactDateTime.ValidateNotEmpty();
-            ValidateIsBetweenRegistrationAndNow(ref error, _deathOrLastContactDateTime, now);
+            ValidateIsBetweenRegistrationAndNowOr28(ref error, _deathOrLastContactDateTime, now);
             switch (OutcomeAt28Days)
             {
                 case OutcomeAt28DaysOption.DischargedAndKnownToHaveDied:

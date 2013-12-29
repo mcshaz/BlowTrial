@@ -746,4 +746,7 @@
   <data name="NewPatientModel_DateTimeEnrollment" xml:space="preserve">
     <value>enrollment</value>
   </data>
+  <data name="TimeInterval_28days" xml:space="preserve">
+    <value>28 days of age</value>
+  </data>
 </root>

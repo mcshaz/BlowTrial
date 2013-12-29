@@ -1609,6 +1609,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 28 days of age.
+        /// </summary>
+        public static string TimeInterval_28days {
+            get {
+                return ResourceManager.GetString("TimeInterval_28days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BCG.
         /// </summary>
         public static string Vaccine_Bcg {
