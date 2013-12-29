@@ -288,12 +288,13 @@ namespace BlowTrial.Models
         }
         string ValidateOutcomeAt28Days(DateTime? now = null)
         {
-            var ageDays = ((now.HasValue)
-                ? (DateTimeBirth - now.Value)
-                : Age).Days;
             if (OutcomeAt28Days==OutcomeAt28DaysOption.InpatientAt28Days)
             {
-                return Strings.ParticipantModel_Error_28daysNotElapsed;
+                var ageDays = ((now ?? DateTime.Now) - DateTimeBirth).Days;
+                if (ageDays < 28)
+                {
+                    return Strings.ParticipantModel_Error_28daysNotElapsed;
+                }
             }
             return null;
         }
