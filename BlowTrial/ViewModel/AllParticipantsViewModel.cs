@@ -43,8 +43,8 @@ namespace BlowTrial.ViewModel
             var participantVMs = Array.ConvertAll(_repository.Participants.ToArray(),
                 new Converter<Participant, ParticipantListItemViewModel>(p => new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(p))));
              * */
-            var participantVMs = _repository.Participants.Include("VaccinesAdministered").Include("VaccinesAdministered.VaccineGiven").ToArray()
-                .Select(p => new ParticipantUpdateViewModel(_repository,Mapper.Map<ParticipantModel>(p)))
+            var parts = _repository.Participants.Include("VaccinesAdministered").Include("VaccinesAdministered.VaccineGiven").ToArray();
+            var participantVMs = parts.Select(p => new ParticipantUpdateViewModel(_repository,Mapper.Map<ParticipantModel>(p)))
                 .ToList();
 
             AllParticipants = new ListCollectionView(participantVMs);

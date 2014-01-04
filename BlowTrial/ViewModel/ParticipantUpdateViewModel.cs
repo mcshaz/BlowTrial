@@ -364,7 +364,7 @@ namespace BlowTrial.ViewModel
                 if (_participant.DeathOrLastContactDate == value) { return; }
                 _participant.DeathOrLastContactDate = value;
                 IsParticipantModelChanged = true;
-                NotifyPropertyChanged("DeathOrLastContactDate", "DeathOrLastContactTime", "DeathLastContactOrToday");
+                NotifyPropertyChanged("DeathOrLastContactDate", "DeathOrLastContactTime", "DeathLastContactTodayOr28");
             }
         }
         public TimeSpan? DeathOrLastContactTime
@@ -903,7 +903,7 @@ namespace BlowTrial.ViewModel
 
         void OnAgeIncrementing(object sender, EventArgs e)
         {
-            NotifyPropertyChanged("AgeDays", "CGA", "TodayOr28", "DeathLastContactOrToday");
+            NotifyPropertyChanged("AgeDays", "CGA", "TodayOr28", "DeathLastContactTodayOr28");
             SetListsBoxes();
             _ageTimer.Interval = IntervalToSameTime(_participant.DateTimeBirth);
         }

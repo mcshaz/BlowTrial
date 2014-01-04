@@ -23,6 +23,9 @@ namespace BlowTrial.Infrastructure.Automapper
     {
         protected override void Configure()
         {
+            Mapper.CreateMap<VaccineAdministered, VaccineAdministeredModel>()
+                .ForMember(s=>s.VaccineGiven, o=>o.MapFrom(d=>d.VaccineGiven));
+
             Mapper.CreateMap<Participant, ParticipantModel>()
                 .ForMember(d=>d.DeathOrLastContactDate, o=>o.Ignore())
                 .ForMember(d => d.DeathOrLastContactTime, o => o.Ignore())
@@ -45,15 +48,6 @@ namespace BlowTrial.Infrastructure.Automapper
             Mapper.CreateMap<ScreenedPatient, ScreenedPatientCsvModel>();
 
             Mapper.CreateMap<ProtocolViolation, ProtocolViolationModel>();
-        }
-    }
-
-    public class VaccineAdministeredProfile : Profile
-    {
-        protected override void Configure()
-        {
-            Mapper.CreateMap<VaccineAdministered, VaccineAdministeredModel>();
-                //.ForMember(s=>s.VaccineGiven, o=>o.MapFrom(d=>d.VaccineGiven));
         }
     }
 }

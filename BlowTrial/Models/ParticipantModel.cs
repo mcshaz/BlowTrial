@@ -49,8 +49,6 @@ namespace BlowTrial.Models
         public bool? BcgPapule { get; set; }
         public int? LastContactWeight { get; set; }
         public DateTime? LastWeightDate { get; set; }
-        public virtual DateTime? DischargeDateTime { get; set; }
-        public virtual DateTime? DeathOrLastContactDateTime { get; set; }
         public string OtherCauseOfDeathDetail { get; set; }
 
         public CauseOfDeathOption CauseOfDeath { get; set; }
@@ -120,19 +118,18 @@ namespace BlowTrial.Models
         }
 
         DateTimeSplitter _dischargeDateTime = new DateTimeSplitter();
-        /*
-        public override DateTime? DischargeDateTime 
+
+        public DateTime? DischargeDateTime 
         {
             get 
             {
-                return DischargeDateTime;
+                return _dischargeDateTime.DateAndTime;
             }
             set 
             {
-                DischargeDateTime = _dischargeDateTime.DateAndTime = value;
+                _dischargeDateTime.DateAndTime = value;
             }
         }
-         * */
         public DateTime? DischargeDate
         {
             get
@@ -158,19 +155,17 @@ namespace BlowTrial.Models
             }
         }
         DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();
-        /*
-        public override DateTime? DeathOrLastContactDateTime
+        public DateTime? DeathOrLastContactDateTime
         {
             get
             {
-                return DeathOrLastContactDateTime;
+                return _deathOrLastContactDateTime.DateAndTime;
             }
             set
             {
-                DeathOrLastContactDateTime = _deathOrLastContactDateTime.DateAndTime = value;
+                _deathOrLastContactDateTime.DateAndTime = value;
             }
         }
-        */
         public DateTime? DeathOrLastContactDate
         {
             get

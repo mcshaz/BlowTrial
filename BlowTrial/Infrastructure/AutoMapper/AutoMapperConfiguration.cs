@@ -14,8 +14,6 @@ namespace BlowTrial.Models
 
                 x.AddProfile<PatientProfiles>();
 
-
-                x.AddProfile<VaccineAdministeredProfile>();
             });
 #if DEBUG
             try

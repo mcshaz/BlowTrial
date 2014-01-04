@@ -85,7 +85,7 @@ namespace BlowTrial.Models
                 return string.Format(Strings.DateTime_Error_Date_MustComeBefore, 
                     Strings.DateTime_Now);
             }
-            if (AdministeredTo.DeathOrLastContactDate > AdministeredAt)
+            if (AdministeredTo.DeathOrLastContactDate < AdministeredAt)
             {
                 return string.Format(Strings.DateTime_Error_Date_MustComeBefore,
                     (AdministeredTo.IsKnownDead==true)

@@ -19,7 +19,8 @@ namespace BlowTrial.ViewModel
         {
             VaccineList = vaccineList;
             this.VaccineAdministeredModel = vaccineModel;
-            SelectedVaccine = vaccineList.FirstOrDefault(l => l.Vaccine == vaccineModel.VaccineGiven);
+            SelectedVaccine = (vaccineModel.VaccineGiven==null)?vaccineList.First(l => l.Vaccine == null)
+                : VaccineList.First(l => l.Vaccine!=null && l.Vaccine.Id == vaccineModel.VaccineGiven.Id);
         }
         #endregion
         #region Fields
