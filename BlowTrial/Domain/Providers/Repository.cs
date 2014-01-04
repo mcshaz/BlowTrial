@@ -6,17 +6,15 @@ using BlowTrial.Models;
 using Ionic.Zip;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Data.Entity.Migrations;
 using BlowTrial.Infrastructure.Exceptions;
-using System.Configuration;
 using System.Data.Entity.Infrastructure;
+using BlowTrial.Helpers;
+using LinqKit;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -341,8 +339,8 @@ namespace BlowTrial.Domain.Providers
                 throw new InvalidOperationException("Backup called without cloud directories set to a single directory");
             }
 #endif
-            string cloudPathWithoutExtension = CloudDirectories.First() + '\\' + Path.GetFileNameWithoutExtension(bakFileName) + '_' + LocalStudyCentres.First().DuplicateIdCheck.ToString("N");
-            string cloudZipName = cloudPathWithoutExtension + ".zip"; 
+            string cloudPathWithoutExtension = Path.GetFileNameWithoutExtension(bakFileName) + '_' + LocalStudyCentres.First().DuplicateIdCheck.ToString("N");
+            string cloudZipName = CloudDirectories.First() + '\\' + cloudPathWithoutExtension + ".zip"; 
             
             var cloudFile = new FileInfo(cloudZipName);
             if (cloudFile.Exists && cloudFile.LastWriteTimeUtc >= _dbContext.DbLastModifiedUtc())
@@ -384,17 +382,21 @@ namespace BlowTrial.Domain.Providers
         void AddOrUpdateBaks(IEnumerable<string> bakFileNames, DateTime addOrUpdateAfter)
         {
             List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
+            List<IntegerRange> newSiteIdRanges = new List<IntegerRange>();
             foreach (string fn in bakFileNames)
             {
+                var knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
                 using (var downloadedDb = _dbContext.AttachDb(ZipExtractionDirectory + '\\' + fn))
-                {
-                    var knownSiteIds = knownSites.Select(s=>s.DuplicateIdCheck);
-                    var newSites = downloadedDb.StudyCentres.Where(s=>!knownSiteIds.Contains(s.DuplicateIdCheck));
+                {      
+                    var newSites = (from s in downloadedDb.StudyCentres.AsNoTracking()
+                                    where !knownSiteIds.Contains(s.DuplicateIdCheck)
+                                    select s).ToList();
                     foreach (StudyCentre s in newSites)
                     {
-                        if (knownSites.Any(k=>k.Id == s.Id))
+                        var dup = knownSites.FirstOrDefault(k=>k.Id == s.Id);
+                        if (dup != null)
                         {
-                            throw new DuplicateDataKeyException("Duplicate key for site Id:" + s.Id.ToString());
+                            throw new DuplicateDataKeyException(string.Format("Duplicate key for site Id:{0} (using Guids {1} & {2})",s.Id.ToString(),s.DuplicateIdCheck, dup.DuplicateIdCheck));
                         }
                         var overlappingSite = knownSites.FirstOrDefault(k=>s.Id <= k.MaxIdForSite && s.MaxIdForSite >= k.Id);
                         if (overlappingSite != null)
@@ -403,14 +405,46 @@ namespace BlowTrial.Domain.Providers
                                 overlappingSite.Id, overlappingSite.MaxIdForSite,
                                 s.Id, s.MaxIdForSite));
                         }
-                        _dbContext.StudyCentres.Attach(s); //because context will have been renewed, this should not cause a duplicate key exception
+                        _dbContext.StudyCentres.Add(s); //because context will have been renewed, this should not cause a duplicate key exception
                         knownSites.Add(s);
+                        newSiteIdRanges.Add(new IntegerRange(s.Id, s.MaxIdForSite));
+                        _localStudyCentres = null;
                     }
-                    _dbContext.Participants.AddOrUpdate(downloadedDb.Participants.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
-                    _dbContext.ScreenedPatients.AddOrUpdate(downloadedDb.ScreenedPatients.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
-                    _dbContext.Vaccines.AddOrUpdate(downloadedDb.Vaccines.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
-                    _dbContext.VaccinesAdministered.AddOrUpdate(downloadedDb.VaccinesAdministered.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
-                    _dbContext.ProtocolViolations.AddOrUpdate(downloadedDb.ProtocolViolations.Where(p => p.RecordLastModified > addOrUpdateAfter).ToArray());
+                    var newSiteIds = newSiteIdRanges.Select(n => n.Min);
+                    _dbContext.Participants.AddOrUpdate((from p in downloadedDb.Participants.AsNoTracking()
+                                                         where p.RecordLastModified > addOrUpdateAfter || newSiteIds.Contains(p.CentreId)
+                                                         select p).ToArray());
+                    _dbContext.ScreenedPatients.AddOrUpdate((from s in downloadedDb.ScreenedPatients.AsNoTracking()
+                                                             where s.RecordLastModified > addOrUpdateAfter || newSiteIds.Contains(s.CentreId)
+                                                             select s).ToArray());
+                    
+                    var vaccinePredicate = PredicateBuilder.False<Vaccine>();
+                    vaccinePredicate.Or(p=>p.RecordLastModified > addOrUpdateAfter);
+                    foreach (IntegerRange rng in newSiteIdRanges)
+                    {
+                        vaccinePredicate = vaccinePredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
+                    }
+                    var newVax = _dbContext.Vaccines.AsNoTracking().AsExpandable().Where(vaccinePredicate).ToArray();
+                    _dbContext.Vaccines.AddOrUpdate(newVax);
+
+                    var vaccineAdminPredicate = PredicateBuilder.False<VaccineAdministered>();
+                    vaccineAdminPredicate.Or(p => p.RecordLastModified > addOrUpdateAfter);
+                    foreach (IntegerRange rng in newSiteIdRanges)
+                    {
+                        vaccineAdminPredicate = vaccineAdminPredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
+                    }
+                    var newVaxAdmin = _dbContext.VaccinesAdministered.AsNoTracking().AsExpandable().Where(vaccineAdminPredicate).ToArray();
+                    _dbContext.VaccinesAdministered.AddOrUpdate(newVaxAdmin);
+
+                    var protocolViolPredicate = PredicateBuilder.False<ProtocolViolation>();
+                    protocolViolPredicate.Or(p => p.RecordLastModified > addOrUpdateAfter);
+                    foreach (IntegerRange rng in newSiteIdRanges)
+                    {
+                        protocolViolPredicate = protocolViolPredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
+                    }
+                    var newProtocolViol = _dbContext.ProtocolViolations.AsNoTracking().AsExpandable().Where(protocolViolPredicate).ToArray();
+                    _dbContext.ProtocolViolations.AddOrUpdate(newProtocolViol);
+
                     _dbContext.SaveChanges();
                 }
             }
@@ -456,15 +490,29 @@ namespace BlowTrial.Domain.Providers
         ICollection<FileInfo> GetFilesUpdatedAfter(DateTime afterUtc, string filePrefix)
         {
             int prefixLen = filePrefix.Length;
+            int fnLen = prefixLen + 37;
             List<FileInfo> returnVar = new List<FileInfo>();
+            var knownSites = LocalStudyCentres.Select(l=>l.DuplicateIdCheck);
             foreach (string dirName in CloudDirectories)
             {
                 DirectoryInfo di = new DirectoryInfo(dirName);
                 foreach (FileInfo f in di.GetFiles())
                 {
-                    if (f.LastWriteTimeUtc > afterUtc && f.Name.Substring(0, prefixLen) == filePrefix)
+                    if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix)
                     {
-                        returnVar.Add(f);
+                        bool needsUpdating = f.LastWriteTimeUtc > afterUtc;
+                        if (!needsUpdating)
+                        {
+                            Guid parsedGuid;
+                            if (Guid.TryParse(f.Name.Substring(prefixLen+1,32), out parsedGuid))
+                            {
+                                needsUpdating = !knownSites.Contains(parsedGuid);
+                            }
+                        }
+                        if (needsUpdating)
+                        {
+                            returnVar.Add(f);
+                        }
                     }
                 }
             }

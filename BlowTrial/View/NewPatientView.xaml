@@ -430,7 +430,7 @@
                   HorizontalAlignment="Right"
                   Target="{Binding ElementName=hasSiblingEnrolledChk}" >
                     <TextBlock TextWrapping="Wrap">
-                        Twin already enrolled (check &amp; then enter DAB trial ID):
+                        Twin already enrolled (check &amp; then enter BLOW trial ID):
                     </TextBlock>
                 </Label>
                 <CheckBox Grid.Row="30" Grid.Column="2" x:Name="hasSiblingEnrolledChk" Margin="6,1,0,0" VerticalAlignment="Center"

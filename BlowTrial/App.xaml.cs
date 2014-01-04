@@ -2,9 +2,8 @@
 using BlowTrial.Security;
 using BlowTrial.View;
 using BlowTrial.ViewModel;
-using DabTrial.Models;
+using BlowTrial.Models;
 using System;
-using System.Data.Entity;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
@@ -13,7 +12,6 @@ using System.IO;
 using BlowTrial.Helpers;
 using log4net;
 using log4net.Appender;
-using log4net.Config;
 using System.Deployment.Application;
 using BlowTrial.Infrastructure.Extensions;
 
@@ -102,8 +100,9 @@ namespace BlowTrial
                 throw;
             }
 
-            bool displayWizard = (BlowTrialDataService.GetBackupDetails().BackupData == null);
-            if (!displayWizard)
+            var backDetails = BlowTrialDataService.GetBackupDetails();
+            bool displayWizard = (backDetails.BackupData == null);
+            if (!displayWizard  && backDetails.BackupData.IsBackingUpToCloud)
             {
                 using (var t = new TrialDataContext())
                 {

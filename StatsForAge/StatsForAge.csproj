@@ -60,4 +60,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <!-- The following makes sure we don’t try to publish a configuration that defines the DEBUG constant -->
+  <Target Name="BeforePublish">
+    <Error Condition="'$(DebugSymbols)' == 'true'" Text="You attempted to publish a configuration that defines the DEBUG constant!" />
+  </Target>
 </Project>

@@ -31,7 +31,7 @@
     <MinimumRequiredVersion>1.0.0.8</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationRevision>20</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -79,13 +79,13 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=3.1.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+    <Reference Include="AutoMapper, Version=3.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\AutoMapper.3.1.0\lib\net40\AutoMapper.dll</HintPath>
+      <HintPath>..\packages\AutoMapper.3.1.1\lib\net40\AutoMapper.dll</HintPath>
     </Reference>
-    <Reference Include="AutoMapper.Net4, Version=3.1.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+    <Reference Include="AutoMapper.Net4, Version=3.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\AutoMapper.3.1.0\lib\net40\AutoMapper.Net4.dll</HintPath>
+      <HintPath>..\packages\AutoMapper.3.1.1\lib\net40\AutoMapper.Net4.dll</HintPath>
     </Reference>
     <Reference Include="ColorMine">
       <HintPath>..\packages\ColorMine.1.1.1\lib\40\ColorMine.dll</HintPath>
@@ -101,6 +101,9 @@
     </Reference>
     <Reference Include="Ionic.Zip.Reduced">
       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
+    </Reference>
+    <Reference Include="LinqKit">
+      <HintPath>..\packages\LinqKit.1.0\lib\35\LinqKit.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-client\log4net.dll</HintPath>
@@ -172,6 +175,7 @@
     <Compile Include="Helpers\DateTimeSplitter.cs" />
     <Compile Include="Domain\Providers\DbBackupService.cs" />
     <Compile Include="Helpers\EventToCommand.cs" />
+    <Compile Include="Helpers\IntegerRange.cs" />
     <Compile Include="Helpers\Mediator.cs" />
     <Compile Include="Helpers\OutcomeAt28DaysSplitter.cs" />
     <Compile Include="Helpers\DetailsRequired.cs" />
@@ -452,6 +456,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\packages\AutoMapper.3.1.1\lib\net40\AutoMapper.Net4.dll">
+      <Link>AutoMapper.Net4.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="amd64\Microsoft.VC90.CRT\msvcr90.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -516,4 +524,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <!-- The following makes sure we don’t try to publish a configuration that defines the DEBUG constant -->
+  <Target Name="BeforePublish">
+    <Error Condition="'$(DebugSymbols)' == 'true'" Text="You attempted to publish a configuration that defines the DEBUG constant!" />
+  </Target>
 </Project>

@@ -2,7 +2,7 @@
 using BlowTrial.Helpers;
 using BlowTrial.View;
 using BlowTrial.ViewModel;
-using DabTrial.Models;
+using BlowTrial.Models;
 using System;
 using System.Data.Entity;
 using System.Windows;

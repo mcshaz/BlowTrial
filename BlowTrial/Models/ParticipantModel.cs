@@ -25,7 +25,6 @@ namespace BlowTrial.Models
         #region Fields
         const double TicksPerWeek = TimeSpan.TicksPerDay * 7;
         TimeSpan _cgabirth;
-        bool _is28Days;
         DateTime? _becomes28On;
         #endregion //Fields
 

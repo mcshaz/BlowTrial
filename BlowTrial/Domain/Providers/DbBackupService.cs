@@ -1,7 +1,7 @@
 ﻿using System.Data.Entity;
 using System.Linq;
 
-namespace DabTrial.Infrastructure.FilesysServices
+namespace BlowTrial.Infrastructure.FilesysServices
 {
     public static class DbBackupService
     {

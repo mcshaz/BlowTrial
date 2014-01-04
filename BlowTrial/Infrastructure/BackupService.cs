@@ -28,7 +28,7 @@ namespace BlowTrial.Infrastructure
             }
             else
             {
-                _handler += new EventHandler(Restore);
+                _handler = new EventHandler(Restore);
                 Restore(this, new EventArgs());
             }
             _timer.Tick += _handler;

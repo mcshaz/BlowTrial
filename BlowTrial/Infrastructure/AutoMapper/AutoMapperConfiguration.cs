@@ -3,7 +3,7 @@ using BlowTrial.Infrastructure.Automapper;
 using System;
 using System.Diagnostics;
 
-namespace DabTrial.Models
+namespace BlowTrial.Models
 {
     public class AutoMapperConfiguration
     {
