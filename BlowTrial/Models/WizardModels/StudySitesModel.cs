@@ -15,11 +15,14 @@ namespace BlowTrial.Models
 {
     public class StudySitesModel :ValidationBase
     {
-        public StudySitesModel()
+        public StudySitesModel() : this(new List<StudySiteItemModel>())
         {
-            StudySitesData = new List<StudySiteItemModel>();
-            _validatedProperties = new string[] { "StudySitesData" };
+        }
 
+        public StudySitesModel(IEnumerable<StudySiteItemModel> siteItems)
+        {
+            _validatedProperties = new string[] { "StudySitesData" };
+            StudySitesData = new List<StudySiteItemModel>(siteItems);
         }
 
         public List<StudySiteItemModel> StudySitesData { get; private set; }

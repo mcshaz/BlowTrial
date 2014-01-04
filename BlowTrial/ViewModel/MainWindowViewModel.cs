@@ -42,6 +42,7 @@ namespace BlowTrial.ViewModel
         {
             this.Version = BlowTrial.App.GetClickOnceVersion() ?? "Development Version";
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
+            ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null && _backupService.IsToBackup);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
@@ -107,6 +108,7 @@ namespace BlowTrial.ViewModel
             };
         }
         public RelayCommand ShowCloudDirectoryCmd {get; private set;}
+        public RelayCommand ShowSiteSettingsCmd { get; private set; }
         public RelayCommand ShowCreateCsvCmd { get; private set; }
         public RelayCommand LogoutCmd { get; private set; }
         public RelayCommand CreateNewUserCmd { get; private set; }
@@ -244,6 +246,20 @@ namespace BlowTrial.ViewModel
             }
             this.SetActiveWorkspace(csvVM);
             base.DisplayName = Strings.CreateCsvVM_Title;
+        }
+        void ShowSiteSettings()
+        {
+            var siteSetVM = (StudySitesViewModel)Workspaces.FirstOrDefault(w => w is StudySitesViewModel);
+            if (siteSetVM == null)
+            {
+                siteSetVM =
+                    new StudySitesViewModel
+                        (new StudySitesModel(Mapper.Map<IEnumerable<StudySiteItemModel>>(_repository.LocalStudyCentres)));
+
+                this.Workspaces.Add(siteSetVM);
+            }
+            this.SetActiveWorkspace(siteSetVM);
+            base.DisplayName = Strings.CloudDirectoryVm_SelectDir;
         }
         void ShowCloudDirectory()
         {

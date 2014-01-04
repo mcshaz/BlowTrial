@@ -48,6 +48,13 @@ namespace BlowTrial.Infrastructure.Automapper
             Mapper.CreateMap<ScreenedPatient, ScreenedPatientCsvModel>();
 
             Mapper.CreateMap<ProtocolViolation, ProtocolViolationModel>();
+
+            Mapper.CreateMap<StudyCentreModel, StudySiteItemModel>()
+                .ForMember(d=>d.SiteBackgroundColour, o=>o.Ignore())
+                .ForMember(d=>d.SiteTextColour, o=>o.Ignore())
+                .ForMember(d=>d.AllLocalSites, o=>o.Ignore())
+                .ForMember(d=>d.SiteName, o=>o.MapFrom(s=>s.Name))
+                .ForMember(d=>d.MaxParticipantAllocations, o=>o.MapFrom(s=>s.MaxIdForSite-s.Id+1));
         }
     }
 }

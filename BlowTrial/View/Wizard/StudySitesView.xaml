@@ -5,7 +5,7 @@
         xmlns:vw="clr-namespace:BlowTrial.View"
         >
     <UserControl.Resources>
-        <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
+        <ResourceDictionary Source="../WorkspaceResources.xaml" />
     </UserControl.Resources>
     <StackPanel Orientation="Vertical" >
         <DataGrid DockPanel.Dock="Right" Grid.Row="22" Grid.Column="2" ItemsSource="{Binding Path=StudySitesData, ValidatesOnDataErrors=True,UpdateSourceTrigger=PropertyChanged}"

@@ -139,7 +139,7 @@ namespace BlowTrial.Models
             set
             {
                 _dischargeDateTime.Date = value;
-                DischargeDateTime = _dischargeDateTime.DateAndTime;
+                //DischargeDateTime = _dischargeDateTime.DateAndTime;
             }
         }
         public TimeSpan? DischargeTime
@@ -151,7 +151,7 @@ namespace BlowTrial.Models
             set
             {
                 _dischargeDateTime.Time = value;
-                DischargeDateTime = _dischargeDateTime.DateAndTime;
+                //DischargeDateTime = _dischargeDateTime.DateAndTime;
             }
         }
         DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();
@@ -175,7 +175,7 @@ namespace BlowTrial.Models
             set
             {
                 _deathOrLastContactDateTime.Date = value;
-                DeathOrLastContactDateTime = _deathOrLastContactDateTime.DateAndTime;
+                //DeathOrLastContactDateTime = _deathOrLastContactDateTime.DateAndTime;
             }
         }
         public TimeSpan? DeathOrLastContactTime
@@ -187,7 +187,7 @@ namespace BlowTrial.Models
             set
             {
                 _deathOrLastContactDateTime.Time = value;
-                DeathOrLastContactDateTime = _deathOrLastContactDateTime.DateAndTime;
+                //DeathOrLastContactDateTime = _deathOrLastContactDateTime.DateAndTime;
             }
         }
         public bool? IsKnownDead

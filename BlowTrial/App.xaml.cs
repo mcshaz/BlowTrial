@@ -64,16 +64,16 @@ namespace BlowTrial
             AppDomain.CurrentDomain.SetData("DataDirectory", baseDir);
 
             //Application initialisation
-            try
-            { 
-                AutoMapperConfiguration.Configure();
-            }
+ 
+            AutoMapperConfiguration.Configure();
+            /*
             catch (Exception ex)
             {
                 _log.Error("App_AutomapperConfigurationException", ex);
                 MessageBox.Show("An error has occured with automapper. An error has been logged, but this file will have to be attached and emailed to the application developer");
                 throw;
             }
+            */
 
             //Security
             CustomPrincipal customPrincipal = new CustomPrincipal();

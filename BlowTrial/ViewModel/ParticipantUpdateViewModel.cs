@@ -364,7 +364,7 @@ namespace BlowTrial.ViewModel
                 if (_participant.DeathOrLastContactDate == value) { return; }
                 _participant.DeathOrLastContactDate = value;
                 IsParticipantModelChanged = true;
-                NotifyPropertyChanged("DeathOrLastContactDate", "DeathOrLastContactTime", "DeathLastContactTodayOr28");
+                NotifyPropertyChanged("DeathOrLastContactDate", "DeathOrLastContactTime", "DeathLastContactTodayOr28", "LastWeightDate");
             }
         }
         public TimeSpan? DeathOrLastContactTime
