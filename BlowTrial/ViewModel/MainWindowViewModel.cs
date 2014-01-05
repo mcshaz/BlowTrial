@@ -254,8 +254,8 @@ namespace BlowTrial.ViewModel
             {
                 siteSetVM =
                     new StudySitesViewModel
-                        (new StudySitesModel(Mapper.Map<IEnumerable<StudySiteItemModel>>(_repository.LocalStudyCentres)));
-
+                        (new StudySitesModel(Mapper.Map<IEnumerable<StudySiteItemModel>>(_repository.LocalStudyCentres)), _repository);
+                
                 this.Workspaces.Add(siteSetVM);
             }
             this.SetActiveWorkspace(siteSetVM);

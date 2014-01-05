@@ -112,17 +112,17 @@ namespace BlowTrial.Domain.Providers
                 if (_localStudyCentres == null)
                 {
                     var studyCentres = _dbContext.StudyCentres.ToArray();
-                        _localStudyCentres = studyCentres.Select(s => new StudyCentreModel
-                         {
-                             Id = s.Id,
-                             Name = s.Name,
-                             ArgbTextColour = s.ArgbTextColour,
-                             ArgbBackgroundColour = s.ArgbBackgroundColour,
-                             HospitalIdentifierMask = s.HospitalIdentifierMask,
-                             PhoneMask = s.PhoneMask,
-                             MaxIdForSite = s.MaxIdForSite,
-                             DuplicateIdCheck = s.DuplicateIdCheck // needed for backup
-                         });
+                    _localStudyCentres = studyCentres.Select(s => new StudyCentreModel
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            ArgbTextColour = s.ArgbTextColour,
+                            ArgbBackgroundColour = s.ArgbBackgroundColour,
+                            HospitalIdentifierMask = s.HospitalIdentifierMask,
+                            PhoneMask = s.PhoneMask,
+                            MaxIdForSite = s.MaxIdForSite,
+                            DuplicateIdCheck = s.DuplicateIdCheck // needed for backup
+                        });
                 }
                 return _localStudyCentres;
             }
@@ -176,7 +176,16 @@ namespace BlowTrial.Domain.Providers
                 this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
             }
         }
-
+        public void AddOrUpdate(IEnumerable<StudyCentre> centres)
+        {
+            foreach (StudyCentre s in centres)
+            {
+                _dbContext.StudyCentres.AddOrUpdate(s);
+            }
+            _dbContext.SaveChanges();
+            _localStudyCentres = null;
+            var dummy = LocalStudyCentres; //before disposing and subsequently using 
+        }
         public void AddOrUpdate(ProtocolViolation violation)
         {
             if (violation.ParticipantId == 0)

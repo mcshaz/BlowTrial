@@ -23,7 +23,7 @@
         <TextBlock Grid.Row="2"
               HorizontalAlignment="Left"
               Margin="4" >
-            <Hyperlink Command="{Binding Path=CancelCmd}">Close without saving</Hyperlink>
+            <Hyperlink Command="{Binding Path=CloseCmd}">Close without saving</Hyperlink>
         </TextBlock>
     </Grid>
 </UserControl>

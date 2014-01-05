@@ -34,6 +34,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         void Update(IEnumerable<Participant> patients);
         void Update(ScreenedPatient patient);
         void AddOrUpdate(ProtocolViolation violation);
+        void AddOrUpdate(IEnumerable<StudyCentre> centres);
         DbQuery<Participant> Participants { get; }
         DbQuery<ScreenedPatient> ScreenedPatients { get; }
         DbQuery<VaccineAdministered> VaccinesAdministered { get; }

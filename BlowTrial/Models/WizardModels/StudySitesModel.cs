@@ -93,6 +93,7 @@ namespace BlowTrial.Models
         public virtual StudySitesModel AllLocalSites { get; set; }
         public int? Id { get; set; }
         public string SiteName { get; set; }
+        public Guid DuplicateIdCheck { get; set; }
         public Color? SiteBackgroundColour { 
             get { return _siteBackgroundColour; }
             set
@@ -124,7 +125,7 @@ namespace BlowTrial.Models
         public int? MaxParticipantAllocations { get; set; }
         public int? MaxIdForSite()
         {
-            return Id + MaxParticipantAllocations - ((Id==1)?2:1);
+            return Id + MaxParticipantAllocations - (Id==1?2:1);
         }
         public string PhoneMask { get; set; }
         public string HospitalIdentifierMask { get; set; }

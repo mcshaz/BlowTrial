@@ -1,5 +1,7 @@
-﻿using BlowTrial.Models;
+﻿using BlowTrial.Infrastructure.Interfaces;
+using BlowTrial.Models;
 using BlowTrial.Properties;
+using MvvmExtraLite.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +11,7 @@ using System.Text;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.ViewModel
 {
@@ -16,21 +19,51 @@ namespace BlowTrial.ViewModel
     {
         #region fields
         StudySitesModel _appModel;
-
+        IRepository _repo;
         #endregion
 
         #region constructors
+        public StudySitesViewModel(StudySitesModel model, IRepository repo) : this(model)
+        {
+            SaveCmd = new RelayCommand(ExecuteSave, p => IsValid());
+            _repo = repo;
+        }
         public StudySitesViewModel(StudySitesModel model)
         {
             _appModel = model;
-            StudySitesData = new ObservableCollection<StudySiteItemViewModel>(
-                _appModel.StudySitesData.Select(s => new StudySiteItemViewModel(s)));
-            StudySitesData.Add(NewSiteDataVM());
+            StudySitesData = new ObservableCollection<StudySiteItemViewModel>();
+            foreach (StudySiteItemModel s in _appModel.StudySitesData)
+            {
+                s.AllLocalSites = _appModel;
+                StudySitesData.Add(new StudySiteItemViewModel(s) { CanAlterId = false });
+            }
+            var newItem = NewSiteDataVM();
+            newItem.AllowEmptyRecord = _appModel.StudySitesData.Any();
+            StudySitesData.Add(newItem);
             StudySitesData.CollectionChanged += StudySitesData_CollectionChanged;
-            
-            DisplayName = Strings.StudySitesViewModel_DisplayName;
-        }
 
+            DisplayName = Strings.StudySitesViewModel_DisplayName;
+
+                
+        }
+#endregion
+#region Methods
+        void ExecuteSave(object param)
+        {
+            _repo.AddOrUpdate(_appModel.StudySitesData.Select(
+                s=>new BlowTrial.Domain.Tables.StudyCentre
+                {
+                    ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
+                    ArgbTextColour = s.SiteTextColour.ToInt(),
+                    Id = s.Id.Value,
+                    HospitalIdentifierMask  = s.HospitalIdentifierMask,
+                    MaxIdForSite = s.Id.Value + s.MaxParticipantAllocations.Value - (s.Id == 1 ? 2 : 1),
+                    Name = s.SiteName,
+                    PhoneMask = s.PhoneMask,
+                    DuplicateIdCheck = (s.DuplicateIdCheck==Guid.Empty)?Guid.NewGuid():s.DuplicateIdCheck
+                }));
+            OnRequestClose();
+        }
         void StudySitesData_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
@@ -81,6 +114,8 @@ namespace BlowTrial.ViewModel
         {
             return _appModel.IsValid();
         }
+
+        public RelayCommand SaveCmd { get; private set; }
         #endregion
 
         #region IDataError implementation
@@ -108,7 +143,9 @@ namespace BlowTrial.ViewModel
         public StudySiteItemViewModel(StudySiteItemModel siteModel)
         {
             SiteModel = siteModel;
+            CanAlterId = true;
         }
+        public bool CanAlterId { get; set; }
         public StudySiteItemModel SiteModel {get; private set;}
         public bool AllowEmptyRecord { get; set; }
         public string SiteName
