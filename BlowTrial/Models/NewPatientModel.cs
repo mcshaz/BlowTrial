@@ -69,7 +69,7 @@ namespace BlowTrial.Models
             set
             {
                 if (string.IsNullOrWhiteSpace(value)) { _hospitalIdentifier = null; }
-                else { _hospitalIdentifier = value.ToUpper(); }
+                else { _hospitalIdentifier = value.Trim().ToUpper(); }
             }
         }
         public string PhoneNumber { get; set; }
