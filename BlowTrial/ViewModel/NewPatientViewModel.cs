@@ -760,6 +760,7 @@ namespace BlowTrial.ViewModel
                     }
                     newParticipant.Id += 1;
                     newParticipant.BlockNumber = EnvelopeDetails.FirstAvailableBlockNumber;
+                    newParticipant.IsInterventionArm = MultipleSibling.IsInterventionArm;
                 }
                 else
                 {
