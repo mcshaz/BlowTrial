@@ -29,9 +29,13 @@ namespace BlowTrial.Security
         public IUser AuthenticateUser(string username, SecureString clearTextPassword, IMembershipContext context)
         {
             string calculatedHash = CalculateHash(clearTextPassword, username);
-            Investigator userData = (from i in context.Investigators.Include("Roles")
-                                     where i.Password == calculatedHash
-                                     select i).FirstOrDefault();
+            Investigator userData=null;
+            if (calculatedHash != null)
+            {
+                userData = (from i in context.Investigators.Include("Roles")
+                            where i.Password == calculatedHash
+                            select i).FirstOrDefault();
+            }
             if (userData == null)
             {
                 throw new UnauthorizedAccessException("Access denied. Please provide some valid credentials.");
@@ -43,6 +47,10 @@ namespace BlowTrial.Security
 
         internal static string CalculateHash(SecureString securePassword, string salt)
         {
+            if (string.IsNullOrWhiteSpace(salt) || securePassword.Length==0)
+            {
+                return null;
+            }
             IntPtr unmanagedStr = IntPtr.Zero;
 
             SHA256 hasher = new SHA256Managed();

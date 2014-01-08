@@ -31,6 +31,7 @@ namespace BlowTrial
         {
             Closing -= ((MainWindowViewModel)DataContext).OnClosing;
             Closed -= MainWindow_Closed;
+            ((MainWindowViewModel)DataContext).Dispose(); 
             Application.Current.Shutdown(0);
         }
 

@@ -285,8 +285,8 @@
     <value>Patient must be born BEFORE the current date &amp; time</value>
     <comment>Error message for when a Customer is missing a last name.</comment>
   </data>
-  <data name="NewPatient_Error_DOBtooOld" xml:space="preserve">
-    <value>Patients cannot be entered after 180 days of age</value>
+  <data name="NewPatient_Error_DOBtooOldToScreen" xml:space="preserve">
+    <value>Patients cannot be screened after 180 days since birth</value>
     <comment>Error message for when the Date of Birth is over 180 days from current date</comment>
   </data>
   <data name="NewPatient_Error_InvalidGestation" xml:space="preserve">
@@ -748,5 +748,14 @@
   </data>
   <data name="TimeInterval_28days" xml:space="preserve">
     <value>28 days old ({0:g})</value>
+  </data>
+  <data name="NewPatient_Error_DOBtooOldToRandomise" xml:space="preserve">
+    <value>The patient must be less than 28 days old at the time of randomising</value>
+  </data>
+  <data name="NewPatient_Error_TwinAndEnvelope" xml:space="preserve">
+    <value>A randomising envelope should not be used. Id will be auto assigned.</value>
+  </data>
+  <data name="NewPatient_Error_TwinGestAge" xml:space="preserve">
+    <value>Twins must have the same gestational age</value>
   </data>
 </root>

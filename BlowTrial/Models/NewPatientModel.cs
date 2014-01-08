@@ -69,7 +69,7 @@ namespace BlowTrial.Models
             set
             {
                 if (string.IsNullOrWhiteSpace(value)) { _hospitalIdentifier = null; }
-                else { _hospitalIdentifier = value.Trim().ToUpper(); }
+                else { _hospitalIdentifier = value.ToUpper(); }
             }
         }
         public string PhoneNumber { get; set; }
@@ -182,10 +182,10 @@ namespace BlowTrial.Models
                 WasGivenBcgPrior==true ||
                 BadInfectnImmune == true);
         }
-        private bool AgeOkToRandomise()
+        private bool AgeOkToRandomise(DateTime? now = null)
         {
             if (DateTimeBirth == null) { return false; }
-            var enrol = DateTimeOfEnrollment ?? DateTime.Now;
+            var enrol = DateTimeOfEnrollment ?? now ?? DateTime.Now;
             var age = enrol -this.DateTimeBirth.Value;
             return age.Days < MaxAgeDaysEnrol && age.TotalMinutes >= MinEnrolAgeMins;
         }
@@ -195,22 +195,22 @@ namespace BlowTrial.Models
 
         public override bool IsValid()
         {
+            DateTime now = DateTime.Now;
             foreach (string property in _validatedProperties)
             {
-                if (GetValidationError(property, true) != null)
+                if (GetValidationError(property, true, now) != null)
                 {
                     return false;
                 }
             }
             return true;
         }
-
         public override string GetValidationError(string propertyName)
         {
             return GetValidationError(propertyName, false);
         }
 
-        public string GetValidationError(string propertyName, bool hardErrorsOnly)
+        public string GetValidationError(string propertyName, bool hardErrorsOnly, DateTime? now=null)
         {
             if (!_validatedProperties.Contains(propertyName))
             { return null; }
@@ -241,16 +241,16 @@ namespace BlowTrial.Models
                     error = this.ValidateGestAgeWeeks();
                     break;
                 case "TimeOfBirth":
-                    error = this.ValidateDob().TimeError;
+                    error = this.ValidateDob(now).TimeError;
                     break;
                 case "DateOfBirth":
-                    error = this.ValidateDob().DateError;
+                    error = this.ValidateDob(now).DateError;
                     break;
                 case "TimeOfEnrollment":
-                    error = this.ValidateEnrollment().TimeError;
+                    error = this.ValidateEnrollment(now).TimeError;
                     break;
                 case "DateOfEnrollment":
-                    error = this.ValidateEnrollment().DateError;
+                    error = this.ValidateEnrollment(now).DateError;
                     break;
                 case "IsMale":
                     error = ValidateDDLNotNull(IsMale);
@@ -288,7 +288,7 @@ namespace BlowTrial.Models
         }
         string ValidateName()
         {
-            if (OkToRandomise())
+            if (RefusedConsent==false) //changed from oktorandmise
             {
                 return ValidateFieldNotEmpty(Name);
             }
@@ -296,7 +296,7 @@ namespace BlowTrial.Models
         }
         string ValidateMothersName()
         {
-            if (OkToRandomise())
+            if (RefusedConsent == false)
             {
                 return ValidateFieldNotEmpty(MothersName);
             }
@@ -308,9 +308,13 @@ namespace BlowTrial.Models
             {
                 return null; 
             }
-            if (EnvelopeNumber==null)
+            if (MultipleSiblingId==null && EnvelopeNumber==null)
             {
                 return Strings.Field_Error_Empty;
+            }
+            if (MultipleSiblingId.HasValue)
+            {
+                return EnvelopeNumber.HasValue?Strings.NewPatient_Error_TwinAndEnvelope:null;
             }
             else if (EnvelopeNumber > StudyCentre.MaxIdForSite || EnvelopeNumber < StudyCentre.Id)
             {
@@ -364,7 +368,7 @@ namespace BlowTrial.Models
             const int maxLength = 16;
             if (string.IsNullOrEmpty(PhoneNumber))
             {
-                return (OkToRandomise())?Strings.Field_Error_Empty:null;
+                return (RefusedConsent==false)?Strings.Field_Error_Empty:null; //had been OkToRandomise
             }
             
             if (PhoneNumber.Length > maxLength)
@@ -424,22 +428,26 @@ namespace BlowTrial.Models
             }
             return null;
         }
-        DateTimeErrorString ValidateDob()
+        DateTimeErrorString ValidateDob(DateTime? now=null)
         {
             var error = _dateTimeBirthSplitter.ValidateNotEmpty();
-            DateTime now = DateTime.Now;
-            _dateTimeBirthSplitter.ValidateIsBefore(Strings.DateTime_Now, now, ref error);
+            DateTime nowVal = now ?? DateTime.Now;
+            _dateTimeBirthSplitter.ValidateIsBefore(Strings.DateTime_Now, nowVal, ref error);
             if (error.DateError == null && DateTimeBirth.HasValue)
             {
-                var age = now - DateTimeBirth.Value;
+                var age = nowVal - DateTimeBirth.Value;
                 if (age.Days > MaxAgeDaysScreen)
                 {
-                    error.DateError = Strings.NewPatient_Error_DOBtooOld;
+                    error.DateError = Strings.NewPatient_Error_DOBtooOldToScreen;
+                }
+                else if (RefusedConsent==false && !AgeOkToRandomise(nowVal))
+                {
+                    error.DateError = Strings.NewPatient_Error_DOBtooOldToRandomise;
                 }
             }
             return error;
         }
-        DateTimeErrorString ValidateEnrollment()
+        DateTimeErrorString ValidateEnrollment(DateTime? now = null)
         {
             if (!(IsEnvelopeRandomising && OkToRandomise())) 
             { 
@@ -447,7 +455,7 @@ namespace BlowTrial.Models
             }
             var error = _dateTimeEnrollmentSplitter.ValidateNotEmpty();
             _dateTimeEnrollmentSplitter.ValidateIsAfter(Strings.DateOfBirth, DateTimeBirth.Value, ref error);
-            _dateTimeEnrollmentSplitter.ValidateIsBefore(Strings.DateTime_Now, DateTime.Now, ref error);
+            _dateTimeEnrollmentSplitter.ValidateIsBefore(Strings.DateTime_Now, now ?? DateTime.Now, ref error);
             return error;
         }
         string ValidateConsent()

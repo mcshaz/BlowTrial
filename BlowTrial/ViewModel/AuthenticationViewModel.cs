@@ -91,10 +91,6 @@ namespace BlowTrial.ViewModel
                 Status = "Login failed! Please provide valid credentials.";
                 //Mediator.NotifyColleagues("AuthorisationRequest", false);
             }
-            catch (Exception ex)
-            {
-                Debug.Fail("ERROR: {0}", ex.Message);
-            }
         }
 
         private bool CanLogin(object parameter)

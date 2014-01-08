@@ -156,12 +156,12 @@
                 <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="2" >
                     <TextBox 
                       x:Name="gestAgeWeeksTxt"
-                      Text="{Binding Path=GestAgeWeeks, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                      Text="{Binding Path=GestAgeWeeks, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}"
                        Width="50"/>
                     <Label Content="Weeks" Target="{Binding ElementName=gestAgeWeeksTxt}"/>
                     <TextBox 
                       x:Name="gestAgeDaysTxt"
-                      Text="{Binding Path=GestAgeDays, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                      Text="{Binding Path=GestAgeDays, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}"
                        Width="50"/>
                     <Label Content="Days" Target="{Binding ElementName=gestAgeDaysTxt}"/>
                 </StackPanel>
@@ -182,7 +182,7 @@
                 <TextBox 
                   x:Name="admissionWeightTxt"
                   Grid.Row="8" Grid.Column="2" 
-                  Text="{Binding Path=AdmissionWeight, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  Text="{Binding Path=AdmissionWeight, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}"
                   />
                 <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
                     <TextBlock Text="{Binding Path=WtForAgeCentile}" Style="{StaticResource siteColour}"/>
@@ -193,8 +193,10 @@
                 <!-- Abnormalities-->
                 <TextBlock
                   Grid.Row="10" Grid.Column="0" 
-                  Text="Abnormalities:" Margin="6"
-                  HorizontalAlignment="Right"  Style="{StaticResource siteColour}"/>
+                  Margin="6" TextWrapping="Wrap"
+                  HorizontalAlignment="Right"  Style="{StaticResource siteColour}">
+                    Abnormalities (leave blank if none):
+                </TextBlock>
                 <DataGrid
                   x:Name="abnormalitiesDataGrid"
                   Grid.Row="10" Grid.Column="2" CanUserAddRows="True" CanUserDeleteRows="True"
@@ -446,7 +448,7 @@
                     </CheckBox.Style>
                 </CheckBox>
                 <TextBox Grid.Row="30" Grid.Column="2" x:Name="multipleSiblingIdTxt" Margin="40,0,0,0" Height="26"
-                         Text="{Binding Path=MultipleSiblingId, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding Path=MultipleSiblingId, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}"
                          >
                     <TextBox.Style>
                         <Style TargetType="{x:Type TextBox}">
@@ -475,7 +477,7 @@
                   x:Name="envelopeNumberTxt"
                   Grid.Row="32" Grid.Column="2" 
                   IsEnabled="{Binding Path=OkToRandomise, Mode=OneWay}"
-                  Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
+                  Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}" 
                   />
                 <ContentPresenter 
                   Grid.Row="33" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"

@@ -799,11 +799,20 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Patients cannot be entered after 180 days of age.
+        ///   Looks up a localized string similar to The patient must be less than 28 days old at the time of randomising.
         /// </summary>
-        public static string NewPatient_Error_DOBtooOld {
+        public static string NewPatient_Error_DOBtooOldToRandomise {
             get {
-                return ResourceManager.GetString("NewPatient_Error_DOBtooOld", resourceCulture);
+                return ResourceManager.GetString("NewPatient_Error_DOBtooOldToRandomise", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Patients cannot be screened after 180 days since birth.
+        /// </summary>
+        public static string NewPatient_Error_DOBtooOldToScreen {
+            get {
+                return ResourceManager.GetString("NewPatient_Error_DOBtooOldToScreen", resourceCulture);
             }
         }
         
@@ -880,11 +889,29 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A randomising envelope should not be used. Id will be auto assigned..
+        /// </summary>
+        public static string NewPatient_Error_TwinAndEnvelope {
+            get {
+                return ResourceManager.GetString("NewPatient_Error_TwinAndEnvelope", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to this twin is of a different gender &amp; will be randomised normally.
         /// </summary>
         public static string NewPatient_Error_TwinGenderDifferent {
             get {
                 return ResourceManager.GetString("NewPatient_Error_TwinGenderDifferent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Twins must have the same gestational age.
+        /// </summary>
+        public static string NewPatient_Error_TwinGestAge {
+            get {
+                return ResourceManager.GetString("NewPatient_Error_TwinGestAge", resourceCulture);
             }
         }
         

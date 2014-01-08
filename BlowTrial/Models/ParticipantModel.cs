@@ -64,7 +64,7 @@ namespace BlowTrial.Models
         {
             get
             {
-                return VaccineModelsAdministered.Select(v => new VaccineAdministered { Id = v.Id }).ToList();
+                return VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineGiven.Id }).ToList();
             }
         }
 
@@ -194,11 +194,12 @@ namespace BlowTrial.Models
         {
             get
             {
+                if (KnownDeadOutcomes.Contains(OutcomeAt28Days))
+                {
+                    return true;
+                }
                 switch (OutcomeAt28Days)
                 {
-                    case OutcomeAt28DaysOption.DiedInHospitalBefore28Days:
-                    case OutcomeAt28DaysOption.DischargedAndKnownToHaveDied:
-                        return true;
                     case OutcomeAt28DaysOption.InpatientAt28Days:
                     case OutcomeAt28DaysOption.DischargedAndKnownToHaveSurvived:
                         return false;
@@ -210,9 +211,11 @@ namespace BlowTrial.Models
 
         public DataRequiredOption DataRequired
         {
-            get { return GetDataRequired().Compile()(this); }
+            get 
+            {
+                return GetDataRequired().Compile()(this); 
+            }
         }
-
         #endregion //Properties
 
         #region IDataErrorInfo Members
@@ -466,24 +469,28 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DischargedAndLikelyToHaveDied,
             OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived
         };
-        #endregion
+        static OutcomeAt28DaysOption[] KnownDeadOutcomes = new OutcomeAt28DaysOption[]
+        {
+            OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
+            OutcomeAt28DaysOption.DischargedAndKnownToHaveDied
+        };
 
-        #region DataRequired
         internal static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequired()
         {
             DateTime born28Prior = DateTime.Now.AddDays(-28);
             return
                 p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
-                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime==null || p.CauseOfDeath == CauseOfDeathOption.Missing)))
+                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
-                        :(p.IsInterventionArm && !p.VaccinesAdministered.Any(v=>v.Id == DataContextInitialiser.Bcg.Id))
+                        : (p.IsInterventionArm && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.Bcg.Id))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
                                 ? (p.DateTimeBirth > born28Prior) //in sql server DbFunctions.DiffDays(DateTimeBirth, DateTime.Now) < 28
                                     ? DataRequiredOption.AwaitingOutcomeOr28
                                     : DataRequiredOption.OutcomeRequired
-                                :DataRequiredOption.Complete;
+                                : DataRequiredOption.Complete;
         }
+
         #endregion
     }
 }

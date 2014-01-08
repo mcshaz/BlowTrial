@@ -44,7 +44,7 @@
                 <DataGridTemplateColumn Header="Site Id">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}"
+                            <TextBox Text="{Binding Path=Id, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}, ConverterParameter=n0}"
                                                  Foreground="{Binding Path=SiteTextBrush, Mode=OneWay}"
                                                  Background="{Binding Path=SiteBackgroundBrush, Mode=OneWay}"
                                         IsEnabled="{Binding Path=CanAlterId, Mode=OneWay}"/>
@@ -54,7 +54,7 @@
                 <DataGridTemplateColumn Header="Maximum Participant Allocations" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Path=MaxParticipantAllocations, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=n0}" 
+                            <TextBox Text="{Binding Path=MaxParticipantAllocations, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}, ConverterParameter=n0}" 
                                      IsEnabled="{Binding Path=CanAlterId, Mode=OneWay}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

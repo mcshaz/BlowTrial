@@ -182,6 +182,7 @@
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\BackupService.cs" />
+    <Compile Include="Infrastructure\Converters\NullableIntConverter.cs" />
     <Compile Include="Infrastructure\Converters\NullableDateTimeConverter.cs" />
     <Compile Include="Infrastructure\Converters\NullableTimeSpanConverter.cs" />
     <Compile Include="Infrastructure\Converters\StudyCentreModelToNameConverter.cs" />

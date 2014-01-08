@@ -141,22 +141,21 @@ namespace BlowTrial.Domain.Providers
         }
         public void Add(Participant participant)
         {
-            if (BlowTrial.Helpers.BlowTrialDataService.IsEnvelopeRandomising())
+            var centre= LocalStudyCentres.First(c=>c.Id == participant.CentreId);
+            if (participant.Id < centre.Id)
             {
-                var centre= LocalStudyCentres.First(c=>c.Id == participant.CentreId);
-                if (participant.Id < centre.Id)
-                {
-                    throw new DataKeyOutOfRangeException("Database key does not correspond to site");
-                }
-                else if (participant.Id > centre.MaxIdForSite)
-                {
-                    throw new DataKeyOutOfRangeException("Database has exceeded maximum size for site");
-                }
+                throw new DataKeyOutOfRangeException("participant id less than id for site");
             }
-            else
+            else if (participant.Id > centre.MaxIdForSite)
+            {
+                throw new DataKeyOutOfRangeException("participant id greater than maximum allocations for site");
+            }
+
+            if (participant.Id == 0)
             {
                 participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
             }
+
             _dbContext.Participants.Add(participant);
 
             _dbContext.SaveChanges();
@@ -184,7 +183,6 @@ namespace BlowTrial.Domain.Providers
             }
             _dbContext.SaveChanges();
             _localStudyCentres = null;
-            var dummy = LocalStudyCentres; //before disposing and subsequently using 
         }
         public void AddOrUpdate(ProtocolViolation violation)
         {
