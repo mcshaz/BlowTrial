@@ -49,23 +49,36 @@ namespace BlowTrial.ViewModel
                 }
                 _selectedVaccine = value;
                 this.VaccineAdministeredModel.VaccineGiven = _selectedVaccine.Vaccine;
-                NotifyPropertyChanged("SelectedVaccine", "AdministeredAt", "EarliestDate");
+                NotifyPropertyChanged("SelectedVaccine", "AdministeredAtDate", "AdministeredAtTime","EarliestDate");
             }
         }
 
         public Vaccine VaccineGiven { get { return this.VaccineAdministeredModel.VaccineGiven; } }
 
-        public DateTime? AdministeredAt 
+        public DateTime? AdministeredAtDate 
         { 
             get
             {
-                return this.VaccineAdministeredModel.AdministeredAt;
+                return this.VaccineAdministeredModel.AdministeredAtDate;
             }
             set
             {
-                if (value == this.VaccineAdministeredModel.AdministeredAt) { return; }
-                this.VaccineAdministeredModel.AdministeredAt = value;
-                NotifyPropertyChanged("AdministeredAt", "SelectedVaccine");
+                if (value == this.VaccineAdministeredModel.AdministeredAtDate) { return; }
+                this.VaccineAdministeredModel.AdministeredAtDate = value;
+                NotifyPropertyChanged("AdministeredAtDate", "AdministeredAtTime", "SelectedVaccine");
+            }
+        }
+        public TimeSpan? AdministeredAtTime
+        {
+            get
+            {
+                return this.VaccineAdministeredModel.AdministeredAtTime;
+            }
+            set
+            {
+                if (value == this.VaccineAdministeredModel.AdministeredAtTime) { return; }
+                this.VaccineAdministeredModel.AdministeredAtTime = value;
+                NotifyPropertyChanged("AdministeredAtDate", "AdministeredAtTime", "SelectedVaccine");
             }
         }
 
@@ -108,7 +121,7 @@ namespace BlowTrial.ViewModel
 
         bool IsEmpty()
         {
-            return SelectedVaccine.Vaccine == null && AdministeredAt == null;
+            return SelectedVaccine.Vaccine == null && AdministeredAtDate == null && AdministeredAtTime==null;
         }
 
 

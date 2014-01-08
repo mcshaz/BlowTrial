@@ -142,6 +142,10 @@ namespace BlowTrial.Domain.Providers
         public void Add(Participant participant)
         {
             var centre= LocalStudyCentres.First(c=>c.Id == participant.CentreId);
+            if (participant.Id == 0)
+            {
+                participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
+            }
             if (participant.Id < centre.Id)
             {
                 throw new DataKeyOutOfRangeException("participant id less than id for site");
@@ -149,11 +153,6 @@ namespace BlowTrial.Domain.Providers
             else if (participant.Id > centre.MaxIdForSite)
             {
                 throw new DataKeyOutOfRangeException("participant id greater than maximum allocations for site");
-            }
-
-            if (participant.Id == 0)
-            {
-                participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
             }
 
             _dbContext.Participants.Add(participant);
@@ -304,20 +303,29 @@ namespace BlowTrial.Domain.Providers
             }
             _dbContext.SaveChanges();
         }
+        public void Add(Vaccine newVaccine)
+        {
+            newVaccine.Id = GetNextId(_dbContext.Vaccines, LocalStudyCentres.First().Id);
+            _dbContext.Vaccines.Add(newVaccine);
+            _dbContext.SaveChanges();
+        }
+        public void Update(Participant patient)
+        {
+            Update(new Participant[] { patient });
+        }
         public void Update(IEnumerable<Participant> patients)
         {
+            if (patients.Any(p=>p.Id==0))
+            {
+                throw new DataKeyOutOfRangeException("all patients for update must have an Id != 0");
+            }
+            var allIds = patients.Select(p=>p.Id);
+            var allParticipants = (from p in _dbContext.Participants
+                                   where allIds.Contains(p.Id)
+                                   select p).ToList();
             foreach (Participant p in patients)
             {
-                Participant attachedParticipant = _dbContext.Participants.Local.FirstOrDefault(part => part.Id == p.Id);
-                if (attachedParticipant == null)
-                {
-                    _dbContext.Participants.Attach(p);
-                }
-                else
-                {
-                    _dbContext.Entry(attachedParticipant).CurrentValues.SetValues(p);
-                }
-                _dbContext.Entry(p).State = EntityState.Modified;
+                _dbContext.Entry(allParticipants.First(a=>a.Id == p.Id)).CurrentValues.SetValues(p);
             }
             _dbContext.SaveChanges();
         }

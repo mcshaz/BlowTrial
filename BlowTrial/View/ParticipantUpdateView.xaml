@@ -375,9 +375,21 @@
 
                     </Grid>
                     <DockPanel  Margin="10">
-                    <TextBlock DockPanel.Dock="Left" Text="Vaccines:" 
-                               HorizontalAlignment="Right" Margin="5,5,15,5"/>
-                        <DataGrid DockPanel.Dock="Right" Grid.Row="24" Grid.Column="2" ItemsSource="{Binding Path=VaccinesAdministered}"
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Stretch">
+                            <TextBlock  Text="Vaccines:" 
+                               HorizontalAlignment="Left" Margin="5,5,15,5">
+                            </TextBlock>
+                            <TextBlock 
+                                Margin="5">
+                                <Hyperlink Command="{Binding Path=NewVaccineCmd}">
+                                    Add New Type of Vaccine:
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBox Name="newVaccineNameTextBox" 
+                                HorizontalAlignment="Stretch"  
+                                 Text="{Binding Path=NewVaccineName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <DataGrid DockPanel.Dock="Bottom" Grid.Row="24" Grid.Column="2" ItemsSource="{Binding Path=VaccinesAdministered}"
                               AutoGenerateColumns="False"  CanUserDeleteRows="True">
 
                         <DataGrid.Columns>
@@ -407,14 +419,27 @@
                                 <DataGridTemplateColumn Header="Date Given" >
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <DatePicker SelectedDate="{Binding Path=AdministeredAt, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                        <DatePicker SelectedDate="{Binding Path=AdministeredAtDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                                                     DisplayDateStart="{Binding Path=EarliestDate, Mode=OneWay}" 
                                                     DisplayDateEnd="{Binding RelativeSource={RelativeSource FindAncestor, 
                                                         AncestorType={x:Type Window}}, Path=DataContext.DeathLastContactTodayOr28, Mode=OneWay}" />
+                                        
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="*" >
+                            <DataGridTemplateColumn Header="Time Given" >
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <wpfToolkit:MaskedTextBox 
+                                                    Value="{Binding Path=AdministeredAtTime, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
+                                                    IncludeLiteralsInValue="True"
+                                                    IncludePromptInValue="False"
+                                                    ValueDataType="{x:Type s:String}"
+                                                    Mask="90:00" Width="50" TextAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Width="*" >
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                             <TextBlock 

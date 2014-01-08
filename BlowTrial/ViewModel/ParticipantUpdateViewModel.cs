@@ -37,6 +37,7 @@ namespace BlowTrial.ViewModel
             _participant = participant;
             _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
             SaveChanges = new RelayCommand(Save, CanSave);
+            NewVaccineCmd = new RelayCommand(CreateNewVaccine, CanCreateNewVaccine);
 
             AttachCollections();
 
@@ -560,6 +561,18 @@ namespace BlowTrial.ViewModel
                     ?? TodayOr28;
             }
         }
+        string _newVaccineName;
+        public string NewVaccineName 
+        {
+            get {return _newVaccineName;}
+            set 
+            {
+                string newVal = value.Trim();
+                if (_newVaccineName == newVal) { return; }
+                _newVaccineName = newVal;
+                NotifyPropertyChanged ("NewVaccineName");
+            }
+        }
 
         public DateTime TodayOr28 // such a silly property is for the upper bound of the datepickers
         {
@@ -762,25 +775,22 @@ namespace BlowTrial.ViewModel
         }
         void VaccineAdminVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "AdministeredAt" || e.PropertyName == "SelectedVaccine")
+            if (e.PropertyName == "AdministeredAtDate" || e.PropertyName == "AdministeredAtTime" || e.PropertyName == "SelectedVaccine")
             {
                 IsVaccineAdminChanged = true;
             }
         }
         private void NewVaccineAdminVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "AdministeredAt" || e.PropertyName == "SelectedVaccine")
+            if (e.PropertyName == "AdministeredAtDate" || e.PropertyName == "AdministeredAtTime" || e.PropertyName == "SelectedVaccine")
             {
                 var newVaccineAdminVm = (VaccineAdministeredViewModel)sender;
-                if (newVaccineAdminVm.AdministeredAt.HasValue && newVaccineAdminVm.VaccineGiven != null) 
+                if (newVaccineAdminVm.IsValid())
                 {
-                    if (newVaccineAdminVm.VaccineAdministeredModel.IsValid())
-                    {
-                        _participant.VaccineModelsAdministered.Add(newVaccineAdminVm.VaccineAdministeredModel);
-                        newVaccineAdminVm.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
-                        newVaccineAdminVm.AllowEmptyRecord = false;
-                        VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
-                    }
+                    _participant.VaccineModelsAdministered.Add(newVaccineAdminVm.VaccineAdministeredModel);
+                    newVaccineAdminVm.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
+                    newVaccineAdminVm.AllowEmptyRecord = false;
+                    VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
                 }
             }
         }
@@ -817,13 +827,23 @@ namespace BlowTrial.ViewModel
                     (v => new VaccineAdministered 
                     {
                         Id = v.Id,
-                        AdministeredAt = v.AdministeredAt.Value,
+                        AdministeredAt = v.AdministeredAtDateTime.Value,
                         VaccineId = v.VaccineGiven.Id
                     }));
                 IsVaccineAdminChanged = false;
             }
         }
-
+        public ICommand NewVaccineCmd { get; private set; }
+        bool CanCreateNewVaccine(object param)
+        {
+            return !string.IsNullOrWhiteSpace(NewVaccineName) && GetValidationError("NewVaccineName") == null;
+        }
+        void CreateNewVaccine(object param)
+        {
+            Vaccine vax = new Vaccine { Name = NewVaccineName };
+            _repository.Add(vax);
+            AllVaccinesAvailable.Add(new VaccineViewModel(vax));
+        }
         #endregion
 
         #region Window Event Handlers
@@ -938,10 +958,19 @@ namespace BlowTrial.ViewModel
                 case "DiedAfterDischarge":
                 case "PostDischargeOutcomeKnown":
                     return ValidatePostDischargeOutcomes();
+                case "NewVaccineName":
+                    return ValidateNewVaccineName();
             }
             return ((IDataErrorInfo)_participant)[propertyName];
         }
-
+        string ValidateNewVaccineName()
+        {
+            if (!string.IsNullOrEmpty(NewVaccineName) && _repository.Vaccines.Any(v => v.Name == NewVaccineName))
+            {
+                return Strings.CreateNewVaccine_Duplicate;
+            }
+            return null;
+        }
         string ValidatePostDischargeOutcomes()
         {
             if (PostDischargeOutcomeKnown.HasValue && !DiedAfterDischarge.HasValue)

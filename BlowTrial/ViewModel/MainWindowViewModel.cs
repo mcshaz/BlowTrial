@@ -120,6 +120,7 @@ namespace BlowTrial.ViewModel
             if (result == MessageBoxResult.OK)
             {
                 BlowTrialDataService.StopEnvelopeRandomising();
+                RandomisingEngine.ResetBlock(EnvelopeDetails.FirstAvailableBlockNumber, _repository);
                 StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => false);
             }
         }

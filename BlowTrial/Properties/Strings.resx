@@ -758,4 +758,7 @@
   <data name="NewPatient_Error_TwinGestAge" xml:space="preserve">
     <value>Twins must have the same gestational age</value>
   </data>
+  <data name="CreateNewVaccine_Duplicate" xml:space="preserve">
+    <value>Vaccine names must be unique</value>
+  </data>
 </root>

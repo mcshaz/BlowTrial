@@ -10,7 +10,8 @@ namespace BlowTrial.Infrastructure
     }
     public static class EnvelopeDetails
     {
-        public const int MaxEnvelope = 5163;
+        public const int MaxEnvelopeNumber = 5163;
+        public const int FirstAvailableBlockNumber = 1713;
         public static Envelope GetEnvelope(int Id)
         {
             switch (Id)

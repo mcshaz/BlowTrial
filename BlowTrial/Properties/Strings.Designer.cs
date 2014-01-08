@@ -313,6 +313,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vaccine names must be unique.
+        /// </summary>
+        public static string CreateNewVaccine_Duplicate {
+            get {
+                return ResourceManager.GetString("CreateNewVaccine_Duplicate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Awaiting discharge, death or 28 day outcome.
         /// </summary>
         public static string DataRequiredOption_AwaitingOutcomeOr28 {

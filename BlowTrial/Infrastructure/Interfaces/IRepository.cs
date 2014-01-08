@@ -20,6 +20,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         void Add(Participant patient);
         void Add(ScreenedPatient patient);
+        void Add(Vaccine newVaccine);
         void UpdateParticipant(int id,
                 CauseOfDeathOption causeOfDeath,
                 String bcgAdverseDetail,
@@ -32,6 +33,7 @@ namespace BlowTrial.Infrastructure.Interfaces
                 OutcomeAt28DaysOption outcomeAt28Days);
         void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
+        void Update(Participant patient);
         void Update(ScreenedPatient patient);
         void AddOrUpdate(ProtocolViolation violation);
         void AddOrUpdate(IEnumerable<StudyCentre> centres);

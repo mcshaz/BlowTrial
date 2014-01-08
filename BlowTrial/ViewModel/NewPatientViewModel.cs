@@ -747,11 +747,24 @@ namespace BlowTrial.ViewModel
             };
             if (MultipleSibling != null && MultipleSibling.IsMale == newParticipant.IsMale)
             {
-                RandomisingEngine.ForcePairedAllocation(newParticipant, MultipleSiblingId.Value,_repository);
-                newParticipant.Id = (from p in _repository.Participants
-                                     where p.Id > EnvelopeDetails.MaxEnvelope
-                                     select p.Id).DefaultIfEmpty().Max();
-                if (newParticipant.Id == 0) { newParticipant.Id = EnvelopeDetails.MaxEnvelope + 1; }
+                newParticipant.MultipleSiblingId = _newPatient.MultipleSiblingId.Value;
+                if (IsEnvelopeRandomising)
+                {
+                    newParticipant.Id = (from p in _repository.Participants
+                                         where p.Id > EnvelopeDetails.MaxEnvelopeNumber
+                                         orderby p.Id descending
+                                         select p.Id).FirstOrDefault();
+                    if (newParticipant.Id == 0)
+                    {
+                        newParticipant.Id = EnvelopeDetails.MaxEnvelopeNumber;
+                    }
+                    newParticipant.Id += 1;
+                    newParticipant.BlockNumber = EnvelopeDetails.FirstAvailableBlockNumber;
+                }
+                else
+                {
+                    RandomisingEngine.ForcePairedAllocation(newParticipant, MultipleSiblingId.Value, _repository);
+                }
             }
             else if (IsEnvelopeRandomising)
             {
@@ -849,8 +862,10 @@ namespace BlowTrial.ViewModel
             if (_abnormalities!= null) { _abnormalities.Clear(); }
             _newPatient = new NewPatientModel();
             StudyCentre = StudyCentreOptions.First().Key;
+            _multipleSibling = null;
+            _hasSiblingEnrolled = false;
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "DateOfEnrollment", "TimeOfEnrollment", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired", "HasSiblingEnrolled");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "DateOfEnrollment", "TimeOfEnrollment", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired", "HasSiblingEnrolled", "MultipleSiblingId");
             RecordAltered = false;
             _isEnrollmentDateTimeAssigned = false;
         }
