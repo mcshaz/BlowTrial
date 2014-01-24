@@ -17,7 +17,7 @@ namespace BlowTrial.Models
         #region Constants
         public const int MaxAgeDaysEnrol = 21;
         public const int MaxAgeDaysScreen = 180;
-        public const int MinGestAgeBirth = 23;
+        public const int MinGestAgeBirth = 24;
         public const int MaxGestAgeBirth = 43;
         public const int MinBirthWeightGrams = 350;
         public const int MaxBirthWeightGrams = 1999;

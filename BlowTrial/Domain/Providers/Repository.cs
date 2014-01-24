@@ -166,7 +166,7 @@ namespace BlowTrial.Domain.Providers
         public void Add(ScreenedPatient patient)
         {
             _dbContext.ScreenedPatients.Add(patient);
-            patient.Id = GetNextId(_dbContext.Participants, patient.CentreId);
+            patient.Id = GetNextId(_dbContext.ScreenedPatients, patient.CentreId);
 
             _dbContext.SaveChanges();
             if (this.ParticipantAdded != null)

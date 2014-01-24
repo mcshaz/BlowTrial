@@ -262,8 +262,6 @@ namespace BlowTrial.ViewModel
             }
         }
 
-
-
         void abnormality_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             _newPatient.Abnormalities = (from a in _abnormalities
