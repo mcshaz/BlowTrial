@@ -394,7 +394,7 @@ namespace BlowTrial.Models
         string ValidateWeight()
         {
             string returnVal = ValidateFieldNotEmpty(AdmissionWeight);
-            if (this.AdmissionWeight < MinBirthWeightGrams || this.AdmissionWeight >= MaxBirthWeightGrams)
+            if (this.AdmissionWeight < MinBirthWeightGrams || this.AdmissionWeight > MaxBirthWeightGrams)
             {
                 returnVal = Strings.NewPatient_Error_InvalidWeight;
             }
