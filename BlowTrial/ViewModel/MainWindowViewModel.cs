@@ -15,8 +15,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Data;
 using AutoMapper;
-using System.Windows.Threading;
-using BlowTrial.View;
 using System.Windows;
 
 
@@ -371,7 +369,13 @@ namespace BlowTrial.ViewModel
             this.Workspaces.Remove(workspace);
             if (senderType == typeof(AuthenticationViewModel)) { HandleAuthorisationClose(); }
             else if (senderType == typeof(CreateNewUserViewModel)) { HandleCreateNewUserClose((CreateNewUserViewModel)workspace); }
-            if (!Workspaces.Any())
+            if (Workspaces.Any())
+            {
+                ICollectionView collectionView = CollectionViewSource.GetDefaultView(this.Workspaces);
+
+                DisplayName = ((ViewModelBase)collectionView.CurrentItem).DisplayName;
+            }
+            else
             {
                 DisplayName = Strings.MainWindowViewModel_WorkspaceName;
             }

@@ -39,9 +39,9 @@ namespace BlowTrial.Models
         static readonly string[] _baseExtensions = new string[] {".csv", ".txt", ".raw"};
 
         internal static readonly ReadOnlyCollection<DelimitedFileType> FileTypes = new ReadOnlyCollection<DelimitedFileType>(new DelimitedFileType[] 
-        { 
-            new DelimitedFileType { Delimiter=',', Description="Comma Seperated Values", FileExtensions=_baseExtensions  },
+        {
             new DelimitedFileType { Delimiter='\t', Description="Tab Seperated Values", FileExtensions=_baseExtensions.Concat(new string[] {".tab", ".tsv"}).ToArray()},
+            new DelimitedFileType { Delimiter=',', Description="Comma Seperated Values", FileExtensions=_baseExtensions  },
             new DelimitedFileType { Delimiter=';', Description="Semi-colon Seperated Values", FileExtensions=_baseExtensions }
         });
 

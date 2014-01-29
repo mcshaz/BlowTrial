@@ -29,12 +29,16 @@
     </UserControl.Resources>
 
     <DockPanel>
-
+        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Right" Height="16">
+            <Hyperlink Command="{Binding ShowViolationDetails}" >Update Details</Hyperlink>
+        </TextBlock>
+        <Separator DockPanel.Dock="Bottom" />
         <ListView 
           AlternationCount="2" DockPanel.Dock="Top"
+          ScrollViewer.VerticalScrollBarVisibility="Auto"
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"
           ItemsSource="{Binding Path=AllViolations}"
-            SelectedItem="{Binding Path=SelectedViolation}"
+          SelectedItem="{Binding Path=SelectedViolation}"
           >
             <ListView.View>
                 <GridView AllowsColumnReorder="True" >
@@ -45,9 +49,5 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Right" >
-            <Hyperlink Command="{Binding ShowViolationDetails}" >Update Details</Hyperlink>
-        </TextBlock>
-        <Separator DockPanel.Dock="Bottom" />
     </DockPanel>
 </UserControl>

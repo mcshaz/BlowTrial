@@ -60,7 +60,15 @@
     </UserControl.Resources>
 
     <DockPanel>
-
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,0,5,5"  Height="16">
+            <TextBlock Margin="0,0,10,0">
+                <Hyperlink Command="{Binding CreateProtocolViolation}" >Register Protocol Violation</Hyperlink>
+            </TextBlock>
+            <TextBlock >
+            <Hyperlink Command="{Binding ShowUpdateDetails}" >Update Details</Hyperlink>
+            </TextBlock>
+        </StackPanel>
+        <Separator DockPanel.Dock="Bottom" />
         <ListView 
           AlternationCount="2" DockPanel.Dock="Top"
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"
@@ -118,14 +126,5 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,0,5,5"  >
-            <TextBlock Margin="0,0,10,0">
-                <Hyperlink Command="{Binding CreateProtocolViolation}" >Register Protocol Violation</Hyperlink>
-            </TextBlock>
-            <TextBlock >
-            <Hyperlink Command="{Binding ShowUpdateDetails}" >Update Details</Hyperlink>
-        </TextBlock>
-        </StackPanel>
-        <Separator DockPanel.Dock="Bottom" />
     </DockPanel>
 </UserControl>

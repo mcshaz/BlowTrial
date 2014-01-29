@@ -45,7 +45,7 @@
     </UserControl.Resources>
 
     <ScrollViewer HorizontalScrollBarVisibility="Auto"
-              VerticalScrollBarVisibility="Disabled">
+              VerticalScrollBarVisibility="Auto">
         <DataGrid
           AlternatingRowBackground="AliceBlue"
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"

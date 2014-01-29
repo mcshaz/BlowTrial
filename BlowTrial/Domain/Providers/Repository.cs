@@ -370,7 +370,7 @@ namespace BlowTrial.Domain.Providers
                         _dbContext.ProtocolViolations.Max(pv=>(DateTime?)pv.RecordLastModified),
                         _dbContext.StudyCentres.Max(s=>(DateTime?)s.RecordLastModified)
                     }).Max();
-                if (cloudFile.LastWriteTimeUtc >= mostRecentEntry)
+                if (mostRecentEntry==null || cloudFile.LastWriteTimeUtc >= mostRecentEntry)
                 {
                     return;
                 }
