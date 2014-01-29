@@ -277,6 +277,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid date format.
+        /// </summary>
+        public static string CreateCsvModel_Error_InvalidDateFormat {
+            get {
+                return ResourceManager.GetString("CreateCsvModel_Error_InvalidDateFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export CSV file.
         /// </summary>
         public static string CreateCsvVM_Title {

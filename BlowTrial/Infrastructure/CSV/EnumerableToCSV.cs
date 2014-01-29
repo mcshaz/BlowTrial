@@ -10,22 +10,25 @@ namespace BlowTrial.Infrastructure
 {
     static class CSVconversion
     {
-        public static void IListToCSVFile<T>(IList<T> collection, string fileName)
+        private static readonly string[] extensions = new string[] { ".txt", ".csv", ".tab", ".tsv" };
+        public static void IListToCSVFile<T>(IList<T> collection, string fileName, char delimiter, string dateFormat = "u")
         {
-            if (!fileName.EndsWith(".csv"))
+            if (!extensions.Any(e=>fileName.EndsWith(e)))
             {
-                fileName += ".csv";
+                fileName += extensions.First();
             }
-            System.IO.File.WriteAllLines(fileName, IListToStrings(collection));
+            System.IO.File.WriteAllLines(fileName, IListToStrings(collection, delimiter));
         }
-        public static string[] IListToStrings<T>(IList<T> collection)
+        public static string[] IListToStrings<T>(IList<T> collection, char delimiter = ',', string dateFormat = "u")
         {
-            Func<object, string> stringToString = new Func<object, string>(s => (s == null) ? string.Empty : ((string)s).Replace(",", @"\,"));
+            string lookfor = delimiter.ToString();
+            string replacewith = '\\' + lookfor;
+            Func<object, string> stringToString = new Func<object, string>(s => (s == null) ? string.Empty : ((string)s).Replace(lookfor, replacewith));
             Func<object, string> dateTimeToString = new Func<object, string>(d =>
                 {
                     var nullableDT = (DateTime?)d;
                     return nullableDT.HasValue
-                        ? nullableDT.Value.ToString("u")
+                        ? nullableDT.Value.ToString(dateFormat)
                         : string.Empty;
                 });
             Func<object, string> boolToString = new Func<object, string>(b =>
@@ -49,7 +52,7 @@ namespace BlowTrial.Infrastructure
                 {
                     if (isSubsequentProp)
                     {
-                        headers.Append(',');
+                        headers.Append(delimiter);
                     }
                     else
                     {
@@ -84,7 +87,7 @@ namespace BlowTrial.Infrastructure
             for (int i = 1; i < returnVar.Length; i++)
             {
                 var rowInstance = collection[i - 1];
-                returnVar[i] = propertyConverters.Select(pc => pc.Invoke(rowInstance)).ToSeparatedList(',');
+                returnVar[i] = propertyConverters.Select(pc => pc.Invoke(rowInstance)).ToSeparatedList(delimiter);
             }
             return returnVar;
         }

@@ -30,6 +30,8 @@ namespace BlowTrial.ViewModel
             SaveCmd = new RelayCommand(Save, param=>IsValid());
             SelectFileCmd = new RelayCommand(SelectFile);
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param), param => true);
+
+            SelectedFileType = FileTypes.First();
         }
         #endregion
 
@@ -47,6 +49,35 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("Filename");
             }
         }
+
+        public string DateFormat
+        {
+            get
+            {
+                return _model.DateFormat;
+            }
+            set
+            {
+                if (_model.DateFormat == value) { return; }
+                _model.DateFormat = value;
+                NotifyPropertyChanged("DateFormat");
+            }
+        }
+
+        public DelimitedFileType SelectedFileType
+        {
+            get
+            {
+                return _model.SelectedFileType;
+            }
+            set
+            {
+                if (_model.SelectedFileType == value) { return; }
+                _model.SelectedFileType = value;
+                NotifyPropertyChanged("SelectedFileType");
+            }
+        }
+
         public TableOptions TableType
         { 
             get
@@ -59,6 +90,11 @@ namespace BlowTrial.ViewModel
                 _model.TableType = value;
                 NotifyPropertyChanged("TableType");
             }
+        }
+
+        public IEnumerable<DelimitedFileType> FileTypes
+        {
+            get { return CreateCsvModel.FileTypes; }
         }
 
         #endregion
@@ -75,10 +111,10 @@ namespace BlowTrial.ViewModel
             {
                 case TableOptions.Participant:
                     var participants = Mapper.Map<ParticipantCsvModel[]>(_repository.Participants.Include("VaccinesAdministered").ToArray());
-                    var csvEncodedParticipants = PatientDataToCSV.ParticipantDataToCSV(participants, _repository.Vaccines.ToArray());
+                    var csvEncodedParticipants = PatientDataToCSV.ParticipantDataToCSV(participants, _repository.Vaccines.ToArray(), SelectedFileType.Delimiter, DateFormat);
                     try
                     {
-                        File.WriteAllLines(_model.Filename, csvEncodedParticipants);
+                        File.WriteAllLines(_model.FileNameWithExtension, csvEncodedParticipants);
                     }
                     catch(System.IO.IOException e)
                     {
@@ -88,13 +124,13 @@ namespace BlowTrial.ViewModel
                     break;
                 case TableOptions.ScreenedPatients:
                     var screened = Mapper.Map<ScreenedPatientCsvModel[]>(_repository.ScreenedPatients.ToArray());
-                    var csvEncodedScreened = CSVconversion.IListToStrings<ScreenedPatientCsvModel>(screened);
-                    File.WriteAllLines(_model.Filename, csvEncodedScreened);
+                    var csvEncodedScreened = CSVconversion.IListToStrings<ScreenedPatientCsvModel>(screened, SelectedFileType.Delimiter, DateFormat);
+                    File.WriteAllLines(_model.FileNameWithExtension, csvEncodedScreened);
                     break;
                 case TableOptions.ProtocolViolations:
                     var viol = _repository.ProtocolViolations.ToArray();
-                    var csvEncodedViols = CSVconversion.IListToStrings<ProtocolViolation>(viol);
-                    File.WriteAllLines(_model.Filename, csvEncodedViols);
+                    var csvEncodedViols = CSVconversion.IListToStrings<ProtocolViolation>(viol, SelectedFileType.Delimiter, DateFormat);
+                    File.WriteAllLines(_model.FileNameWithExtension, csvEncodedViols);
                     break;
                 default:
                     throw new InvalidOperationException("save called no table selected");

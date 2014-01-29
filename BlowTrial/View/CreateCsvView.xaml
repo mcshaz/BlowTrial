@@ -25,6 +25,11 @@
                     <RowDefinition Height="30" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="5" VerticalAlignment="Stretch" Width="6" />
             <!--TableName-->
@@ -66,6 +71,47 @@
               Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
               Content="{Binding ElementName=filenameTxt, Path=(Validation.Errors).CurrentItem}"
               />
+            <!--SelectedFileType-->
+            <Label 
+              Grid.Row="4" Grid.Column="0" 
+              Content="Delimiter:" 
+              HorizontalAlignment="Right"
+              Target="{Binding ElementName=fileTypeCombo}" 
+              />
+            <ComboBox x:Name="fileTypeCombo" Grid.Row="4" Grid.Column="2"
+                     DisplayMemberPath="Description"
+                     SelectedValue="{Binding Path=SelectedFileType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged }"
+                     ItemsSource="{Binding Path=FileTypes, Mode=OneWay}"
+                      />
+            <ContentPresenter 
+              Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+              Content="{Binding ElementName=fileTypeCombo, Path=(Validation.Errors).CurrentItem}"
+              />
+            <!--DateFormat-->
+            <Label 
+              Grid.Row="6" Grid.Column="0" 
+              Content="Date Format*:" 
+              HorizontalAlignment="Right"
+              Target="{Binding ElementName=dateFormatTxt}" 
+              />
+            <TextBox x:Name="dateFormatTxt" Grid.Row="6" Grid.Column="2"
+                     Text="{Binding Path=DateFormat, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged }"
+                      />
+            <ContentPresenter 
+              Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+              Content="{Binding ElementName=dateFormatTxt, Path=(Validation.Errors).CurrentItem}"
+              />
+            <TextBlock TextWrapping="Wrap" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3">
+                *For details of how to format dates see
+                <Hyperlink NavigateUri="http://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.100%29.aspx" RequestNavigate="Hyperlink_RequestNavigate" >
+                    standard
+                </Hyperlink>
+                and
+                <Hyperlink NavigateUri="http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=vs.100%29.aspx" RequestNavigate="Hyperlink_RequestNavigate" >
+                    custom
+                </Hyperlink>
+                date format strings
+            </TextBlock>
         </Grid>
             <Line Grid.Row="2" Grid.RowSpan="2" 
                 VerticalAlignment="Top" Stroke="Gray" StrokeThickness="1"

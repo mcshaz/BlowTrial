@@ -53,8 +53,8 @@ namespace BlowTrial.Domain.Providers
 
         #region Members
         private readonly Func<ITrialDataContext> _createContext;
-
         private ITrialDataContext _dbContext;
+        private const string BakExtension = ".sdf"; //obviously change if using non-compact
         #endregion // Members
 
         #region Properties
@@ -358,9 +358,22 @@ namespace BlowTrial.Domain.Providers
             string cloudZipName = CloudDirectories.First() + '\\' + cloudPathWithoutExtension + ".zip"; 
             
             var cloudFile = new FileInfo(cloudZipName);
-            if (cloudFile.Exists && cloudFile.LastWriteTimeUtc >= _dbContext.DbLastModifiedUtc())
+
+            if (cloudFile.Exists)
             {
-                return;
+                DateTime? mostRecentEntry = (new DateTime?[]
+                    {
+                        _dbContext.Participants.Max(p=>(DateTime?)p.RecordLastModified),
+                        _dbContext.ScreenedPatients.Max(s=>(DateTime?)s.RecordLastModified),
+                        _dbContext.Vaccines.Max(v=>(DateTime?)v.RecordLastModified),
+                        _dbContext.VaccinesAdministered.Max(va=>(DateTime?)va.RecordLastModified),
+                        _dbContext.ProtocolViolations.Max(pv=>(DateTime?)pv.RecordLastModified),
+                        _dbContext.StudyCentres.Max(s=>(DateTime?)s.RecordLastModified)
+                    }).Max();
+                if (cloudFile.LastWriteTimeUtc >= mostRecentEntry)
+                {
+                    return;
+                }
             }
             _dbContext.Dispose(); // only necessary for ce
             string cloudBakName = cloudPathWithoutExtension + Path.GetExtension(bakFileName);
@@ -374,34 +387,36 @@ namespace BlowTrial.Domain.Providers
 
         public void Restore()
         {
-            DateTime RecordLastModified = _dbContext.DbLastModifiedUtc(); //note this is all assuming user on backup end has no ability to modify data
-            var zipFiles = GetFilesUpdatedAfter(RecordLastModified, _dbContext.DbName);
-            if (!zipFiles.Any()) { return; }
+            //DateTime RecordLastModified = _dbContext.DbLastModifiedUtc(); //note this is all assuming user on backup end has no ability to modify data
+            IEnumerable<MatchedFilePair> filePairs = GetMatchedCloudAndExtractedFiles().Where(fp => fp.ExtractedBak == null || fp.ExtractedBak.CreationTimeUtc < fp.Zip.LastWriteTimeUtc);
+            if (!filePairs.Any()) { return; }
             _dbContext.Dispose();
 
-            List<string> bakFileNames = new List<string>(zipFiles.Count);
-            foreach (var zipFile in zipFiles)
+            foreach (var fp in filePairs)
             {
-                using (ZipFile readFile = ZipFile.Read(zipFile.FullName))
+                using (ZipFile readFile = ZipFile.Read(fp.Zip.FullName))
                 {
-                    //may want to check lastaccessed to check against as well but not sure if UTC - imperative for international data
                     readFile[0].Extract(ZipExtractionDirectory, ExtractExistingFileAction.OverwriteSilently);
-                    bakFileNames.Add(readFile[0].FileName);
                 }
+                if (fp.ExtractedBak == null)
+                {
+                    fp.ExtractedBak = new FileInfo(Path.Combine(ZipExtractionDirectory, Path.GetFileNameWithoutExtension(fp.Zip.Name) + BakExtension));
+                }
+                fp.ExtractedBak.CreationTimeUtc = fp.Zip.LastWriteTimeUtc;
             }
 
             _dbContext = _createContext.Invoke();
-            AddOrUpdateBaks(bakFileNames, RecordLastModified);
+            AddOrUpdateBaks(filePairs.Select(fp=>fp.ExtractedBak));
 
         }
-        void AddOrUpdateBaks(IEnumerable<string> bakFileNames, DateTime addOrUpdateAfter)
+        void AddOrUpdateBaks(IEnumerable<FileInfo> bakupFiles)
         {
             List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
             List<IntegerRange> newSiteIdRanges = new List<IntegerRange>();
-            foreach (string fn in bakFileNames)
+            foreach (var f in bakupFiles)
             {
-                var knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
-                using (var downloadedDb = _dbContext.AttachDb(ZipExtractionDirectory + '\\' + fn))
+                IEnumerable<Guid> knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
+                using (var downloadedDb = _dbContext.AttachDb(f.FullName))
                 {      
                     var newSites = (from s in downloadedDb.StudyCentres.AsNoTracking()
                                     where !knownSiteIds.Contains(s.DuplicateIdCheck)
@@ -426,15 +441,16 @@ namespace BlowTrial.Domain.Providers
                         _localStudyCentres = null;
                     }
                     var newSiteIds = newSiteIdRanges.Select(n => n.Min);
+                    DateTime mostRecentBak = f.CreationTimeUtc;
                     _dbContext.Participants.AddOrUpdate((from p in downloadedDb.Participants.AsNoTracking()
-                                                         where p.RecordLastModified > addOrUpdateAfter || newSiteIds.Contains(p.CentreId)
+                                                         where p.RecordLastModified > mostRecentBak || newSiteIds.Contains(p.CentreId)
                                                          select p).ToArray());
                     _dbContext.ScreenedPatients.AddOrUpdate((from s in downloadedDb.ScreenedPatients.AsNoTracking()
-                                                             where s.RecordLastModified > addOrUpdateAfter || newSiteIds.Contains(s.CentreId)
+                                                             where s.RecordLastModified > mostRecentBak || newSiteIds.Contains(s.CentreId)
                                                              select s).ToArray());
                     
                     var vaccinePredicate = PredicateBuilder.False<Vaccine>();
-                    vaccinePredicate.Or(p=>p.RecordLastModified > addOrUpdateAfter);
+                    vaccinePredicate.Or(p => p.RecordLastModified > mostRecentBak);
                     foreach (IntegerRange rng in newSiteIdRanges)
                     {
                         vaccinePredicate = vaccinePredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
@@ -443,7 +459,7 @@ namespace BlowTrial.Domain.Providers
                     _dbContext.Vaccines.AddOrUpdate(newVax);
 
                     var vaccineAdminPredicate = PredicateBuilder.False<VaccineAdministered>();
-                    vaccineAdminPredicate.Or(p => p.RecordLastModified > addOrUpdateAfter);
+                    vaccineAdminPredicate.Or(p => p.RecordLastModified > mostRecentBak);
                     foreach (IntegerRange rng in newSiteIdRanges)
                     {
                         vaccineAdminPredicate = vaccineAdminPredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
@@ -452,7 +468,7 @@ namespace BlowTrial.Domain.Providers
                     _dbContext.VaccinesAdministered.AddOrUpdate(newVaxAdmin);
 
                     var protocolViolPredicate = PredicateBuilder.False<ProtocolViolation>();
-                    protocolViolPredicate.Or(p => p.RecordLastModified > addOrUpdateAfter);
+                    protocolViolPredicate.Or(p => p.RecordLastModified > mostRecentBak);
                     foreach (IntegerRange rng in newSiteIdRanges)
                     {
                         protocolViolPredicate = protocolViolPredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
@@ -502,35 +518,36 @@ namespace BlowTrial.Domain.Providers
             return returnVar;
         }
 
-        ICollection<FileInfo> GetFilesUpdatedAfter(DateTime afterUtc, string filePrefix)
+        ICollection<MatchedFilePair> GetMatchedCloudAndExtractedFiles()
         {
+            string filePrefix = _dbContext.DbName;
             int prefixLen = filePrefix.Length;
             int fnLen = prefixLen + 37;
-            List<FileInfo> returnVar = new List<FileInfo>();
-            var knownSites = LocalStudyCentres.Select(l=>l.DuplicateIdCheck);
+
+            List<MatchedFilePair> returnVar = new List<MatchedFilePair>();
+
+            DirectoryInfo di;
             foreach (string dirName in CloudDirectories)
             {
-                DirectoryInfo di = new DirectoryInfo(dirName);
-                foreach (FileInfo f in di.GetFiles())
+                di = new DirectoryInfo(dirName);
+                returnVar.AddRange(from f in di.GetFiles()
+                                   where f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix
+                                   select new MatchedFilePair{ Zip = f });
+            }
+
+            di = new DirectoryInfo(ZipExtractionDirectory);
+            foreach (FileInfo f in di.GetFiles())
+            {
+                if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix)
                 {
-                    if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix)
+                    var matchedPair = returnVar.FirstOrDefault(r => Path.GetFileNameWithoutExtension(r.Zip.Name) == Path.GetFileNameWithoutExtension(f.Name));
+                    if (matchedPair != null)
                     {
-                        bool needsUpdating = f.LastWriteTimeUtc > afterUtc;
-                        if (!needsUpdating)
-                        {
-                            Guid parsedGuid;
-                            if (Guid.TryParse(f.Name.Substring(prefixLen+1,32), out parsedGuid))
-                            {
-                                needsUpdating = !knownSites.Contains(parsedGuid);
-                            }
-                        }
-                        if (needsUpdating)
-                        {
-                            returnVar.Add(f);
-                        }
+                        matchedPair.ExtractedBak = f;
                     }
                 }
             }
+
             return returnVar;
         }
 
@@ -565,6 +582,38 @@ namespace BlowTrial.Domain.Providers
             }
         }
         #endregion // IDiposable
+
+        #region FileModifiedInfo
+        private class MatchedFilePair
+        {
+            FileInfo _zip;
+            FileInfo _extractedBak;
+            internal FileInfo Zip 
+            {
+                get { return _zip; }
+                set 
+                { 
+                    if (!value.Name.EndsWith(".zip"))
+                    {
+                        throw new InvalidFileTypeException(Path.GetExtension(value.Name),".zip");
+                    }
+                    _zip = value;
+                }
+            }
+            internal FileInfo ExtractedBak 
+            {
+                get { return _extractedBak; }
+                set
+                {
+                    if (!value.Name.EndsWith(BakExtension))
+                    {
+                        throw new InvalidFileTypeException(Path.GetExtension(value.Name), BakExtension);
+                    }
+                    _extractedBak = value;
+                }
+            }
+        }
+        #endregion
 
     }
 }

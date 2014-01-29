@@ -6,9 +6,9 @@ namespace BlowTrial.Infrastructure.Extensions
 {
     public static class StringExtensions
     {
-        public static string GetSafeFilename(string filename, string seperator = "_")
+        public static string GetSafeFilename(string filename, string delimiter = "_")
         {
-            return string.Join(seperator, filename.Split(System.IO.Path.GetInvalidFileNameChars()));
+            return string.Join(delimiter, filename.Split(System.IO.Path.GetInvalidFileNameChars()));
         }
         public static string ToSeparatedWords(this string value)
         {

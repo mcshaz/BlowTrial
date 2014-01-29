@@ -8,12 +8,12 @@ namespace BlowTrial.Infrastructure.CSV
 {
     public static class PatientDataToCSV
     {
-        public static string[] ParticipantDataToCSV(IList<ParticipantCsvModel> allParticipants, IEnumerable<Vaccine> allVaccines)
+        public static string[] ParticipantDataToCSV(IList<ParticipantCsvModel> allParticipants, IEnumerable<Vaccine> allVaccines, char delimiter, string dateFormat)
         {
-            var participantsCsv = CSVconversion.IListToStrings<ParticipantCsvModel>(allParticipants);
+            var participantsCsv = CSVconversion.IListToStrings<ParticipantCsvModel>(allParticipants, delimiter, dateFormat);
 
             //append row 0 [headers]
-            participantsCsv[0] += string.Join(string.Empty, allVaccines.Select(v => ',' + v.Name));
+            participantsCsv[0] += string.Join(string.Empty, allVaccines.Select(v => delimiter + v.Name));
             for (int i=0; i< allParticipants.Count;i++)
             {
                 foreach (var v in allVaccines)
@@ -22,11 +22,11 @@ namespace BlowTrial.Infrastructure.CSV
                     
                     if (admin==null)
                     {
-                        participantsCsv[i+1] += ',';
+                        participantsCsv[i+1] += delimiter;
                     }
                     else
                     {
-                        participantsCsv[i+1] += ',' + admin.AdministeredAt.ToString("u");
+                        participantsCsv[i+1] += delimiter + admin.AdministeredAt.ToString(dateFormat);
                     }
                 }
             }

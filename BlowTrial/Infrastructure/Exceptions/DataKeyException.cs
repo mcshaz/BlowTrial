@@ -36,4 +36,12 @@ namespace BlowTrial.Infrastructure.Exceptions
         {
         }
     }
+    [Serializable]
+    public class InvalidFileTypeException : Exception
+    {
+        public InvalidFileTypeException(string fileTypeGiven, string fileTypeExpected)
+            : base(string.Format("filetype {0} given where {1} expected", fileTypeGiven, fileTypeExpected))
+        {
+        }
+    }
 }

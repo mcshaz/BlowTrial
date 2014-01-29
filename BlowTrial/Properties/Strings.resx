@@ -761,4 +761,7 @@
   <data name="CreateNewVaccine_Duplicate" xml:space="preserve">
     <value>Vaccine names must be unique</value>
   </data>
+  <data name="CreateCsvModel_Error_InvalidDateFormat" xml:space="preserve">
+    <value>Invalid date format</value>
+  </data>
 </root>

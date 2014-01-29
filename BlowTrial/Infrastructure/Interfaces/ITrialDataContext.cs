@@ -26,7 +26,7 @@ namespace BlowTrial.Domain.Interfaces
         /// <returns></returns>
         string BackupDb();
         string DbName { get; }
-        DateTime DbLastModifiedUtc();
+        //DateTime DbLastModifiedUtc();
         ITrialDataContext AttachDb(string backupFilePath);
         int SaveChanges();
     }

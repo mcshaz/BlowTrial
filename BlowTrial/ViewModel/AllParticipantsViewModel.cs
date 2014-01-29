@@ -119,7 +119,6 @@ namespace BlowTrial.ViewModel
                    (new SortDescription(propertyName, ListSortDirection.Descending));
                 _isAscending[propertyName] = true;
             }
-            if (propertyName == "Id") { NotifyPropertyChanged("IsIdSort"); }
         }
 
         public RelayCommand CreateProtocolViolation { get; private set;}
