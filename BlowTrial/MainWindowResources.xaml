@@ -32,6 +32,10 @@ This resource dictionary is used by the MainWindow.
         <vw:BackupView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vm:RandomisedMessagesViewModel}">
+        <vw:RandomisedMessageView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vm:CreateCsvViewModel}">
         <vw:CreateCsvView />
     </DataTemplate>

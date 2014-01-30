@@ -338,11 +338,11 @@
     <comment>Caption on messagebox when succesfully randomised</comment>
   </data>
   <data name="NewPatient_ToControl" xml:space="preserve">
-    <value>{0} has been randomised to the CONTROL arm with an ID of {1:n0}. Please give only give BCG &amp; OPV once nearing discharge.</value>
+    <value>{0} has been randomised to the CONTROL arm with an ID of {1:n0}.</value>
     <comment>String format display message when randomised to control arm</comment>
   </data>
   <data name="NewPatient_ToIntervention" xml:space="preserve">
-    <value>{0} has been randomised to the INTERVENTION arm with an ID of {1}. Please give BCG &amp; OPV as soon as possible.</value>
+    <value>{0} has been randomised to the INTERVENTION arm with an ID of {1:n0}.</value>
     <comment>String format display message when randomised to intervention arm</comment>
   </data>
   <data name="ParticipantModel_Describe_DateTimeDischarge" xml:space="preserve">
@@ -643,6 +643,7 @@
   </data>
   <data name="WizardView_Header_Steps" xml:space="preserve">
     <value>Steps</value>
+    <comment>The header refering to the steps of the process eg, step 1 - enter your site's name</comment>
   </data>
   <data name="BackupDirectionViewModel_DisplayName" xml:space="preserve">
     <value>Application purpose</value>
@@ -763,5 +764,14 @@
   </data>
   <data name="CreateCsvModel_Error_InvalidDateFormat" xml:space="preserve">
     <value>Invalid date format</value>
+  </data>
+  <data name="RandomisedMessagesViewModel_DefaultControl" xml:space="preserve">
+    <value>Please only give BCG &amp; OPV once nearing discharge.</value>
+  </data>
+  <data name="RandomisedMessagesViewModel_DefaultIntervention" xml:space="preserve">
+    <value>Please give BCG &amp; OPV as soon as possible.</value>
+  </data>
+  <data name="RandomisedMessagesViewModel_DisplayName" xml:space="preserve">
+    <value>Messages On Randomisation</value>
   </data>
 </root>

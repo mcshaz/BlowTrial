@@ -7,10 +7,11 @@ using System.Text;
 
 namespace BlowTrial.Infrastructure.Interfaces
 {
-    public interface IBackupData
+    public interface IAppData
     {
         DbSet<BackupData> BackupDataSet { get; }
         DbSet<CloudDirectory> CloudDirectories { get; }
+        DbSet<RandomisingMessage> RandomisingMessages { get; }
         Database Database { get; }
         int SaveChanges();
      }

@@ -554,6 +554,22 @@ namespace BlowTrial.ViewModel
         {
             get { return DateTime.Today.AddDays(-NewPatientModel.MaxAgeDaysScreen); }
         }
+
+        RandomisingMessage _randomisingMessage;
+        string ControlArmMessage
+        {
+            get
+            {
+                return (_randomisingMessage ?? (_randomisingMessage = BlowTrialDataService.GetRandomisingMessage())).ControlInstructions;
+            }
+        }
+        string InterventionArmMessage
+        {
+            get
+            {
+                return (_randomisingMessage ?? (_randomisingMessage = BlowTrialDataService.GetRandomisingMessage())).InterventionInstructions;
+            }
+        }
         #endregion // Properties
 
         #region Private Methods
@@ -790,7 +806,9 @@ namespace BlowTrial.ViewModel
             }
             if (!false.Equals(parameter)) // for testing purposes, supress dialog
             {
-                string userMsg = (newParticipant.IsInterventionArm) ? Strings.NewPatient_ToIntervention : Strings.NewPatient_ToControl;
+                string userMsg = (newParticipant.IsInterventionArm) 
+                    ? Strings.NewPatient_ToIntervention + " " + InterventionArmMessage
+                    : Strings.NewPatient_ToControl + " " + ControlArmMessage;
                 userMsg = string.Format(userMsg, newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')', newParticipant.Id);
                 MessageBox.Show(userMsg, Strings.NewPatient_SuccesfullyRandomised, MessageBoxButton.OK, MessageBoxImage.Information);
             }

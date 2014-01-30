@@ -21,6 +21,10 @@
             <vw:StudySitesView />
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vm:RandomisedMessagesViewModel}">
+            <vw:RandomisedMessagesUserControlBase />
+        </DataTemplate>
+
         <Style TargetType="{x:Type Button}">
             <Setter Property="Padding" Value="3.5,0" />
             <Setter Property="Margin" Value="3.5" />

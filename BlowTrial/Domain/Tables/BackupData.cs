@@ -24,4 +24,17 @@ namespace BlowTrial.Domain.Tables
         public int Id { get; set; }
         public string Path { get; set; }
     }
+
+    /// <summary>
+    /// This exists because some sights have subtly different local ethics aproval
+    /// </summary>
+    public class RandomisingMessage
+    {
+        [Key]
+        public int Id { get; set; }
+        [StringLength(200)]
+        public string InterventionInstructions { get; set; }
+        [StringLength(200)]
+        public string ControlInstructions { get; set; }
+    }
 }

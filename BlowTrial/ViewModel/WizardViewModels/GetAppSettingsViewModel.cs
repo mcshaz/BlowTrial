@@ -27,6 +27,7 @@ namespace BlowTrial.ViewModel
         RelayCommand _cancelCommand;
         List<WizardPageViewModel> _pages;
         StudySitesViewModel _sitesVm;
+        RandomisedMessagesViewModel _messagesVm;
         bool? _isAnyStudyCentres;
 
         #endregion // Fields
@@ -149,6 +150,7 @@ namespace BlowTrial.ViewModel
 
         #region Properties
         StudySitesModel SitesModel { get; set; }
+        RandomisedMessagesModel MessagesModel { get; set; }
         BackupDirectionModel BackupModel { get; set; }
         public bool WasCancelled { get; private set; }
         /// <summary>
@@ -221,6 +223,10 @@ namespace BlowTrial.ViewModel
                 _sitesVm = new StudySitesViewModel(SitesModel);
                 _pages.Add(_sitesVm);
             }
+
+            MessagesModel = new RandomisedMessagesModel();
+            _messagesVm = new RandomisedMessagesViewModel(MessagesModel);
+            _pages.Add(_messagesVm);
             
             _pages.Add(new CloudDirectoryViewModel(BackupModel));
 
@@ -242,6 +248,16 @@ namespace BlowTrial.ViewModel
                     {
                         Pages.Remove(page);
                     }
+
+                    page = (WizardPageViewModel)Pages.FirstOrDefault(p => p.Equals(_messagesVm));
+                    if (page==null && isBackingUpToCloud.Value)
+                    {
+                        Pages.Insert(Pages.Count - 1, (WizardPageViewModel)_messagesVm);
+                    }
+                    else if (page != null && !isBackingUpToCloud.Value)
+                    {
+                        Pages.Remove(page);
+                    }
                 }
             }
         }
@@ -249,16 +265,30 @@ namespace BlowTrial.ViewModel
         void UploadData()
         {
             if (BackupModel == null) { return; }
-            var details = BackupModel;
-            BlowTrialDataService.SetBackupDetails(
-                details.CloudDirectories,
-                details.BackupIntervalMinutes.Value,
-                details.IsBackingUpToCloud,
-                details.PatientsPreviouslyRandomised
-                );
-            if (SitesModel != null)
+            if (BackupModel.IsBackingUpToCloud.Value)
             {
-                BlowTrialDataService.DefineNewStudyCentres(SitesModel.StudySitesData);
+                BlowTrialDataService.SetAppData(
+                    MessagesModel.InterventionInstructions,
+                    MessagesModel.ControlInstructions,
+                    BackupModel.CloudDirectories,
+                    BackupModel.BackupIntervalMinutes.Value,
+                    BackupModel.IsBackingUpToCloud,
+                    BackupModel.PatientsPreviouslyRandomised
+                    );
+                if (SitesModel != null)
+                {
+                    BlowTrialDataService.DefineNewStudyCentres(SitesModel.StudySitesData);
+                }
+
+            }
+            else
+            {
+                BlowTrialDataService.SetBackupDetails(
+                    BackupModel.CloudDirectories,
+                    BackupModel.BackupIntervalMinutes.Value,
+                    BackupModel.IsBackingUpToCloud,
+                    BackupModel.PatientsPreviouslyRandomised
+                    );
             }
             WasCancelled = false;
         }

@@ -389,6 +389,7 @@ namespace BlowTrial.Domain.Providers
         {
             //DateTime RecordLastModified = _dbContext.DbLastModifiedUtc(); //note this is all assuming user on backup end has no ability to modify data
             IEnumerable<MatchedFilePair> filePairs = GetMatchedCloudAndExtractedFiles().Where(fp => fp.ExtractedBak == null || fp.ExtractedBak.CreationTimeUtc < fp.Zip.LastWriteTimeUtc);
+            List<BakFileDetails> bakDetails = new List<BakFileDetails>();
             if (!filePairs.Any()) { return; }
             _dbContext.Dispose();
 
@@ -398,25 +399,32 @@ namespace BlowTrial.Domain.Providers
                 {
                     readFile[0].Extract(ZipExtractionDirectory, ExtractExistingFileAction.OverwriteSilently);
                 }
+                BakFileDetails newBak = new BakFileDetails();
+                bakDetails.Add(newBak);
                 if (fp.ExtractedBak == null)
                 {
                     fp.ExtractedBak = new FileInfo(Path.Combine(ZipExtractionDirectory, Path.GetFileNameWithoutExtension(fp.Zip.Name) + BakExtension));
                 }
+                else
+                {
+                    newBak.LastBackupUtc = fp.ExtractedBak.CreationTimeUtc;
+                }
+                newBak.FullFilename = fp.ExtractedBak.FullName;
                 fp.ExtractedBak.CreationTimeUtc = fp.Zip.LastWriteTimeUtc;
             }
 
             _dbContext = _createContext.Invoke();
-            AddOrUpdateBaks(filePairs.Select(fp=>fp.ExtractedBak));
+            AddOrUpdateBaks(bakDetails);
 
         }
-        void AddOrUpdateBaks(IEnumerable<FileInfo> bakupFiles)
+        void AddOrUpdateBaks(IEnumerable<BakFileDetails> bakupFiles)
         {
             List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
             List<IntegerRange> newSiteIdRanges = new List<IntegerRange>();
             foreach (var f in bakupFiles)
             {
                 IEnumerable<Guid> knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
-                using (var downloadedDb = _dbContext.AttachDb(f.FullName))
+                using (var downloadedDb = _dbContext.AttachDb(f.FullFilename))
                 {      
                     var newSites = (from s in downloadedDb.StudyCentres.AsNoTracking()
                                     where !knownSiteIds.Contains(s.DuplicateIdCheck)
@@ -441,7 +449,8 @@ namespace BlowTrial.Domain.Providers
                         _localStudyCentres = null;
                     }
                     var newSiteIds = newSiteIdRanges.Select(n => n.Min);
-                    DateTime mostRecentBak = f.CreationTimeUtc;
+                    DateTime minDate = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+                    DateTime mostRecentBak = (f.LastBackupUtc < minDate)?minDate:f.LastBackupUtc;
                     _dbContext.Participants.AddOrUpdate((from p in downloadedDb.Participants.AsNoTracking()
                                                          where p.RecordLastModified > mostRecentBak || newSiteIds.Contains(p.CentreId)
                                                          select p).ToArray());
@@ -583,7 +592,7 @@ namespace BlowTrial.Domain.Providers
         }
         #endregion // IDiposable
 
-        #region FileModifiedInfo
+        #region MatchedFilePair
         private class MatchedFilePair
         {
             FileInfo _zip;
@@ -615,5 +624,12 @@ namespace BlowTrial.Domain.Providers
         }
         #endregion
 
+        #region BakFileDetails
+        private class BakFileDetails
+        {
+            internal string FullFilename { get; set; }
+            internal DateTime LastBackupUtc { get; set; }
+        }
+        #endregion
     }
 }

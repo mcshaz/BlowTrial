@@ -1,0 +1,60 @@
+﻿<UserControl 
+  x:Class="BlowTrial.View.RandomisedMessagesUserControlBase"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vw="clr-namespace:BlowTrial.View" 
+    xmlns:con="clr-namespace:BlowTrial.Infrastructure.Converters"
+>
+    <UserControl.Resources>
+        <ResourceDictionary Source="../WorkspaceResources.xaml" />
+    </UserControl.Resources>
+    <Grid Margin="0,0,5,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140" MinWidth="110" />
+            <ColumnDefinition Width="6" />
+            <ColumnDefinition Width="*" MinWidth="170"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="5" VerticalAlignment="Stretch" Width="6" />
+        <!-- InterventionInstructions-->
+        <Label 
+              Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" VerticalAlignment="Center"
+              Content="Intervention Arm:" Target="{Binding ElementName=interventionInstructionsTxt}"
+              HorizontalAlignment="Right" 
+              />
+        <TextBlock Grid.Row="0" Grid.Column="2" Margin="5" TextWrapping="Wrap" Text="{Binding Path=EgInterventionDetails, Mode=OneTime}" />
+        <TextBox Grid.Row="1" Grid.Column="2"  HorizontalAlignment="Stretch" AcceptsReturn="True" TextWrapping="Wrap"
+                x:Name="interventionInstructionsTxt"
+                  Text="{Binding Path=InterventionInstructions, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+        <ContentPresenter 
+              Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+              Content="{Binding ElementName=interventionInstructionsTxt, Path=(Validation.Errors).CurrentItem}"
+              />
+
+        <!-- ControlInstructions-->
+        <Label 
+              Grid.Row="3" Grid.Column="0" Grid.RowSpan="2" VerticalAlignment="Center"
+              Content="Control Arm:" Target="{Binding ElementName=controlInstructionsTxt}"
+              HorizontalAlignment="Right" 
+              />
+        <TextBlock Grid.Row="3" Grid.Column="2" TextWrapping="Wrap" Margin="5" Text="{Binding Path=EgControlDetails, Mode=OneTime}" />
+        <TextBox Grid.Row="4" Grid.Column="2"  HorizontalAlignment="Stretch" AcceptsReturn="True" TextWrapping="Wrap"
+                x:Name="controlInstructionsTxt"
+                  Text="{Binding Path=ControlInstructions, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+        <ContentPresenter 
+              Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+              Content="{Binding ElementName=controlInstructionsTxt, Path=(Validation.Errors).CurrentItem}"
+              />
+    </Grid>
+</UserControl>
+

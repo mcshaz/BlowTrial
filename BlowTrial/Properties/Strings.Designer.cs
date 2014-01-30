@@ -988,7 +988,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1:n0}. Please give only give BCG &amp; OPV once nearing discharge..
+        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1:n0}..
         /// </summary>
         public static string NewPatient_ToControl {
             get {
@@ -997,7 +997,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm with an ID of {1}. Please give BCG &amp; OPV as soon as possible..
+        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm with an ID of {1:n0}..
         /// </summary>
         public static string NewPatient_ToIntervention {
             get {
@@ -1551,6 +1551,33 @@ namespace BlowTrial.Properties {
         public static string ProtocolViolationVM_Register {
             get {
                 return ResourceManager.GetString("ProtocolViolationVM_Register", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please only give BCG &amp; OPV once nearing discharge..
+        /// </summary>
+        public static string RandomisedMessagesViewModel_DefaultControl {
+            get {
+                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please give BCG &amp; OPV as soon as possible..
+        /// </summary>
+        public static string RandomisedMessagesViewModel_DefaultIntervention {
+            get {
+                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultIntervention", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Messages On Randomisation.
+        /// </summary>
+        public static string RandomisedMessagesViewModel_DisplayName {
+            get {
+                return ResourceManager.GetString("RandomisedMessagesViewModel_DisplayName", resourceCulture);
             }
         }
         

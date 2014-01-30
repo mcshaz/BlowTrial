@@ -13,7 +13,7 @@ namespace BlowTrial.Infrastructure
     {
         #region Constructors
         private const int millisecsPerMin = 1000*60;
-        public BackupService(IRepository repo, IBackupData backupData)
+        public BackupService(IRepository repo, IAppData backupData)
         {
             _repo = repo;
             var backupDetails = BlowTrialDataService.GetBackupDetails(backupData);

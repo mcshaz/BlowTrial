@@ -55,6 +55,9 @@ namespace BlowTrial.ViewModel
                 if (value != true) { PatientsPreviouslyRandomised = false; }
             }
         }
+        #endregion
+
+        #region Methods
         public override bool IsValid()
         {
             return _validatedFields.All(v=>_backupModel.GetValidationError(v)==null);

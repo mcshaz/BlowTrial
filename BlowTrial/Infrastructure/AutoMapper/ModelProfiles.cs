@@ -61,4 +61,12 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.MaxParticipantAllocations, o => o.MapFrom(s => s.MaxIdForSite - s.Id + (s.Id == 1 ? 2 : 1)));
         }
     }
+
+    public class AppDataProfiles : Profile
+    {
+        protected override void Configure()
+        {
+            Mapper.CreateMap<RandomisingMessage, RandomisedMessagesModel>();
+        }
+    }
 }

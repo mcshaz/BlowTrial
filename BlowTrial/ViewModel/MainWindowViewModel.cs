@@ -46,6 +46,7 @@ namespace BlowTrial.ViewModel
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
             bool isEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising();
             StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => IsAuthorised && isEnvelopeRandomising);
+            ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
             ShowLogin();
         }
 
@@ -111,6 +112,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand LogoutCmd { get; private set; }
         public RelayCommand CreateNewUserCmd { get; private set; }
         public RelayCommand StopEnvelopeCmd { get; private set; }
+        public RelayCommand ShowRandomisingMessagesCmd { get; private set; }
 
         void StopEnvelopeRandomising()
         {
@@ -174,8 +176,8 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(newPatientVM);
             }
             this.SetActiveWorkspace(newPatientVM);
-            base.DisplayName = Strings.MainWindowViewModel_Command_RegisterNewPatient;
         }
+
         void ShowCreateNewUser()
         {
             IsAuthorised = false;
@@ -183,7 +185,6 @@ namespace BlowTrial.ViewModel
             allParticipantsVM.ChangeToThisUserOnSave = GetCurrentPrincipal().Identity.Name == "Admin";
             this.Workspaces.Add(allParticipantsVM);
             this.SetActiveWorkspace(allParticipantsVM);
-            base.DisplayName = allParticipantsVM.DisplayName;
         }
 
         void ShowAllParticipants()
@@ -195,7 +196,6 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(allParticipantsVM);
             }
             this.SetActiveWorkspace(allParticipantsVM);
-            base.DisplayName = Strings.MainWindowViewModel_Command_ViewParticipants;
         }
 
         void ShowScreenedPatients()
@@ -207,8 +207,8 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(allScreenedVM);
             }
             this.SetActiveWorkspace(allScreenedVM);
-            base.DisplayName = Strings.MainWindowViewModel_Command_ViewScreenedPatients;
         }
+
         void ShowSummaryData()
         {
             DataSummaryViewModel summaryVM = (DataSummaryViewModel)Workspaces.FirstOrDefault(w => w is DataSummaryViewModel);
@@ -218,8 +218,8 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(summaryVM);
             }
             this.SetActiveWorkspace(summaryVM);
-            base.DisplayName = Strings.MainWindowViewModel_Command_ViewSummary;
         }
+
         void ShowViolations()
         {
             AllViolationsViewModel violVM = (AllViolationsViewModel)Workspaces.FirstOrDefault(w => w is AllViolationsViewModel);
@@ -229,8 +229,8 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(violVM);
             }
             this.SetActiveWorkspace(violVM);
-            base.DisplayName = Strings.MainWindowViewModel_Command_ViewProtocolViolations;
         }
+
         void showCreateCsv()
         {
             var csvVM = (CreateCsvViewModel)Workspaces.FirstOrDefault(w => w is CreateCsvViewModel);
@@ -244,8 +244,8 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(csvVM);
             }
             this.SetActiveWorkspace(csvVM);
-            base.DisplayName = Strings.CreateCsvVM_Title;
         }
+
         void ShowSiteSettings()
         {
             var siteSetVM = (StudySitesViewModel)Workspaces.FirstOrDefault(w => w is StudySitesViewModel);
@@ -258,8 +258,24 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(siteSetVM);
             }
             this.SetActiveWorkspace(siteSetVM);
-            base.DisplayName = Strings.CloudDirectoryVm_SelectDir;
         }
+
+        void ShowRandomisingMessages()
+        {
+            var messagesVM = (RandomisedMessagesViewModel)Workspaces.FirstOrDefault(w => w is RandomisedMessagesViewModel);
+            if (messagesVM == null)
+            {
+                var messages = BlowTrialDataService.GetRandomisingMessage();
+                RandomisedMessagesModel model = (messages==null)
+                    ? new RandomisedMessagesModel()
+                    : Mapper.Map<RandomisedMessagesModel>(messages);
+                messagesVM = new RandomisedMessagesViewModel(model);
+
+                this.Workspaces.Add(messagesVM);
+            }
+            this.SetActiveWorkspace(messagesVM);
+        }
+
         void ShowCloudDirectory()
         {
             var cloudVM = (CloudDirectoryViewModel)Workspaces.FirstOrDefault(w => w is CloudDirectoryViewModel);
@@ -278,7 +294,6 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(cloudVM);
             }
             this.SetActiveWorkspace(cloudVM);
-            base.DisplayName = Strings.CloudDirectoryVm_SelectDir;
         }
 
         void ShowLogin()
@@ -287,7 +302,6 @@ namespace BlowTrial.ViewModel
             AuthenticationViewModel loginVM = new AuthenticationViewModel(new AuthenticationService());
             this.Workspaces.Add(loginVM);
             this.SetActiveWorkspace(loginVM);
-            base.DisplayName = Strings.MainWindowViewModel_Command_Login;
         }
 
         void SetActiveWorkspace(WorkspaceViewModel workspace)
@@ -298,6 +312,7 @@ namespace BlowTrial.ViewModel
             {
                 collectionView.MoveCurrentTo(workspace);
             }
+            base.DisplayName = workspace.DisplayName;
         }
 
         private bool _isAuthorised;

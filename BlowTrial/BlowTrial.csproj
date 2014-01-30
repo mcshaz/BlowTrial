@@ -230,6 +230,7 @@
     <Compile Include="Models\CreateNewUserModel.cs" />
     <Compile Include="Models\StudyCentreModel.cs" />
     <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
+    <Compile Include="Models\WizardModels\RandomisedMessagesModel.cs" />
     <Compile Include="Models\WizardModels\StudySitesModel.cs" />
     <Compile Include="Models\SummaryModels.cs" />
     <Compile Include="Models\VaccineAdministeredModel.cs" />
@@ -251,6 +252,7 @@
     <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\DataSummaryViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\RandomisedMessagesViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\StudySitesViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
@@ -271,6 +273,9 @@
     <Compile Include="View\AllParticipantsView.xaml.cs">
       <DependentUpon>AllParticipantsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\RandomisedMessageView.xaml.cs">
+      <DependentUpon>RandomisedMessageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\SiteSettingsView.xaml.cs">
       <DependentUpon>SiteSettingsView.xaml</DependentUpon>
     </Compile>
@@ -279,6 +284,9 @@
     </Compile>
     <Compile Include="View\ProtocolViolationView.xaml.cs">
       <DependentUpon>ProtocolViolationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Wizard\RandomisedMessagesUserControlBase.xaml.cs">
+      <DependentUpon>RandomisedMessagesUserControlBase.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Wizard\BackupUserControlBase.xaml.cs">
       <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
@@ -337,6 +345,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="View\RandomisedMessageView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\SiteSettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -346,6 +358,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\ProtocolViolationView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Wizard\RandomisedMessagesUserControlBase.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

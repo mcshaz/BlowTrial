@@ -18,10 +18,16 @@ namespace BlowTrial.Infrastructure.Converters
             return intVal.Value.ToString((string)parameter);
         }
 
+        string _numberGroupSeperator;
+        string NumberGroupSeperator
+        {
+            get { return _numberGroupSeperator ?? (_numberGroupSeperator = System.Threading.Thread.CurrentThread.CurrentUICulture.NumberFormat.NumberGroupSeparator); }
+        }
+
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             int intVal;
-            if (int.TryParse((string)value, out intVal))
+            if (int.TryParse(((string)value).Replace(NumberGroupSeperator,""), out intVal))
             {
                 return intVal;
             }

@@ -30,7 +30,8 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="30" />
                     <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="5" VerticalAlignment="Stretch" Width="6" />
             <!--TableName-->
             <Label 
@@ -101,7 +102,11 @@
               Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
               Content="{Binding ElementName=dateFormatTxt, Path=(Validation.Errors).CurrentItem}"
               />
-            <TextBlock TextWrapping="Wrap" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3">
+            <TextBlock Grid.Row="8" Grid.Column="0" HorizontalAlignment="Right" Margin="5">
+                Date Example:
+            </TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="2" HorizontalAlignment="Left" Margin="5" Text="{Binding Path=DateExample, Mode=OneWay}"/>
+            <TextBlock TextWrapping="Wrap" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3">
                 *For details of how to format dates see
                 <Hyperlink NavigateUri="http://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.100%29.aspx" RequestNavigate="Hyperlink_RequestNavigate" >
                     standard

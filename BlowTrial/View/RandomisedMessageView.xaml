@@ -1,0 +1,33 @@
+﻿<UserControl 
+  x:Class="BlowTrial.View.RandomisedMessageView"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vw="clr-namespace:BlowTrial.View"
+>
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <vw:RandomisedMessagesUserControlBase DataContext="{Binding Path=.}" Grid.Row="0"/>
+        <TextBlock Grid.Row="1" TextWrapping="Wrap">
+            *please note that if a patient has been randomised since logging in, you will have to log out in order for the new message to be displayed.
+        </TextBlock>
+        <Line Grid.Row="3"
+                VerticalAlignment="Top" Stroke="Gray" StrokeThickness="1"
+                X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />
+                    <!-- BUTTON -->
+            <Button Grid.Row="2"
+              Command="{Binding Path=SaveCmd}"
+              Content="_Save"
+              HorizontalAlignment="Right"
+              Margin="4" 
+              Width="60" IsDefault="True" />
+        <TextBlock Grid.Row="2"
+              HorizontalAlignment="Left"
+              Margin="4" >
+            <Hyperlink Command="{Binding Path=CancelCmd}">Close without saving</Hyperlink>
+        </TextBlock>
+    </Grid>
+</UserControl>

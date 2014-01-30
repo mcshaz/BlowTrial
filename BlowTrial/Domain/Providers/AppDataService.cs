@@ -35,11 +35,22 @@ namespace BlowTrial.Helpers
                 StopEnvelopeRandomising(a);
             }
         }
-        public static void StopEnvelopeRandomising(IBackupData appData)
+        public static void StopEnvelopeRandomising(IAppData appData)
         {
             var data = appData.BackupDataSet.First();
             data.IsEnvelopeRandomising = false;
             appData.SaveChanges();
+        }
+        public static RandomisingMessage GetRandomisingMessage()
+        {
+            using (var a = new MembershipContext())
+            {
+                return GetRandomisingMessage(a);
+            }
+        }
+        public static RandomisingMessage GetRandomisingMessage(IAppData appData)
+        {
+            return appData.RandomisingMessages.FirstOrDefault();
         }
         public static bool IsEnvelopeRandomising()
         {
@@ -48,7 +59,7 @@ namespace BlowTrial.Helpers
                 return IsEnvelopeRandomising(a);
             }
         }
-        public static bool IsEnvelopeRandomising(IBackupData appData)
+        public static bool IsEnvelopeRandomising(IAppData appData)
         {
             return (from a in appData.BackupDataSet
                     select a.IsEnvelopeRandomising).First();
@@ -60,7 +71,7 @@ namespace BlowTrial.Helpers
                 return GetBackupDetails(a);
             }
         }
-        public static BackupDataSet GetBackupDetails(IBackupData appData)
+        public static BackupDataSet GetBackupDetails(IAppData appData)
         {
             return new BackupDataSet
             {
@@ -69,6 +80,35 @@ namespace BlowTrial.Helpers
                 CloudDirectories = appData.CloudDirectories.Select(c=>c.Path).ToList()
             };
         }
+        public static void SetRandomisingMessages(string interventionMessage, string controlMessage)
+        {
+            using (var a = new MembershipContext())
+            {
+                SetRandomisingMessages(interventionMessage, controlMessage, a);
+            }
+        }
+        internal static void SetRandomisingMessages(string interventionMessage, string controlMessage, IAppData appDataProvider)
+        {
+            try
+            {
+                appDataProvider.Database.ExecuteSqlCommand("Delete from RandomisingMessages");
+            }
+            catch (System.Data.SqlClient.SqlException) { }
+            appDataProvider.RandomisingMessages.Add(new RandomisingMessage
+                {
+                    InterventionInstructions = interventionMessage,
+                    ControlInstructions = controlMessage
+                });
+            appDataProvider.SaveChanges();
+        }
+        public static void SetAppData(string interventionMessage, string controlMessage, IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising=null)
+        {
+            using (var a = new MembershipContext())
+            {
+                SetBackupDetails(cloudDirectories, intervalMins, isTobackupToCloud, isEnvelopeRandomising, a);
+                SetRandomisingMessages(interventionMessage, controlMessage, a);
+            }
+        }
         public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising=null)
         {
             using (var a = new MembershipContext())
@@ -76,14 +116,13 @@ namespace BlowTrial.Helpers
                 SetBackupDetails(cloudDirectories,intervalMins, isTobackupToCloud,isEnvelopeRandomising,a);
             }
         }
-        internal static void SetBackupDetails(IEnumerable<string> paths, int intervalMins, bool? isTobackupToCloud, bool? isEnvelopeRandomising,IBackupData appDataProvider)
+        internal static void SetBackupDetails(IEnumerable<string> paths, int intervalMins, bool? isTobackupToCloud, bool? isEnvelopeRandomising,IAppData appDataProvider)
         {
             try
             {
                 appDataProvider.Database.ExecuteSqlCommand("Delete from CloudDirectories");
             }
             catch (System.Data.SqlClient.SqlException) { }
-            catch (Exception) {throw;}
 
             foreach (string p in paths)
             {

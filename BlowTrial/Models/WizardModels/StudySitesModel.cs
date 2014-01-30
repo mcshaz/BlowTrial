@@ -40,7 +40,7 @@ namespace BlowTrial.Models
                     error = ValidateStudySitesData();
                     break;
                 default:
-                    Debug.Fail("Unexpected property being validated on GetAppSettingsModel: " + propertyName);
+                    Debug.Fail("Unexpected property being validated on StudySitesModel: " + propertyName);
                     break;
             }
 

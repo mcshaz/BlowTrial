@@ -12,6 +12,7 @@ using BlowTrial.Infrastructure.CSV;
 using System.IO;
 using BlowTrial.Infrastructure;
 using Microsoft.Win32;
+using BlowTrial.Properties;
 
 namespace BlowTrial.ViewModel
 {
@@ -30,7 +31,7 @@ namespace BlowTrial.ViewModel
             SaveCmd = new RelayCommand(Save, param=>IsValid());
             SelectFileCmd = new RelayCommand(SelectFile);
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param), param => true);
-
+            DisplayName = Strings.CreateCsvVM_Title;
             SelectedFileType = FileTypes.First();
         }
         #endregion
@@ -60,7 +61,23 @@ namespace BlowTrial.ViewModel
             {
                 if (_model.DateFormat == value) { return; }
                 _model.DateFormat = value;
-                NotifyPropertyChanged("DateFormat");
+                NotifyPropertyChanged("DateFormat", "DateExample");
+            }
+        }
+
+        readonly DateTime ExampleDate = new DateTime(2014,1,30,14,12,56);
+        public string DateExample
+        {
+            get
+            {
+                try
+                {
+                    return ExampleDate.ToString(DateFormat);
+                }
+                catch(FormatException)
+                {
+                    return Strings.NotApplicable;
+                }
             }
         }
 
