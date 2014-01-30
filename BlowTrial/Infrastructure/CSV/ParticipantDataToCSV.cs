@@ -8,9 +8,9 @@ namespace BlowTrial.Infrastructure.CSV
 {
     public static class PatientDataToCSV
     {
-        public static string[] ParticipantDataToCSV(IList<ParticipantCsvModel> allParticipants, IEnumerable<Vaccine> allVaccines, char delimiter, string dateFormat)
+        public static string[] ParticipantDataToCSV(IList<ParticipantCsvModel> allParticipants, IEnumerable<Vaccine> allVaccines, char delimiter, string dateFormat, bool encloseStringInQuotes, bool encloseDateInQuotes)
         {
-            var participantsCsv = CSVconversion.IListToStrings<ParticipantCsvModel>(allParticipants, delimiter, dateFormat);
+            var participantsCsv = CSVconversion.IListToStrings<ParticipantCsvModel>(allParticipants, delimiter, dateFormat, encloseStringInQuotes, encloseDateInQuotes);
 
             //append row 0 [headers]
             participantsCsv[0] += string.Join(string.Empty, allVaccines.Select(v => delimiter + v.Name));

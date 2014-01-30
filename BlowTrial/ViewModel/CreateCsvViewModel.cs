@@ -13,6 +13,8 @@ using System.IO;
 using BlowTrial.Infrastructure;
 using Microsoft.Win32;
 using BlowTrial.Properties;
+using BlowTrial.Helpers.Stata;
+using BlowTrial.Helpers;
 
 namespace BlowTrial.ViewModel
 {
@@ -21,6 +23,7 @@ namespace BlowTrial.ViewModel
     {
         #region Fields
         CreateCsvModel _model;
+        bool _canAlterDateInQuotes;
         #endregion
 
         #region Constructor
@@ -33,6 +36,10 @@ namespace BlowTrial.ViewModel
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param), param => true);
             DisplayName = Strings.CreateCsvVM_Title;
             SelectedFileType = FileTypes.First();
+            DateFormat = "u";
+            IsDateInQuotes = true;
+            IsStringInQuotes = true;
+            //SetDateInQuotes();
         }
         #endregion
 
@@ -61,23 +68,30 @@ namespace BlowTrial.ViewModel
             {
                 if (_model.DateFormat == value) { return; }
                 _model.DateFormat = value;
+                SetDateInQuotes();
                 NotifyPropertyChanged("DateFormat", "DateExample");
             }
         }
 
-        readonly DateTime ExampleDate = new DateTime(2014,1,30,14,12,56);
         public string DateExample
         {
             get
             {
-                try
-                {
-                    return ExampleDate.ToString(DateFormat);
-                }
-                catch(FormatException)
-                {
-                    return Strings.NotApplicable;
-                }
+                return _model.ExampleDate ?? Strings.NotApplicable;
+            }
+        }
+
+        public bool CanAlterDateInQuotes
+        {
+            get
+            {
+                return _canAlterDateInQuotes;
+            }
+            private set 
+            {
+                if (_canAlterDateInQuotes == value) { return; }
+                _canAlterDateInQuotes = value;
+                NotifyPropertyChanged("CanAlterDateInQuotes");
             }
         }
 
@@ -91,7 +105,50 @@ namespace BlowTrial.ViewModel
             {
                 if (_model.SelectedFileType == value) { return; }
                 _model.SelectedFileType = value;
+                SetDateInQuotes();
                 NotifyPropertyChanged("SelectedFileType");
+            }
+        }
+
+        public bool IsStringInQuotes
+        {
+            get
+            {
+                return _model.IsStringInQuotes;
+            }
+            set
+            {
+                if (_model.IsStringInQuotes == value) { return; }
+                _model.IsStringInQuotes = value;
+                NotifyPropertyChanged("IsStringInQuotes");
+            }
+        }
+
+        public bool IsDateInQuotes
+        {
+            get
+            {
+                return _model.IsDateInQuotes;
+            }
+            set
+            {
+                if (_model.IsDateInQuotes == value) { return; }
+                _model.IsDateInQuotes = value;
+                NotifyPropertyChanged("IsDateInQuotes");
+            }
+        }
+
+        public bool SimultaneousStata
+        {
+            get
+            {
+                return _model.SimultaneousStata;
+            }
+            set
+            {
+                if (_model.SimultaneousStata == value) { return; }
+                _model.SimultaneousStata = value;
+                NotifyPropertyChanged("SimultaneousStata");
             }
         }
 
@@ -116,6 +173,21 @@ namespace BlowTrial.ViewModel
 
         #endregion
 
+        #region methods
+        void SetDateInQuotes()
+        {
+            if (_model.ExampleDate.Contains(',') && SelectedFileType.Delimiter == ',')
+            {
+                IsDateInQuotes = true;
+                CanAlterDateInQuotes = false;
+            }
+            else
+            {
+                CanAlterDateInQuotes = true;
+            }
+        }
+        #endregion
+
         #region Commands
         public RelayCommand SaveCmd { get; private set; }
         public void Save(object param)
@@ -124,11 +196,13 @@ namespace BlowTrial.ViewModel
             {
                 throw new InvalidOperationException("CreateCsvViewModel not valid - cannot call save");
             }
+            string dofile = null;
             switch (TableType)
             {
                 case TableOptions.Participant:
                     var participants = Mapper.Map<ParticipantCsvModel[]>(_repository.Participants.Include("VaccinesAdministered").ToArray());
-                    var csvEncodedParticipants = PatientDataToCSV.ParticipantDataToCSV(participants, _repository.Vaccines.ToArray(), SelectedFileType.Delimiter, DateFormat);
+                    var vaccines = _repository.Vaccines.ToArray();
+                    var csvEncodedParticipants = PatientDataToCSV.ParticipantDataToCSV(participants, vaccines, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
                     try
                     {
                         File.WriteAllLines(_model.FileNameWithExtension, csvEncodedParticipants);
@@ -138,19 +212,66 @@ namespace BlowTrial.ViewModel
                         System.Windows.MessageBox.Show(e.Message);
                         return;
                     }
+                    if (SimultaneousStata)
+                    {
+                        dofile = CreateDoFile.Participant(_model.FileNameWithExtension,
+                            vaccines[vaccines.Length - 1].Name,
+                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name)),
+                            SelectedFileType.Delimiter);
+                    }
                     break;
                 case TableOptions.ScreenedPatients:
                     var screened = Mapper.Map<ScreenedPatientCsvModel[]>(_repository.ScreenedPatients.ToArray());
-                    var csvEncodedScreened = CSVconversion.IListToStrings<ScreenedPatientCsvModel>(screened, SelectedFileType.Delimiter, DateFormat);
-                    File.WriteAllLines(_model.FileNameWithExtension, csvEncodedScreened);
+                    var csvEncodedScreened = CSVconversion.IListToStrings<ScreenedPatientCsvModel>(screened, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
+                    try
+                    {
+                        File.WriteAllLines(_model.FileNameWithExtension, csvEncodedScreened);
+                    }
+                    catch (System.IO.IOException e)
+                    {
+                        System.Windows.MessageBox.Show(e.Message);
+                        return;
+                    }
+                    if (SimultaneousStata)
+                    {
+                        dofile = CreateDoFile.ScreenedPatients(_model.FileNameWithExtension,
+                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name)),
+                            SelectedFileType.Delimiter);
+                    }
                     break;
                 case TableOptions.ProtocolViolations:
                     var viol = _repository.ProtocolViolations.ToArray();
-                    var csvEncodedViols = CSVconversion.IListToStrings<ProtocolViolation>(viol, SelectedFileType.Delimiter, DateFormat);
-                    File.WriteAllLines(_model.FileNameWithExtension, csvEncodedViols);
+                    var csvEncodedViols = CSVconversion.IListToStrings<ProtocolViolation>(viol, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
+                    try
+                    {
+                        File.WriteAllLines(_model.FileNameWithExtension, csvEncodedViols);
+                    }
+                    catch(System.IO.IOException e)
+                    {
+                        System.Windows.MessageBox.Show(e.Message);
+                        return;
+                    }
+                    if (SimultaneousStata)
+                    {
+                        dofile = CreateDoFile.ProtocolViolations(_model.FileNameWithExtension,
+                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<IntegerRange, string>(new IntegerRange(s.Id, s.MaxIdForSite), s.Name)),
+                            SelectedFileType.Delimiter);
+                    }
                     break;
                 default:
                     throw new InvalidOperationException("save called no table selected");
+            }
+            if (dofile != null)
+            {
+                try
+                {
+                    File.WriteAllText(Path.ChangeExtension(_model.Filename, "do"), dofile);
+                }
+                catch (System.IO.IOException e)
+                {
+                    System.Windows.MessageBox.Show(e.Message);
+                    return;
+                }
             }
             CloseCmd.Execute(null);
         }

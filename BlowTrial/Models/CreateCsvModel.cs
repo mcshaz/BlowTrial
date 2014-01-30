@@ -13,13 +13,32 @@ namespace BlowTrial.Models
     public enum TableOptions { Participant = 0, ScreenedPatients, ProtocolViolations }
     public class CreateCsvModel : ValidationBase
     {
+        #region Constructor
         public CreateCsvModel()
         {
-            _validatedProperties = new string[] { "Filename", "DateFormat",  /*, "TableType" */ };
+            _validatedProperties = new string[] { "Filename", "DateFormat", "IsDateInQuotes" /*, "TableType" */ };
         }
-
+        #endregion
+        #region Properties
         public string Filename { get; set;}
+        public bool IsStringInQuotes { get; set; }
+        public bool IsDateInQuotes { get; set; }
+        public bool SimultaneousStata { get; set; }
 
+        public String ExampleDate 
+        { 
+            get 
+            {
+                try
+                {
+                    return _testDate.ToString(DateFormat);
+                }
+                catch(FormatException)
+                {
+                    return null;
+                }
+            } 
+        }
         public string FileNameWithExtension
         {
             get
@@ -35,8 +54,12 @@ namespace BlowTrial.Models
         public TableOptions TableType { get; set; }
 
         public DelimitedFileType SelectedFileType { get; set; }
+        #endregion
 
+        #region fields
+        readonly DateTime _testDate = new DateTime(635216347220000000);
         static readonly string[] _baseExtensions = new string[] {".csv", ".txt", ".raw"};
+        #endregion
 
         internal static readonly ReadOnlyCollection<DelimitedFileType> FileTypes = new ReadOnlyCollection<DelimitedFileType>(new DelimitedFileType[] 
         {
@@ -59,6 +82,8 @@ namespace BlowTrial.Models
                     //                    return ValidateTableType();
                     case "DateFormat":
                         return ValidateDateFormat();
+                    case "IsDateInQuotes":
+                        return ValidateDateQuotes();
                     default:
                         Debug.Fail("Unexpected property being validated on ParticipantUpdateModel: " + propertyName);
                         break;
@@ -79,18 +104,25 @@ namespace BlowTrial.Models
             }
             return null;
         }
+
         string ValidateDateFormat()
         {
-            try
-            {
-                new DateTime(635216347220000000).ToString(DateFormat);
-            }
-            catch (FormatException)
+            if (ExampleDate==null)
             {
                 return Strings.CreateCsvModel_Error_InvalidDateFormat;
             }
             return null;
         }
+
+        string ValidateDateQuotes()
+        {
+            if (!IsDateInQuotes && SelectedFileType.Delimiter==',' && ExampleDate.Contains(','))
+            {
+                return Strings.CreateCsvModel_Error_NoDateQuotes;
+            }
+            return null;
+        }
+
         string ValidateTableType()
         {
             /*

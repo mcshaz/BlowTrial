@@ -765,8 +765,11 @@
   <data name="CreateCsvModel_Error_InvalidDateFormat" xml:space="preserve">
     <value>Invalid date format</value>
   </data>
+  <data name="CreateCsvModel_Error_NoDateQuotes" xml:space="preserve">
+    <value>If date contains a comma, dates must be in quotes or seperated by another character</value>
+  </data>
   <data name="RandomisedMessagesViewModel_DefaultControl" xml:space="preserve">
-    <value>Please only give BCG &amp; OPV once nearing discharge.</value>
+    <value>Please only give BCG &amp; OPV once nearing discharge from hospital.</value>
   </data>
   <data name="RandomisedMessagesViewModel_DefaultIntervention" xml:space="preserve">
     <value>Please give BCG &amp; OPV as soon as possible.</value>

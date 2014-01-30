@@ -1,0 +1,20 @@
+﻿clear
+insheet using "<%csvFile%>", <%delimiter%>
+
+tempname a
+foreach v of varlist datetimebirth registeredat {
+	capture confirm string variable `v'
+    if (!_rc) {
+		gen double `a' = clock( `v', "YMDhms#")
+		drop `v'
+		rename `a' `v'
+		format `v' %tc
+	}
+}
+
+label define centreNames <%centreNames%>
+
+label values centreid centreNames
+
+save "<%stataFile%>", replace
+

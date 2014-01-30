@@ -1,0 +1,31 @@
+﻿clear
+insheet using "<%csvFile%>", <%delimiter%>
+rename opvoralpolio opv
+tempname a
+foreach v of varlist dischargedatetime deathorlastcontactdatetime datetimebirth registeredat bcg-<%lastvax%> {
+	capture confirm string variable `v'
+    if (!_rc) {
+		gen double `a' = clock( `v', "YMDhms#")
+		drop `v'
+		rename `a' `v'
+		format `v' %tc
+	}
+}
+
+capture confirm string variable lastweightdate
+if (!_rc) {
+	gen int `a' = date( lastweightdate, "YMD#")
+	drop lastweightdate
+	rename `a' lastweightdate
+	format lastweightdate %td
+}
+
+label define causeOfDeathOption 0 Missing 1 Infection 2 "Congenital Malformation" 3 "Hyaline Membrane Disease" 4 "Intraventricular Haemorrhage" 5 "Necrotising Enterocollitis" 6 Other 7 Unknown
+label define outcomeAt28DaysOption 0 Missing 1 "Inpatient At 28 Days" 2 "Died In Hospital Before 28 Days" 3 "Discharged Before 28 Days" 4 "Discharged And Known To Have Survived" 5 "Discharged And Known To Have Died" 6 "Discharged And Likely To Have Survived" 7 "Discharged And Likely To Have Died"
+label define centreNames <%centreNames%>
+
+label values causeofdeathid causeOfDeathOption
+label values outcomeat28id outcomeAt28DaysOption
+label values centreid centreNames
+
+save "<%stataFile%>", replace

@@ -540,14 +540,14 @@ namespace BlowTrial.Domain.Providers
             {
                 di = new DirectoryInfo(dirName);
                 returnVar.AddRange(from f in di.GetFiles()
-                                   where f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix
+                                   where f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix && f.Extension==".zip"
                                    select new MatchedFilePair{ Zip = f });
             }
 
             di = new DirectoryInfo(ZipExtractionDirectory);
             foreach (FileInfo f in di.GetFiles())
             {
-                if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix)
+                if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix && f.Extension == BakExtension)
                 {
                     var matchedPair = returnVar.FirstOrDefault(r => Path.GetFileNameWithoutExtension(r.Zip.Name) == Path.GetFileNameWithoutExtension(f.Name));
                     if (matchedPair != null)
@@ -602,9 +602,9 @@ namespace BlowTrial.Domain.Providers
                 get { return _zip; }
                 set 
                 { 
-                    if (!value.Name.EndsWith(".zip"))
+                    if (value.Extension!=".zip")
                     {
-                        throw new InvalidFileTypeException(Path.GetExtension(value.Name),".zip");
+                        throw new InvalidFileTypeException(value.Extension,".zip");
                     }
                     _zip = value;
                 }
@@ -614,9 +614,9 @@ namespace BlowTrial.Domain.Providers
                 get { return _extractedBak; }
                 set
                 {
-                    if (!value.Name.EndsWith(BakExtension))
+                    if (value.Extension!=BakExtension)
                     {
-                        throw new InvalidFileTypeException(Path.GetExtension(value.Name), BakExtension);
+                        throw new InvalidFileTypeException(value.Extension, BakExtension);
                     }
                     _extractedBak = value;
                 }

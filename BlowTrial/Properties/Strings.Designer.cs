@@ -286,6 +286,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to If date contains a comma, dates must be in quotes or seperated by another character.
+        /// </summary>
+        public static string CreateCsvModel_Error_NoDateQuotes {
+            get {
+                return ResourceManager.GetString("CreateCsvModel_Error_NoDateQuotes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export CSV file.
         /// </summary>
         public static string CreateCsvVM_Title {
@@ -1555,7 +1564,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please only give BCG &amp; OPV once nearing discharge..
+        ///   Looks up a localized string similar to Please only give BCG &amp; OPV once nearing discharge from hospital..
         /// </summary>
         public static string RandomisedMessagesViewModel_DefaultControl {
             get {
