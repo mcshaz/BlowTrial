@@ -13,8 +13,8 @@ using System.IO;
 using BlowTrial.Infrastructure;
 using Microsoft.Win32;
 using BlowTrial.Properties;
-using BlowTrial.Helpers.Stata;
 using BlowTrial.Helpers;
+using BlowTrial.TextTemplates;
 
 namespace BlowTrial.ViewModel
 {
@@ -214,10 +214,12 @@ namespace BlowTrial.ViewModel
                     }
                     if (SimultaneousStata)
                     {
-                        dofile = CreateDoFile.Participant(_model.FileNameWithExtension,
-                            vaccines[vaccines.Length - 1].Name,
-                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name)),
-                            SelectedFileType.Delimiter);
+                        dofile = new ParticipantDataStataTemplate(
+                            new ParticipantStataData( _model.FileNameWithExtension,
+                                SelectedFileType.Delimiter,
+                                _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name)),
+                                vaccines.Select(v=>v.Name)
+                            )).TransformText();
                     }
                     break;
                 case TableOptions.ScreenedPatients:
@@ -234,9 +236,11 @@ namespace BlowTrial.ViewModel
                     }
                     if (SimultaneousStata)
                     {
-                        dofile = CreateDoFile.ScreenedPatients(_model.FileNameWithExtension,
-                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name)),
-                            SelectedFileType.Delimiter);
+                        dofile = new ScreenedPatientStataTemplate(new CentreStataData(
+                            _model.FileNameWithExtension,
+                            SelectedFileType.Delimiter,
+                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name))
+                            )).TransformText();
                     }
                     break;
                 case TableOptions.ProtocolViolations:
@@ -253,9 +257,11 @@ namespace BlowTrial.ViewModel
                     }
                     if (SimultaneousStata)
                     {
-                        dofile = CreateDoFile.ProtocolViolations(_model.FileNameWithExtension,
-                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<IntegerRange, string>(new IntegerRange(s.Id, s.MaxIdForSite), s.Name)),
-                            SelectedFileType.Delimiter);
+                        dofile = new ScreenedPatientStataTemplate(new CentreStataData(
+                            _model.FileNameWithExtension,
+                            SelectedFileType.Delimiter,
+                            _repository.LocalStudyCentres.Select(s => new KeyValuePair<int, string>(s.Id, s.Name))
+                            )).TransformText();
                     }
                     break;
                 default:

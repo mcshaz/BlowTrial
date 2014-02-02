@@ -1,8 +1,14 @@
-﻿clear
-insheet using "<%csvFile%>", <%delimiter%>
-rename opvoralpolio opv
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+clear
+insheet using "<#= _data.CsvFilename #>", <#= _data.Delimiter #>
+
 tempname a
-foreach v of varlist dischargedatetime deathorlastcontactdatetime datetimebirth registeredat bcg-<%lastvax%> {
+foreach v of varlist dischargedatetime deathorlastcontactdatetime datetimebirth registeredat <#= string.Join(" ",_data.Vaccines) #> {
 	capture confirm string variable `v'
     if (!_rc) {
 		gen double `a' = clock( `v', "YMDhms#")
@@ -11,6 +17,8 @@ foreach v of varlist dischargedatetime deathorlastcontactdatetime datetimebirth 
 		format `v' %tc
 	}
 }
+
+rename opvoralpolio opv
 
 capture confirm string variable lastweightdate
 if (!_rc) {
@@ -22,10 +30,12 @@ if (!_rc) {
 
 label define causeOfDeathOption 0 Missing 1 Infection 2 "Congenital Malformation" 3 "Hyaline Membrane Disease" 4 "Intraventricular Haemorrhage" 5 "Necrotising Enterocollitis" 6 Other 7 Unknown
 label define outcomeAt28DaysOption 0 Missing 1 "Inpatient At 28 Days" 2 "Died In Hospital Before 28 Days" 3 "Discharged Before 28 Days" 4 "Discharged And Known To Have Survived" 5 "Discharged And Known To Have Died" 6 "Discharged And Likely To Have Survived" 7 "Discharged And Likely To Have Died"
-label define centreNames <%centreNames%>
+label define centreNames <#= _data.CentresLabel #>
 
 label values causeofdeathid causeOfDeathOption
 label values outcomeat28id outcomeAt28DaysOption
 label values centreid centreNames
 
-save "<%stataFile%>", replace
+stset deathorlastcontactdatetime, id(id) failure(outcome==2,5) origin(time datetimebirth) enter(time registeredat ) scale(`=msofhours(24)')
+
+save "<#= _data.StataFilename #>", replace

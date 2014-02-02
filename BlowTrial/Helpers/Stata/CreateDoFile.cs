@@ -16,7 +16,6 @@ namespace BlowTrial.Helpers.Stata
             replaceDictionary.Add("delimiter", GetDelimitOption(delimiter));
             replaceDictionary.Add("csvFile", csvFileName);
             replaceDictionary.Add("lastvax", Regex.Replace(lastVaxName,@"\W","").ToLower());
-            replaceDictionary.Add("centreNames", CentresToLabels(centres));
             replaceDictionary.Add("stataFile", Path.ChangeExtension(csvFileName,"dta"));
 
             return ReadTemplateFile("ParticipantDataStataTemplate.txt", replaceDictionary);
@@ -27,7 +26,6 @@ namespace BlowTrial.Helpers.Stata
             var replaceDictionary = new Dictionary<string, string>();
             replaceDictionary.Add("delimiter", GetDelimitOption(delimiter));
             replaceDictionary.Add("csvFile", csvFileName);
-            replaceDictionary.Add("centreNames", CentresToLabels(centres));
             replaceDictionary.Add("stataFile", Path.ChangeExtension(csvFileName, "dta"));
 
             return ReadTemplateFile("ScreenedPatientStataTemplate.txt", replaceDictionary);
@@ -39,7 +37,6 @@ namespace BlowTrial.Helpers.Stata
             replaceDictionary.Add("delimiter", GetDelimitOption(delimiter));
             replaceDictionary.Add("csvFile", csvFileName);
             replaceDictionary.Add("stataFile", Path.ChangeExtension(csvFileName, "dta"));
-            replaceDictionary.Add("centreNames", CentresToLabels(centres.Select(c=>new KeyValuePair<int, string>(c.Key.Min, c.Value))));
             replaceDictionary.Add("centreDefs", string.Join(Environment.NewLine, centres.Select(c=>string.Format("replace centreid={0} if id>={0} & id<={1}",c.Key.Min, c.Key.Max))));
 
             return ReadTemplateFile("ProtocolViolationStataTemplate.txt", replaceDictionary);
@@ -58,10 +55,7 @@ namespace BlowTrial.Helpers.Stata
             }
         }
 
-        static string CentresToLabels(IEnumerable<KeyValuePair<int,string>> centres)
-        {
-            return string.Join(" ", centres.Select(c => c.Key.ToString() + " \"" + c.Value.ToString() + '"'));
-        }
+
 
         static string ReadTemplateFile(string fileName, IDictionary<string, string> replacements)
         {
