@@ -27,10 +27,17 @@ namespace GenericToDataString
         {
             return ((ticks - StataStartDateTime) / TimeSpan.TicksPerMillisecond).ToString();
         }
+        static string ToStataString(string s)
+        {
+            return "`\"" + s + "\"'";
+        }
         public static string ToStataDo<T>(IList<T> collection)
         {
             
-            var convertedList = ToStringValues<T>(collection, new DataTypeOption<string>(s => "`\"" + s + "\"'"), 
+            var convertedList = ToStringValues<T>(collection, 
+                new DataTypeOption<string>(s => ToStataString(s)),
+                new DataTypeOption<char>(c => ToStataString(c.ToString())),
+                new DataTypeOption<char[]>(c => ToStataString(new string(c))),
                 new DataTypeOption<bool>(t => t ? "1" : "0"),
                 new DataTypeOption<DateTime>(d=>TicksToString(d.Ticks)),
                 new DataTypeOption<TimeSpan>(ts=>ts.Milliseconds.ToString()), // note these 2 are not tested yet as they 
@@ -64,7 +71,7 @@ namespace GenericToDataString
                         break;
                     case TypeCode.String:
                         sb.AppendFormat("generate str{0} {1} = \"\"\r\n", 
-                            (new int[]{ 3, convertedList.StringValues.Max(r => r[c].Length)}).Max() - 2, propName);
+                            (new int[]{ 1, convertedList.StringValues.Max(r => r[c].Length) - 2}).Max(), propName);
                         break;
                     case TypeCode.Int16:
                         sb.AppendFormat("generate int {0} = .\r\n",propName);
@@ -173,6 +180,7 @@ namespace GenericToDataString
             {
                 new DataTypeOption<char>(),
                 new DataTypeOption<string>(),
+                new DataTypeOption<char[]>(c=>new string(c)),
                 new DataTypeOption<bool>(),
                 new DataTypeOption<byte>(),
                 new DataTypeOption<Int16>(),
@@ -182,7 +190,7 @@ namespace GenericToDataString
                 new DataTypeOption<double>(),
                 new DataTypeOption<DateTime>(),
                 new DataTypeOption<TimeSpan>(),
-                new DataTypeOption<DateTimeOffset>()
+                new DataTypeOption<DateTimeOffset>(),
             }).ToDictionary(dto=>dto.PropertyType);
         }
         public static DataTypeOption GetBoolToBinaryConverter()
