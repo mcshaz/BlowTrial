@@ -27,6 +27,7 @@ namespace GenericToDataString
         {
             return ((ticks - StataStartDateTime) / TimeSpan.TicksPerMillisecond).ToString();
         }
+        const int StataStringChars = 4;
         static string ToStataString(string s)
         {
             return "`\"" + s + "\"'";
@@ -41,7 +42,7 @@ namespace GenericToDataString
                 new DataTypeOption<bool>(t => t ? "1" : "0"),
                 new DataTypeOption<DateTime>(d=>TicksToString(d.Ticks)),
                 new DataTypeOption<TimeSpan>(ts=>ts.Milliseconds.ToString()), // note these 2 are not tested yet as they 
-                new DataTypeOption<DateTimeOffset>(d=>TicksToString(d.UtcTicks))); // are never used by myself
+                new DataTypeOption<DateTimeOffset>(d=>TicksToString(d.UtcTicks))); // are never used by myself within data repositories
             int rows = convertedList.StringValues.Length;
             StringBuilder sb = new StringBuilder(string.Format("set obs {0}\r\n", rows));
             for (int c=0;c<convertedList.PropertiesDetail.Count;c++)
@@ -75,7 +76,7 @@ namespace GenericToDataString
                         break;
                     case TypeCode.String:
                         sb.AppendFormat("generate str{0} {1} = \"\"\r\n", 
-                            (new int[]{ 1, convertedList.StringValues.Max(r => r[c].Length) - 2}).Max(), propName);
+                            (new int[]{ 1, convertedList.StringValues.Max(r => r[c].Length) - StataStringChars}).Max(), propName);
                         break;
                     case TypeCode.Int16:
                         sb.AppendFormat("generate int {0} = .\r\n",propName);
