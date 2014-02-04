@@ -59,6 +59,10 @@ namespace GenericToDataString
                     {
                         propType = TypeCode.DateTime;
                     }
+                    else if (baseType == typeof(char[]))
+                    {
+                        propType = TypeCode.String;
+                    }
                 }
                 switch (propType)
                 {
