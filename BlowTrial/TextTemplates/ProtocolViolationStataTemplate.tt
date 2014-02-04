@@ -1,0 +1,29 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+clear
+insheet using "<#= _data.CsvFilename #>", <#= _data.Delimiter #>
+
+tempname a
+foreach v of varlist reportingtimelocal recordlastmodified {
+	capture confirm string variable `v'
+    if (!_rc) {
+		gen double `a' = clock( `v', "YMDhms#")
+		drop `v'
+		rename `a' `v'
+		format `v' %tc
+	}
+}
+
+gen centreid = .
+<#	foreach(var c in _data.CentreRanges)
+	{ #>
+		replace centreid = <#= c.Min #> if inrange(id, <#= c.Min #>, <#= c.Max #>)
+<#	} #>
+
+label define centreNames <#= _data.CentresLabel #>
+label values centreid centreNames
+
+save "<#= _data.StataFilename #>", clear
