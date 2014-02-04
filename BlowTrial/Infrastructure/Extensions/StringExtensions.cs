@@ -13,7 +13,9 @@ namespace BlowTrial.Infrastructure.Extensions
         public static string ToSeparatedWords(this string value)
         {
             if (value != null)
+            {
                 return Regex.Replace(value, "([A-Z][a-z]?)", " $1").Trim();
+            }
             return null;
         }
         public static string ToBriefString(this string value) // expression trees cannot handle default values - do it manually

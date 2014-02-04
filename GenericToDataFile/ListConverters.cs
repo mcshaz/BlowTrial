@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -81,6 +83,8 @@ namespace GenericToDataString
                         sb.AppendFormat("generate double {0} = .\r\nformat {0} %tc\r\n",propName);
                         break;
                 }
+                sb.AppendFormat("label variable {0} \"{1}\"\r\n",propName,
+                    convertedList.PropertiesDetail[c].DisplayName ?? propName.ToSeparatedWords());
                 for (int r=0;r<rows;r++)
                 {
                     string nextVal = convertedList.StringValues[r][c];
@@ -127,14 +131,15 @@ namespace GenericToDataString
             foreach (PropertyInfo pi in allProps)
             {
                 if (pi.CanRead
-                    && !Attribute.IsDefined(pi, typeof(System.ComponentModel.DataAnnotations.Schema.NotMappedAttribute)))
+                    && !Attribute.IsDefined(pi, typeof(NotMappedAttribute)))
                 {
                     Type baseType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType;
                     DataTypeOption dto;
                     if (propTypeOptions.TryGetValue(baseType, out dto))
                     {
                         propertyConverters.Add(new Func<object, string>(o => dto.ObjectToString(pi.GetValue(o, null))));
-                        headers.Add(new PropertyDetail{ Name = pi.Name, BaseType = baseType });
+                        DisplayAttribute attr = (DisplayAttribute)pi.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault();
+                        headers.Add(new PropertyDetail{ Name = pi.Name, BaseType = baseType, DisplayName = (attr==null)?null:attr.Name });
                     }
                 }
             }
@@ -150,6 +155,7 @@ namespace GenericToDataString
         {
             public string Name { get; internal set; }
             public Type BaseType { get; internal set; }
+            public string DisplayName { get; internal set; }
         }
 
         public sealed class PropertyValues
