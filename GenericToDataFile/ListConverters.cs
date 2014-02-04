@@ -21,17 +21,37 @@ namespace GenericToDataString
                 .Concat(convertedList.StringValues.Select(s=>string.Join(delimString,s))));
         }
         const long StataStartDateTime = 618199776000000000;// new DateTime(1960,1,1).Ticks
+        static string TicksToString(long ticks)
+        {
+            return ((ticks - StataStartDateTime) / TimeSpan.TicksPerMillisecond).ToString();
+        }
         public static string ToStataDo<T>(IList<T> collection)
         {
-            var convertedList = ToStringValues<T>(collection, new DataTypeOption<string>(s => '"' + s + '"'), 
+            
+            var convertedList = ToStringValues<T>(collection, new DataTypeOption<string>(s => "`\"" + s + "\"'"), 
                 new DataTypeOption<bool>(t => t ? "1" : "0"),
-                new DataTypeOption<DateTime>(d=>((d.Ticks - StataStartDateTime)/TimeSpan.TicksPerMillisecond).ToString()));
+                new DataTypeOption<DateTime>(d=>TicksToString(d.Ticks)),
+                new DataTypeOption<TimeSpan>(ts=>ts.Milliseconds.ToString()), // note these 2 are not tested yet as they 
+                new DataTypeOption<DateTimeOffset>(d=>TicksToString(d.UtcTicks))); // are never used by myself
             int rows = convertedList.StringValues.Length;
             StringBuilder sb = new StringBuilder(string.Format("set obs {0}\r\n", rows));
             for (int c=0;c<convertedList.PropertiesDetail.Count;c++)
             {
                 string propName = convertedList.PropertiesDetail[c].Name;
-                switch (Type.GetTypeCode(convertedList.PropertiesDetail[c].BaseType))
+                Type baseType = convertedList.PropertiesDetail[c].BaseType;
+                TypeCode propType = Type.GetTypeCode(baseType);
+                if (propType == TypeCode.Object)
+                {
+                    if (baseType == typeof(TimeSpan))
+                    {
+                        propType = TypeCode.Double;
+                    }
+                    else if (baseType == typeof(DateTimeOffset))
+                    {
+                        propType = TypeCode.DateTime;
+                    }
+                }
+                switch (propType)
                 {
                     case TypeCode.Byte:
                     case TypeCode.Boolean:
@@ -41,7 +61,8 @@ namespace GenericToDataString
                         sb.AppendFormat("generate str1 {0} = \"\"\r\n",propName);
                         break;
                     case TypeCode.String:
-                        sb.AppendFormat("generate str{0} {1} = \"\"\r\n", (new int[]{ 1, convertedList.StringValues.Max(r => r[c].Length)}).Max(), propName);
+                        sb.AppendFormat("generate str{0} {1} = \"\"\r\n", 
+                            (new int[]{ 3, convertedList.StringValues.Max(r => r[c].Length)}).Max() - 2, propName);
                         break;
                     case TypeCode.Int16:
                         sb.AppendFormat("generate int {0} = .\r\n",propName);
@@ -89,13 +110,13 @@ namespace GenericToDataString
             var propTypeOptions = GetDatabaseTypes();
             foreach (DataTypeOption dto in typeOptions)
             {
-                if (propTypeOptions.ContainsKey(dto.Type))
+                if (propTypeOptions.ContainsKey(dto.PropertyType))
                 {
-                    propTypeOptions[dto.Type] = dto;
+                    propTypeOptions[dto.PropertyType] = dto;
                 }
                 else
                 {
-                    propTypeOptions.Add(dto.Type, dto);
+                    propTypeOptions.Add(dto.PropertyType, dto);
                 }
             }
 
@@ -156,7 +177,7 @@ namespace GenericToDataString
                 new DataTypeOption<DateTime>(),
                 new DataTypeOption<TimeSpan>(),
                 new DataTypeOption<DateTimeOffset>()
-            }).ToDictionary(dto=>dto.Type);
+            }).ToDictionary(dto=>dto.PropertyType);
         }
         public static DataTypeOption GetBoolToBinaryConverter()
         {

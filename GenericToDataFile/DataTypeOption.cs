@@ -7,10 +7,10 @@ namespace GenericToDataString
     {
         protected DataTypeOption(Type T)
         {
-            this.Type = T;
+            this.PropertyType = T;
             NullString = string.Empty;
         }
-        public Type Type { get; private set; }
+        public Type PropertyType { get; private set; }
         public string StringFormatter { get; set; }
         // internal char Delimiter { get; set; }
         Func<object,string> _objectToString;
@@ -26,7 +26,7 @@ namespace GenericToDataString
                     }
                     else
                     {
-                        MethodInfo toStringInfo = this.Type.GetMethod("ToString", new Type[] { typeof(string) });
+                        MethodInfo toStringInfo = this.PropertyType.GetMethod("ToString", new Type[] { typeof(string) });
                         object[] param = new object[] { StringFormatter };
                         _objectToString = ApplyStringConversionOptions(new Func<object, string>(o => (string)toStringInfo.Invoke(o, param)));
                     }
