@@ -196,7 +196,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Infrastructure\Converters\StringToNullableIntConverter.cs" />
-    <Compile Include="Infrastructure\CSV\EnumerableToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantDataToCSV.cs" />
     <Compile Include="Infrastructure\CSV\ParticipantCsvModel.cs" />
     <Compile Include="Infrastructure\Exceptions\DataKeyException.cs" />
@@ -495,6 +494,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GenericToDataFile\GenericToDataString.csproj">
+      <Project>{8845c7ce-8815-4b3f-ad3e-95bca4d3b68c}</Project>
+      <Name>GenericToDataString</Name>
+    </ProjectReference>
     <ProjectReference Include="..\StatsForAge\StatsForAge.csproj">
       <Project>{bd45a88d-c81d-4160-83f4-6058ec553b6f}</Project>
       <Name>StatsForAge</Name>

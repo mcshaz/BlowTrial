@@ -1,4 +1,5 @@
 ﻿using BlowTrial.Domain.Tables;
+using GenericToDataString;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,11 @@ namespace BlowTrial.Infrastructure.CSV
     {
         public static string[] ParticipantDataToCSV(IList<ParticipantCsvModel> allParticipants, IEnumerable<Vaccine> allVaccines, char delimiter, string dateFormat, bool encloseStringInQuotes, bool encloseDateInQuotes)
         {
-            var participantsCsv = CSVconversion.IListToStrings<ParticipantCsvModel>(allParticipants, delimiter, dateFormat, encloseStringInQuotes, encloseDateInQuotes);
+            string participantsCsv = ListConverters.ToCSV<ParticipantCsvModel>(allParticipants,delimiter, CSVOptions(dateFormat, encloseStringInQuotes, encloseDateInQuotes));
 
-            //append row 0 [headers]
-            participantsCsv[0] += string.Join(string.Empty, allVaccines.Select(v => delimiter + v.Name));
+            string[] csvLines = participantsCsv.Split(new string[]{"\r\n"}, StringSplitOptions.None);
+
+            csvLines[0] += delimiter + string.Join(delimiter.ToString(), allVaccines.Select(v=>v.Name));
             for (int i=0; i< allParticipants.Count;i++)
             {
                 foreach (var v in allVaccines)
@@ -22,15 +24,35 @@ namespace BlowTrial.Infrastructure.CSV
                     
                     if (admin==null)
                     {
-                        participantsCsv[i+1] += delimiter;
+                        csvLines[i] += delimiter;
                     }
                     else
                     {
-                        participantsCsv[i+1] += delimiter + admin.AdministeredAt.ToString(dateFormat);
+                        csvLines[i] += delimiter + admin.AdministeredAt.ToString(dateFormat);
                     }
                 }
             }
-            return participantsCsv;
+
+            return csvLines;
         }
+
+        internal static IEnumerable<DataTypeOption> CSVOptions(string dateFormat, bool encloseStringInQuotes, bool encloseDateInQuotes)
+        {
+            var returnvar = new List<DataTypeOption>();
+            if (encloseDateInQuotes)
+            {
+                returnvar.Add(new DataTypeOption<string>(s => '"' + s + '"'));
+            }
+            if (encloseDateInQuotes)
+            {
+                returnvar.Add(new DataTypeOption<DateTime>(d => '"' + d.ToString(dateFormat) + '"'));
+            }
+            else
+            {
+                returnvar.Add(new DataTypeOption<DateTime>(d => d.ToString(dateFormat)));
+            }
+            return returnvar;
+        }
+
     }
 }

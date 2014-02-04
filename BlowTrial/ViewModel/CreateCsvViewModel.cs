@@ -15,6 +15,7 @@ using Microsoft.Win32;
 using BlowTrial.Properties;
 using BlowTrial.Helpers;
 using BlowTrial.TextTemplates;
+using GenericToDataString;
 
 namespace BlowTrial.ViewModel
 {
@@ -224,10 +225,10 @@ namespace BlowTrial.ViewModel
                     break;
                 case TableOptions.ScreenedPatients:
                     var screened = Mapper.Map<ScreenedPatientCsvModel[]>(_repository.ScreenedPatients.ToArray());
-                    var csvEncodedScreened = CSVconversion.IListToStrings<ScreenedPatientCsvModel>(screened, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
+                    var csvEncodedScreened = ListConverters.ToCSV<ScreenedPatientCsvModel>(screened, SelectedFileType.Delimiter, PatientDataToCSV.CSVOptions(DateFormat, IsStringInQuotes, IsDateInQuotes));
                     try
                     {
-                        File.WriteAllLines(_model.FileNameWithExtension, csvEncodedScreened);
+                        File.WriteAllText(_model.FileNameWithExtension, csvEncodedScreened);
                     }
                     catch (System.IO.IOException e)
                     {
@@ -245,10 +246,10 @@ namespace BlowTrial.ViewModel
                     break;
                 case TableOptions.ProtocolViolations:
                     var viol = _repository.ProtocolViolations.ToArray();
-                    var csvEncodedViols = CSVconversion.IListToStrings<ProtocolViolation>(viol, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
+                    var csvEncodedViols = ListConverters.ToCSV<ProtocolViolation>(viol, SelectedFileType.Delimiter, PatientDataToCSV.CSVOptions(DateFormat, IsStringInQuotes, IsDateInQuotes));
                     try
                     {
-                        File.WriteAllLines(_model.FileNameWithExtension, csvEncodedViols);
+                        File.WriteAllText(_model.FileNameWithExtension, csvEncodedViols);
                     }
                     catch(System.IO.IOException e)
                     {
