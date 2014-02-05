@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,13 +11,17 @@ namespace GenericToDataString
 {
     public static class ListConverters
     {
-        public static string ToCSV<T>(IList<T> collection, char delimiter = ',', params DataTypeOption[] typeOptions)
+        public static string ToCSV<T>(IEnumerable<T> collection, char delimiter = ',', params DataTypeOption[] typeOptions)
         {
-            return ToCSV<T>(collection, delimiter, (IEnumerable<DataTypeOption>)typeOptions);
+            return ToCSV(typeof(T), collection, typeOptions, delimiter);
         }
-        public static string ToCSV<T>(IList<T> collection, char delimiter = ',', IEnumerable<DataTypeOption> typeOptions = null)
+        public static string ToCSV(IEnumerable collection, char delimiter = ',', params DataTypeOption[] typeOptions)
         {
-            var convertedList = ToStringValues<T>(collection, typeOptions);
+            return ToCSV(GetGenericIEnumerable(collection), collection, typeOptions, delimiter);
+        }
+        static string ToCSV(Type collectionType, IEnumerable collection, DataTypeOption[] typeOptions, char delimiter = ',')
+        {
+            var convertedList = ToStringValues(collectionType, collection, typeOptions);
             string delimString = delimiter.ToString();
             return string.Join(Environment.NewLine,
                 (new string[] { string.Join(delimString, convertedList.PropertiesDetail.Select(prop => prop.Name)) })
@@ -32,10 +37,17 @@ namespace GenericToDataString
         {
             return "`\"" + s + "\"'";
         }
-        public static string ToStataDo<T>(IList<T> collection)
+        public static string ToStataDo<T>(IEnumerable<T> collection)
         {
-            
-            var convertedList = ToStringValues<T>(collection, 
+            return ToStataDo(typeof(T), collection);
+        }
+        public static string ToStataDo(IEnumerable collection)
+        {
+            return ToStataDo(GetGenericIEnumerable(collection), collection);
+        }
+        static string ToStataDo(Type collectionType, IEnumerable collection)
+        {
+            var convertedList = ToStringValues(collectionType, collection, 
                 new DataTypeOption<string>(s => ToStataString(s)),
                 new DataTypeOption<char>(c => ToStataString(c.ToString())),
                 new DataTypeOption<char[]>(c => ToStataString(new string(c))),
@@ -115,12 +127,12 @@ namespace GenericToDataString
         /// <param name="collection"></param>
         /// <param name="delimiter"></param>
         /// <param name="typeOptions"></param>
-        /// <returns> 1st row = property names, subsequent rows = array of strings with conversion functions</returns>
-        public static PropertyValues ToStringValues<T>(IList<T> collection, params DataTypeOption[] typeOptions)
+        /// <returns></returns>
+        public static PropertyValues ToStringValues<T>(IEnumerable<T> collection, params DataTypeOption[] typeOptions)
         {
-            return ToStringValues<T>(collection, (IEnumerable<DataTypeOption>)typeOptions);
+            return ToStringValues(typeof(T), collection, typeOptions);
         }
-        public static PropertyValues ToStringValues<T>(IList<T> collection, IEnumerable<DataTypeOption> typeOptions)
+        static PropertyValues ToStringValues(Type collectionType, IEnumerable collection, params DataTypeOption[] typeOptions)
         {
             typeOptions = typeOptions ?? new DataTypeOption[0];
             var propTypeOptions = GetDatabaseTypes();
@@ -136,7 +148,7 @@ namespace GenericToDataString
                 }
             }
 
-            PropertyInfo[] allProps = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo[] allProps = collectionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             List<PropertyDetail> headers = new List<PropertyDetail>(allProps.Length);
             List<Func<object, string>> propertyConverters = new List<Func<object, string>>(allProps.Length);
 
@@ -155,11 +167,21 @@ namespace GenericToDataString
                     }
                 }
             }
-
+            int row = GetCount(collection);
+            string[][] stringVals = new string[row][];
+            row = 0;
+            foreach(object o in collection)
+            {
+                string[] currentRow = stringVals[row++] = new string[headers.Count];
+                for (int col =0;col<headers.Count;col++)
+                {
+                    currentRow[col] = propertyConverters[col](o);
+                }
+            }
             return new PropertyValues
             {
                 PropertiesDetail = headers,
-                StringValues = collection.Select(c=>propertyConverters.Select(pc=>pc.Invoke(c)).ToArray()).ToArray()
+                StringValues = stringVals // collection.Select(c=>propertyConverters.Select(pc=>pc.Invoke(c)).ToArray()).ToArray()
             };
         }
 
@@ -198,9 +220,34 @@ namespace GenericToDataString
                 new DataTypeOption<DateTimeOffset>(),
             }).ToDictionary(dto=>dto.PropertyType);
         }
+
         public static DataTypeOption GetBoolToBinaryConverter()
         {
             return new DataTypeOption<bool>(t => t ? "1" : "0");
+        }
+        //stackoverflow.com/questions/906499/getting-type-t-from-ienumerablet#906538
+        public static Type GetGenericIEnumerable(IEnumerable e)
+        {
+            Type T = e.GetType()
+                    .GetInterfaces()
+                    .FirstOrDefault(t => t.IsGenericType == true
+                        && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            return T == null
+                ? null
+                : T.GetGenericArguments()[0];
+        }
+
+        public static int GetCount(IEnumerable e)
+        {
+            ICollection ic = e as ICollection;
+            if (ic != null)
+            {
+                return ic.Count;
+            }
+            int count = 0;
+            var enumerator = e.GetEnumerator();
+            while (enumerator.MoveNext()) { count++; }
+            return count;
         }
     }
 }

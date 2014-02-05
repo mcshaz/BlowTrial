@@ -36,7 +36,7 @@ namespace BlowTrial.Infrastructure.CSV
             return csvLines;
         }
 
-        internal static IEnumerable<DataTypeOption> CSVOptions(string dateFormat, bool encloseStringInQuotes, bool encloseDateInQuotes)
+        internal static DataTypeOption[] CSVOptions(string dateFormat, bool encloseStringInQuotes, bool encloseDateInQuotes)
         {
             var returnvar = new List<DataTypeOption>();
             if (encloseDateInQuotes)
@@ -51,7 +51,7 @@ namespace BlowTrial.Infrastructure.CSV
             {
                 returnvar.Add(new DataTypeOption<DateTime>(d => d.ToString(dateFormat)));
             }
-            return returnvar;
+            return returnvar.ToArray();
         }
 
     }
