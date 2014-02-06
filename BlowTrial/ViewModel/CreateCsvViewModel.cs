@@ -225,7 +225,7 @@ namespace BlowTrial.ViewModel
                     break;
                 case TableOptions.ScreenedPatients:
                     var screened = Mapper.Map<ScreenedPatientCsvModel[]>(_repository.ScreenedPatients.ToArray());
-                    var csvEncodedScreened = ListConverters.ToCSV<ScreenedPatientCsvModel>(screened, SelectedFileType.Delimiter, PatientDataToCSV.CSVOptions(DateFormat, IsStringInQuotes, IsDateInQuotes));
+                    var csvEncodedScreened = ListConverters.ToCSV(screened, SelectedFileType.Delimiter, PatientDataToCSV.CSVOptions(DateFormat, IsStringInQuotes, IsDateInQuotes));
                     try
                     {
                         File.WriteAllText(_model.FileNameWithExtension, csvEncodedScreened);
@@ -246,7 +246,7 @@ namespace BlowTrial.ViewModel
                     break;
                 case TableOptions.ProtocolViolations:
                     var viol = _repository.ProtocolViolations.ToArray();
-                    var csvEncodedViols = ListConverters.ToCSV<ProtocolViolation>(viol, SelectedFileType.Delimiter, PatientDataToCSV.CSVOptions(DateFormat, IsStringInQuotes, IsDateInQuotes));
+                    var csvEncodedViols = ListConverters.ToCSV(viol, SelectedFileType.Delimiter, PatientDataToCSV.CSVOptions(DateFormat, IsStringInQuotes, IsDateInQuotes));
                     try
                     {
                         File.WriteAllText(_model.FileNameWithExtension, csvEncodedViols);

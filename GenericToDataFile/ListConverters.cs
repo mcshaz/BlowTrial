@@ -167,9 +167,8 @@ namespace GenericToDataString
                     }
                 }
             }
-            int row = GetCount(collection);
-            string[][] stringVals = new string[row][];
-            row = 0;
+            string[][] stringVals = new string[GetCount(collection)][];
+            int row = 0;
             foreach(object o in collection)
             {
                 string[] currentRow = stringVals[row++] = new string[headers.Count];

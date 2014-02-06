@@ -11,7 +11,7 @@ namespace BlowTrial.Infrastructure.CSV
     {
         public static string[] ParticipantDataToCSV(IList<ParticipantCsvModel> allParticipants, IEnumerable<Vaccine> allVaccines, char delimiter, string dateFormat, bool encloseStringInQuotes, bool encloseDateInQuotes)
         {
-            string participantsCsv = ListConverters.ToCSV<ParticipantCsvModel>(allParticipants,delimiter, CSVOptions(dateFormat, encloseStringInQuotes, encloseDateInQuotes));
+            string participantsCsv = ListConverters.ToCSV(allParticipants,delimiter, CSVOptions(dateFormat, encloseStringInQuotes, encloseDateInQuotes));
 
             string[] csvLines = participantsCsv.Split(new string[]{"\r\n"}, StringSplitOptions.None);
 
@@ -49,7 +49,7 @@ namespace BlowTrial.Infrastructure.CSV
             }
             else
             {
-                returnvar.Add(new DataTypeOption<DateTime>(d => d.ToString(dateFormat)));
+                returnvar.Add(new DataTypeOption<DateTime>(dateFormat));
             }
             return returnvar.ToArray();
         }

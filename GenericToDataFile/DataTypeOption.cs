@@ -5,53 +5,31 @@ namespace GenericToDataString
 {
     public class DataTypeOption
     {
-        protected DataTypeOption(Type T)
+        public const string DefaultNull = "";
+        protected DataTypeOption(Type T, string nullString = DefaultNull)
+            :this(T, new Func<object, string>(o=>o.ToString()), nullString)
         {
-            this.PropertyType = T;
-            NullString = string.Empty;
+        }
+        protected DataTypeOption(Type T, Func<object, string> nonNullObjectToString, string nullString = DefaultNull)
+        {
+            PropertyType = T;
+            ObjectToString = new Func<object, string>(o => (o == null) ? nullString : nonNullObjectToString(o));
         }
         public Type PropertyType { get; private set; }
-        public string StringFormatter { get; set; }
-        // internal char Delimiter { get; set; }
-        Func<object,string> _objectToString;
-        internal virtual Func<object,string> ObjectToString
+        internal Func<object, string> ObjectToString { get; private set; }
+        public string Convert(object o)
         {
-            get
-            {
-                if (_objectToString == null)
-                {
-                    if (string.IsNullOrEmpty(StringFormatter))
-                    {
-                        _objectToString = ApplyStringConversionOptions(new Func<object, string>(o => o.ToString()));
-                    }
-                    else
-                    {
-                        MethodInfo toStringInfo = this.PropertyType.GetMethod("ToString", new Type[] { typeof(string) });
-                        object[] param = new object[] { StringFormatter };
-                        _objectToString = ApplyStringConversionOptions(new Func<object, string>(o => (string)toStringInfo.Invoke(o, param)));
-                    }
-                }
-                return _objectToString;
-            }
-            set
-            {
-                _objectToString = ApplyStringConversionOptions(value);
-            }
-        }
-        public string NullString { get; set; }
-
-        Func<object, string> ApplyStringConversionOptions(Func<object, string> startingFunc)
-        {
-            return new Func<object, string>(o => (o == null) ? NullString : startingFunc(o));;
+            return ObjectToString(o);
         }
     }
     public class DataTypeOption<T> : DataTypeOption
     {
-        public DataTypeOption(Func<T, string> stringConversion) : this()
+        public DataTypeOption(Func<T, string> stringConversion, string nullString = DataTypeOption.DefaultNull) 
+            : base(typeof(T),new Func<object, string>(o => stringConversion((T)o)),nullString)
         {
-            base.ObjectToString = new Func<object, string>(o => stringConversion.Invoke((T)o));
         }
-        public DataTypeOption() : base(typeof(T))
+        public DataTypeOption(string nullString = DataTypeOption.DefaultNull)
+            : base(typeof(T), nullString)
         { }
     }
 }

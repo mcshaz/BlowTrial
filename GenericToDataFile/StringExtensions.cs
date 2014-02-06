@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace GenericToDataString
@@ -17,7 +15,7 @@ namespace GenericToDataString
         {
             return (value == null)
                 ? null
-                : Regex.Replace(value, "([A-Z][a-z]?)", " $1").Trim();
+                : Regex.Replace(value, @"([A-Z]+|\d+)", " $1").Trim();
         }
     }
 }
