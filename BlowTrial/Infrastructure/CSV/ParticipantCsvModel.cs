@@ -31,11 +31,13 @@ namespace BlowTrial.Domain.Tables
         public string BcgAdverseDetail { get; set; }
         public bool? BcgPapule { get; set; }
         public int? LastContactWeight { get; set; }
+        [DataType(DataType.Date)]
         public DateTime? LastWeightDate { get; set; }
         public virtual DateTime? DischargeDateTime { get; set; }
         public virtual DateTime? DeathOrLastContactDateTime { get; set; }
 	    public int CauseOfDeathId {get; set;}
         public string OtherCauseOfDeathDetail { get; set; }
+        [Display(Name="28 Day Outcome Code")]
         public int OutcomeAt28Id { get; set; }
         public int BlockNumber { get; set; }
         public int BlockSize { get; set; }

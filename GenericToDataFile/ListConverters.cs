@@ -28,9 +28,13 @@ namespace GenericToDataString
                 .Concat(convertedList.StringValues.Select(s=>string.Join(delimString,s))));
         }
         const long StataStartDateTime = 618199776000000000;// new DateTime(1960,1,1).Ticks
-        static string TicksToString(long ticks)
+        static string TicksToStataDateTime(long ticks)
         {
             return ((ticks - StataStartDateTime) / TimeSpan.TicksPerMillisecond).ToString();
+        }
+        static string TicksToStataDate(long ticks)
+        {
+            return ((ticks - StataStartDateTime) / TimeSpan.TicksPerDay).ToString();
         }
         const int StataStringChars = 4;
         static string ToStataString(string s)
@@ -52,9 +56,20 @@ namespace GenericToDataString
                 new DataTypeOption<char>(c => ToStataString(c.ToString())),
                 new DataTypeOption<char[]>(c => ToStataString(new string(c))),
                 new DataTypeOption<bool>(t => t ? "1" : "0"),
-                new DataTypeOption<DateTime>(d=>TicksToString(d.Ticks)),
+                new DataTypeOption<DateTime>((d, atts)=>
+                {
+                    var dataType = (DataTypeAttribute)atts.FirstOrDefault(a => a.GetType() == typeof(DataTypeAttribute));
+                    if (dataType != null)
+                    {
+                        if (dataType.DataType == DataType.Date)
+                        {
+                            return TicksToStataDate(d.Ticks);
+                        }
+                    }
+                    return TicksToStataDateTime(d.Ticks);
+                }),
                 new DataTypeOption<TimeSpan>(ts=>ts.Milliseconds.ToString()), // note these 2 are not tested yet as they 
-                new DataTypeOption<DateTimeOffset>(d=>TicksToString(d.UtcTicks))); // are never used by myself within data repositories
+                new DataTypeOption<DateTimeOffset>(d=>TicksToStataDateTime(d.UtcTicks))); // are never used by myself within data repositories
             int rows = convertedList.StringValues.Length;
             StringBuilder sb = new StringBuilder(string.Format("set obs {0}\r\n", rows));
             for (int c=0;c<convertedList.PropertiesDetail.Count;c++)
@@ -104,11 +119,21 @@ namespace GenericToDataString
                         sb.AppendFormat("generate double {0} = .\r\n",propName);
                         break;
                     case TypeCode.DateTime:
-                        sb.AppendFormat("generate double {0} = .\r\nformat {0} %tc\r\n",propName);
+                        DataTypeAttribute dataType = (DataTypeAttribute)convertedList.PropertiesDetail[c].Attributes.FirstOrDefault(a => a.GetType() == typeof(DataTypeAttribute));
+                        if (dataType != null && dataType.DataType == DataType.Date)
+                        {
+                            sb.AppendFormat("generate long {0} = .\r\nformat {0} %td\r\n", propName);
+                        }
+                        else
+                        {
+                            sb.AppendFormat("generate double {0} = .\r\nformat {0} %tc\r\n",propName);
+                        }
                         break;
                 }
+                DisplayAttribute display = (DisplayAttribute)convertedList.PropertiesDetail[c].Attributes.FirstOrDefault(a => a.GetType() == typeof(DisplayAttribute));
+
                 sb.AppendFormat("label variable {0} \"{1}\"\r\n",propName,
-                    convertedList.PropertiesDetail[c].DisplayName ?? propName.ToSeparatedWords());
+                    (display==null || string.IsNullOrEmpty(display.Name)) ? propName.ToSeparatedWords() : display.Name);
                 for (int r=0;r<rows;r++)
                 {
                     string nextVal = convertedList.StringValues[r][c];
@@ -161,9 +186,10 @@ namespace GenericToDataString
                     DataTypeOption dto;
                     if (propTypeOptions.TryGetValue(baseType, out dto))
                     {
-                        propertyConverters.Add(new Func<object, string>(o => dto.ObjectToString(pi.GetValue(o, null))));
-                        DisplayAttribute attr = (DisplayAttribute)pi.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault();
-                        headers.Add(new PropertyDetail{ Name = pi.Name, BaseType = baseType, DisplayName = (attr==null)?null:attr.Name });
+                        var atts = pi.GetCustomAttributes(false);
+                        propertyConverters.Add(new Func<object,string>(o => dto.ConversionFunction(pi.GetValue(o, null),atts)));
+                        DisplayAttribute attr = (DisplayAttribute)atts.FirstOrDefault(a=>a.GetType() == typeof(DisplayAttribute));
+                        headers.Add(new PropertyDetail{ Name = pi.Name, BaseType = baseType, Attributes = atts });
                     }
                 }
             }
@@ -188,7 +214,7 @@ namespace GenericToDataString
         {
             public string Name { get; internal set; }
             public Type BaseType { get; internal set; }
-            public string DisplayName { get; internal set; }
+            public object[] Attributes { get; internal set; }
         }
 
         public sealed class PropertyValues
