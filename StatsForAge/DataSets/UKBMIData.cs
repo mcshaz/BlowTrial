@@ -3,7 +3,7 @@ namespace StatsForAge.DataSets
 {
     public sealed class UKBMIData : CentileData
     {
-        internal UKBMIData()
+        public UKBMIData()
         {
             base.GestAgeRange = new GenderRange(43, 43);
         }

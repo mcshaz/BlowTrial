@@ -621,28 +621,18 @@ namespace BlowTrial.ViewModel
             {
                 if (_outcomeAt28orDischargeOptions==null)
                 {
-                    _outcomeAt28orDischargeOptions = EnumToListOptions<OutcomeAt28DaysOption>()
-                        .Where(o => o.Key <= OutcomeAt28DaysOption.DischargedBefore28Days)
-                        .Select(o => new SelectableItem<OutcomeAt28DaysOption>(o.Key, o.Value))
-                        .ToArray();
-                    EnableOutcomeAt28(_outcomeAt28orDischargeOptions, AgeDays);
+                    bool is28daysOld = AgeDays >= 28;
+                    _outcomeAt28orDischargeOptions = (from o in EnumToListOptions<OutcomeAt28DaysOption>()
+                                                      where o.Key <= OutcomeAt28DaysOption.DischargedBefore28Days
+                                                      select new SelectableItem<OutcomeAt28DaysOption>(o.Key, o.Value)
+                                                      {
+                                                        IsEnabled = o.Key != OutcomeAt28DaysOption.InpatientAt28Days || is28daysOld
+                                                      }).ToArray();
                 }
                 return _outcomeAt28orDischargeOptions;
             }
         }
-        void SetListsBoxes()
-        {
-            EnableOutcomeAt28(_outcomeAt28orDischargeOptions, AgeDays);
-        }
-        static void EnableOutcomeAt28(IEnumerable<SelectableItem<OutcomeAt28DaysOption>> outcomes, int ageDays)
-        {
-            bool is28daysOld = ageDays >= 28;
-            foreach(var o in outcomes)
-            {
-                bool enabled = o.Key != OutcomeAt28DaysOption.InpatientAt28Days || is28daysOld;
-                o.IsEnabled = enabled;
-            }
-        }
+
         ObservableCollection<VaccineViewModel> AllVaccinesAvailable
         {
             get
@@ -924,7 +914,7 @@ namespace BlowTrial.ViewModel
         void OnAgeIncrementing(object sender, EventArgs e)
         {
             NotifyPropertyChanged("AgeDays", "CGA", "TodayOr28", "DeathLastContactTodayOr28", "DataRequired");
-            SetListsBoxes();
+            OutcomeAt28orDischargeOptions.First(o => o.Key == OutcomeAt28DaysOption.InpatientAt28Days).IsEnabled = AgeDays >= 28;
             _ageTimer.Interval = IntervalToSameTime(_participant.DateTimeBirth);
         }
 

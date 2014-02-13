@@ -92,7 +92,7 @@
 
                 <!-- Description -->
                 <Label Target="{Binding ElementName=otherCauseOfDeathTxt}"
-                            Grid.Row="2" Grid.Column="0" Content="Details of cause of death:"
+                            Grid.Row="2" Grid.Column="0" Content="Details of protocol violation:"
                             HorizontalAlignment="Right" />
 
                 <TextBox Grid.Row="2" Grid.Column="2" Name="detailsTxt" 

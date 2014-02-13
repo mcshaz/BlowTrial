@@ -3,7 +3,7 @@ namespace StatsForAge.DataSets
 {
     public sealed class UKHeadCircumferenceData : CentileData
     {
-        internal UKHeadCircumferenceData()
+        public UKHeadCircumferenceData()
         {
             base.AgeMonthsRange = new GenderRange
             {

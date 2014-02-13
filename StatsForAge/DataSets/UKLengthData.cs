@@ -6,7 +6,7 @@ namespace StatsForAge.DataSets
     /// </summary>
     public sealed class UKLengthData : CentileData
     {
-        internal UKLengthData()
+        public UKLengthData()
         {
             base.GestAgeRange = new GenderRange(25, 43);
         }

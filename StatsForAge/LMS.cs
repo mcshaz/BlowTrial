@@ -31,14 +31,24 @@ namespace StatsForAge
             };
         }
 
-        public double ZfromParams(double param)
+        public double Zscore(double param)
         {
             return Stats.ZfromParams(param, M, S, L);
         }
 
-        public double CumSnormfromParams(double param)
+        public double CumNormalDistribution(double param)
         {
-            return Stats.CumSnorm(ZfromParams(param));
+            return Stats.CumSnorm(Zscore(param));
+        }
+
+        public double Centile(double param)
+        {
+            return 100 * CumNormalDistribution(param);
+        }
+
+        public double XfromZscore(double param)
+        {
+            return Stats.XfromZscore(param, this.M, this.S, this.L);
         }
     }
 }

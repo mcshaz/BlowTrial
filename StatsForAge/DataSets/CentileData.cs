@@ -48,21 +48,24 @@ namespace StatsForAge
         #endregion
 
         #region methods
-
+        public bool IsDataAvailable(double daysOfAge, bool isMale, double totalWeeksGestAtBirth = TermGestation)
+        {
+            return (isMale ? GestAgeRange.MaleRange : GestAgeRange.FemaleRange).Min <= (int)(totalWeeksGestAtBirth + daysOfAge / 7)
+                && (isMale ? AgeMonthsRange.MaleRange : AgeMonthsRange.FemaleRange).Max >= (int)(daysOfAge / DaysPerMonth);
+        }
         public double CumSnormForAge(double value, double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {
-            return LMSForAge(daysOfAge, isMale, totalWeeksGestAtBirth).CumSnormfromParams(value);
+            return LMSForAge(daysOfAge, isMale, totalWeeksGestAtBirth).CumNormalDistribution(value);
         }
 
         public double ZForAge(double value, double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {
-            return LMSForAge(daysOfAge, isMale, totalWeeksGestAtBirth).ZfromParams(value);
+            return LMSForAge(daysOfAge, isMale, totalWeeksGestAtBirth).Zscore(value);
         }
         const double roundingFactor = 0.00001;
         public LMS LMSForAge(double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {
-            if (isMale && (totalWeeksGestAtBirth < GestAgeRange.MaleRange.Min) || 
-                (!isMale && totalWeeksGestAtBirth < GestAgeRange.FemaleRange.Min))
+            if (!IsDataAvailable(daysOfAge, isMale, totalWeeksGestAtBirth))
             {
                 throw new ArgumentOutOfRangeException("totalWeeksGestAtBirth", totalWeeksGestAtBirth, string.Format("must be greater than {0} - check GestAgeRange property prior to calling", (isMale ? GestAgeRange.MaleRange : GestAgeRange.FemaleRange).Min));
             }

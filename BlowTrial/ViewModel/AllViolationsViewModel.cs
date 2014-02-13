@@ -17,17 +17,21 @@ namespace BlowTrial.ViewModel
         public AllViolationsViewModel(IRepository repository)
             : base(repository) 
         {
-            AllViolations = new ObservableCollection<ProtocolViolationViewModel>(
-                Mapper.Map<List<ProtocolViolationModel>>(_repository.ProtocolViolations.ToList())
-                    .Select(v=>new ProtocolViolationViewModel(_repository,v))
-                );
-            _repository.ProtocolViolationAdded += violationAdded;
+            var allViolModels = Mapper.Map<List<ProtocolViolationModel>>(_repository.ProtocolViolations.ToList());
+            foreach (var v in allViolModels)
+            {
+                v.Participant.StudyCentre = _repository.LocalStudyCentres.First(s=> v.Participant.CentreId == s.Id);
+            }
+            AllViolations = new ObservableCollection<ProtocolViolationViewModel>(allViolModels.Select(v => new ProtocolViolationViewModel(_repository, v)));
+            _repository.ProtocolViolationAdded += ViolationAdded;
             ShowViolationDetails = new RelayCommand(ShowViolationWindow, param => SelectedViolation != null && _violationWindow == null);
         }
 
-        private void violationAdded(object sender, Domain.Providers.ProtocolViolationEventArgs e)
+        private void ViolationAdded(object sender, Domain.Providers.ProtocolViolationEventArgs e)
         {
-            AllViolations.Add(new ProtocolViolationViewModel(_repository,Mapper.Map<ProtocolViolationModel>(e.NewViolation)));
+            var violModel = Mapper.Map<ProtocolViolationModel>(e.NewViolation);
+            violModel.Participant.StudyCentre = _repository.LocalStudyCentres.First(s => violModel.Participant.CentreId == s.Id);
+            AllViolations.Add(new ProtocolViolationViewModel(_repository,violModel));
         }
         public ObservableCollection<ProtocolViolationViewModel> AllViolations { get; private set; }
         ProtocolViolationView _violationWindow;

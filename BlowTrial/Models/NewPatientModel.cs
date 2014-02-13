@@ -96,21 +96,7 @@ namespace BlowTrial.Models
             }
         }
 	    public int? GestAgeWeeks {get;set;}
-        private int? _gestAgeDays;
-        public int? GestAgeDays 
-        { 
-            get {return _gestAgeDays;} 
-            set 
-            {
-                if (value>=7)
-                {
-                    int weeks=value.Value/7;
-                    value = value.Value - weeks * 7;
-                    GestAgeWeeks += weeks;
-                }
-                _gestAgeDays = value;
-            }
-        }
+        public int? GestAgeDays { get; set; }
 	    public string Abnormalities {get;set;}
 	    public bool? IsMale {get;set;}
         DateTimeSplitter _dateTimeBirthSplitter = new DateTimeSplitter();
@@ -425,6 +411,10 @@ namespace BlowTrial.Models
                 {
                     return Strings.NewPatient_Error_NoGAdaysOnly;
                 }
+            }
+            else if (GestAgeDays < 0 || GestAgeDays >6)
+            {
+                return Strings.NewPatient_Error_InvalidGestationDays;
             }
             return null;
         }

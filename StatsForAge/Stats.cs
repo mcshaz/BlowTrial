@@ -7,7 +7,7 @@ namespace StatsForAge
 {
     public static class Stats
     {
-        public static double CumSnorm(Double Zscore)
+        public static double CumSnorm(double Zscore)
         {
             double returnVal, ZAbs = Math.Abs(Zscore);
             if (ZAbs > 37)
@@ -71,7 +71,7 @@ namespace StatsForAge
         /// <param name="S">generalized coefficient of variation</param>
         /// <param name="L">power of box-cox transformation(optional)</param>
         /// <returns>value of a measurement given statistical parameters </returns>
-        public static double XfromParams(double Z, double M, double S, double L = 0)
+        public static double XfromZscore(double Z, double M, double S, double L = 0)
         {
             if (L == 0)
             {

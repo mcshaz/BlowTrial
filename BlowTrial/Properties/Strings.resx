@@ -777,4 +777,7 @@
   <data name="RandomisedMessagesViewModel_DisplayName" xml:space="preserve">
     <value>Messages On Randomisation</value>
   </data>
+  <data name="NewPatient_Error_InvalidGestationDays" xml:space="preserve">
+    <value>Please enter a value between 0 and 6 days</value>
+  </data>
 </root>
