@@ -108,7 +108,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                if (AllowEmptyRecord && IsEmpty())
+                if (AllowEmptyRecord && IsEmpty)
                 {
                     return null;
                 }
@@ -119,15 +119,18 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        bool IsEmpty()
+        public bool IsEmpty
         {
-            return SelectedVaccine.Vaccine == null && AdministeredAtDate == null && AdministeredAtTime==null;
+            get
+            {
+                return SelectedVaccine.Vaccine == null && AdministeredAtDate == null && AdministeredAtTime == null;
+            }
         }
 
 
         public bool IsValid()
         {
-            if (AllowEmptyRecord && IsEmpty()) { return true; }
+            if (AllowEmptyRecord && IsEmpty) { return true; }
             return this.VaccineAdministeredModel.IsValid();
         }
 

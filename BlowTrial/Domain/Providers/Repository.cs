@@ -220,20 +220,26 @@ namespace BlowTrial.Domain.Providers
         }
 
         public void UpdateParticipant(int id,
-                CauseOfDeathOption causeOfDeath,
-                String bcgAdverseDetail,
-                bool? bcgAdverse,
-                bool? bcgPapule,
-                int? lastContactWeight,
-                DateTime? lastWeightDate,
-                DateTime? dischargeDateTime,
-                DateTime? deathOrLastContactDateTime,
-                OutcomeAt28DaysOption outcomeAt28Days)
+            string name,
+            string phoneNumber,
+            CauseOfDeathOption causeOfDeath,
+            string otherCauseOfDeathDetail,
+            bool? bcgAdverse,
+            string bcgAdverseDetail,
+            bool? bcgPapule,
+            int? lastContactWeight,
+            DateTime? lastWeightDate,
+            DateTime? dischargeDateTime,
+            DateTime? deathOrLastContactDateTime,
+            OutcomeAt28DaysOption outcomeAt28Days)
         {
             Participant participant = _dbContext.Participants.Find(id);
+            participant.Name = name;
+            participant.PhoneNumber = phoneNumber;
             participant.CauseOfDeath = causeOfDeath;
-            participant.BcgAdverseDetail = bcgAdverseDetail;
+            participant.OtherCauseOfDeathDetail = otherCauseOfDeathDetail;
             participant.BcgAdverse = bcgAdverse;
+            participant.BcgAdverseDetail = bcgAdverseDetail;
             participant.BcgPapule = bcgPapule;
             participant.LastContactWeight = lastContactWeight;
             participant.LastWeightDate = lastWeightDate;
@@ -294,12 +300,12 @@ namespace BlowTrial.Domain.Providers
                     if (attachedVA == null)
                     {
                         _dbContext.VaccinesAdministered.Attach(v);
+                        _dbContext.Entry(v).State = EntityState.Modified;
                     }
                     else
                     {
                         _dbContext.Entry(attachedVA).CurrentValues.SetValues(v);
                     }
-                    _dbContext.Entry(v).State = EntityState.Modified;
                 }
             }
             _dbContext.SaveChanges();

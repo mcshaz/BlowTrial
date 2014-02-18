@@ -826,7 +826,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The patient must be less than 28 days old at the time of randomising.
+        ///   Looks up a localized string similar to The patient must be less than 22 days old at the time of randomising.
         /// </summary>
         public static string NewPatient_Error_DOBtooOldToRandomise {
             get {

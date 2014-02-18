@@ -751,7 +751,7 @@
     <value>28 days old ({0:g})</value>
   </data>
   <data name="NewPatient_Error_DOBtooOldToRandomise" xml:space="preserve">
-    <value>The patient must be less than 28 days old at the time of randomising</value>
+    <value>The patient must be less than 22 days old at the time of randomising</value>
   </data>
   <data name="NewPatient_Error_TwinAndEnvelope" xml:space="preserve">
     <value>A randomising envelope should not be used. Id will be auto assigned.</value>

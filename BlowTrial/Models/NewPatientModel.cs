@@ -170,10 +170,10 @@ namespace BlowTrial.Models
         }
         private bool AgeOkToRandomise(DateTime? now = null)
         {
-            if (DateTimeBirth == null) { return false; }
-            var enrol = DateTimeOfEnrollment ?? now ?? DateTime.Now;
-            var age = enrol -this.DateTimeBirth.Value;
-            return age.Days < MaxAgeDaysEnrol && age.TotalMinutes >= MinEnrolAgeMins;
+            if (DateTimeBirth == null || (IsEnvelopeRandomising && DateTimeOfEnrollment==null)) { return false; }
+            DateTime enrol = DateTimeOfEnrollment ?? now ?? DateTime.Now;
+            TimeSpan age = enrol - this.DateTimeBirth.Value;
+            return age.Days <= MaxAgeDaysEnrol && age.TotalMinutes >= MinEnrolAgeMins;
         }
         #endregion
 

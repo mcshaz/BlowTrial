@@ -238,6 +238,7 @@ namespace BlowTrial.Models
         }
         static readonly string[] ValidatedProperties = new string[]
         { 
+            "Name",
             "OutcomeAt28Days",
             "LastContactWeight", 
             "LastWeightDate", 
@@ -257,6 +258,9 @@ namespace BlowTrial.Models
 
             switch (propertyName)
             {
+                case "Name":
+                    error = this.ValidateName();
+                    break;
                 case "OutcomeAt28Days":
                     error = this.ValidateOutcomeAt28Days(now);
                     break;
@@ -293,6 +297,15 @@ namespace BlowTrial.Models
             }
             return error;
         }
+        string ValidateName()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                return Strings.Field_Error_Empty ;
+            }
+            return null;
+        }
+
         string ValidateOutcomeAt28Days(DateTime? now = null)
         {
             if (OutcomeAt28Days==OutcomeAt28DaysOption.InpatientAt28Days)

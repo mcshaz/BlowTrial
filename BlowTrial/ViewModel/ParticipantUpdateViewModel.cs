@@ -132,14 +132,14 @@ namespace BlowTrial.ViewModel
             {
                 return _participant.Name;
             }
-            /*
+ 
             set
             {
                 if (value == _participant.Name) { return; }
                 _participant.Name = value;
+                IsParticipantModelChanged = true;
                 NotifyPropertyChanged("Name");
             }
-            */
         }
 
         public string PhoneNumber
@@ -749,10 +749,6 @@ namespace BlowTrial.ViewModel
                         }
                         IsVaccineAdminChanged = true;
                     }
-                    else // must be the create new row
-                    {
-                        VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
-                    }
                 }
             }
             if (e.NewItems != null)
@@ -775,11 +771,12 @@ namespace BlowTrial.ViewModel
             if (e.PropertyName == "AdministeredAtDate" || e.PropertyName == "AdministeredAtTime" || e.PropertyName == "SelectedVaccine")
             {
                 var newVaccineAdminVm = (VaccineAdministeredViewModel)sender;
-                if (newVaccineAdminVm.IsValid())
+                newVaccineAdminVm.AllowEmptyRecord = newVaccineAdminVm.IsEmpty;
+                if (!newVaccineAdminVm.IsEmpty && newVaccineAdminVm.IsValid())
                 {
+                    newVaccineAdminVm.AllowEmptyRecord = false;
                     _participant.VaccineModelsAdministered.Add(newVaccineAdminVm.VaccineAdministeredModel);
                     newVaccineAdminVm.PropertyChanged -= NewVaccineAdminVm_PropertyChanged;
-                    newVaccineAdminVm.AllowEmptyRecord = false;
                     VaccinesAdministered.Add(NewVaccineAdministeredViewModel());
                 }
             }
@@ -799,9 +796,12 @@ namespace BlowTrial.ViewModel
             {
                 _repository.UpdateParticipant(
                     id : _participant.Id,
+                    name : _participant.Name,
+                    phoneNumber : _participant.PhoneNumber,
                     causeOfDeath : _participant.CauseOfDeath,
-                    bcgAdverseDetail : _participant.BcgAdverseDetail,
+                    otherCauseOfDeathDetail: _participant.OtherCauseOfDeathDetail,
                     bcgAdverse : _participant.BcgAdverse,
+                    bcgAdverseDetail: _participant.BcgAdverseDetail,
                     bcgPapule : _participant.BcgPapule,
                     lastContactWeight : _participant.LastContactWeight,
                     lastWeightDate : _participant.LastWeightDate,
@@ -889,12 +889,17 @@ namespace BlowTrial.ViewModel
 
         void CancelChanges()
         {
+            string oldName = _participant.Name;
             _participant = Mapper.Map<ParticipantModel>(
                             _repository.Participants.Include("VaccinesAdministered").Include("VaccinesAdministered.VaccineGiven")
                                 .First(p => p.Id == _participant.Id));
             IsParticipantModelChanged = IsVaccineAdminChanged = false;
             _outcomeSplitter = new OutcomeAt28DaysSplitter(_participant.OutcomeAt28Days);
             AttachCollections();
+            if (oldName != _participant.Name)
+            {
+                NotifyPropertyChanged("Name");
+            }
         }
 
         #endregion

@@ -22,15 +22,18 @@ namespace BlowTrial.Infrastructure.Interfaces
         void Add(ScreenedPatient patient);
         void Add(Vaccine newVaccine);
         void UpdateParticipant(int id,
-                CauseOfDeathOption causeOfDeath,
-                String bcgAdverseDetail,
-                bool? bcgAdverse,
-                bool? bcgPapule,
-                int? lastContactWeight,
-                DateTime? lastWeightDate,
-                DateTime? dischargeDateTime,
-                DateTime? deathOrLastContactDateTime,
-                OutcomeAt28DaysOption outcomeAt28Days);
+            string name,
+            string phoneNumber,
+            CauseOfDeathOption causeOfDeath,
+            string otherCauseOfDeathDetail,
+            bool? bcgAdverse,
+            string bcgAdverseDetail,
+            bool? bcgPapule,
+            int? lastContactWeight,
+            DateTime? lastWeightDate,
+            DateTime? dischargeDateTime,
+            DateTime? deathOrLastContactDateTime,
+            OutcomeAt28DaysOption outcomeAt28Days);
         void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
         void Update(Participant patient);
