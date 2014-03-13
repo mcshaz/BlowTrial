@@ -1,4 +1,5 @@
-﻿using BlowTrial.Infrastructure;
+﻿using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure;
 using BlowTrial.Properties;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,14 @@ namespace BlowTrial.Models
     {
         public ProtocolViolationModel()
         {
-            _validatedProperties = new string[] { "MajorViolation", "Details" };
+            _validatedProperties = new string[] { "ViolationType", "Details" };
         }
 
-        public ParticipantModel Participant { get; set; }
+        public ParticipantBaseModel Participant { get; set; }
 
         public int Id { get; set; }
 
-        public bool? MajorViolation { get; set; }
+        public ViolationTypeOption? ViolationType { get; set; }
 
         public string Details { get; set; }
 
@@ -32,8 +33,8 @@ namespace BlowTrial.Models
             string error = null;
             switch (propertyName)
             {
-                case "MajorViolation":
-                    error = ValidateDDLNotNull(MajorViolation);
+                case "ViolationType":
+                    error = ValidateDDLNotNull(ViolationType);
                     break;
                 case "Details":
                     error = ValidateFieldNotEmpty(Details);

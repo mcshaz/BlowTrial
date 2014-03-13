@@ -15,22 +15,23 @@ namespace BlowTrial.Infrastructure.CSV
 
             string[] csvLines = participantsCsv.Split(new string[]{"\r\n"}, StringSplitOptions.None);
 
-            csvLines[0] += delimiter + string.Join(delimiter.ToString(), allVaccines.Select(v=>v.Name));
+            csvLines[0] += delimiter + string.Join(delimiter.ToString(), allVaccines.Select(v => ListConverters.StataSafeVarname(v.Name, "")));
+
+            int[] vaccineIds = allVaccines.Select(v => v.Id).ToArray();
+            StringBuilder vaccineDates = new StringBuilder();
             for (int i=0; i< allParticipants.Count;i++)
             {
-                foreach (var v in allVaccines)
+                vaccineDates.Clear();
+                foreach (int vid in vaccineIds)
                 {
-                    var admin = allParticipants[i].VaccinesAdministered.FirstOrDefault(va => va.VaccineGiven.Id == v.Id);
-                    
-                    if (admin==null)
+                    vaccineDates.Append(delimiter);
+                    var admin = allParticipants[i].VaccinesAdministered.FirstOrDefault(va => va.VaccineId == vid);
+                    if (admin!=null)
                     {
-                        csvLines[i] += delimiter;
-                    }
-                    else
-                    {
-                        csvLines[i] += delimiter + admin.AdministeredAt.ToString(dateFormat);
+                         vaccineDates.Append(admin.AdministeredAt.ToString(dateFormat));
                     }
                 }
+                csvLines[i+1] += vaccineDates.ToString();
             }
 
             return csvLines;

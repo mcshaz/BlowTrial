@@ -81,7 +81,7 @@
         <TextBox Grid.Row="2" Grid.Column="2"  HorizontalAlignment="Left"
                 x:Name="backupIntervalTxt"
                   Width="70"
-                  Text="{Binding Path=BackupInterval, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  Text="{Binding Path=BackupInterval, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,  Converter={StaticResource nullIntConvert}}"
                   />
         <ComboBox  Grid.Row="2" Grid.Column="2" 
                 Margin="70,0,0,0"

@@ -62,6 +62,15 @@ namespace BlowTrial.ViewModel
                     });
         }
 
+        protected static IEnumerable<KeyValuePair<Nullable<T>, string>> NullableEnumToListOptions<T>(string nullString = null) where T : struct, IConvertible
+        {
+            if (nullString ==null) { nullString = Strings.DropDownList_PleaseSelect; }
+            var returnVar = new List<KeyValuePair<Nullable<T>, string>>();
+            returnVar.Add(new KeyValuePair<Nullable<T>, string>(null, nullString));
+            returnVar.AddRange(EnumToListOptions<T>().Select(l => new KeyValuePair<Nullable<T>, string>(l.Key, l.Value)));
+            return returnVar;
+        }
+
         protected static System.Security.Principal.IPrincipal GetCurrentPrincipal()
         {
             return System.Threading.Thread.CurrentPrincipal;

@@ -8,29 +8,29 @@ namespace BlowTrial.Domain.Providers
 {
     public class ParticipantEventArgs : EventArgs
     {
-        public ParticipantEventArgs(Participant newParticipant)
+        public ParticipantEventArgs(Participant participant)
         {
-            NewParticipant = newParticipant;
+            this.Participant = participant;
         }
 
-        public Participant NewParticipant { get; private set; }
+        public Participant Participant { get; private set; }
     }
     public class ScreenedPatientEventArgs : EventArgs
     {
-        public ScreenedPatientEventArgs(ScreenedPatient newScreenedPatient)
+        public ScreenedPatientEventArgs(ScreenedPatient screenedPatient)
         {
-            NewScreenedPatient = newScreenedPatient;
+            this.ScreenedPatient = screenedPatient;
         }
 
-        public ScreenedPatient NewScreenedPatient { get; private set; }
+        public ScreenedPatient ScreenedPatient { get; private set; }
     }
     public class ProtocolViolationEventArgs : EventArgs
     {
-        public ProtocolViolationEventArgs(ProtocolViolation newViolation)
+        public ProtocolViolationEventArgs(ProtocolViolation violation)
         {
-            NewViolation = newViolation;
+            this.Violation = violation;
         }
 
-        public ProtocolViolation NewViolation { get; private set; }
+        public ProtocolViolation Violation { get; private set; }
     }
 }

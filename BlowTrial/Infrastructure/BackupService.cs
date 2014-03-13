@@ -62,10 +62,18 @@ namespace BlowTrial.Infrastructure
         }
         #endregion
 
+        #region Handlers
+        public EventHandler OnBackup;
+        #endregion
+
         #region Methods
         private void Backup(object sender, EventArgs e)
         {
             _repo.Backup();
+            if (OnBackup != null)
+            {
+                OnBackup.Invoke(this, e);
+            }
         }
         private void Restore(object sender, EventArgs e)
         {

@@ -21,34 +21,34 @@ namespace BlowTrial.ViewModel
         void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
         {
             //too hard - can alter this later 
-            ScreenedPatientData = _repository.GetScreenedPatientSummary();
-            NotifyPropertyChanged("ScreenedPatientData");
+            ParticipantData = _repository.GetParticipantSummary();
+            NotifyPropertyChanged("ParticipantData");
         }
 
         void _repository_ScreenedPatientAdded(object sender, Domain.Providers.ScreenedPatientEventArgs e)
         {
             ScreenedPatientData.TotalCount++;
-            if (e.NewScreenedPatient.BadInfectnImmune)
+            if (e.ScreenedPatient.BadInfectnImmune)
             {
                 ScreenedPatientData.BadInfectnImmuneCount++;
             }
-            if (e.NewScreenedPatient.BadMalform)
+            if (e.ScreenedPatient.BadMalform)
             {
                 ScreenedPatientData.BadMalformCount++;
             }
-            if (e.NewScreenedPatient.LikelyDie24Hr)
+            if (e.ScreenedPatient.LikelyDie24Hr)
             {
                 ScreenedPatientData.LikelyDie24HrCount++;
             }
-            if (e.NewScreenedPatient.Missed==true)
+            if (e.ScreenedPatient.Missed==true)
             {
                 ScreenedPatientData.MissedCount++;
             }
-            if (e.NewScreenedPatient.RefusedConsent == true)
+            if (e.ScreenedPatient.RefusedConsent == true)
             {
                 ScreenedPatientData.RefusedConsentCount++;
             }
-            if (e.NewScreenedPatient.WasGivenBcgPrior)
+            if (e.ScreenedPatient.WasGivenBcgPrior)
             {
                 ScreenedPatientData.WasGivenBcgPriorCount++;
             }
@@ -58,7 +58,7 @@ namespace BlowTrial.ViewModel
         void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
         {
             ParticipantData.TotalCount++;
-            if (e.NewParticipant.IsInterventionArm)
+            if (e.Participant.IsInterventionArm)
             {
                 ParticipantData.InterventionArmCount++;
             }

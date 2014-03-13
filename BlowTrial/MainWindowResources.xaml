@@ -20,7 +20,7 @@ This resource dictionary is used by the MainWindow.
   This template applies a CustomerView to an instance  
   of the CustomerViewModel class shown in the main window.
   -->
-    <DataTemplate DataType="{x:Type vm:NewPatientViewModel}">
+    <DataTemplate DataType="{x:Type vm:PatientDemographicsViewModel}">
         <vw:NewPatientView />
     </DataTemplate>
 

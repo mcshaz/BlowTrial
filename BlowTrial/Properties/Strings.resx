@@ -700,7 +700,7 @@
     <value>Negative values are not allowed</value>
   </data>
   <data name="MainWindow_StopEnvelopeRandomisingCaption" xml:space="preserve">
-    <value>Cease entering envelope randomised patients</value>
+    <value>Start computerised randomising</value>
   </data>
   <data name="MainWindow_StopEnvelopeRandomisingMsg" xml:space="preserve">
     <value>This step cannot be undone. Click OK only if all patients randomised by envelope have been entered into the 'New Patient' form.</value>
@@ -745,7 +745,7 @@
     <value>All protocol violations</value>
   </data>
   <data name="NewPatientModel_DateTimeEnrollment" xml:space="preserve">
-    <value>enrollment</value>
+    <value>Enrolment</value>
   </data>
   <data name="TimeInterval_28days" xml:space="preserve">
     <value>28 days old ({0:g})</value>
@@ -779,5 +779,44 @@
   </data>
   <data name="NewPatient_Error_InvalidGestationDays" xml:space="preserve">
     <value>Please enter a value between 0 and 6 days</value>
+  </data>
+  <data name="NewPatientViewModel_Option_InbornFalse" xml:space="preserve">
+    <value>No - Transferred here after birth</value>
+  </data>
+  <data name="NewPatientViewModel_Option_InbornTrue" xml:space="preserve">
+    <value>Yes - Born in this unit</value>
+  </data>
+  <data name="ParticipantUpdateVM_NoPhone" xml:space="preserve">
+    <value>No Phone</value>
+  </data>
+  <data name="ParticipantUpdateVM_Option_BcgPapuleNull" xml:space="preserve">
+    <value>No BCG given</value>
+  </data>
+  <data name="RandomisedMessagesViewModel_DefaultDischarge_Hospital" xml:space="preserve">
+    <value>Discharge from Hospital</value>
+  </data>
+  <data name="RandomisedMessagesViewModel_DefaultDischarge_NICU" xml:space="preserve">
+    <value>Discharge from NICU or Level 2 Nursery</value>
+  </data>
+  <data name="MainWindow_StopComputerRandomisingCaption" xml:space="preserve">
+    <value>Enter new envelope randomised patients</value>
+  </data>
+  <data name="ViolationTypeOption_MajorOther" xml:space="preserve">
+    <value>Major - Other</value>
+  </data>
+  <data name="ViolationTypeOption_MajorWrongAllocation" xml:space="preserve">
+    <value>Major - Randomised on incorrect weight or gender</value>
+  </data>
+  <data name="ViolationTypeOption_MajorWrongTreatment" xml:space="preserve">
+    <value>Major - Wrong treatment applied</value>
+  </data>
+  <data name="ViolationTypeOption_Minor" xml:space="preserve">
+    <value>Minor</value>
+  </data>
+  <data name="BackupService_DBupdateRequestExplanation" xml:space="preserve">
+    <value>A request has been recieved to update the database with information entered by a trial oversight computer. Please save any changes, and then logout or close the application.</value>
+  </data>
+  <data name="BackupService_DBupdateRequestHeader" xml:space="preserve">
+    <value>Update Request Received</value>
   </data>
 </root>

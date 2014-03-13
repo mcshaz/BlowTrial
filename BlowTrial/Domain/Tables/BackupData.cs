@@ -31,5 +31,7 @@ namespace BlowTrial.Domain.Tables
         public string InterventionInstructions { get; set; }
         [StringLength(200)]
         public string ControlInstructions { get; set; }
+        [StringLength(200)]
+        public string DischargeExplanation { get; set; }
     }
 }

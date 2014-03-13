@@ -45,18 +45,18 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
-        public bool? MajorViolation
+        public ViolationTypeOption? ViolationType
         {
             get
             {
-                return _violation.MajorViolation;
+                return _violation.ViolationType;
             }
             set
             {
-                if (value == _violation.MajorViolation) { return; }
+                if (value == _violation.ViolationType) { return; }
                 _isRecordAltered = true;
-                _violation.MajorViolation = value;
-                NotifyPropertyChanged("MajorViolation");
+                _violation.ViolationType = value;
+                NotifyPropertyChanged("ViolationType");
             }
         }
 
@@ -64,15 +64,15 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                switch(_violation.MajorViolation)
+                if (!ViolationType.HasValue)
                 {
-                    case true:
-                        return Strings.ProtocolViolationVM_Major;
-                    case false:
-                        return Strings.ProtocolViolationVM_Minor;
-                    default:
-                        return null;
+                    return null;
                 }
+                if (ViolationType==ViolationTypeOption.Minor)
+                {
+                    return Strings.ProtocolViolationVM_Minor;
+                }
+                return Strings.ProtocolViolationVM_Major;
             }
         }
 
@@ -167,9 +167,24 @@ namespace BlowTrial.ViewModel
                 return _violation.ReportingTimeLocal;
             }
         }
+        public Brush BackgroundColour
+        {
+            get
+            {
+                return _violation.Participant.StudyCentre.BackgroundColour;
+            }
+        }
+        public Brush TextColour
+        {
+            get
+            {
+                return _violation.Participant.StudyCentre.TextColour;
+            }
+        }
         #endregion
 
         #region Listbox Options
+        /* Legacy:
         KeyValuePair<bool?, string>[] _majorViolationOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
@@ -181,8 +196,17 @@ namespace BlowTrial.ViewModel
                 return _majorViolationOptions ?? (_majorViolationOptions = CreateBoolPairs(Strings.ProtocolViolationVM_Major,Strings.ProtocolViolationVM_Minor));
             }
         }
-        #endregion // Listbox options
+        //End legacy */
 
+        IEnumerable<KeyValuePair<ViolationTypeOption?, string>> _violationTypeOptions;
+        public IEnumerable<KeyValuePair<ViolationTypeOption?, string>> ViolationTypeOptions
+        {
+            get
+            {
+                return _violationTypeOptions ?? (_violationTypeOptions = NullableEnumToListOptions<ViolationTypeOption>());
+            }
+        }
+        #endregion // Listbox options
         #region Commands
         public RelayCommand SaveCmd{get; private set;}
 
@@ -190,7 +214,7 @@ namespace BlowTrial.ViewModel
         {
             ProtocolViolation violation = new ProtocolViolation
                 {
-                    MajorViolation = _violation.MajorViolation.Value,
+                    ViolationType = _violation.ViolationType.Value,
                     Details = _violation.Details,
                     ParticipantId = _violation.Participant.Id
                 };

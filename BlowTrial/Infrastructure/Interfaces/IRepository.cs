@@ -11,6 +11,14 @@ using System.Text;
 
 namespace BlowTrial.Infrastructure.Interfaces
 {
+    [Flags]
+    public enum UpdateParticipantViolationType
+    {
+        NoViolations = 0,
+        BlockCriteriaChanged = 1,
+        IneligibleWeight = 2,
+        MultipleSiblingIdChanged = 4
+    }
     public interface IRepository : IDisposable
     {
         event EventHandler<ParticipantEventArgs> ParticipantAdded;
@@ -18,12 +26,24 @@ namespace BlowTrial.Infrastructure.Interfaces
         event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
-        void Add(Participant patient);
+        Participant AddParticipant(
+            string name,
+            string mothersName,
+            string hospitalIdentifier,
+            int admissionWeight,
+            double gestAgeBirth,
+            DateTime dateTimeBirth,
+            string AdmissionDiagnosis,
+            string phoneNumber,
+            bool isMale,
+            bool? inborn,
+            DateTime registeredAt,
+            int centreId,
+            int? multipleSiblingId,
+            int? envelopeNumber = null);
         void Add(ScreenedPatient patient);
         void Add(Vaccine newVaccine);
         void UpdateParticipant(int id,
-            string name,
-            string phoneNumber,
             CauseOfDeathOption causeOfDeath,
             string otherCauseOfDeathDetail,
             bool? bcgAdverse,
@@ -33,7 +53,21 @@ namespace BlowTrial.Infrastructure.Interfaces
             DateTime? lastWeightDate,
             DateTime? dischargeDateTime,
             DateTime? deathOrLastContactDateTime,
-            OutcomeAt28DaysOption outcomeAt28Days);
+            OutcomeAt28DaysOption outcomeAt28Days,
+            string notes);
+        UpdateParticipantViolationType UpdateParticipant(int id,
+            string name,
+            bool isMale,
+            string phoneNumber,
+            string AdmissionDiagnosis,
+            int admissionWeight,
+            DateTime dateTimeBirth,
+            double gestAgeBirth,
+            string hospitalIdentifier,
+            bool? isInborn,
+            int? multipleSibblingId,
+            DateTime registeredAt,
+            bool isEnvelopeRandomising);
         void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
         void Update(Participant patient);
@@ -51,6 +85,10 @@ namespace BlowTrial.Infrastructure.Interfaces
         IEnumerable<StudyCentreModel> LocalStudyCentres { get; }
         ParticipantsSummary GetParticipantSummary();
         ScreenedPatientsSummary GetScreenedPatientSummary();
+        StudyCentreModel FindStudyCentre(int studyCentreId);
+        string BackupLimitedDbTo(string directory, params StudyCentreModel[] studyCentres);
+        IEnumerable<KeyValuePair<string, IEnumerable<StudyCentreModel>>> GetFilenamesAndCentres();
+        Database Database { get; }
         void Backup();
         void Restore();
     }

@@ -18,6 +18,8 @@ namespace BlowTrial.Domain.Interfaces
         DbSet<StudyCentre> StudyCentres { get; set; }
         Database Database { get; }
 
+        
+
         DbEntityEntry Entry(object entity);
         DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         /// <summary>

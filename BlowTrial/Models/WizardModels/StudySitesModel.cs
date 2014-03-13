@@ -129,16 +129,11 @@ namespace BlowTrial.Models
         }
         public string PhoneMask { get; set; }
         public string HospitalIdentifierMask { get; set; }
-        int _studyCentreIdIncrement;
         int StudyCentreIdIncrement
         {
             get
             {
-                if (_studyCentreIdIncrement == 0)
-                {
-                    _studyCentreIdIncrement = int.Parse(ConfigurationManager.AppSettings["StudyCentreIdIncrement"]);
-                }
-                return _studyCentreIdIncrement;
+                return 100;
             }
         }
 

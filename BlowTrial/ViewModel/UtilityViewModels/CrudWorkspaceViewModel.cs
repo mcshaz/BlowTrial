@@ -10,6 +10,7 @@ namespace BlowTrial.ViewModel
     public abstract class CrudWorkspaceViewModel : WorkspaceViewModel
     {
         #region fields
+        bool? _wasValidOnLastNotify;
         #endregion
         public CrudWorkspaceViewModel(IRepository repository)
             : base(repository)
@@ -19,14 +20,20 @@ namespace BlowTrial.ViewModel
             : base()
         {
         }
-        public bool WasValidOnLastNotify { get; private set; }
+        public bool WasValidOnLastNotify 
+        { 
+            get
+            {
+                return _wasValidOnLastNotify ?? (_wasValidOnLastNotify = IsValid()).Value;
+            }
+        }
         public abstract bool IsValid();
         protected override void NotifyPropertyChanged(params string[] propertyNames)
         {
             base.NotifyPropertyChanged(propertyNames);
             if (propertyNames.Length>1 || propertyNames[0]!="DisplayName")
             {
-                WasValidOnLastNotify = IsValid();
+                _wasValidOnLastNotify = IsValid();
             }
         }
     }

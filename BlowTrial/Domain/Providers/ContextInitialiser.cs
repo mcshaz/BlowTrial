@@ -1,21 +1,14 @@
 ﻿using BlowTrial.Domain.Tables;
-using BlowTrial.Migrations;
 using BlowTrial.Properties;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Text;
 
 namespace BlowTrial.Domain.Providers
 {
-    class MembershipContextInitialiser : MigrateDatabaseToLatestVersion<MembershipContext, MembershipConfiguration>
+    class MembershipContextInitialiser : MigrateDatabaseToLatestVersion<MembershipContext, BlowTrial.Migrations.Membership.MembershipConfiguration>
     {
-
     }
-    class DataContextInitialiser : MigrateDatabaseToLatestVersion<TrialDataContext,TrialDataConfiguration>
+    class DataContextInitialiser : MigrateDatabaseToLatestVersion<TrialDataContext, BlowTrial.Migrations.TrialData.TrialDataConfiguration>
     {
-
         public static readonly Vaccine Bcg =
             new Vaccine
             {

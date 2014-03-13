@@ -1,3 +1,7 @@
+using BlowTrial.Domain.Outcomes;
+using BlowTrial.Infrastructure.Randomising;
+using System.Collections.Generic;
+using System.Linq;
 namespace BlowTrial.Infrastructure
 {
     public class Envelope
@@ -7,9 +11,55 @@ namespace BlowTrial.Infrastructure
 	    public bool IsInterventionArm {get; set;}
         public int BlockSize { get; set; }
         public int BlockNumber { get; set; }
+
+        public RandomisationCategories RandomisationCategory
+        {
+            get
+            {
+                int returnInt;
+                if (WeightLessThan == RandomisingEngine.BlockWeight1)
+                {
+                    returnInt = 1;
+                }
+                else if (WeightLessThan == RandomisingEngine.BlockWeight2)
+                {
+                    returnInt = 3;
+                }
+                else
+                {
+                    returnInt = 5;
+                }
+                if (!IsMale)
+                {
+                    returnInt++;
+                }
+                return (RandomisationCategories)returnInt;
+            }
+        }
+        /*
+        internal const string UpdateCategoriesSql = "Update [Participants] Set [RandomisationCategory] = 1 Where [Id] BETWEEN '1' AND '20';" +
+                "Update [Participants] Set [RandomisationCategory] = 2 Where [Id] BETWEEN '1011' AND '1030';" +
+                "Update [Participants] Set [RandomisationCategory] = 3 Where [Id] BETWEEN '2021' AND '2081';" +
+                "Update [Participants] Set [RandomisationCategory] = 4 Where [Id] BETWEEN '3029' AND '3089';" +
+                "Update [Participants] Set [RandomisationCategory] = 5 Where [Id] BETWEEN '4037' AND '4275';" +
+                "Update [Participants] Set [RandomisationCategory] = 6 Where [Id] BETWEEN '5045' AND '5283';";
+         * */
     }
     public static class EnvelopeDetails
     {
+        public static ILookup<RandomisationCategories, int> GetAllEnvelopeNumbers()
+        {
+            var allEnvelopes = new List<KeyValuePair<int,Envelope>>(400);
+            for (int i=1;i<=MaxEnvelopeNumber;i++)
+            {
+                Envelope e = GetEnvelope(i);
+                if (e!=null)
+                {
+                    allEnvelopes.Add(new KeyValuePair<int,Envelope>(i,e));
+                }
+            }
+            return allEnvelopes.ToLookup(p => p.Value.RandomisationCategory,e=>e.Key);
+        }
         public const int MaxEnvelopeNumber = 5283;
         public const int FirstAvailableBlockNumber = 1752;
         public static Envelope GetEnvelope(int Id)

@@ -28,6 +28,10 @@ namespace BlowTrial.ViewModel
             {
                 ControlInstructions = Strings.RandomisedMessagesViewModel_DefaultControl;
             }
+            if (DischargeExplanation == null)
+            {
+                DischargeExplanation = Strings.RandomisedMessagesViewModel_DefaultDischarge_Hospital;
+            }
 
             SaveCmd = new RelayCommand(param => Save(), param => WasValidOnLastNotify);
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param));
@@ -79,6 +83,20 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        public string DischargeExplanation
+        {
+            get
+            {
+                return _messagesModel.DischargeExplanation;
+            }
+            set
+            {
+                if (_messagesModel.DischargeExplanation == value) { return; }
+                _messagesModel.DischargeExplanation = value;
+                NotifyPropertyChanged("DischargeExplanation");
+            }
+        }
+
         public ICommand SaveCmd { get; private set; }
         public ICommand CancelCmd { get; private set; }
 
@@ -94,7 +112,7 @@ namespace BlowTrial.ViewModel
         #region private methods
         void Save()
         {
-            BlowTrialDataService.SetRandomisingMessages(InterventionInstructions, ControlInstructions);
+            BlowTrialDataService.SetRandomisingMessages(InterventionInstructions, ControlInstructions, DischargeExplanation);
             CloseCmd.Execute(null);
         }
         #endregion

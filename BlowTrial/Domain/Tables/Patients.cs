@@ -17,12 +17,14 @@ namespace BlowTrial.Domain.Tables
         [StringLength(128)]
 	    public string HospitalIdentifier {get;set;}
         [StringLength(512)]
-        public string Abnormalities { get; set; }
+        public string AdmissionDiagnosis { get; set; }
 	    public int AdmissionWeight {get;set;}
+        public bool? Inborn { get; set; }
 	    public double GestAgeBirth {get;set;}
 	    public bool IsMale {get;set;}
 	    public DateTime DateTimeBirth {get;set;}
 	    public DateTime RegisteredAt {get; set;}
+        public int AppVersionAtEnrollment { get; set; }
         [ForeignKey("Centre")]
         public int CentreId { get; set; }
         [StringLength(64)]
@@ -51,11 +53,14 @@ namespace BlowTrial.Domain.Tables
         public virtual DateTime? DeathOrLastContactDateTime { get; set; }
         [StringLength(2056)]
         public string OtherCauseOfDeathDetail { get; set; }
-        public int BlockNumber { get; set; }
+        public int? BlockNumber { get; set; }
         public int BlockSize { get; set; }
         public int? MultipleSiblingId { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
+        [StringLength(160)]
+        public string Notes { get; set; }
+        public bool WasEnvelopeRandomised { get; set; }
 
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
         public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }

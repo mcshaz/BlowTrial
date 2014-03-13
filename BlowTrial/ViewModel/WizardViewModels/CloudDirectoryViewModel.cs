@@ -16,13 +16,13 @@ namespace BlowTrial.ViewModel
     public sealed class CloudDirectoryViewModel: WizardPageViewModel, IDataErrorInfo
     {
         #region Fields
-        CloudDirectoryModel _cloudDirModel;
+
         #endregion
 
         #region Constructor
         public CloudDirectoryViewModel(CloudDirectoryModel cloudDirModel)
         {
-            _cloudDirModel = cloudDirModel;
+            CloudModel = cloudDirModel;
             SaveCmd = new RelayCommand(Save, param=>IsValid());
             CancelCmd = new RelayCommand(param => CloseCmd.Execute(param));
             IntervalTimeScale = 1;
@@ -34,7 +34,7 @@ namespace BlowTrial.ViewModel
         {
             CloudDirectories = new ObservableCollection<DirectoryItemViewModel>();
 
-            foreach (var c in _cloudDirModel.CloudDirectoryItems)
+            foreach (var c in CloudModel.CloudDirectoryItems)
             {
                 var vm = new DirectoryItemViewModel(c);
                 CloudDirectories.Add(vm);
@@ -53,7 +53,7 @@ namespace BlowTrial.ViewModel
                 {
                     i.PropertyChanged -= DirectoryItem_NewPropertyChanged;
                     i.PropertyChanged -= DirectoryItem_PropertyChanged;
-                    _cloudDirModel.CloudDirectoryItems.Remove(i.DirectoryItem);
+                    CloudModel.CloudDirectoryItems.Remove(i.DirectoryItem);
                 }
             }
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
@@ -67,7 +67,7 @@ namespace BlowTrial.ViewModel
 
         void AddDirectoryItemVM()
         {
-            if (!CloudDirectories.Any() || _cloudDirModel.IsBackingUpToCloud == false)
+            if (!CloudDirectories.Any() || CloudModel.IsBackingUpToCloud == false)
             {
                 var newDir = new DirectoryItemViewModel(new DirectoryItemModel());
                 if (CloudDirectories.Any()) { newDir.AllowBlank = true; }
@@ -92,7 +92,7 @@ namespace BlowTrial.ViewModel
                 {
                     item.PropertyChanged -= DirectoryItem_NewPropertyChanged;
                     item.AllowBlank = false;
-                    _cloudDirModel.CloudDirectoryItems.Add(item.DirectoryItem);
+                    CloudModel.CloudDirectoryItems.Add(item.DirectoryItem);
                     AddDirectoryItemVM();
                 }
                 
@@ -125,15 +125,16 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _cloudDirModel.BackupIntervalMinutes/IntervalTimeScale;
+                return CloudModel.BackupIntervalMinutes/IntervalTimeScale;
             }
             set
             {
                 if (value == BackupInterval) { return; }
-                _cloudDirModel.BackupIntervalMinutes = value * IntervalTimeScale;
+                CloudModel.BackupIntervalMinutes = value * IntervalTimeScale;
                 NotifyPropertyChanged("BackupInterval");
             }
         }
+        public CloudDirectoryModel CloudModel { get; private set;}
 
         #endregion
 
@@ -142,11 +143,12 @@ namespace BlowTrial.ViewModel
         public void Save(object param)
         {
             BlowTrialDataService.SetBackupDetails(
-                _cloudDirModel.CloudDirectoryItems.Select(c=>c.DirectoryPath), 
-                _cloudDirModel.BackupIntervalMinutes.Value);
+                CloudModel.CloudDirectoryItems.Select(c=>c.DirectoryPath), 
+                CloudModel.BackupIntervalMinutes.Value);
+            if (OnSave != null) { OnSave(this, new EventArgs()); }
             CloseCmd.Execute(null);
         }
-
+        public EventHandler OnSave;
         public ICommand CancelCmd { get; private set; }
         #endregion
 
@@ -199,7 +201,7 @@ namespace BlowTrial.ViewModel
         /// </summary>
         public override bool IsValid()
             {
-                bool returnVal = _cloudDirModel.IsValid();
+                bool returnVal = CloudModel.IsValid();
                 CommandManager.InvalidateRequerySuggested();
                 return returnVal;
             }
@@ -207,7 +209,7 @@ namespace BlowTrial.ViewModel
 
         private string GetValidationError(string propertyName)
         {
-            string error = (_cloudDirModel as IDataErrorInfo)[propertyName];
+            string error = (CloudModel as IDataErrorInfo)[propertyName];
 
             // Dirty the commands registered with CommandManager,
             // such as our Save command, so that they are queried

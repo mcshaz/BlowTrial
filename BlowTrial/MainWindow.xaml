@@ -29,7 +29,8 @@
                     <MenuItem Header="Create _New User" Command="{Binding Path=CreateNewUserCmd}" />
                     <MenuItem Header="Change _Password" IsEnabled="False" />
                     <MenuItem Header="Manage _Users" IsEnabled="False"/>
-                    <MenuItem Header="Start computerised randomising" Command="{Binding Path=StopEnvelopeCmd}" />
+                    <MenuItem Header="{Binding Path=ToggleEnvelopeString, Mode=OneWay}" Command="{Binding Path=ToggleEnvelopeCmd}" />
+                    <MenuItem Header="Update Trial Site Database" Command="{Binding Path=RequestReverseUpdateCmd}" />
                 </MenuItem>
                 <MenuItem Header="_Help" >
                     <MenuItem Header="{Binding Path=Version, Mode=OneWay}" IsEnabled="False" />

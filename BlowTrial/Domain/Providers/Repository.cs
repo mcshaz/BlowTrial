@@ -15,6 +15,9 @@ using BlowTrial.Infrastructure.Exceptions;
 using System.Data.Entity.Infrastructure;
 using BlowTrial.Helpers;
 using LinqKit;
+using BlowTrial.Infrastructure;
+using BlowTrial.Infrastructure.Randomising;
+using BlowTrial.Migrations;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -35,7 +38,6 @@ namespace BlowTrial.Domain.Providers
         {
             _createContext = createContext;
             _dbContext = _createContext.Invoke(); //keep connection alive
-            ZipExtractionDirectory = AppDomain.CurrentDomain.GetData("DataDirectory").ToString();
         }
         static Func<ITrialDataContext> TypeToConstructor(Type iDataContextType)
         {
@@ -55,14 +57,22 @@ namespace BlowTrial.Domain.Providers
         private readonly Func<ITrialDataContext> _createContext;
         private ITrialDataContext _dbContext;
         private const string BakExtension = ".sdf"; //obviously change if using non-compact
+        private List<string> _baksForgoingMigration;
         #endregion // Members
 
-        #region Properties
+        #region EventHandlers
         public event EventHandler<ParticipantEventArgs> ParticipantAdded;
         public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
+        #endregion // EventHandlers
+
+        #region Properties
+        public Database Database
+        {
+            get { return _dbContext.Database; }
+        }
         public IEnumerable<string> CloudDirectories
         {
             get;
@@ -104,30 +114,40 @@ namespace BlowTrial.Domain.Providers
                 return _dbContext.ProtocolViolations.AsNoTracking();
             }
         }
-        IEnumerable<StudyCentreModel> _localStudyCentres;
-        public IEnumerable<StudyCentreModel> LocalStudyCentres 
+        Dictionary<int, StudyCentreModel> _localStudyCentreDictionary;
+        Dictionary<int, StudyCentreModel> LocalStudyCentreDictionary 
         {
             get 
             {
-                if (_localStudyCentres == null)
+                if (_localStudyCentreDictionary == null)
                 {
-                    var studyCentres = _dbContext.StudyCentres.ToArray();
-                    _localStudyCentres = studyCentres.Select(s => new StudyCentreModel
-                        {
-                            Id = s.Id,
-                            Name = s.Name,
-                            ArgbTextColour = s.ArgbTextColour,
-                            ArgbBackgroundColour = s.ArgbBackgroundColour,
-                            HospitalIdentifierMask = s.HospitalIdentifierMask,
-                            PhoneMask = s.PhoneMask,
-                            MaxIdForSite = s.MaxIdForSite,
-                            DuplicateIdCheck = s.DuplicateIdCheck // needed for backup
-                        });
+                    _localStudyCentreDictionary = (from s in _dbContext.StudyCentres 
+                                                  select new StudyCentreModel
+                                                    {
+                                                        Id = s.Id,
+                                                        Name = s.Name,
+                                                        ArgbTextColour = s.ArgbTextColour,
+                                                        ArgbBackgroundColour = s.ArgbBackgroundColour,
+                                                        HospitalIdentifierMask = s.HospitalIdentifierMask,
+                                                        PhoneMask = s.PhoneMask,
+                                                        MaxIdForSite = s.MaxIdForSite,
+                                                        DuplicateIdCheck = s.DuplicateIdCheck // needed for backup
+                                                    }).ToDictionary(scm=>scm.Id);
                 }
-                return _localStudyCentres;
+                return _localStudyCentreDictionary;
             }
         }
-        public string ZipExtractionDirectory { get; set; } //set to datadirectory on instantiation
+
+        public IEnumerable<StudyCentreModel> LocalStudyCentres
+        {
+            get { return LocalStudyCentreDictionary.Values; }
+        }
+
+        public StudyCentreModel FindStudyCentre(int studyCentreId)
+        {
+            return LocalStudyCentreDictionary[studyCentreId];
+        }
+
         #endregion // Properties
 
         #region Methods
@@ -139,13 +159,91 @@ namespace BlowTrial.Domain.Providers
         {
             return _dbContext.ProtocolViolations.Find(violationId);
         }
-        public void Add(Participant participant)
+        public Participant AddParticipant(
+            string name,
+            string mothersName,
+            string hospitalIdentifier,
+            int admissionWeight,
+            double gestAgeBirth,
+            DateTime dateTimeBirth,
+            string AdmissionDiagnosis,
+            string phoneNumber,
+            bool isMale,
+            bool? inborn,
+            DateTime registeredAt,
+            int centreId,
+            int? multipleSiblingId,
+            int? envelopeNumber = null)
         {
-            var centre= LocalStudyCentres.First(c=>c.Id == participant.CentreId);
-            if (participant.Id == 0)
+            Participant newParticipant = new Participant
             {
-                participant.Id = GetNextId(_dbContext.Participants, participant.CentreId);
+                Name = name,
+                MothersName = mothersName,
+                HospitalIdentifier = hospitalIdentifier.Trim(),
+                AdmissionWeight = admissionWeight,
+                GestAgeBirth = gestAgeBirth,
+                DateTimeBirth = dateTimeBirth,
+                AdmissionDiagnosis = AdmissionDiagnosis,
+                PhoneNumber =  phoneNumber,
+                IsMale = isMale,
+                Inborn = inborn,
+                RegisteredAt = registeredAt,
+                RegisteringInvestigator = System.Threading.Thread.CurrentPrincipal.Identity.Name,
+                CentreId = centreId,
+                WasEnvelopeRandomised = envelopeNumber.HasValue,
+                AppVersionAtEnrollment = App.CurrentAppVersion
+            };
+            if (multipleSiblingId.HasValue)
+            {
+                var multipleSibling = _dbContext.Participants.Find(multipleSiblingId.Value);
+                if (multipleSibling == null)
+                {
+                    throw new ArgumentException("Participant Not Found", "multipleSiblingId");
+                }
+                if (multipleSibling.IsMale == newParticipant.IsMale)
+                {
+                    newParticipant.IsInterventionArm = multipleSibling.IsInterventionArm;
+                    newParticipant.MultipleSiblingId = multipleSiblingId;
+                    if (envelopeNumber.HasValue)
+                    {
+                        newParticipant.Id = (from p in _dbContext.Participants
+                                             where p.Id > EnvelopeDetails.MaxEnvelopeNumber
+                                             orderby p.Id descending
+                                             select p.Id).FirstOrDefault();
+                        if (newParticipant.Id == 0)
+                        {
+                            newParticipant.Id = EnvelopeDetails.MaxEnvelopeNumber;
+                        }
+                        newParticipant.Id += 1;
+                    }
+                    else
+                    {
+                        RandomisingEngine.ForceAllocationToArm(newParticipant, this);
+                    }
+                }
             }
+            if (!newParticipant.MultipleSiblingId.HasValue)
+            {
+                if (envelopeNumber.HasValue)
+                {
+                    Envelope envelope = EnvelopeDetails.GetEnvelope(envelopeNumber.Value);
+                    newParticipant.BlockNumber = envelope.BlockNumber;
+                    newParticipant.BlockSize = envelope.BlockSize;
+                    newParticipant.IsInterventionArm = envelope.IsInterventionArm;
+                    newParticipant.Id = envelopeNumber.Value;
+                }
+                else
+                {
+                    newParticipant.Id = GetNextId(_dbContext.Participants, centreId);
+                    RandomisingEngine.CreateAllocation(newParticipant, this);
+                }
+            }
+            Add(newParticipant);
+            return newParticipant;
+        }
+        void Add(Participant participant)
+        {
+            var centre = FindStudyCentre(participant.CentreId);
             if (participant.Id < centre.Id)
             {
                 throw new DataKeyOutOfRangeException("participant id less than id for site");
@@ -167,6 +265,7 @@ namespace BlowTrial.Domain.Providers
         {
             _dbContext.ScreenedPatients.Add(patient);
             patient.Id = GetNextId(_dbContext.ScreenedPatients, patient.CentreId);
+            patient.AppVersionAtEnrollment = App.CurrentAppVersion;
 
             _dbContext.SaveChanges();
             if (this.ParticipantAdded != null)
@@ -181,7 +280,7 @@ namespace BlowTrial.Domain.Providers
                 _dbContext.StudyCentres.AddOrUpdate(s);
             }
             _dbContext.SaveChanges();
-            _localStudyCentres = null;
+            _localStudyCentreDictionary = null;
         }
         public void AddOrUpdate(ProtocolViolation violation)
         {
@@ -205,23 +304,127 @@ namespace BlowTrial.Domain.Providers
             }
             else
             {
-                ProtocolViolation attachedViol = _dbContext.ProtocolViolations.Local.FirstOrDefault(v => v.Id == violation.Id);
-                if (attachedViol == null)
+                var entry = _dbContext.Entry<ProtocolViolation>(violation);
+
+                if (entry.State == EntityState.Detached)
                 {
-                    _dbContext.ProtocolViolations.Attach(violation);
+                    ProtocolViolation attachedViol = _dbContext.ProtocolViolations.Local.FirstOrDefault(v => v.Id == violation.Id);
+                    if (attachedViol == null)
+                    {
+                        entry.State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        _dbContext.Entry(attachedViol).CurrentValues.SetValues(violation);
+                    }
                 }
-                else
-                {
-                    _dbContext.Entry(attachedViol).CurrentValues.SetValues(violation);
-                }
-                _dbContext.Entry(violation).State = EntityState.Modified;
             }
             _dbContext.SaveChanges();
         }
-
-        public void UpdateParticipant(int id,
+        const string BlockRandomisationViolation = "Alteration to data which would have affected randomisation:";
+        static string GenderString(bool isMale)
+        {
+            return isMale ? "Male" : "Female";
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="isMale"></param>
+        /// <param name="phoneNumber"></param>
+        /// <param name="AdmissionDiagnosis"></param>
+        /// <param name="admissionWeight"></param>
+        /// <param name="dateTimeBirth"></param>
+        /// <param name="gestAgeBirth"></param>
+        /// <param name="hospitalIdentifier"></param>
+        /// <param name="isInborn"></param>
+        /// <param name="multipleSibblingId"></param>
+        /// <param name="registeredAt"></param>
+        /// <returns>Whether a protocol violation has been logged due to randomising criteria being altered</returns>
+        public UpdateParticipantViolationType UpdateParticipant(int id,
             string name,
+            bool isMale,
             string phoneNumber,
+            string AdmissionDiagnosis,
+            int admissionWeight,
+            DateTime dateTimeBirth,
+            double gestAgeBirth,
+            string hospitalIdentifier,
+            bool? isInborn,
+            int? multipleSibblingId,
+            DateTime registeredAt,
+            bool isEnvelopeRandomising)
+        {
+            Participant participant = _dbContext.Participants.Find(id);
+            var pv = new List<ProtocolViolation>();
+            UpdateParticipantViolationType returnVar = UpdateParticipantViolationType.NoViolations;
+            if (!RandomisingExtensions.IsSameRandomisingCategory(participant.IsMale, isMale, participant.AdmissionWeight, admissionWeight))
+            {
+                pv.Add(new ProtocolViolation
+                {
+                    Details = string.Format(BlockRandomisationViolation + "Block randomising information changed from {0}g {1} to {2}g {3}", 
+                        participant.AdmissionWeight, 
+                        GenderString(participant.IsMale),
+                        admissionWeight,
+                        GenderString(isMale))
+                });
+                if (isEnvelopeRandomising)
+                {
+                    participant.BlockNumber = null;
+                    participant.BlockSize = 0;
+                }
+                else
+                {
+                    RandomisingEngine.ReasignBlockRandomisingData(participant, isMale, admissionWeight, this);
+                }
+                returnVar |= UpdateParticipantViolationType.BlockCriteriaChanged;
+            }
+            if (admissionWeight > RandomisingEngine.MaxBirthWeightGrams)
+            {
+                pv.Add(new ProtocolViolation
+                {
+                    Details = string.Format("Retrospectively inelligible participant!: Weight changed from {0} to {1}", participant.AdmissionWeight, admissionWeight)
+                });
+
+                participant.AdmissionWeight = admissionWeight;
+                returnVar |= UpdateParticipantViolationType.IneligibleWeight;
+            }
+            if (participant.MultipleSiblingId != multipleSibblingId)
+            {
+                pv.Add(new ProtocolViolation
+                {
+                    Details = string.Format(BlockRandomisationViolation + "Twin/tripplet ID changed from '{0}' to '{1}';", participant.MultipleSiblingId, multipleSibblingId)
+                });
+                participant.MultipleSiblingId = multipleSibblingId;
+                returnVar |= UpdateParticipantViolationType.MultipleSiblingIdChanged;
+            }
+            int nextPvId = GetNextId(_dbContext.ProtocolViolations, participant.CentreId);
+            foreach (var p in pv)
+            {
+                p.ParticipantId = participant.Id;
+                p.Id = nextPvId++;
+                p.ViolationType = ViolationTypeOption.MajorWrongAllocation;
+                p.ReportingTimeLocal = DateTime.Now;
+                p.ReportingInvestigator = System.Threading.Thread.CurrentPrincipal.Identity.Name;
+                _dbContext.ProtocolViolations.Add(p);
+            }
+            participant.Name = name;
+            participant.PhoneNumber = phoneNumber;
+            participant.AdmissionDiagnosis = AdmissionDiagnosis;
+            participant.DateTimeBirth = dateTimeBirth;
+            participant.GestAgeBirth = gestAgeBirth;
+            participant.HospitalIdentifier = hospitalIdentifier;
+            participant.Inborn = isInborn;
+            participant.RegisteredAt = registeredAt;
+            _dbContext.SaveChanges();
+            if (this.ParticipantUpdated != null)
+            {
+                this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
+            }
+            return returnVar;
+        }
+        public void UpdateParticipant(int id,
             CauseOfDeathOption causeOfDeath,
             string otherCauseOfDeathDetail,
             bool? bcgAdverse,
@@ -231,11 +434,10 @@ namespace BlowTrial.Domain.Providers
             DateTime? lastWeightDate,
             DateTime? dischargeDateTime,
             DateTime? deathOrLastContactDateTime,
-            OutcomeAt28DaysOption outcomeAt28Days)
+            OutcomeAt28DaysOption outcomeAt28Days,
+            string notes)
         {
             Participant participant = _dbContext.Participants.Find(id);
-            participant.Name = name;
-            participant.PhoneNumber = phoneNumber;
             participant.CauseOfDeath = causeOfDeath;
             participant.OtherCauseOfDeathDetail = otherCauseOfDeathDetail;
             participant.BcgAdverse = bcgAdverse;
@@ -247,6 +449,7 @@ namespace BlowTrial.Domain.Providers
             participant.DeathOrLastContactDateTime = deathOrLastContactDateTime;
             participant.OutcomeAt28Days = outcomeAt28Days;
             participant.RecordLastModified = DateTime.UtcNow;
+            participant.Notes = notes;
             Participant attachedParticipant = _dbContext.Participants.Local.FirstOrDefault(p => p.Id == participant.Id);
             if (attachedParticipant == null)
             {
@@ -404,13 +607,13 @@ namespace BlowTrial.Domain.Providers
             {
                 using (ZipFile readFile = ZipFile.Read(fp.Zip.FullName))
                 {
-                    readFile[0].Extract(ZipExtractionDirectory, ExtractExistingFileAction.OverwriteSilently);
+                    readFile[0].Extract(App.DataDirectory, ExtractExistingFileAction.OverwriteSilently);
                 }
                 BakFileDetails newBak = new BakFileDetails();
                 bakDetails.Add(newBak);
                 if (fp.ExtractedBak == null)
                 {
-                    fp.ExtractedBak = new FileInfo(Path.Combine(ZipExtractionDirectory, Path.GetFileNameWithoutExtension(fp.Zip.Name) + BakExtension));
+                    fp.ExtractedBak = new FileInfo(Path.Combine(App.DataDirectory, Path.GetFileNameWithoutExtension(fp.Zip.Name) + BakExtension));
                 }
                 else
                 {
@@ -424,12 +627,59 @@ namespace BlowTrial.Domain.Providers
             AddOrUpdateBaks(bakDetails);
 
         }
+        public IEnumerable<KeyValuePair<string,IEnumerable<StudyCentreModel>>> GetFilenamesAndCentres()
+        {
+            Restore();
+            var returnVar = new List<KeyValuePair<string,IEnumerable<StudyCentreModel>>>();
+            foreach (var p in GetMatchedCloudAndExtractedFiles())
+            {
+                if (p.ExtractedBak!=null)
+                {
+                    MigrateIfRequired(p.ExtractedBak.FullName);
+                    using (var db = _dbContext.AttachDb(p.ExtractedBak.FullName))
+                    {
+                        returnVar.Add(new KeyValuePair<string,IEnumerable<StudyCentreModel>>(p.Zip.FullName,db.StudyCentres.Select(s=>s.Id).ToList().Select(s=>LocalStudyCentreDictionary[s]).ToArray()));
+                    }
+                }
+            }
+            return returnVar;
+        }
+
+        public string BackupLimitedDbTo(string directory, params StudyCentreModel[] studyCentres)
+        {
+            const string bakExtension = ".sdf";
+            //this is a hack, and will not work if moving to a full sql server instance
+            Restore();
+            string destination = Path.Combine(directory, _dbContext.DbName + '_' + studyCentres.First().DuplicateIdCheck.ToString("N")) + bakExtension;
+            File.Copy(App.DataDirectory + '\\' + _dbContext.DbName + bakExtension, destination, true);
+            string whereString = "WHERE NOT (" + studyCentres.Select(s => string.Format("(Id BETWEEN '{0}' AND '{1}')", s.Id, s.MaxIdForSite)).Aggregate((c, n) => c + " OR " + n) + ')';
+            using (var db = _dbContext.AttachDb(destination))
+            {
+                foreach (string table in new string[] { "StudyCentres", "Participants", "ProtocolViolations", "ScreenedPatients", "VaccinesAdministered" })
+                {
+                    db.Database.ExecuteSqlCommand("Delete from [" + table + "] " + whereString);
+                }
+            }
+            return destination;
+        }
+        void MigrateIfRequired(string fullFilename)
+        {
+            if (_baksForgoingMigration == null) { _baksForgoingMigration = new List<string>(); }
+            if (!_baksForgoingMigration.Contains(fullFilename))
+            {
+                if (!CodeBasedMigration.ApplyPendingMigrations<BlowTrial.Migrations.TrialData.TrialDataConfiguration>(TrialDataContext.GetConnectionString(fullFilename), ContextCeConfiguration.ProviderInvariantName))
+                {
+                    _baksForgoingMigration.Add(fullFilename);
+                }
+            }
+        }
         void AddOrUpdateBaks(IEnumerable<BakFileDetails> bakupFiles)
         {
             List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
             List<IntegerRange> newSiteIdRanges = new List<IntegerRange>();
             foreach (var f in bakupFiles)
             {
+                MigrateIfRequired(f.FullFilename);
                 IEnumerable<Guid> knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
                 using (var downloadedDb = _dbContext.AttachDb(f.FullFilename))
                 {      
@@ -453,18 +703,12 @@ namespace BlowTrial.Domain.Providers
                         _dbContext.StudyCentres.Add(s); //because context will have been renewed, this should not cause a duplicate key exception
                         knownSites.Add(s);
                         newSiteIdRanges.Add(new IntegerRange(s.Id, s.MaxIdForSite));
-                        _localStudyCentres = null;
+                        _localStudyCentreDictionary = null;
                     }
                     var newSiteIds = newSiteIdRanges.Select(n => n.Min);
                     DateTime minDate = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
                     DateTime mostRecentBak = (f.LastBackupUtc < minDate)?minDate:f.LastBackupUtc;
-                    _dbContext.Participants.AddOrUpdate((from p in downloadedDb.Participants.AsNoTracking()
-                                                         where p.RecordLastModified > mostRecentBak || newSiteIds.Contains(p.CentreId)
-                                                         select p).ToArray());
-                    _dbContext.ScreenedPatients.AddOrUpdate((from s in downloadedDb.ScreenedPatients.AsNoTracking()
-                                                             where s.RecordLastModified > mostRecentBak || newSiteIds.Contains(s.CentreId)
-                                                             select s).ToArray());
-                    
+
                     var vaccinePredicate = PredicateBuilder.False<Vaccine>();
                     vaccinePredicate.Or(p => p.RecordLastModified > mostRecentBak);
                     foreach (IntegerRange rng in newSiteIdRanges)
@@ -483,6 +727,56 @@ namespace BlowTrial.Domain.Providers
                     var newVaxAdmin = _dbContext.VaccinesAdministered.AsNoTracking().AsExpandable().Where(vaccineAdminPredicate).ToArray();
                     _dbContext.VaccinesAdministered.AddOrUpdate(newVaxAdmin);
 
+                    var newOrUpdatedParticipants = (from p in downloadedDb.Participants.Include("VaccinesAdministered").AsNoTracking()
+                                        where p.RecordLastModified > mostRecentBak || newSiteIds.Contains(p.CentreId)
+                                        select p).ToArray();
+                    //move this down - need to check if vaccines administered
+                    bool isPartAddedEvt = this.ParticipantAdded != null;
+                    bool isPartUpdEvt = this.ParticipantUpdated != null;
+                    ILookup<bool, Participant> partWasAdded = null;
+                    if (isPartAddedEvt || isPartUpdEvt) 
+                    {
+                        int[] currentPartIds = _dbContext.Participants.Select(p => p.Id).ToArray();
+                        partWasAdded = newOrUpdatedParticipants.ToLookup(p => currentPartIds.Contains(p.Id));
+                    }
+                    _dbContext.Participants.AddOrUpdate(newOrUpdatedParticipants);
+                    if (isPartUpdEvt)
+                    {
+                        int[] newVaxAdminPartId = newVaxAdmin.Select(va => va.ParticipantId).Distinct().Except(newOrUpdatedParticipants.Select(p => p.Id)).ToArray();
+
+                        foreach (Participant p in _dbContext.Participants.AsNoTracking().Include("VaccinesAdministered")
+                            .Where(p => newVaxAdminPartId.Contains(p.Id)).ToArray()
+                            .Concat(partWasAdded[false]))
+                        {
+                            this.ParticipantUpdated(this, new ParticipantEventArgs(p)); 
+                        }
+                    }
+                    if (isPartAddedEvt)
+                    {
+                        foreach (Participant p in partWasAdded[true])
+                        {
+                            this.ParticipantAdded(this, new ParticipantEventArgs(p));
+                        }
+                    }
+
+                    var screenedPatients = (from s in downloadedDb.ScreenedPatients.AsNoTracking()
+                                            where s.RecordLastModified > mostRecentBak || newSiteIds.Contains(s.CentreId)
+                                            select s).ToArray();
+                    ScreenedPatient[] newScreenedPatients = null;
+                    if (this.ScreenedPatientAdded != null)
+                    {
+                        int[] currentScreenedPatients = _dbContext.ScreenedPatients.Select(s => s.Id).ToArray();
+                        newScreenedPatients = ScreenedPatients.Where(s => !currentScreenedPatients.Contains(s.Id)).ToArray();
+                    }
+                    _dbContext.ScreenedPatients.AddOrUpdate(screenedPatients);
+                    if (this.ScreenedPatientAdded != null)
+                    {
+                        foreach (ScreenedPatient s in newScreenedPatients)
+                        {
+                            ScreenedPatientAdded(this, new ScreenedPatientEventArgs(s));
+                        }
+                    }
+
                     var protocolViolPredicate = PredicateBuilder.False<ProtocolViolation>();
                     protocolViolPredicate.Or(p => p.RecordLastModified > mostRecentBak);
                     foreach (IntegerRange rng in newSiteIdRanges)
@@ -491,6 +785,13 @@ namespace BlowTrial.Domain.Providers
                     }
                     var newProtocolViol = _dbContext.ProtocolViolations.AsNoTracking().AsExpandable().Where(protocolViolPredicate).ToArray();
                     _dbContext.ProtocolViolations.AddOrUpdate(newProtocolViol);
+                    if (ProtocolViolationAdded != null)
+                    {
+                        foreach(ProtocolViolation pv in newProtocolViol)
+                        {
+                            ProtocolViolationAdded(this,new ProtocolViolationEventArgs(pv));
+                        }
+                    }
 
                     _dbContext.SaveChanges();
                 }
@@ -502,7 +803,7 @@ namespace BlowTrial.Domain.Providers
             {
                 TotalCount = _dbContext.Participants.Count(),
                 InterventionArmCount = _dbContext.Participants.Count(p => p.IsInterventionArm),
-                CompletedRecordCount = _dbContext.Participants.Select(ParticipantModel.GetDataRequired()).Count(d => d == DataRequiredOption.Complete)
+                CompletedRecordCount = _dbContext.Participants.Select(ParticipantBaseModel.GetDataRequiredExpression()).Count(d => d == DataRequiredOption.Complete)
             };
         }
         public ScreenedPatientsSummary GetScreenedPatientSummary()
@@ -551,7 +852,7 @@ namespace BlowTrial.Domain.Providers
                                    select new MatchedFilePair{ Zip = f });
             }
 
-            di = new DirectoryInfo(ZipExtractionDirectory);
+            di = new DirectoryInfo(App.DataDirectory);
             foreach (FileInfo f in di.GetFiles())
             {
                 if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix && f.Extension == BakExtension)

@@ -97,6 +97,24 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A request has been recieved to update the database with information entered by a trial oversight computer. Please save any changes, and then logout or close the application..
+        /// </summary>
+        public static string BackupService_DBupdateRequestExplanation {
+            get {
+                return ResourceManager.GetString("BackupService_DBupdateRequestExplanation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Request Received.
+        /// </summary>
+        public static string BackupService_DBupdateRequestHeader {
+            get {
+                return ResourceManager.GetString("BackupService_DBupdateRequestHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BLOW Trial (BCG for low-birth-weight babies).
         /// </summary>
         public static string Blowtrial_ProjectName {
@@ -637,7 +655,16 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cease entering envelope randomised patients.
+        ///   Looks up a localized string similar to Enter new envelope randomised patients.
+        /// </summary>
+        public static string MainWindow_StopComputerRandomisingCaption {
+            get {
+                return ResourceManager.GetString("MainWindow_StopComputerRandomisingCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start computerised randomising.
         /// </summary>
         public static string MainWindow_StopEnvelopeRandomisingCaption {
             get {
@@ -1024,7 +1051,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to enrollment.
+        ///   Looks up a localized string similar to Enrolment.
         /// </summary>
         public static string NewPatientModel_DateTimeEnrollment {
             get {
@@ -1092,6 +1119,24 @@ namespace BlowTrial.Properties {
         public static string NewPatientViewModel_Error_EnvelopeInDb {
             get {
                 return ResourceManager.GetString("NewPatientViewModel_Error_EnvelopeInDb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No - Transferred here after birth.
+        /// </summary>
+        public static string NewPatientViewModel_Option_InbornFalse {
+            get {
+                return ResourceManager.GetString("NewPatientViewModel_Option_InbornFalse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes - Born in this unit.
+        /// </summary>
+        public static string NewPatientViewModel_Option_InbornTrue {
+            get {
+                return ResourceManager.GetString("NewPatientViewModel_Option_InbornTrue", resourceCulture);
             }
         }
         
@@ -1519,6 +1564,24 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No Phone.
+        /// </summary>
+        public static string ParticipantUpdateVM_NoPhone {
+            get {
+                return ResourceManager.GetString("ParticipantUpdateVM_NoPhone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No BCG given.
+        /// </summary>
+        public static string ParticipantUpdateVM_Option_BcgPapuleNull {
+            get {
+                return ResourceManager.GetString("ParticipantUpdateVM_Option_BcgPapuleNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The trial will commence with this installation.
         /// </summary>
         public static string PreviouslyRandomisedOptions_False {
@@ -1578,6 +1641,24 @@ namespace BlowTrial.Properties {
         public static string RandomisedMessagesViewModel_DefaultControl {
             get {
                 return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discharge from Hospital.
+        /// </summary>
+        public static string RandomisedMessagesViewModel_DefaultDischarge_Hospital {
+            get {
+                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultDischarge_Hospital", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discharge from NICU or Level 2 Nursery.
+        /// </summary>
+        public static string RandomisedMessagesViewModel_DefaultDischarge_NICU {
+            get {
+                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultDischarge_NICU", resourceCulture);
             }
         }
         
@@ -1758,6 +1839,42 @@ namespace BlowTrial.Properties {
         public static string VaccineAdministeredVM_DuplicateVaccine {
             get {
                 return ResourceManager.GetString("VaccineAdministeredVM_DuplicateVaccine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Major - Other.
+        /// </summary>
+        public static string ViolationTypeOption_MajorOther {
+            get {
+                return ResourceManager.GetString("ViolationTypeOption_MajorOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Major - Randomised on incorrect weight or gender.
+        /// </summary>
+        public static string ViolationTypeOption_MajorWrongAllocation {
+            get {
+                return ResourceManager.GetString("ViolationTypeOption_MajorWrongAllocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Major - Wrong treatment applied.
+        /// </summary>
+        public static string ViolationTypeOption_MajorWrongTreatment {
+            get {
+                return ResourceManager.GetString("ViolationTypeOption_MajorWrongTreatment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minor.
+        /// </summary>
+        public static string ViolationTypeOption_Minor {
+            get {
+                return ResourceManager.GetString("ViolationTypeOption_Minor", resourceCulture);
             }
         }
         

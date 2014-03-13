@@ -10,7 +10,7 @@
     </UserControl.Resources>
     <Grid Margin="0,0,5,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="140" MinWidth="110" />
+            <ColumnDefinition Width="155" MinWidth="110" />
             <ColumnDefinition Width="6" />
             <ColumnDefinition Width="*" MinWidth="170"/>
         </Grid.ColumnDefinitions>
@@ -20,6 +20,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="30" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
@@ -54,6 +56,21 @@
         <ContentPresenter 
               Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
               Content="{Binding ElementName=controlInstructionsTxt, Path=(Validation.Errors).CurrentItem}"
+              />
+
+        <!-- DischargeInstructions-->
+        <Label 
+              Grid.Row="6" Grid.Column="0" VerticalAlignment="Center"
+              Content="Discharge Explanation" Target="{Binding ElementName=dischargeExplanationTxt}"
+              HorizontalAlignment="Right" 
+              />
+        <TextBox Grid.Row="6" Grid.Column="2"  HorizontalAlignment="Stretch" AcceptsReturn="True" TextWrapping="Wrap"
+                x:Name="dischargeExplanationTxt"
+                  Text="{Binding Path=DischargeExplanation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                  />
+        <ContentPresenter 
+              Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+              Content="{Binding ElementName=dischargeExplanationTxt, Path=(Validation.Errors).CurrentItem}"
               />
     </Grid>
 </UserControl>

@@ -270,6 +270,7 @@ namespace BlowTrial.ViewModel
                 BlowTrialDataService.SetAppData(
                     MessagesModel.InterventionInstructions,
                     MessagesModel.ControlInstructions,
+                    MessagesModel.DischargeExplanation,
                     BackupModel.CloudDirectories,
                     BackupModel.BackupIntervalMinutes.Value,
                     BackupModel.IsBackingUpToCloud,

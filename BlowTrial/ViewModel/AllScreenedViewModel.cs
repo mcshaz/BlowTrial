@@ -18,7 +18,7 @@ namespace BlowTrial.ViewModel
 
         private void _repository_ScreenedPatientAdded(object sender, Domain.Providers.ScreenedPatientEventArgs e)
         {
-            AllScreened.Add(e.NewScreenedPatient);
+            AllScreened.Add(e.ScreenedPatient);
         }
         public ObservableCollection<ScreenedPatient> AllScreened { get; private set; }
     }

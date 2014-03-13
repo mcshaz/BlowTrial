@@ -10,8 +10,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <vw:RandomisedMessagesUserControlBase DataContext="{Binding Path=.}" Grid.Row="0"/>
-        <TextBlock Grid.Row="1" TextWrapping="Wrap">
+        <vw:RandomisedMessagesUserControlBase DataContext="{Binding Path=.}" Grid.Row="0" Margin="5" Loaded="RandomisedMessagesUserControlBase_Loaded"/>
+        <TextBlock Grid.Row="1" TextWrapping="Wrap" Foreground="DarkOrange">
             *please note that if a patient has been randomised since logging in, you will have to log out in order for the new message to be displayed.
         </TextBlock>
         <Line Grid.Row="3"

@@ -16,88 +16,44 @@ using System.Linq.Expressions;
 
 namespace BlowTrial.Models
 {
-    public partial class ParticipantModel : IDataErrorInfo, IParticipant
+    public class ParticipantBaseModel : IParticipant
     {
-        #region Constructors
-
-        #endregion // Constructors
-
         #region Fields
-        const double TicksPerWeek = TimeSpan.TicksPerDay * 7;
-        TimeSpan _cgabirth;
-        DateTime? _becomes28On;
-        #endregion //Fields
+        DateTime _dateTimeBirth;
+        #endregion
 
-        #region Properties
+        #region Constructor
+        #endregion
+
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public string MothersName { get; set; }
-        public string PhoneNumber { get; set; }
-        public string HospitalIdentifier { get; set; }
-        public int AdmissionWeight { get; set; }
-        public double GestAgeBirth { get; set; }
-        public string Abnormalities { get; set; }
         public bool IsMale { get; set; }
-        public DateTime DateTimeBirth { get; set; }
+        public string HospitalIdentifier { get; set; }
+        public DateTime Becomes28On { get; private set; }
         public DateTime RegisteredAt { get; set; }
         public int CentreId { get; set; }
-        public string RegisteringInvestigator { get; set; }
         public bool IsInterventionArm { get; set; }
-        public bool? BcgAdverse { get; set; }
-        public string BcgAdverseDetail { get; set; }
-        public bool? BcgPapule { get; set; }
-        public int? LastContactWeight { get; set; }
-        public DateTime? LastWeightDate { get; set; }
-        public string OtherCauseOfDeathDetail { get; set; }
-
+        public StudyCentreModel StudyCentre { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
-        public StudyCentreModel StudyCentre { get; set; }
+        public ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
 
-        public ICollection<VaccineAdministeredModel> VaccineModelsAdministered { get; set; }
-
-        /// <summary>
-        /// To implement IParticipant - mapping Id only at this point
-        /// </summary>
-        public ICollection<VaccineAdministered> VaccinesAdministered
-        {
+        public DateTime DateTimeBirth 
+        { 
             get
             {
-                return VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineGiven.Id }).ToList();
+                return _dateTimeBirth;
+            }
+            set
+            {
+                _dateTimeBirth = value;
+                Becomes28On = _dateTimeBirth.AddDays(28);
             }
         }
 
-        public TimeSpan Age
-        {
-            get { return (DateTime.Now - DateTimeBirth);  }
-        }
+        public int AgeDays { get; set; }
 
-        public DateTime Becomes28On
-        {
-            get
-            {
-                return (_becomes28On ?? (_becomes28On = DateTimeBirth.AddDays(28))).Value;
-            }
-        }
-        TimeSpan CgaBirth
-        {
-            get
-            {
-                if (_cgabirth == default(TimeSpan))
-                {
-                    _cgabirth = new TimeSpan((long)(TicksPerWeek * GestAgeBirth));
-                }
-                return _cgabirth;
-            }
-        }
-        public TimeSpan CGA
-        {
-            get
-            {
-                return  Age.Add(CgaBirth);
-            }
-        }
         public string TrialArm
         {
             get
@@ -117,44 +73,22 @@ namespace BlowTrial.Models
             }
         }
 
-        DateTimeSplitter _dischargeDateTime = new DateTimeSplitter();
+        string ValidateName()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                return Strings.Field_Error_Empty;
+            }
+            return null;
+        }
 
-        public DateTime? DischargeDateTime 
+        public DataRequiredOption DataRequired
         {
-            get 
-            {
-                return _dischargeDateTime.DateAndTime;
-            }
-            set 
-            {
-                _dischargeDateTime.DateAndTime = value;
-            }
+            get;
+            internal set;
         }
-        public DateTime? DischargeDate
-        {
-            get
-            {
-                return _dischargeDateTime.Date;
-            }
-            set
-            {
-                _dischargeDateTime.Date = value;
-                //DischargeDateTime = _dischargeDateTime.DateAndTime;
-            }
-        }
-        public TimeSpan? DischargeTime
-        {
-            get 
-            { 
-                return _dischargeDateTime.Time; 
-            }
-            set
-            {
-                _dischargeDateTime.Time = value;
-                //DischargeDateTime = _dischargeDateTime.DateAndTime;
-            }
-        }
-        DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();
+
+        internal DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();
         public DateTime? DeathOrLastContactDateTime
         {
             get
@@ -190,6 +124,45 @@ namespace BlowTrial.Models
                 //DeathOrLastContactDateTime = _deathOrLastContactDateTime.DateAndTime;
             }
         }
+
+        internal DateTimeSplitter _dischargeDateTime = new DateTimeSplitter();
+
+        public DateTime? DischargeDateTime
+        {
+            get
+            {
+                return _dischargeDateTime.DateAndTime;
+            }
+            set
+            {
+                _dischargeDateTime.DateAndTime = value;
+            }
+        }
+        public DateTime? DischargeDate
+        {
+            get
+            {
+                return _dischargeDateTime.Date;
+            }
+            set
+            {
+                _dischargeDateTime.Date = value;
+                //DischargeDateTime = _dischargeDateTime.DateAndTime;
+            }
+        }
+        public TimeSpan? DischargeTime
+        {
+            get
+            {
+                return _dischargeDateTime.Time;
+            }
+            set
+            {
+                _dischargeDateTime.Time = value;
+                //DischargeDateTime = _dischargeDateTime.DateAndTime;
+            }
+        }
+
         public bool? IsKnownDead
         {
             get
@@ -209,13 +182,111 @@ namespace BlowTrial.Models
             }
         }
 
-        public DataRequiredOption DataRequired
+        #region Methods
+        public DataRequiredOption RecalculateDataRequired()
         {
-            get 
+            return GetDataRequiredExpression().Compile()(this);
+        }
+        /*
+        public TimeSpan GetAge(DateTime? now = null)
+        {
+            return ((now ?? DateTime.Now) - DateTimeBirth);
+        }
+         * */
+        #region Static Methods
+        protected static OutcomeAt28DaysOption[] DeathOrLastContactRequiredIf = new OutcomeAt28DaysOption[]
+        {
+            OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
+            OutcomeAt28DaysOption.DischargedAndKnownToHaveDied,
+            OutcomeAt28DaysOption.DischargedAndLikelyToHaveDied,
+            OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived
+        };
+        protected static OutcomeAt28DaysOption[] KnownDeadOutcomes = new OutcomeAt28DaysOption[]
+        {
+            OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
+            OutcomeAt28DaysOption.DischargedAndKnownToHaveDied
+        };
+
+        internal static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequiredExpression(DateTime? dt28Prior=null)
+        {
+            DateTime twentyEightPrior = dt28Prior ?? DateTime.Now.AddDays(-28);
+            return
+                p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
+                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
+                        ? DataRequiredOption.DetailsMissing
+                        : (p.IsInterventionArm && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.Bcg.Id))
+                            ? DataRequiredOption.BcgDataRequired
+                            : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
+                                ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
+                                    ? DataRequiredOption.AwaitingOutcomeOr28
+                                    : DataRequiredOption.OutcomeRequired
+                                : DataRequiredOption.Complete;
+        }
+
+        #endregion //Static Methds
+        #endregion //Methods
+    }
+
+    public class ParticipantProgressModel : ParticipantBaseModel, IDataErrorInfo
+    {
+        #region Constructors
+
+        #endregion // Constructors
+
+        #region Fields
+        const double TicksPerWeek = TimeSpan.TicksPerDay * 7;
+        TimeSpan _cgabirth;
+        
+        #endregion //Fields
+
+        #region Properties
+
+        public string MothersName { get; set; }
+        public string PhoneNumber { get; set; }
+
+        public int AdmissionWeight { get; set; }
+        public double GestAgeBirth { get; set; }
+        public string AdmissionDiagnosis { get; set; }
+        
+        public string RegisteringInvestigator { get; set; }
+        public bool? BcgAdverse { get; set; }
+        public string BcgAdverseDetail { get; set; }
+        public bool? BcgPapule { get; set; }
+        public int? LastContactWeight { get; set; }
+        public DateTime? LastWeightDate { get; set; }
+        public string OtherCauseOfDeathDetail { get; set; }
+        public string Notes { get; set; }
+
+        public ICollection<VaccineAdministeredModel> VaccineModelsAdministered { get; set; }
+        public new ICollection<VaccineAdministered> VaccinesAdministered 
+        {
+            get
             {
-                return GetDataRequired().Compile()(this); 
+                return VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineGiven.Id }).ToList();
             }
         }
+
+        /// <summary>
+        /// To implement IParticipant - mapping Id only at this point
+        /// </summary>
+        /*
+        public TimeSpan GetCGA(DateTime? now = null)
+        {
+            return GetAge(now).Add(CgaBirth);
+        }
+        */
+        TimeSpan CgaBirth
+        {
+            get
+            {
+                if (_cgabirth == default(TimeSpan))
+                {
+                    _cgabirth = new TimeSpan((long)(TicksPerWeek * GestAgeBirth));
+                }
+                return _cgabirth;
+            }
+        }
+
         #endregion //Properties
 
         #region IDataErrorInfo Members
@@ -238,7 +309,6 @@ namespace BlowTrial.Models
         }
         static readonly string[] ValidatedProperties = new string[]
         { 
-            "Name",
             "OutcomeAt28Days",
             "LastContactWeight", 
             "LastWeightDate", 
@@ -248,7 +318,8 @@ namespace BlowTrial.Models
             "DeathOrLastContactTime",
             "OtherCauseOfDeathDetail",
             "CauseOfDeath",
-            "BcgAdverseDetail"
+            "BcgAdverseDetail",
+            "Notes"
         };
         public string GetValidationError(string propertyName, DateTime? now=null)
         {
@@ -258,9 +329,6 @@ namespace BlowTrial.Models
 
             switch (propertyName)
             {
-                case "Name":
-                    error = this.ValidateName();
-                    break;
                 case "OutcomeAt28Days":
                     error = this.ValidateOutcomeAt28Days(now);
                     break;
@@ -291,27 +359,21 @@ namespace BlowTrial.Models
                 case "BcgAdverseDetail":
                     error = ValidateBcgAdverseDetail();
                     break;
+                case "Notes":
+                    error = ValidateNotes();
+                    break;
                 default:
                     Debug.Fail("Unexpected property being validated on ParticipantUpdateModel: " + propertyName);
                     break;
             }
             return error;
         }
-        string ValidateName()
-        {
-            if (string.IsNullOrWhiteSpace(Name))
-            {
-                return Strings.Field_Error_Empty ;
-            }
-            return null;
-        }
 
         string ValidateOutcomeAt28Days(DateTime? now = null)
         {
             if (OutcomeAt28Days==OutcomeAt28DaysOption.InpatientAt28Days)
             {
-                var ageDays = ((now ?? DateTime.Now) - DateTimeBirth).Days;
-                if (ageDays < 28)
+                if (AgeDays < 28)
                 {
                     return Strings.ParticipantModel_Error_28daysNotElapsed;
                 }
@@ -401,6 +463,15 @@ namespace BlowTrial.Models
             }
             return null;
         }
+        const int noteLength = 160;
+        string ValidateNotes()
+        {
+            if (Notes!=null && Notes.Length > noteLength)
+            {
+                return string.Format(Strings.Field_Error_TooLong, noteLength);
+            }
+            return null;
+        }
         DateTimeErrorString ValidateDischargeDateTime(DateTime? now = null)
         {
             DateTimeErrorString error;
@@ -474,36 +545,5 @@ namespace BlowTrial.Models
         }
         #endregion
 
-        #region Static Methods
-        static OutcomeAt28DaysOption[] DeathOrLastContactRequiredIf = new OutcomeAt28DaysOption[]
-        {
-            OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
-            OutcomeAt28DaysOption.DischargedAndKnownToHaveDied,
-            OutcomeAt28DaysOption.DischargedAndLikelyToHaveDied,
-            OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived
-        };
-        static OutcomeAt28DaysOption[] KnownDeadOutcomes = new OutcomeAt28DaysOption[]
-        {
-            OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
-            OutcomeAt28DaysOption.DischargedAndKnownToHaveDied
-        };
-
-        internal static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequired()
-        {
-            DateTime born28Prior = DateTime.Now.AddDays(-28);
-            return
-                p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
-                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
-                        ? DataRequiredOption.DetailsMissing
-                        : (p.IsInterventionArm && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.Bcg.Id))
-                            ? DataRequiredOption.BcgDataRequired
-                            : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
-                                ? (p.DateTimeBirth > born28Prior) //in sql server DbFunctions.DiffDays(DateTimeBirth, DateTime.Now) < 28
-                                    ? DataRequiredOption.AwaitingOutcomeOr28
-                                    : DataRequiredOption.OutcomeRequired
-                                : DataRequiredOption.Complete;
-        }
-
-        #endregion
     }
 }

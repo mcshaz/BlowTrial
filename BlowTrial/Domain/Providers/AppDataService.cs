@@ -28,17 +28,17 @@ namespace BlowTrial.Helpers
             }
             return null;
         }
-        public static void StopEnvelopeRandomising()
+        public static void ChangeEnvelopeRandomising(bool newVal)
         {
             using (var a = new MembershipContext())
             {
-                StopEnvelopeRandomising(a);
+                ChangeEnvelopeRandomising(newVal, a);
             }
         }
-        public static void StopEnvelopeRandomising(IAppData appData)
+        public static void ChangeEnvelopeRandomising(bool newVal, IAppData appData)
         {
             var data = appData.BackupDataSet.First();
-            data.IsEnvelopeRandomising = false;
+            data.IsEnvelopeRandomising = newVal;
             appData.SaveChanges();
         }
         public static RandomisingMessage GetRandomisingMessage()
@@ -80,14 +80,14 @@ namespace BlowTrial.Helpers
                 CloudDirectories = appData.CloudDirectories.Select(c=>c.Path).ToList()
             };
         }
-        public static void SetRandomisingMessages(string interventionMessage, string controlMessage)
+        public static void SetRandomisingMessages(string interventionMessage, string controlMessage, string dischargeExplanation)
         {
             using (var a = new MembershipContext())
             {
-                SetRandomisingMessages(interventionMessage, controlMessage, a);
+                SetRandomisingMessages(interventionMessage, controlMessage, dischargeExplanation, a);
             }
         }
-        internal static void SetRandomisingMessages(string interventionMessage, string controlMessage, IAppData appDataProvider)
+        internal static void SetRandomisingMessages(string interventionMessage, string controlMessage, string dischargeExplanation, IAppData appDataProvider)
         {
             try
             {
@@ -97,16 +97,17 @@ namespace BlowTrial.Helpers
             appDataProvider.RandomisingMessages.Add(new RandomisingMessage
                 {
                     InterventionInstructions = interventionMessage,
-                    ControlInstructions = controlMessage
+                    ControlInstructions = controlMessage,
+                    DischargeExplanation = dischargeExplanation
                 });
             appDataProvider.SaveChanges();
         }
-        public static void SetAppData(string interventionMessage, string controlMessage, IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising=null)
+        public static void SetAppData(string interventionMessage, string controlMessage, string dischargeExplanation, IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising = null)
         {
             using (var a = new MembershipContext())
             {
                 SetBackupDetails(cloudDirectories, intervalMins, isTobackupToCloud, isEnvelopeRandomising, a);
-                SetRandomisingMessages(interventionMessage, controlMessage, a);
+                SetRandomisingMessages(interventionMessage, controlMessage, dischargeExplanation,a);
             }
         }
         public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising=null)
@@ -153,10 +154,9 @@ namespace BlowTrial.Helpers
             else
             {
                 data.BackupData.BackupIntervalMinutes = intervalMins;
-                appDataProvider.BackupDataSet.Attach(data.BackupData);
+                //var a = (MembershipContext)appDataProvider;
+                //var b = a.Entry(data.BackupData);
             }
-            
-
             appDataProvider.SaveChanges();
         }
         public static bool AnyStudyCentres()

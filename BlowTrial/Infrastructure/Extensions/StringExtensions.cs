@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.IO;
 
 namespace BlowTrial.Infrastructure.Extensions
 {
@@ -37,6 +38,14 @@ namespace BlowTrial.Infrastructure.Extensions
         {
             if (string.IsNullOrWhiteSpace(value)) { throw new ArgumentException("String cannot be null or whitespace"); }
             return char.ToUpper(value[0]) + value.Substring(1) + ':';
+        }
+
+        public static string InsertDateStampToFileName(this string fileName)
+        {
+            const string TimeStampFormat = "yyyyMMddhhmm";
+            int dotpos = fileName.LastIndexOf('.');
+            if (dotpos == -1) { return fileName + DateTime.Now.ToString(TimeStampFormat); }
+            return fileName.Substring(0, dotpos) + DateTime.Now.ToString(TimeStampFormat) + fileName.Substring(dotpos);
         }
         /// <summary>
         ///convert text to Pascal Case

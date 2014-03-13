@@ -24,10 +24,6 @@ namespace BlowTrial.ViewModel
 
         protected WorkspaceViewModel(IRepository repository)
         {
-            if (repository==null)
-            {
-                throw new ArgumentException();
-            }
             _repository = repository;
         }
 

@@ -13,7 +13,7 @@ namespace BlowTrial.Domain.Tables
         [ForeignKey("Participant")]
         public int ParticipantId { get; set; }
         public string Details { get; set; }
-        public bool MajorViolation { get; set; }
+        public ViolationTypeOption ViolationType { get; set; }
         public string ReportingInvestigator { get; set; }
         public DateTime ReportingTimeLocal { get; set; }
 
@@ -24,5 +24,12 @@ namespace BlowTrial.Domain.Tables
         [ForeignKey("ReportingInvestigator")]
         public virtual Investigator ReportingInvestigator { get; set; }
         */
+    }
+    public enum ViolationTypeOption
+    {
+        Minor = 1,
+        MajorWrongTreatment = 2,
+        MajorWrongAllocation = 3,
+        MajorOther = 4
     }
 }

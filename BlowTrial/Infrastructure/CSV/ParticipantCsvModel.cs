@@ -12,11 +12,12 @@ namespace BlowTrial.Domain.Tables
 	    public int Id {get; set;}
 	    public int AdmissionWeight {get;set;}
 	    public double GestAgeBirth {get;set;}
-	    public string Abnormalities {get;set;}
+	    public string AdmissionDiagnosis {get;set;}
 	    public bool IsMale {get;set;}
 	    public DateTime DateTimeBirth {get;set;}
 	    public DateTime RegisteredAt {get; set;}
         public int CentreId { get; set; }
+        public bool? Inborn { get; set; }
         public string RegisteringInvestigator { get; set; }
 
         /*
@@ -42,6 +43,8 @@ namespace BlowTrial.Domain.Tables
         public int BlockNumber { get; set; }
         public int BlockSize { get; set; }
         public int? MultipleSiblingId { get; set; }
+        public string Notes { get; set; }
+        public bool WasEnvelopeRandomised { get; set; }
 
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
     }

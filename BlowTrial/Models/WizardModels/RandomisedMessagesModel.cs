@@ -12,7 +12,7 @@ namespace BlowTrial.Models
         #region Constructors
         public RandomisedMessagesModel()
         {
-            _validatedProperties = new string[] { "InterventionInstructions", "ControlInstructions" };
+            _validatedProperties = new string[] { "InterventionInstructions", "ControlInstructions", "DischargeExplanation" };
         }
         #endregion
 
@@ -22,6 +22,7 @@ namespace BlowTrial.Models
         #region Properties
         public string InterventionInstructions { get; set; }
         public string ControlInstructions { get; set; }
+        public string DischargeExplanation { get; set; }
         #endregion
 
         #region Validation Overrides/implementation
@@ -39,6 +40,9 @@ namespace BlowTrial.Models
                     break;
                 case "ControlInstructions":
                     error = ValidateFieldLength(InterventionInstructions, 18, 200);
+                    break;
+                case "DischargeExplanation":
+                    error = ValidateFieldLength(DischargeExplanation, 4, 200);
                     break;
                 default:
                     Debug.Fail("Unexpected property being validated on RandomisedMessagesModel: " + propertyName);

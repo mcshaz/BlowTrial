@@ -1,17 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6D146229-91CA-46C0-9F74-B12DF8E68C64}</ProjectGuid>
+    <ProjectGuid>{2B17A26F-88DA-4CE6-A71D-8566F22BE461}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BlowTrial</RootNamespace>
     <AssemblyName>BlowTrial</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -20,7 +18,7 @@
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
+    <UpdateMode>Background</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
@@ -28,17 +26,17 @@
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://www.blowtrial.dabtrial.com/</InstallUrl>
     <UpdateUrl>http://www.blowtrial.dabtrial.com/</UpdateUrl>
-    <MinimumRequiredVersion>1.0.0.8</MinimumRequiredVersion>
+    <MinimumRequiredVersion>2.0.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
-    <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>9</ApplicationRevision>
-    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
+    <WebPage>Publish.htm</WebPage>
+    <ApplicationRevision>22</ApplicationRevision>
+    <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
-    <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -49,6 +47,7 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -57,26 +56,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>38BC3D5C17FD3797FC8B348D502859FC7647C6F8</ManifestCertificateThumbprint>
+    <StartupObject>BlowTrial.App</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>BlowTrial_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>F9AF4CE6D201EB1DC864255E9F28B4041BFA234C</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>BlowTrial2013_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
-  </PropertyGroup>
-  <PropertyGroup>
-    <TargetZone>LocalIntranet</TargetZone>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AutoMapper, Version=3.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
@@ -87,38 +79,40 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AutoMapper.3.1.1\lib\net40\AutoMapper.Net4.dll</HintPath>
     </Reference>
-    <Reference Include="ColorMine">
-      <HintPath>..\packages\ColorMine.1.1.1\lib\40\ColorMine.dll</HintPath>
+    <Reference Include="ColorMine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ColorMine.1.1.1\lib\45\ColorMine.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework">
-      <HintPath>..\packages\EntityFramework.6.0.2\lib\net40\EntityFramework.dll</HintPath>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\packages\EntityFramework.6.0.2\lib\net40\EntityFramework.SqlServer.dll</HintPath>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework.SqlServerCompact">
-      <HintPath>..\packages\EntityFramework.SqlServerCompact.6.0.2\lib\net40\EntityFramework.SqlServerCompact.dll</HintPath>
+    <Reference Include="EntityFramework.SqlServerCompact, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.SqlServerCompact.6.0.2\lib\net45\EntityFramework.SqlServerCompact.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip.Reduced">
+    <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
-    <Reference Include="LinqKit">
+    <Reference Include="LinqKit, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\LinqKit.1.0\lib\35\LinqKit.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-client\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.configuration" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.1, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files\Microsoft SQL Server Compact Edition\v4.0\Private\System.Data.SqlServerCe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.1, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files\Microsoft SQL Server Compact Edition\v4.0\Private\System.Data.SqlServerCe.Entity.dll</HintPath>
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.SqlServer.Compact.4.0.8876.1\lib\net40\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
     <Reference Include="System.Deployment" />
     <Reference Include="System.Windows.Forms" />
@@ -133,24 +127,29 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="Xceed.Wpf.AvalonDock">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.0.0\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.0.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.0.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.0.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.DataGrid">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.0.0\lib\net40\Xceed.Wpf.DataGrid.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.Toolkit, Version=2.0.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+    <Reference Include="Xceed.Wpf.AvalonDock, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.0.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
+      <HintPath>..\packages\Extended.Wpf.Toolkit.2.1.0\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Extended.Wpf.Toolkit.2.1.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Extended.Wpf.Toolkit.2.1.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Extended.Wpf.Toolkit.2.1.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.DataGrid, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Extended.Wpf.Toolkit.2.1.0\lib\net40\Xceed.Wpf.DataGrid.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.Toolkit, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Extended.Wpf.Toolkit.2.1.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -158,180 +157,164 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Domain\OutcomeCodes.cs" />
-    <Compile Include="Domain\Providers\TrialDataContext.cs" />
-    <Compile Include="Domain\Providers\ContextInitialiser.cs" />
-    <Compile Include="Domain\Providers\MembershipContext.cs" />
-    <Compile Include="Domain\Providers\RepositoryEventArguments.cs" />
-    <Compile Include="Domain\Providers\Repository.cs" />
-    <Compile Include="Domain\Tables\BackupData.cs" />
-    <Compile Include="Domain\Tables\Investigator.cs" />
-    <Compile Include="Domain\Tables\Patients.cs" />
-    <Compile Include="Domain\Tables\ProtocolViolation.cs" />
-    <Compile Include="Domain\Tables\StudyCentre.cs" />
-    <Compile Include="Domain\Tables\Vaccine.cs" />
-    <Compile Include="Domain\Providers\AppDataService.cs" />
     <Compile Include="Helpers\Attached.cs" />
     <Compile Include="Helpers\DateTimeSplitter.cs" />
-    <Compile Include="Domain\Providers\DbBackupService.cs" />
+    <Compile Include="Helpers\DetailsRequired.cs" />
     <Compile Include="Helpers\EventToCommand.cs" />
     <Compile Include="Helpers\IntegerRange.cs" />
     <Compile Include="Helpers\Mediator.cs" />
     <Compile Include="Helpers\OutcomeAt28DaysSplitter.cs" />
-    <Compile Include="Helpers\DetailsRequired.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
-    <Compile Include="Helpers\SelectableItem.cs" />
-    <Compile Include="Infrastructure\BackupService.cs" />
-    <Compile Include="Infrastructure\Converters\NullableIntConverter.cs" />
-    <Compile Include="Infrastructure\Converters\NullableDateTimeConverter.cs" />
-    <Compile Include="Infrastructure\Converters\NullableTimeSpanConverter.cs" />
-    <Compile Include="Infrastructure\Converters\StudyCentreModelToNameConverter.cs" />
-    <Compile Include="Infrastructure\Converters\NotNullConverter.cs" />
-    <Compile Include="Infrastructure\Converters\NullableBoolConverter.cs" />
-    <Compile Include="Infrastructure\Converters\BooleanInverterConverter.cs" />
-    <Compile Include="Infrastructure\Converters\BooleanToGridLengthConverter.cs" />
-    <Compile Include="Infrastructure\Converters\EnumToBooleanConverter.cs" />
-    <Compile Include="Infrastructure\Converters\GenericConverters.cs" />
-    <Compile Include="Infrastructure\Converters\RowDefinitionExtended.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Infrastructure\Converters\StringToNullableIntConverter.cs" />
-    <Compile Include="Infrastructure\CSV\ParticipantDataToCSV.cs" />
-    <Compile Include="Infrastructure\CSV\ParticipantCsvModel.cs" />
-    <Compile Include="Infrastructure\Exceptions\DataKeyException.cs" />
-    <Compile Include="Infrastructure\Extensions\ColorExtensions.cs" />
-    <Compile Include="Infrastructure\Extensions\LinqExtensions.cs" />
-    <Compile Include="Infrastructure\Extensions\StringEnumerationExtensions.cs" />
-    <Compile Include="Infrastructure\Extensions\StringExtensions.cs" />
-    <Compile Include="Infrastructure\Interfaces\ICleanup.cs" />
-    <Compile Include="Infrastructure\Interfaces\IBackupData.cs" />
-    <Compile Include="Infrastructure\Interfaces\IMembershipContext.cs" />
-    <Compile Include="Infrastructure\Interfaces\IParticipant.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Infrastructure\Interfaces\ISharedRecord.cs" />
-    <Compile Include="Infrastructure\Interfaces\ITrialDataContext.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Infrastructure\Randomising\Envelopes.cs" />
-    <Compile Include="Infrastructure\Randomising\RandomisingEngine.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
-    <Compile Include="Infrastructure\AutoMapper\AutoMapperConfiguration.cs" />
-    <Compile Include="Infrastructure\AutoMapper\ModelProfiles.cs" />
-    <Compile Include="Infrastructure\Interfaces\IRepository.cs" />
-    <Compile Include="Infrastructure\Interfaces\IUser.cs" />
-    <Compile Include="Infrastructure\ValidationBase.cs" />
-    <Compile Include="Migrations\MembershipConfiguration.cs" />
-    <Compile Include="Migrations\TrialDataConfiguration.cs" />
-    <Compile Include="Models\CloudDirectoryModel.cs" />
-    <Compile Include="Models\CreateCsvModel.cs" />
-    <Compile Include="Models\ProtocolViolationModel.cs" />
-    <Compile Include="Models\CreateNewUserModel.cs" />
-    <Compile Include="Models\StudyCentreModel.cs" />
-    <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
-    <Compile Include="Models\WizardModels\RandomisedMessagesModel.cs" />
-    <Compile Include="Models\WizardModels\StudySitesModel.cs" />
-    <Compile Include="Models\SummaryModels.cs" />
-    <Compile Include="Models\VaccineAdministeredModel.cs" />
-    <Compile Include="Models\ParticipantModel.cs" />
-    <Compile Include="Models\NewPatientModel.cs" />
+    <Compile Include="Helpers\SelectableItem.cs" />
+    <Compile Include="Infrastructure\AgeUpdatingService.cs" />
+    <Compile Include="Infrastructure\Converters\EnumToSeperatedWordsConverter.cs" />
+    <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
+    <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
+    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.cs" />
+    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.Designer.cs">
+      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\CodeBasedMigration.cs" />
+    <Compile Include="Migrations\Membership\MembershipConfiguration.cs" />
+    <Compile Include="Migrations\Membership\201403062252244_InitialMembership.cs" />
+    <Compile Include="Migrations\Membership\201403062252244_InitialMembership.Designer.cs">
+      <DependentUpon>201403062252244_InitialMembership.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\TrialData\201403062253529_InitialTrialData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Migrations\TrialData\201403062253529_InitialTrialData.Designer.cs">
+      <DependentUpon>201403062253529_InitialTrialData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\TrialData\201403100345554_TrialDataV2.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Migrations\TrialData\201403100345554_TrialDataV2.Designer.cs">
+      <DependentUpon>201403100345554_TrialDataV2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\TrialData\TrialDataConfiguration.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Security\AnnonymousIdentity.cs" />
     <Compile Include="Security\AuthenticationService.cs" />
     <Compile Include="Security\CustomIdentity.cs" />
     <Compile Include="Security\CustomPrincipal.cs" />
-    <Compile Include="TextTemplates\ParticipantDataStataTemplate.cs" />
-    <Compile Include="TextTemplates\ParticipantDataStataTemplate1.cs">
+    <Compile Include="Security\MembershipRepository.cs" />
+    <Compile Include="TextTemplates\StataTemplateData.cs" />
+    <Compile Include="TextTemplates\ParticipantDataStataTemplate2.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ParticipantDataStataTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Include="TextTemplates\ProtocolViolationStataTemplate.cs">
+    <Compile Include="TextTemplates\ProtocolViolationStataTemplate1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ProtocolViolationStataTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Include="TextTemplates\ScreenedPatientStataTemplate.cs">
+    <Compile Include="TextTemplates\ScreenedPatientStataTemplate1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ScreenedPatientStataTemplate.tt</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\AllParticipantsViewModel.cs" />
-    <Compile Include="ViewModel\AllViolationsViewModel.cs" />
     <Compile Include="ViewModel\AllScreenedViewModel.cs" />
+    <Compile Include="ViewModel\AllViolationsViewModel.cs" />
     <Compile Include="ViewModel\AuthenticationViewModel.cs" />
     <Compile Include="ViewModel\CreateCsvViewModel.cs" />
     <Compile Include="ViewModel\CreateNewUserViewModel.cs" />
-    <Compile Include="ViewModel\ProtocolViolationViewModel.cs" />
-    <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\DataSummaryViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\RandomisedMessagesViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\StudySitesViewModel.cs" />
-    <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
-    <Compile Include="ViewModel\NewPatientViewModel.cs" />
-    <Compile Include="ViewModel\ParticipantUpdateViewModel.cs" />
+    <Compile Include="ViewModel\PatientDemographicsViewModel.cs" />
+    <Compile Include="ViewModel\ParticipantListItemViewModel.cs" />
+    <Compile Include="ViewModel\ParticipantProgressViewModel.cs" />
+    <Compile Include="ViewModel\ProtocolViolationViewModel.cs" />
+    <Compile Include="ViewModel\RequestReverseUpdateViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\ClosableWindowViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\DataRepositoryViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\NotifyChangeBase.cs" />
     <Compile Include="ViewModel\UtilityViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModel\UtilityViewModels\WorkspaceViewModel.cs" />
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />
     <Compile Include="ViewModel\VaccineViewModels.cs" />
+    <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\DataSummaryViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\RandomisedMessagesViewModel.cs" />
+    <Compile Include="ViewModel\WizardViewModels\StudySitesViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\WizardPageViewModel.cs" />
-    <Compile Include="View\AllViolationsView.xaml.cs">
-      <DependentUpon>AllViolationsView.xaml</DependentUpon>
+    <Compile Include="View\AllParticipantsView.xaml.cs">
+      <DependentUpon>AllParticipantsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\AllScreenedView.xaml.cs">
       <DependentUpon>AllScreenedView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\AllParticipantsView.xaml.cs">
-      <DependentUpon>AllParticipantsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\RandomisedMessageView.xaml.cs">
-      <DependentUpon>RandomisedMessageView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\SiteSettingsView.xaml.cs">
-      <DependentUpon>SiteSettingsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\CreateNewUserView.xaml.cs">
-      <DependentUpon>CreateNewUserView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\ProtocolViolationView.xaml.cs">
-      <DependentUpon>ProtocolViolationView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Wizard\RandomisedMessagesUserControlBase.xaml.cs">
-      <DependentUpon>RandomisedMessagesUserControlBase.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Wizard\BackupUserControlBase.xaml.cs">
-      <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\CreateCsvView.xaml.cs">
-      <DependentUpon>CreateCsvView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\BackupView.xaml.cs">
-      <DependentUpon>BackupView.xaml</DependentUpon>
+    <Compile Include="View\AllViolationsView.xaml.cs">
+      <DependentUpon>AllViolationsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\AuthenticationView.xaml.cs">
       <DependentUpon>AuthenticationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\SummaryDataView.xaml.cs">
-      <DependentUpon>SummaryDataView.xaml</DependentUpon>
+    <Compile Include="View\BackupView.xaml.cs">
+      <DependentUpon>BackupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\CreateCsvView.xaml.cs">
+      <DependentUpon>CreateCsvView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\CreateNewUserView.xaml.cs">
+      <DependentUpon>CreateNewUserView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\PatientDemographicUpdateView.xaml.cs">
+      <DependentUpon>PatientDemographicUpdateView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ParticipantProgressView.xaml.cs">
+      <DependentUpon>ParticipantProgressView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\PatientDemographicsView.xaml.cs">
+      <DependentUpon>PatientDemographicsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\NewPatientView.xaml.cs">
       <DependentUpon>NewPatientView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\ParticipantUpdateView.xaml.cs">
-      <DependentUpon>ParticipantUpdateView.xaml</DependentUpon>
+    <Compile Include="View\PleaseWait.xaml.cs">
+      <DependentUpon>PleaseWait.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ProtocolViolationView.xaml.cs">
+      <DependentUpon>ProtocolViolationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\RandomisedMessageView.xaml.cs">
+      <DependentUpon>RandomisedMessageView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\RequestReverseUpdateView.xaml.cs">
+      <DependentUpon>RequestReverseUpdateView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SiteSettingsView.xaml.cs">
+      <DependentUpon>SiteSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SummaryDataView.xaml.cs">
+      <DependentUpon>SummaryDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Wizard\BackupDirectionView.xaml.cs">
       <DependentUpon>BackupDirectionView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Wizard\StudySitesView.xaml.cs">
-      <DependentUpon>StudySitesView.xaml</DependentUpon>
+    <Compile Include="View\Wizard\BackupUserControlBase.xaml.cs">
+      <DependentUpon>BackupUserControlBase.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Wizard\GetAppSettingsWizard.xaml.cs">
       <DependentUpon>GetAppSettingsWizard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Wizard\RandomisedMessagesUserControlBase.xaml.cs">
+      <DependentUpon>RandomisedMessagesUserControlBase.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Wizard\StudySitesView.xaml.cs">
+      <DependentUpon>StudySitesView.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -341,18 +324,66 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Domain\OutcomeCodes.cs" />
+    <Compile Include="Domain\Providers\AppDataService.cs" />
+    <Compile Include="Domain\Providers\ContextInitialiser.cs" />
+    <Compile Include="Domain\Providers\DbBackupService.cs" />
+    <Compile Include="Domain\Providers\MembershipContext.cs" />
+    <Compile Include="Domain\Providers\Repository.cs" />
+    <Compile Include="Domain\Providers\RepositoryEventArguments.cs" />
+    <Compile Include="Domain\Providers\TrialDataContext.cs" />
+    <Compile Include="Domain\Tables\BackupData.cs" />
+    <Compile Include="Domain\Tables\Investigator.cs" />
+    <Compile Include="Domain\Tables\Patients.cs" />
+    <Compile Include="Domain\Tables\ProtocolViolation.cs" />
+    <Compile Include="Domain\Tables\StudyCentre.cs" />
+    <Compile Include="Domain\Tables\Vaccine.cs" />
+    <Compile Include="Infrastructure\AutoMapper\AutoMapperConfiguration.cs" />
+    <Compile Include="Infrastructure\AutoMapper\BackupConfigurations.cs" />
+    <Compile Include="Infrastructure\AutoMapper\ModelProfiles.cs" />
+    <Compile Include="Infrastructure\BackupService.cs" />
+    <Compile Include="Infrastructure\Converters\BooleanInverterConverter.cs" />
+    <Compile Include="Infrastructure\Converters\BooleanToGridLengthConverter.cs" />
+    <Compile Include="Infrastructure\Converters\EnumToBooleanConverter.cs" />
+    <Compile Include="Infrastructure\Converters\GenericConverters.cs" />
+    <Compile Include="Infrastructure\Converters\NotNullConverter.cs" />
+    <Compile Include="Infrastructure\Converters\NullableBoolConverter.cs" />
+    <Compile Include="Infrastructure\Converters\NullableDateTimeConverter.cs" />
+    <Compile Include="Infrastructure\Converters\NullableIntConverter.cs" />
+    <Compile Include="Infrastructure\Converters\NullableTimeSpanConverter.cs" />
+    <Compile Include="Infrastructure\Converters\RowDefinitionExtended.cs" />
+    <Compile Include="Infrastructure\Converters\StringToNullableIntConverter.cs" />
+    <Compile Include="Infrastructure\Converters\StudyCentreModelToNameConverter.cs" />
+    <Compile Include="Infrastructure\CSV\ParticipantCsvModel.cs" />
+    <Compile Include="Infrastructure\CSV\ParticipantDataToCSV.cs" />
+    <Compile Include="Infrastructure\EventArguments\CancelledOrSavedEventArgs.cs" />
+    <Compile Include="Infrastructure\Exceptions\DataKeyException.cs" />
+    <Compile Include="Infrastructure\Extensions\ColorExtensions.cs" />
+    <Compile Include="Infrastructure\Extensions\LinqExtensions.cs" />
+    <Compile Include="Infrastructure\Extensions\StringEnumerationExtensions.cs" />
+    <Compile Include="Infrastructure\Extensions\StringExtensions.cs" />
+    <Compile Include="Infrastructure\Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="Infrastructure\Interfaces\IBackupData.cs" />
+    <Compile Include="Infrastructure\Interfaces\ICleanup.cs" />
+    <Compile Include="Infrastructure\Interfaces\IMembershipContext.cs" />
+    <Compile Include="Infrastructure\Interfaces\IParticipant.cs" />
+    <Compile Include="Infrastructure\Interfaces\IRepository.cs" />
+    <Compile Include="Infrastructure\Interfaces\ISharedRecord.cs" />
+    <Compile Include="Infrastructure\Interfaces\ITrialDataContext.cs" />
+    <Compile Include="Infrastructure\Interfaces\IUser.cs" />
+    <Compile Include="Infrastructure\Interfaces\IVaccineAdministered.cs" />
+    <Compile Include="Infrastructure\Randomising\Envelopes.cs" />
+    <Compile Include="Infrastructure\Randomising\RandomisingEngine.cs" />
+    <Compile Include="Infrastructure\ValidationBase.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="MainWindowResources.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Skins\MainSkin.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\AllViolationsView.xaml">
+    <Page Include="View\AllParticipantsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -360,11 +391,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\RandomisedMessageView.xaml">
+    <Page Include="View\AllViolationsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\SiteSettingsView.xaml">
+    <Page Include="View\AuthenticationView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\BackupView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\CreateCsvView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -372,19 +411,39 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="View\PatientDemographicUpdateView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\ParticipantProgressView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\PatientDemographicsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\NewPatientView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\PleaseWait.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\ProtocolViolationView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\Wizard\RandomisedMessagesUserControlBase.xaml">
+    <Page Include="View\RandomisedMessageView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\Wizard\BackupUserControlBase.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="View\RequestReverseUpdateView.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\CreateCsvView.xaml">
+    <Page Include="View\SiteSettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -396,67 +455,71 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\Wizard\StudySitesView.xaml">
+    <Page Include="View\Wizard\BackupUserControlBase.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Wizard\GetAppSettingsWizard.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Wizard\RandomisedMessagesUserControlBase.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Wizard\StudySitesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\WorkspaceResources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\AllParticipantsView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\BackupView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\AuthenticationView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\NewPatientView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\ParticipantUpdateView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\CloudDirectoryModel.cs" />
+    <Compile Include="Models\CreateCsvModel.cs" />
+    <Compile Include="Models\CreateNewUserModel.cs" />
+    <Compile Include="Models\InvestigatorModel.cs" />
+    <Compile Include="Models\PatientDemographicsModel.cs" />
+    <Compile Include="Models\ParticipantModel.cs" />
+    <Compile Include="Models\ProtocolViolationModel.cs" />
+    <Compile Include="Models\StudyCentreModel.cs" />
+    <Compile Include="Models\SummaryModels.cs" />
+    <Compile Include="Models\VaccineAdministeredModel.cs" />
+    <Compile Include="Models\WizardModels\BackupDirectionModel.cs" />
+    <Compile Include="Models\WizardModels\RandomisedMessagesModel.cs" />
+    <Compile Include="Models\WizardModels\StudySitesModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="Migrations\Membership\201403070429267_MembershipV2.resx">
+      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\Membership\201403062252244_InitialMembership.resx">
+      <DependentUpon>201403062252244_InitialMembership.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\TrialData\201403062253529_InitialTrialData.resx">
+      <DependentUpon>201403062253529_InitialTrialData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\TrialData\201403100345554_TrialDataV2.resx">
+      <DependentUpon>201403100345554_TrialDataV2.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
+      <CustomToolNamespace>BlowTrial.Properties</CustomToolNamespace>
     </EmbeddedResource>
-    <None Include="amd64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest">
+    <Content Include="amd64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
+    </Content>
     <None Include="BlowTrial_TemporaryKey.pfx" />
     <None Include="packages.config" />
-    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -464,17 +527,54 @@
     <AppDesigner Include="Properties\" />
     <None Include="TextTemplates\ParticipantDataStataTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ParticipantDataStataTemplate2.cs</LastGenOutput>
       <CustomToolNamespace>BlowTrial.TextTemplates</CustomToolNamespace>
-      <LastGenOutput>ParticipantDataStataTemplate1.cs</LastGenOutput>
     </None>
-    <None Include="x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest">
+    <None Include="TextTemplates\ProtocolViolationStataTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ProtocolViolationStataTemplate1.cs</LastGenOutput>
+      <CustomToolNamespace>BlowTrial.TextTemplates</CustomToolNamespace>
+    </None>
+    <None Include="TextTemplates\ScreenedPatientStataTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ScreenedPatientStataTemplate1.cs</LastGenOutput>
+      <CustomToolNamespace>BlowTrial.TextTemplates</CustomToolNamespace>
+    </None>
+    <Content Include="x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Visual Studio 2012\Projects\BlowTrial\GenericToDataFile\GenericToDataString.csproj">
+      <Project>{8845c7ce-8815-4b3f-ad3e-95bca4d3b68c}</Project>
+      <Name>GenericToDataString</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Visual Studio 2012\Projects\BlowTrial\StatsForAge\StatsForAge.csproj">
+      <Project>{bd45a88d-c81d-4160-83f4-6058ec553b6f}</Project>
+      <Name>StatsForAge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CloudFileTransfer\CloudFileTransfer.csproj">
+      <Project>{89dad06c-beb6-4498-a8ef-4cd34cc376b2}</Project>
+      <Name>CloudFileTransfer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client,KB2468871">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29 and Update for .NET Framework 4 %28KB2468871%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.1 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -487,29 +587,14 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 4.5</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GenericToDataFile\GenericToDataString.csproj">
-      <Project>{8845c7ce-8815-4b3f-ad3e-95bca4d3b68c}</Project>
-      <Name>GenericToDataString</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StatsForAge\StatsForAge.csproj">
-      <Project>{bd45a88d-c81d-4160-83f4-6058ec553b6f}</Project>
-      <Name>StatsForAge</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="amd64\Microsoft.VC90.CRT\msvcr90.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="amd64\Microsoft.VC90.CRT\README_ENU.txt">
+    <Content Include="amd64\Microsoft.VC90.CRT\README_ENU.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </Content>
     <Content Include="amd64\sqlceca40.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -528,22 +613,12 @@
     <Content Include="amd64\sqlcese40.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="TextTemplates\ScreenedPatientStataTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <CustomToolNamespace>BlowTrial.TextTemplates</CustomToolNamespace>
-      <LastGenOutput>ScreenedPatientStataTemplate.cs</LastGenOutput>
-    </None>
-    <None Include="TextTemplates\ProtocolViolationStataTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <CustomToolNamespace>BlowTrial.TextTemplates</CustomToolNamespace>
-      <LastGenOutput>ProtocolViolationStataTemplate.cs</LastGenOutput>
-    </None>
     <Content Include="x86\Microsoft.VC90.CRT\msvcr90.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="x86\Microsoft.VC90.CRT\README_ENU.txt">
+    <Content Include="x86\Microsoft.VC90.CRT\README_ENU.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </Content>
     <Content Include="x86\sqlceca40.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -563,9 +638,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
@@ -581,8 +653,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <!-- The following makes sure we don’t try to publish a configuration that defines the DEBUG constant -->
-  <Target Name="BeforePublish">
-    <Error Condition="'$(DebugSymbols)' == 'true'" Text="You attempted to publish a configuration that defines the DEBUG constant!" />
-  </Target>
 </Project>

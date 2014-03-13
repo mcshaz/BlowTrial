@@ -27,5 +27,17 @@ namespace BlowTrial.Infrastructure.Extensions
                     yield return buffer.Dequeue();
             }
         }
+
+        public static void RemoveFirst<T>(this IList<T> source, Func<T,bool> predicate)
+        {
+            for (int i=0;i<source.Count;i++)
+            {
+                if (predicate(source[i]))
+                {
+                    source.RemoveAt(i);
+                    return;
+                }
+            }
+        }
     }
 }

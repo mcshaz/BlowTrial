@@ -25,10 +25,11 @@ namespace BlowTrial.ViewModel
         #endregion
         #region Fields
         VaccineViewModel _selectedVaccine;
-        public VaccineAdministeredModel VaccineAdministeredModel { get; private set; }
+        
         #endregion
 
         #region Properties
+        public VaccineAdministeredModel VaccineAdministeredModel { get; private set; }
         public IEnumerable<VaccineViewModel> VaccineList { get; private set; }
 
         public int Id { get { return VaccineAdministeredModel.Id; } }
@@ -55,6 +56,19 @@ namespace BlowTrial.ViewModel
 
         public Vaccine VaccineGiven { get { return this.VaccineAdministeredModel.VaccineGiven; } }
 
+        internal DateTime? AdministeredAtDateTime
+        {
+            get
+            {
+                return VaccineAdministeredModel.AdministeredAtDateTime;
+            }
+            set
+            {
+                if (value == this.VaccineAdministeredModel.AdministeredAtDateTime) { return; }
+                this.VaccineAdministeredModel.AdministeredAtDateTime = value;
+                NotifyPropertyChanged("AdministeredAtDate", "AdministeredAtTime");
+            }
+        }
         public DateTime? AdministeredAtDate 
         { 
             get

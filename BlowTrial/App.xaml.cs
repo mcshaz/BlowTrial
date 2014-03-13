@@ -14,6 +14,10 @@ using log4net;
 using log4net.Appender;
 using System.Deployment.Application;
 using BlowTrial.Infrastructure.Extensions;
+using BlowTrial.Migrations;
+using System.Security.Permissions;
+using System.Security;
+using System.Security.AccessControl;
 
 namespace BlowTrial
 {
@@ -37,6 +41,16 @@ namespace BlowTrial
             FrameworkElement.LanguageProperty.OverrideMetadata(
               typeof(FrameworkElement),
               new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
+
+            //Setup application variables
+            DataDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\BlowTrial";
+            CurrentClickOnceVersion = GetClickOnceVersion();
+            CurrentAppVersion = VersionNumberExtensions.GetVersionInt();
+            if (!Directory.Exists(DataDirectory))
+            {
+                Directory.CreateDirectory(DataDirectory);
+            }
+
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -44,24 +58,17 @@ namespace BlowTrial
             if (_log == null)
             {
                 _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-            }
-            string deployVersion = GetClickOnceVersion();
-            if (deployVersion != null)
+            };
+            if (CurrentClickOnceVersion != null)
             {
-                ThreadContext.Properties["deploymentVersion"] = deployVersion;
+                ThreadContext.Properties["deploymentVersion"] = CurrentClickOnceVersion;
             }
             this.DispatcherUnhandledException += Application_DispatcherUnhandledException;
             log4net.Config.XmlConfigurator.Configure();
 #endif
             base.OnStartup(e);
 
-            //Set data directory
-            string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\BlowTrial";
-            if (!Directory.Exists(baseDir))
-            {
-                Directory.CreateDirectory(baseDir);
-            }
-            AppDomain.CurrentDomain.SetData("DataDirectory", baseDir);
+            // AppDomain.CurrentDomain.SetData("DataDirectory", baseDir);
 
             //Application initialisation
  
@@ -81,24 +88,36 @@ namespace BlowTrial
 
             ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
             //test if wizard needs to run
-
+#if !DEBUG
             try
             {
-                using (var db = new TrialDataContext())
-                {
-                    db.Participants.Any();
-                }
-                using (var db = new MembershipContext())
-                {
-                    db.CloudDirectories.Any();
-                }
+#endif
+                CodeBasedMigration.ApplyPendingMigrations<BlowTrial.Migrations.TrialData.TrialDataConfiguration>(TrialDataContext.GetConnectionString(), ContextCeConfiguration.ProviderInvariantName, true);
+
+                CodeBasedMigration.ApplyPendingMigrations<BlowTrial.Migrations.Membership.MembershipConfiguration>(MembershipContext.GetConnectionString(), ContextCeConfiguration.ProviderInvariantName, true);
+#if !DEBUG
             }
+
             catch (Exception ex)
             {
-                _log.Error("App_FirstDatabaseAccessException", ex);
-                MessageBox.Show("An error has occured trying to access the database - this may be because of access permissions or the database pasword may have changed. An error has been logged, but this file will have to be attached and emailed to the application developer");
-                throw;
+                string usrErrMsg = null;
+                if (ex.Message.StartsWith("Access to the database file is not allowed"))
+                {
+                    string administratorInstructions = string.Format("User:{0}\nRequies modify permissions be allowed for folder:\n{1}\nAnd all files within", System.Security.Principal.WindowsIdentity.GetCurrent().Name, DataDirectory);
+                    usrErrMsg = "Cannot access database: \nPlease contact the systems administrator with the following message:\n" + administratorInstructions;
+                }
+                else
+                {
+                    usrErrMsg = "An error has occured trying to access the database: \n" + ex.Message;
+                }
+                if (usrErrMsg != null)
+                {
+                    _log.Error("App_FirstDatabaseAccessException", ex);
+                    MessageBox.Show(usrErrMsg);
+                    throw;
+                }
             }
+#endif
 
             var backDetails = BlowTrialDataService.GetBackupDetails();
             bool displayWizard = (backDetails.BackupData == null);
@@ -177,19 +196,9 @@ namespace BlowTrial
                 }
             }
         }
-        public static string GetClickOnceVersion()
-        {
-            if (ApplicationDeployment.IsNetworkDeployed)
-            {
-                var myVersion = ApplicationDeployment.CurrentDeployment.CurrentVersion;
-                return string.Format("v{0}.{1}.{2}.{3}",
-                    myVersion.Major,
-                    myVersion.Minor,
-                    myVersion.Build,
-                    myVersion.Revision);
-            }
-            return null;
-        }
+
+
+
         static string GetLogOutputPath()
         {
             BackupDataSet bak = BlowTrialDataService.GetBackupDetails();
@@ -228,6 +237,22 @@ namespace BlowTrial
             }
             return false;
 
+        }
+        public static string DataDirectory; 
+        public static string CurrentClickOnceVersion;
+        public static int CurrentAppVersion;
+        static string GetClickOnceVersion()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                var myVersion = ApplicationDeployment.CurrentDeployment.CurrentVersion;
+                return string.Format("v{0}.{1}.{2}.{3}",
+                    myVersion.Major,
+                    myVersion.Minor,
+                    myVersion.Build,
+                    myVersion.Revision);
+            }
+            return null;
         }
     }
 }

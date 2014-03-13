@@ -64,7 +64,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="30" />
-                    <RowDefinition Height="90" />
+                    <RowDefinition Height="*" MinHeight="120" />
                     <RowDefinition Height="30" />
 
                 </Grid.RowDefinitions>
@@ -75,15 +75,15 @@
                 <Label Target="{Binding ElementName=severityCombo}"
                             Grid.Row="0" Grid.Column="0" 
                             HorizontalAlignment="Right"
-                            Content="Violation Severity"
+                            Content="Violation Type"
                         />
 
                 <ComboBox Grid.Row="0" Grid.Column="2" Name="severityCombo"
                             VerticalAlignment="Center" HorizontalAlignment="Stretch" 
-                            ItemsSource="{Binding Path=MajorViolationOptions, Mode=OneWay}"
+                            ItemsSource="{Binding Path=ViolationTypeOptions, Mode=OneWay}"
                             SelectedValuePath="Key" 
                             DisplayMemberPath="Value"
-                            SelectedValue="{Binding Path=MajorViolation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" >
+                            SelectedValue="{Binding Path=ViolationType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" >
                 </ComboBox>
 
                 <ContentPresenter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
@@ -91,12 +91,12 @@
                       />
 
                 <!-- Description -->
-                <Label Target="{Binding ElementName=otherCauseOfDeathTxt}"
+                <Label Target="{Binding ElementName=detailsTxt}"
                             Grid.Row="2" Grid.Column="0" Content="Details of protocol violation:"
                             HorizontalAlignment="Right" />
 
-                <TextBox Grid.Row="2" Grid.Column="2" Name="detailsTxt" 
-                            HorizontalAlignment="Stretch"  
+                <TextBox Grid.Row="2" Grid.Column="2" Name="detailsTxt"
+                            HorizontalAlignment="Stretch"  TextWrapping="Wrap" AcceptsReturn="True"
                             Text="{Binding Path=Details, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <ContentPresenter Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"

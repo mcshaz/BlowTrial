@@ -75,7 +75,7 @@ namespace BlowTrial.Models
                 _vaccine = value;
             }
         }
-        public ParticipantModel AdministeredTo { get; set; }
+        public ParticipantProgressModel AdministeredTo { get; set; }
         #endregion
 
         #region ValidationBase overrides
@@ -112,7 +112,7 @@ namespace BlowTrial.Models
             {
                 return Strings.VaccineAdministeredModel_Error_NoVaccine;
             }
-            if (AdministeredTo.VaccinesAdministered.Any(v=>v.Id != this.Id && v.VaccineGiven==this.VaccineGiven))
+            if (AdministeredTo.VaccineModelsAdministered.Any(v=>v.Id != this.Id && v.VaccineGiven==this.VaccineGiven))
             {
                 return Strings.VaccineAdministeredVM_DuplicateVaccine;
             }

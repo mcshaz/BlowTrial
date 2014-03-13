@@ -1,5 +1,0 @@
-notes for questions:
-
-gest age - do you want autocalc function ie edd/lmp
-
-how to implement missed patients - ie tick box & text entry for reason if patient older than 21 days and all criteria met

@@ -20,7 +20,7 @@ namespace BlowTrial.ViewModel
             var allViolModels = Mapper.Map<List<ProtocolViolationModel>>(_repository.ProtocolViolations.ToList());
             foreach (var v in allViolModels)
             {
-                v.Participant.StudyCentre = _repository.LocalStudyCentres.First(s=> v.Participant.CentreId == s.Id);
+                v.Participant.StudyCentre = _repository.FindStudyCentre(v.Participant.CentreId);
             }
             AllViolations = new ObservableCollection<ProtocolViolationViewModel>(allViolModels.Select(v => new ProtocolViolationViewModel(_repository, v)));
             _repository.ProtocolViolationAdded += ViolationAdded;
@@ -29,8 +29,8 @@ namespace BlowTrial.ViewModel
 
         private void ViolationAdded(object sender, Domain.Providers.ProtocolViolationEventArgs e)
         {
-            var violModel = Mapper.Map<ProtocolViolationModel>(e.NewViolation);
-            violModel.Participant.StudyCentre = _repository.LocalStudyCentres.First(s => violModel.Participant.CentreId == s.Id);
+            var violModel = Mapper.Map<ProtocolViolationModel>(e.Violation);
+            violModel.Participant.StudyCentre = _repository.FindStudyCentre(violModel.Participant.CentreId);
             AllViolations.Add(new ProtocolViolationViewModel(_repository,violModel));
         }
         public ObservableCollection<ProtocolViolationViewModel> AllViolations { get; private set; }

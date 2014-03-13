@@ -12,7 +12,7 @@ namespace BlowTrial.Infrastructure.Automapper
     {
         protected override void Configure()
         {
-            Mapper.CreateMap<ScreenedPatient, NewPatientModel>()
+            Mapper.CreateMap<ScreenedPatient, PatientDemographicsModel>()
                 .ForMember(d=>d.DateOfBirth, opt=>opt.Ignore())
                 .ForMember(d=>d.TimeOfBirth, opt=>opt.Ignore())
                 .ForMember(d=>d.GestAgeDays, opt=>opt.Ignore())
@@ -30,20 +30,49 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.AdministeredAtTime, o => o.Ignore())
                 .ForMember(d => d.AdministeredAtDate, o => o.Ignore());
 
-            Mapper.CreateMap<Participant, ParticipantModel>()
-                .ForMember(d=>d.DeathOrLastContactDate, o=>o.Ignore())
+            Mapper.CreateMap<Participant, ParticipantBaseModel>()
+                .Include<Participant, ParticipantProgressModel>()
+                .ForMember(d => d.DeathOrLastContactDate, o => o.Ignore())
                 .ForMember(d => d.DeathOrLastContactTime, o => o.Ignore())
                 .ForMember(d => d.DischargeDate, o => o.Ignore())
                 .ForMember(d => d.DischargeTime, o => o.Ignore())
-                .ForMember(d=>d.VaccinesAdministered, o=>o.Ignore())
+                .ForMember(d => d.VaccinesAdministered, o => o.Ignore())
+                .ForMember(d => d.StudyCentre, o => o.Ignore())
+                .ForMember(d => d.Becomes28On, o => o.Ignore())
+                .ForMember(d => d.DataRequired, o => o.Ignore())
+                .ForMember(d=>d.AgeDays, o=>o.MapFrom(s=> (DateTime.Now - s.DateTimeBirth).Days));
+
+            Mapper.CreateMap<Participant, ParticipantProgressModel>()
                 .ForMember(d=>d.VaccineModelsAdministered, o=>o.MapFrom(s=>s.VaccinesAdministered))
-                .ForMember(d=>d.StudyCentre, o=>o.Ignore())
                 .AfterMap((s,d) => {
                     foreach (var v in d.VaccineModelsAdministered)
                     {
                         v.AdministeredTo = d;
                     }
+                    d.DataRequired = ParticipantBaseModel.GetDataRequiredExpression().Compile()(d);
                 });
+
+            Mapper.CreateMap<Participant, PatientDemographicsModel>()
+                .ForMember(d => d.GestAgeBirth, o => o.MapFrom(s => s.GestAgeBirth))
+                .ForMember(d => d.TimeOfBirth, o => o.Ignore())
+                .ForMember(d => d.TimeOfEnrollment, o => o.Ignore())
+                .ForMember(d => d.DateOfBirth, o => o.Ignore())
+                .ForMember(d => d.DateOfEnrollment, o => o.Ignore())
+                .ForMember(d => d.DateOfAdmission, o => o.Ignore())
+                .ForMember(d => d.BadInfectnImmune, o => o.MapFrom(s=>false))
+                .ForMember(d => d.BadMalform, o => o.MapFrom(s => false))
+                .ForMember(d => d.RefusedConsent, o => o.MapFrom(s => false))
+                .ForMember(d => d.WasGivenBcgPrior, o => o.MapFrom(s=>false))
+                .ForMember(d => d.LikelyDie24Hr, o => o.MapFrom(s => false))
+                .ForMember(d => d.Missed, o => o.MapFrom(s => false))
+                .ForMember(d => d.DateTimeOfEnrollment, o => o.MapFrom(s=>s.RegisteredAt))
+                .ForMember(d => d.EnvelopeNumber, o => o.MapFrom(s=>s.WasEnvelopeRandomised?(int?)s.Id:null))
+                .ForMember(d => d.IsInborn, o => o.MapFrom(s=>s.Inborn))
+                .ForMember(d => d.StudyCentre, o => o.Ignore())
+                .ForMember(d => d.GestAgeWeeks, o => o.Ignore())
+                .ForMember(d => d.GestAgeDays, o => o.Ignore())
+                .ForMember(d => d.HasNoPhone, o=>o.MapFrom(s=>s.PhoneNumber==null));
+
 
             Mapper.CreateMap<Participant, ParticipantCsvModel>()
                 .ForMember(d=>d.CauseOfDeathId, o=>o.MapFrom(s=>(int)s.CauseOfDeath))

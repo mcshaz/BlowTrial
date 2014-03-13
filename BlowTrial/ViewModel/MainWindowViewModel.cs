@@ -16,6 +16,9 @@ using System.Linq;
 using System.Windows.Data;
 using AutoMapper;
 using System.Windows;
+using CloudFileTransfer;
+using System.IO;
+using BlowTrial.Infrastructure.Extensions;
 
 
 namespace BlowTrial.ViewModel
@@ -30,6 +33,7 @@ namespace BlowTrial.ViewModel
         ReadOnlyCollection<CommandViewModel> _commands;
         ObservableCollection<WorkspaceViewModel> _workspaces;
         BackupService _backupService;
+        TransferLog _log;
 
         #endregion // Fields
 
@@ -38,15 +42,15 @@ namespace BlowTrial.ViewModel
         public MainWindowViewModel() : this(new Repository(()=>new TrialDataContext())) { }
         public MainWindowViewModel(IRepository repository) : base(repository)
         {
-            this.Version = BlowTrial.App.GetClickOnceVersion() ?? "Development Version";
+            this.Version = BlowTrial.App.CurrentClickOnceVersion ?? ("Development Version: " + App.CurrentAppVersion.ToVersionString());
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
             ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null && _backupService.IsToBackup);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
-            bool isEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising();
-            StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => IsAuthorised && isEnvelopeRandomising);
+            ToggleEnvelopeCmd = new RelayCommand(param => ToggleEnvelopeRandomising(), param => IsAuthorised);
             ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
+            RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
             ShowLogin();
         }
 
@@ -57,8 +61,27 @@ namespace BlowTrial.ViewModel
         {
             get { return Strings.Blowtrial_ProjectName; }
         }
-
-        public String Version { get; private set; }
+        bool _isEnvelopeRandomising;
+        bool IsEnvelopeRandomising { 
+            get 
+            { 
+                return _isEnvelopeRandomising; 
+            } 
+            set
+            {
+                if (value == _isEnvelopeRandomising) { return; }
+                _isEnvelopeRandomising = value;
+                NotifyPropertyChanged("ToggleEnvelopeString");
+            }
+        }
+        public string Version { get; private set; }
+        public string ToggleEnvelopeString
+        {
+            get
+            { 
+                return IsEnvelopeRandomising?Strings.MainWindow_StopEnvelopeRandomisingCaption:Strings.MainWindow_StopComputerRandomisingCaption;
+            }
+        }
         #endregion // Properties
 
         #region Commands
@@ -111,18 +134,32 @@ namespace BlowTrial.ViewModel
         public RelayCommand ShowCreateCsvCmd { get; private set; }
         public RelayCommand LogoutCmd { get; private set; }
         public RelayCommand CreateNewUserCmd { get; private set; }
-        public RelayCommand StopEnvelopeCmd { get; private set; }
+        public RelayCommand ToggleEnvelopeCmd { get; private set; }
         public RelayCommand ShowRandomisingMessagesCmd { get; private set; }
+        public RelayCommand RequestReverseUpdateCmd { get; private set; }
 
-        void StopEnvelopeRandomising()
+        void ToggleEnvelopeRandomising()
         {
-            var result = MessageBox.Show(Strings.MainWindow_StopEnvelopeRandomisingMsg,Strings.MainWindow_StopEnvelopeRandomisingCaption, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.OK)
+            //var result = MessageBox.Show(Strings.MainWindow_StopEnvelopeRandomisingMsg,Strings.MainWindow_StopEnvelopeRandomisingCaption, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+           // if (result == MessageBoxResult.OK)
+            var result = MessageBox.Show("If you continue, the new patient window will be closed and any data lost", "Change Envelope randomising status", MessageBoxButton.OKCancel);
+            if (result == MessageBoxResult.Cancel) { return; }
+            WorkspaceViewModel newPatientVM = Workspaces.FirstOrDefault(w => w is PatientDemographicsViewModel);
+            if (newPatientVM != null)
             {
-                BlowTrialDataService.StopEnvelopeRandomising();
-                RandomisingEngine.ResetBlock(EnvelopeDetails.FirstAvailableBlockNumber, _repository);
-                StopEnvelopeCmd = new RelayCommand(param => StopEnvelopeRandomising(), param => false);
+                newPatientVM.CloseCmd.Execute(null);
             }
+            IsEnvelopeRandomising = !IsEnvelopeRandomising;
+            BlowTrialDataService.ChangeEnvelopeRandomising(IsEnvelopeRandomising);
+            if (IsEnvelopeRandomising)
+            {
+                RandomisingEngine.UnsetComputerisedBlocks(_repository);
+            }
+            else
+            {
+                RandomisingEngine.BalanceUnsetBlocks(_repository);
+            }
+
         }
         #endregion // Commands
 
@@ -162,17 +199,61 @@ namespace BlowTrial.ViewModel
                 var ws = (WorkspaceViewModel)Workspaces[i];
                 Workspaces.Remove(ws);
             }
-            _backupService = null;
-            ShowLogin();
+            if (IsReplaceDbRequest())
+            {
+                OnRequestClose();
+            }
+            else
+            {
+                Cleanup();
+                ShowLogin();
+            }
         }
+        void Cleanup()
+        {
+            if (_backupService != null)
+            {
+                _backupService.OnBackup -= OnBackupInterval;
+                _backupService.Cleanup();
+                _backupService = null;
+            }
+            var allPart = (AllParticipantsViewModel)Workspaces.FirstOrDefault(w=>w is AllParticipantsViewModel);
+            if (allPart != null)
+            {
+                allPart.Cleanup();
+            }
+            _log = null;
+        }
+        bool IsReplaceDbRequest()
+        {
+            return _log != null && _log.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck);
+        }
+        void ReplaceDb()
+        {
+            var pw = new BlowTrial.View.PleaseWait();
+            pw.Show();
+            string currentPath = TrialDataContext.GetDbPath();
+            if (_repository != null)
+            {
+                _repository.Dispose();
+                _repository = null;
+            }
+            System.IO.File.Move(currentPath, currentPath.InsertDateStampToFileName());
+            TransferFile.AllowUpdate(_log, fi =>
+                {
+                    fi.MoveTo(currentPath);
+                });
+            pw.Close();
+        }
+
 
         void RegisterNewPatient()
         {
-            NewPatientViewModel newPatientVM = (NewPatientViewModel)Workspaces.FirstOrDefault(w => w is NewPatientViewModel);
+            PatientDemographicsViewModel newPatientVM = (PatientDemographicsViewModel)Workspaces.FirstOrDefault(w => w is PatientDemographicsViewModel);
             if (newPatientVM==null)
             {
-                var newPatient = new NewPatientModel();
-                newPatientVM = new NewPatientViewModel(_repository, newPatient);
+                var newPatient = new PatientDemographicsModel { WasEnvelopeRandomised =  IsEnvelopeRandomising};
+                newPatientVM = new PatientDemographicsViewModel(_repository, newPatient);
                 this.Workspaces.Add(newPatientVM);
             }
             this.SetActiveWorkspace(newPatientVM);
@@ -187,12 +268,27 @@ namespace BlowTrial.ViewModel
             this.SetActiveWorkspace(allParticipantsVM);
         }
 
+        void ShowRequestReverseUpdate()
+        {
+            RequestReverseUpdateViewModel updateVm = new RequestReverseUpdateViewModel(_repository, LogFileName);
+            var updateWindow = new BlowTrial.View.RequestReverseUpdateView();
+            EventHandler onRequestClose = null;
+            updateVm.RequestClose += onRequestClose = (o, e) =>
+            {
+                updateWindow.Close();
+                updateVm.RequestClose -= onRequestClose;
+                onRequestClose = null;
+            };
+
+            updateWindow.DataContext = updateVm;
+            updateWindow.ShowDialog();
+        }
         void ShowAllParticipants()
         {
             AllParticipantsViewModel allParticipantsVM = (AllParticipantsViewModel)Workspaces.FirstOrDefault(w => w is AllParticipantsViewModel);
             if (allParticipantsVM == null)
             {
-                allParticipantsVM = new AllParticipantsViewModel(_repository);
+                allParticipantsVM = new AllParticipantsViewModel(_repository, _backupService.IsToBackup);
                 this.Workspaces.Add(allParticipantsVM);
             }
             this.SetActiveWorkspace(allParticipantsVM);
@@ -290,12 +386,17 @@ namespace BlowTrial.ViewModel
                                  IsBackingUpToCloud = _backupService.IsToBackup
                             }
                         );
-
+                cloudVM.OnSave += CloudVmSaved;
                 this.Workspaces.Add(cloudVM);
             }
             this.SetActiveWorkspace(cloudVM);
         }
-
+        void CloudVmSaved(object sender, EventArgs e)
+        {
+            var CloudModel = ((CloudDirectoryViewModel)sender).CloudModel;
+            _repository.CloudDirectories = CloudModel.CloudDirectories;
+            _backupService.IntervalMins = CloudModel.BackupIntervalMinutes.Value;
+        }
         void ShowLogin()
         {
             if (Workspaces.Any(w => w is AuthenticationViewModel)) { return; }
@@ -325,7 +426,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("IsAuthorised");
             }
         }
-        
+        internal const string LogFileName = "SyncRequestLog.csv";
         void HandleAuthorisationClose()
         {
             var identity = GetCurrentPrincipal().Identity;
@@ -341,6 +442,13 @@ namespace BlowTrial.ViewModel
                     using (var m = new MembershipContext())
                     {
                         _backupService = new BackupService(_repository, m);
+                        IsEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising(m);
+                        var backDetails = BlowTrialDataService.GetBackupDetails(m);
+                        if (backDetails.BackupData.IsBackingUpToCloud)
+                        {
+                            _log = new TransferLog(backDetails.CloudDirectories.First() + '\\' + LogFileName);
+                            _backupService.OnBackup += OnBackupInterval;
+                        }
                     }
                 }
                 else
@@ -349,6 +457,15 @@ namespace BlowTrial.ViewModel
                 }
             }
         }
+
+        void OnBackupInterval(object sender, EventArgs e)
+        {
+            if (_log.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck))
+            {
+                MessageBox.Show(Strings.BackupService_DBupdateRequestExplanation, Strings.BackupService_DBupdateRequestHeader);
+            }
+        }
+
         void HandleCreateNewUserClose(CreateNewUserViewModel vm)
         {
             vm.MembershipContext.Dispose();
@@ -384,6 +501,7 @@ namespace BlowTrial.ViewModel
             this.Workspaces.Remove(workspace);
             if (senderType == typeof(AuthenticationViewModel)) { HandleAuthorisationClose(); }
             else if (senderType == typeof(CreateNewUserViewModel)) { HandleCreateNewUserClose((CreateNewUserViewModel)workspace); }
+            else if (senderType == typeof(CloudDirectoryViewModel)) { ((CloudDirectoryViewModel)sender).OnSave -= CloudVmSaved; }
             if (Workspaces.Any())
             {
                 ICollectionView collectionView = CollectionViewSource.GetDefaultView(this.Workspaces);
@@ -401,6 +519,10 @@ namespace BlowTrial.ViewModel
         public void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Mediator.NotifyColleagues("MainWindowClosing", e);
+            if (!e.Cancel && IsReplaceDbRequest())
+            {
+                ReplaceDb();
+            }
         }
         #endregion
 
@@ -423,10 +545,7 @@ namespace BlowTrial.ViewModel
         {
             if (!_disposed)
             {
-                if (_backupService != null)
-                {
-                    _backupService.Cleanup();
-                }
+                Cleanup();
                 if (disposing)
                 {
                     if (_repository != null) { _repository.Dispose(); }
