@@ -15,6 +15,7 @@ using System.Windows.Media;
 using BlowTrial.Helpers;
 using StatsForAge.DataSets;
 using System.Windows.Threading;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.ViewModel
 {
@@ -279,8 +280,9 @@ namespace BlowTrial.ViewModel
 		        if (value == _newPatient.IsMale) { return; }
                 _newPatient.IsMale = value;
                 RecordAltered = true;
-                NotifyPropertyChanged("IsMale", "OkToRandomise", "EnvelopeNumber");
+                NotifyPropertyChanged("IsMale", "OkToRandomise");
                 CalculateWtCentile();
+                ValidateSiblingId();
 	        }
         }
         public DateTime? DateOfBirth
@@ -1006,6 +1008,15 @@ namespace BlowTrial.ViewModel
                 {
                     return Strings.NewPatientVM_Error_SiblingNotFound;
                 }
+
+                if (_newPatient.DateOfBirth.HasValue && _newPatient.GestAgeBirth.HasValue)
+                {
+                    var expectedNewPatientGest = ExpectedGestAgeAtBirth(_newPatient.DateOfBirth.Value, MultipleSibling.DateTimeBirth, MultipleSibling.GestAgeBirth);
+                    if (expectedNewPatientGest != _newPatient.GestAgeBirth.Value)
+                    {
+                        return string.Format(Strings.NewPatient_Error_TwinGestAge, expectedNewPatientGest.ToCgaString(0));
+                    }
+                }
                 /*
                  * www.dailymail.co.uk/health/article-2316634/Twins-born-87-days-apart-mothers-contractions-simply-STOPPED.html
 
@@ -1020,13 +1031,16 @@ namespace BlowTrial.ViewModel
                     return Strings.NewPatient_Error_TwinGestAge;
                 }
                 */
-                if (MultipleSibling.IsMale != _newPatient.IsMale)
-                {
-                    SiblingNote = Strings.NewPatient_Error_TwinGenderDifferent;
-                }
+                SiblingNote = (MultipleSibling.IsMale == _newPatient.IsMale)?string.Empty:Strings.NewPatient_Error_TwinGenderDifferent;
+                
             }
             return null;
         }
         #endregion // IDataErrorInfo Members
+
+        static double ExpectedGestAgeAtBirth(DateTime dateOfBirthA, DateTime dateOfBirthB, double gestAgeB)
+        {
+            return gestAgeB + ((dateOfBirthA.Date - dateOfBirthB.Date).TotalDays/7);
+        }
     }
 }

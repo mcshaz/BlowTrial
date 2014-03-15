@@ -970,7 +970,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Twins must have the same gestational age.
+        ///   Looks up a localized string similar to A twin of that patient would be expected to have a gestation of {0} weeks.
         /// </summary>
         public static string NewPatient_Error_TwinGestAge {
             get {

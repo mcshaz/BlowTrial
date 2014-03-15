@@ -44,7 +44,7 @@
                 <Run Foreground="Blue">
                     Trial Arm:
                 </Run>
-                <Run Foreground="Chocolate" Text="{Binding Path=TrialArm, Mode=OneWay}" />
+                <Run Foreground="DarkRed" Text="{Binding Path=TrialArm, Mode=OneWay}" FontWeight="Bold" />
                 <Run Foreground="Blue">
                     Hospital Id:
                 </Run>

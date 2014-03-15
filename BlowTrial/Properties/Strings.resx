@@ -757,7 +757,7 @@
     <value>A randomising envelope should not be used. Id will be auto assigned.</value>
   </data>
   <data name="NewPatient_Error_TwinGestAge" xml:space="preserve">
-    <value>Twins must have the same gestational age</value>
+    <value>A twin of that patient would be expected to have a gestation of {0} weeks</value>
   </data>
   <data name="CreateNewVaccine_Duplicate" xml:space="preserve">
     <value>Vaccine names must be unique</value>

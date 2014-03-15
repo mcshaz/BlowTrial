@@ -218,6 +218,7 @@ namespace BlowTrial.Domain.Providers
                     }
                     else
                     {
+                        newParticipant.Id = GetNextId(_dbContext.Participants, centreId);
                         RandomisingEngine.ForceAllocationToArm(newParticipant, this);
                     }
                 }
