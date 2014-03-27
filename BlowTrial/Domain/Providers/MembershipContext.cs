@@ -9,14 +9,14 @@ using System.Text;
 
 namespace BlowTrial.Domain.Providers
 {
-    public class MembershipContext : DbContext, IMembershipContext, IBackupData
+    public class MembershipContext : DbContext, IMembershipContext, IAppData
     {
         public const string MembershipDbName = "BlowTrialMembership";
         static public string GetConnectionString()
         {
             return (new SqlCeConnectionStringBuilder
             {
-                Password = "ABC",
+                Password = DbPasswords.MembershipPassword,
                 DataSource = ContextCeConfiguration.GetSqlCePath(MembershipDbName)
             }).ToString();
         }
@@ -25,6 +25,7 @@ namespace BlowTrial.Domain.Providers
         public DbSet<Role> Roles { get; set; }
         public DbSet<BackupData> BackupDataSet { get; set; }
         public DbSet<CloudDirectory> CloudDirectories { get; set; }
+        public DbSet<RandomisingMessage> RandomisingMessages { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

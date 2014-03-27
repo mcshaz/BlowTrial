@@ -2,16 +2,15 @@
 using BlowTrial.Domain.Tables;
 using BlowTrial.Infrastructure.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Migrations;
 using System.Data.Entity.SqlServerCompact;
 using System.Data.Entity.Validation;
 using System.Data.SqlServerCe;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -24,14 +23,13 @@ namespace BlowTrial.Domain.Providers
         {
             return ContextCeConfiguration.GetSqlCePath(ParticipantDb);
         }
-        const string DbPassword = "ABC";
 
-        static public string GetConnectionString(string dbPath)
+        static public string GetConnectionString(string dbPath = null)
         {
             return (new SqlCeConnectionStringBuilder
             {
-                  Password = DbPassword,
-                  DataSource = dbPath
+                Password = DbPasswords.TrialDataPassword,
+                DataSource = dbPath ?? GetDbPath()
             }).ToString();
         }
 
@@ -111,10 +109,14 @@ namespace BlowTrial.Domain.Providers
             //non ce sql to create .bak goes here instead
             return GetDbPath();
         }
+
+        /*
         public DateTime DbLastModifiedUtc()
         {
             return System.IO.File.GetLastWriteTimeUtc(GetDbPath());
         }
+        */
+
         //create an instance method purely for reflection
         public string DbName
         {
@@ -138,22 +140,26 @@ namespace BlowTrial.Domain.Providers
 
     public class ContextCeConfiguration : DbConfiguration
     {
+
         public ContextCeConfiguration()
         {
             SetProviderServices(
-                SqlCeProviderServices.ProviderInvariantName,
+                ProviderInvariantName,
                 SqlCeProviderServices.Instance);
-            SetDatabaseInitializer<TrialDataContext>(new DataContextInitialiser());
-            SetDatabaseInitializer<MembershipContext>(new MembershipContextInitialiser());
+            //SetDatabaseInitializer<TrialDataContext>(new DataContextInitialiser());
+            //SetDatabaseInitializer<MembershipContext>(new MembershipContextInitialiser());
             
             /*
             SetDefaultConnectionFactory()
-             * */
+             */
         }
+
+        public const string ProviderInvariantName = SqlCeProviderServices.ProviderInvariantName;
+        
         public static string GetSqlCePath(string sqlCeName)
         {
             if (!sqlCeName.EndsWith(".sdf")) { sqlCeName += ".sdf"; }
-            return string.Format(@"{0}\{1}", AppDomain.CurrentDomain.GetData("DataDirectory"), sqlCeName);
+            return Path.Combine(App.DataDirectory ?? App.DataDirectory, sqlCeName);
         }
     }
 }
