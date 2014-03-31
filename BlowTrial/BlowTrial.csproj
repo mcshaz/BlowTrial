@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.1.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>2.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -554,17 +554,17 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Visual Studio 2012\Projects\BlowTrial\GenericToDataFile\GenericToDataString.csproj">
-      <Project>{8845c7ce-8815-4b3f-ad3e-95bca4d3b68c}</Project>
-      <Name>GenericToDataString</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Visual Studio 2012\Projects\BlowTrial\StatsForAge\StatsForAge.csproj">
-      <Project>{bd45a88d-c81d-4160-83f4-6058ec553b6f}</Project>
-      <Name>StatsForAge</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CloudFileTransfer\CloudFileTransfer.csproj">
       <Project>{89dad06c-beb6-4498-a8ef-4cd34cc376b2}</Project>
       <Name>CloudFileTransfer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GenericToDataFile\GenericToDataString.csproj">
+      <Project>{8845c7ce-8815-4b3f-ad3e-95bca4d3b68c}</Project>
+      <Name>GenericToDataString</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\StatsForAge\StatsForAge.csproj">
+      <Project>{bd45a88d-c81d-4160-83f4-6058ec553b6f}</Project>
+      <Name>StatsForAge</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

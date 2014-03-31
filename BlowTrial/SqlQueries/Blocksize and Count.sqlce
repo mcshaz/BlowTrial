@@ -1,0 +1,7 @@
+-- Script Date: 10/03/2014 5:38 p.m.  - ErikEJ.SqlCeScripting version 3.5.2.29
+SELECT [BlockSize],
+      COUNT([BlockSize]) as CountOfBlockSize
+  FROM [Participants]
+  GROUP BY BlockSize
+  ORDER BY BlockSize DESC;
+GO

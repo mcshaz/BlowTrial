@@ -1,0 +1,20 @@
+-- Script Date: 10/03/2014 5:38 p.m.  - ErikEJ.SqlCeScripting version 3.5.2.29
+SELECT s.[BlockNumber],
+min(s.[BlockSize]) as BlockSize,
+SUM(CASE WHEN s.IsInterventionArm = 1 THEN 1 ELSE 0 END) AS intervention, 
+SUM(CASE WHEN s.IsInterventionArm = 0 THEN 1 ELSE 0 END) AS control,
+avg(s.RandomisationCat),
+COUNT(s.[Id]) as Participants
+  FROM (select p.IsInterventionArm, 
+		  (CASE WHEN p.AdmissionWeight < 1000 AND p.IsMale=1 THEN 1 
+			WHEN p.AdmissionWeight < 1000 AND p.IsMale=0 THEN 2 
+			WHEN p.AdmissionWeight < 1500 AND p.IsMale=1 THEN 3 
+			WHEN p.AdmissionWeight < 1500 AND p.IsMale=0 THEN 4 
+			WHEN p.AdmissionWeight >= 1500 AND p.IsMale=1 THEN 5 
+			WHEN p.AdmissionWeight >= 1500 AND p.IsMale=0 THEN 6
+			ELSE 0
+			end) as RandomisationCat,
+			p.BlockNumber, p.BlockSize, p.Id
+			from [Participants] p) s
+  GROUP BY s.BlockNumber, s.RandomisationCat
+GO
