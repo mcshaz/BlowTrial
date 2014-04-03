@@ -288,7 +288,7 @@ namespace BlowTrial.ViewModel
             AllParticipantsViewModel allParticipantsVM = (AllParticipantsViewModel)Workspaces.FirstOrDefault(w => w is AllParticipantsViewModel);
             if (allParticipantsVM == null)
             {
-                allParticipantsVM = new AllParticipantsViewModel(_repository, _backupService.IsToBackup);
+                allParticipantsVM = new AllParticipantsViewModel(_repository);
                 this.Workspaces.Add(allParticipantsVM);
             }
             this.SetActiveWorkspace(allParticipantsVM);

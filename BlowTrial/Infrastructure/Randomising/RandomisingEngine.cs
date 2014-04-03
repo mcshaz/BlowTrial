@@ -127,7 +127,12 @@ namespace BlowTrial.Infrastructure
         public const int MaxBirthWeightGrams = 1999;
         static IEnumerable<Participant> GetCurrentBlock(Participant newParticipant, IRepository repos)
         {
-            return QueryForCurrentBlock(repos.Participants, newParticipant).ToList();
+            var returnVar = QueryForAllSameBlocks(repos.Participants, newParticipant).FirstOrDefault();
+            if (returnVar == null)
+            {
+                return new Participant[0];
+            }
+            return returnVar;
         }
         /// <summary>
         /// 
@@ -179,10 +184,6 @@ namespace BlowTrial.Infrastructure
         /// <param name="entitySet"></param>
         /// <param name="newParticipant"></param>
         /// <returns></returns>
-        static IQueryable<Participant> QueryForCurrentBlock(IQueryable<Participant> entitySet, Participant newParticipant)
-        {
-            return QueryForAllSameBlocks(entitySet, newParticipant).FirstOrDefault().AsQueryable();
-        }
         static IOrderedQueryable<IGrouping<int, Participant>> QueryForAllSameBlocks(IQueryable<Participant> entitySet, Participant newParticipant)
         {
             IQueryable<Participant> categoryQuery = entitySet.Where(p => p.IsMale == newParticipant.IsMale && p.CentreId == newParticipant.CentreId && p.BlockNumber.HasValue);

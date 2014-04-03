@@ -30,15 +30,12 @@ namespace BlowTrial.ViewModel
 
         #region Constructor
 
-        public AllParticipantsViewModel(IRepository repository, bool isBackingUpToCloud):base(repository)
+        public AllParticipantsViewModel(IRepository repository):base(repository)
         {
             base.DisplayName = Strings.AllParticipantsViewModel_DisplayName;
             _repository.ParticipantAdded += OnParticipantAdded;
             GetAllParticipants();
-            if (isBackingUpToCloud)
-            {
-                _repository.ParticipantUpdated += HandleCloudUpdate;
-            }
+            _repository.ParticipantUpdated += HandleParticipantUpdate;
 
             SortGridView = new RelayCommand(SortParticipants);
             ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null && _updateWindow==null);
@@ -93,14 +90,10 @@ namespace BlowTrial.ViewModel
             set
             {
                 if (_selectedParticipant == value) { return; }
-                if (_updateWindow == null)
+                _selectedParticipant = value;
+                if (_updateWindow != null && value != null && ((ParticipantProgressViewModel)_updateWindow.DataContext).OkToProceed())
                 {
-                    _selectedParticipant = value;
-                }
-                else if (((ParticipantProgressViewModel)_updateWindow.DataContext).OkToProceed())
-                {
-                    OnClosingOrChangingWindowContext();
-                    _updateWindow.DataContext = _selectedParticipant = GetSelectedProgressViewModel(value);
+                    _updateWindow.DataContext = GetSelectedProgressViewModel(value.Id);
                 }
                 NotifyPropertyChanged("SelectedParticipant");
             }
@@ -116,32 +109,16 @@ namespace BlowTrial.ViewModel
 
         void ShowUpdateWindow(object param)
         {
-            var updatableParticipant = GetSelectedProgressViewModel(SelectedParticipant);
-            _selectedParticipant = updatableParticipant;
+            var updatableParticipant = GetSelectedProgressViewModel(SelectedParticipant.Id);
             _updateWindow = new ParticipantUpdateView(updatableParticipant);
             _updateWindow.Closed += OnUpdateWindow_Closed;
-            updatableParticipant.OnSave += ParticipantProgressSaved;
             _updateWindow.Show();
         }
 
-        ParticipantProgressViewModel GetSelectedProgressViewModel(ParticipantListItemViewModel p)
+        ParticipantProgressViewModel GetSelectedProgressViewModel(int participantId)
         {
-            ParticipantProgressViewModel updatableParticipant = p as ParticipantProgressViewModel;
-            if (updatableParticipant == null)
-            {
-                var currentList = (List<ParticipantListItemViewModel>)AllParticipants.SourceCollection;
-                int indx = currentList.IndexOf(SelectedParticipant);
-                var part = Mapper.Map<ParticipantProgressModel>(_repository.FindParticipant(p.Id));
-                currentList[indx] = updatableParticipant = new ParticipantProgressViewModel(_repository, part);
-            }
-            return updatableParticipant;
-        }
-
-        void ParticipantProgressSaved(object sender, EventArgs e)
-        {
-            var p = (ParticipantProgressViewModel)_updateWindow.DataContext;
-            AllParticipants.EditItem(p);
-            AllParticipants.CommitEdit();
+                var part = Mapper.Map<ParticipantProgressModel>(_repository.FindParticipant(participantId));
+                return new ParticipantProgressViewModel(_repository, part);
         }
 
         public RelayCommand SortGridView { get; private set; }
@@ -214,16 +191,18 @@ namespace BlowTrial.ViewModel
                 sp.AdmissionWeight = p.AdmissionWeight;
             }
         }
-        void HandleCloudUpdate(object sender, ParticipantEventArgs e)
+        void HandleParticipantUpdate(object sender, ParticipantEventArgs e)
         {
             var assdVM = ((List<ParticipantListItemViewModel>)AllParticipants.SourceCollection)
                 .First(p=>p.Id == e.Participant.Id);
             AllParticipants.EditItem(assdVM);
             UpdateDemographics(e.Participant, assdVM);
             assdVM.VaccinesAdministered = e.Participant.VaccinesAdministered;
-            var sp = assdVM as ParticipantProgressViewModel;
-            if (sp != null)
+            
+            if (_updateWindow != null && ((ParticipantProgressViewModel)_updateWindow.DataContext).Id == assdVM.Id)
             {
+                ParticipantProgressViewModel sp = (ParticipantProgressViewModel)_updateWindow.DataContext;
+                UpdateDemographics(e.Participant, sp);
                 sp.OutcomeAt28Days = e.Participant.OutcomeAt28Days;
                 sp.CauseOfDeath = e.Participant.CauseOfDeath;
                 sp.DeathOrLastContactDateTime = e.Participant.DeathOrLastContactDateTime;
@@ -287,14 +266,7 @@ namespace BlowTrial.ViewModel
         void OnUpdateWindow_Closed(object sender, EventArgs e)
         {
             _updateWindow.Closed -= OnUpdateWindow_Closed;
-            OnClosingOrChangingWindowContext();
             _updateWindow = null;
-        }
-
-        void OnClosingOrChangingWindowContext()
-        {
-            var p = _updateWindow.DataContext as ParticipantProgressViewModel;
-            if (p != null) { p.OnSave -= ParticipantProgressSaved; }
         }
 
         void OnMainWindowClosing(object args)
@@ -350,7 +322,7 @@ namespace BlowTrial.ViewModel
         ~AllParticipantsViewModel()
         {
             _repository.ParticipantAdded -= OnParticipantAdded;
-            _repository.ParticipantUpdated -= HandleCloudUpdate;
+            _repository.ParticipantUpdated -= HandleParticipantUpdate;
             
             Mediator.Unregister("MainWindowClosing", OnMainWindowClosing);
         }

@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.1.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>5</ApplicationRevision>
     <ApplicationVersion>2.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -101,9 +101,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
-    <Reference Include="LinqKit, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
+    <Reference Include="LinqKit, Version=1.1.1.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\LINQKit.1.1.0\lib\net451\LinqKit.dll</HintPath>
+      <HintPath>..\packages\LINQKit.1.1.1\lib\net45\LinqKit.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -175,31 +175,27 @@
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
-    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.cs" />
-    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.Designer.cs">
-      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\CodeBasedMigration.cs" />
-    <Compile Include="Migrations\Membership\MembershipConfiguration.cs" />
     <Compile Include="Migrations\Membership\201403062252244_InitialMembership.cs" />
     <Compile Include="Migrations\Membership\201403062252244_InitialMembership.Designer.cs">
       <DependentUpon>201403062252244_InitialMembership.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.cs" />
+    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.Designer.cs">
+      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Membership\MembershipConfiguration.cs" />
     <Compile Include="Migrations\TrialData\201403062253529_InitialTrialData.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Migrations\TrialData\201403062253529_InitialTrialData.Designer.cs">
       <DependentUpon>201403062253529_InitialTrialData.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\TrialData\201403100345554_TrialDataV2.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Migrations\TrialData\201403100345554_TrialDataV2.cs" />
     <Compile Include="Migrations\TrialData\201403100345554_TrialDataV2.Designer.cs">
       <DependentUpon>201403100345554_TrialDataV2.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\TrialData\TrialDataConfiguration.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Migrations\TrialData\TrialDataConfiguration.cs" />
     <Compile Include="Properties\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -502,11 +498,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\Membership\201403070429267_MembershipV2.resx">
-      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Membership\201403062252244_InitialMembership.resx">
       <DependentUpon>201403062252244_InitialMembership.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\Membership\201403070429267_MembershipV2.resx">
+      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\TrialData\201403062253529_InitialTrialData.resx">
       <DependentUpon>201403062253529_InitialTrialData.cs</DependentUpon>
@@ -615,6 +611,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

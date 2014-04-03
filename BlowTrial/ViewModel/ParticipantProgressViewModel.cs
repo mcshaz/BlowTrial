@@ -54,39 +54,6 @@ namespace BlowTrial.ViewModel
 
         public ObservableCollection<VaccineAdministeredViewModel> VaccineVMsAdministered { get; private set; }
 
-        public new ICollection<VaccineAdministered> VaccinesAdministered
-        {
-            get
-            {
-                return base.VaccinesAdministered;
-            }
-            set
-            {
-                foreach(var va in value)
-                {
-                    var match = VaccineVMsAdministered.FirstOrDefault(vavm=>vavm.VaccineGiven.Id == va.VaccineId);
-                    if (match==null)
-                    {
-                        VaccineVMsAdministered.Add(new VaccineAdministeredViewModel(
-                            new VaccineAdministeredModel
-                            {
-                                AdministeredTo = ParticipantProgressModel, 
-                                Id = va.Id, 
-                                AdministeredAtDateTime = va.AdministeredAt, 
-                                VaccineGiven = va.VaccineGiven
-                            }
-                            , AllVaccinesAvailable) { AllowEmptyRecord = false });
-                    }
-                    else
-                    {
-                        match.VaccineAdministeredModel.Id = va.Id;
-                        match.AdministeredAtDateTime = va.AdministeredAt;
-                    }
-                }
-                base.VaccinesAdministered = value;
-            }
-        }
-
         public bool IsParticipantModelChanged { get; internal set; }
 
         public bool IsVaccineAdminChanged { get; internal set; }
@@ -125,6 +92,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == ParticipantProgressModel.Notes) { return; }
                 ParticipantProgressModel.Notes = value;
+                IsParticipantModelChanged = true;
                 NotifyPropertyChanged("Notes");
             }
         }
@@ -218,7 +186,7 @@ namespace BlowTrial.ViewModel
                 if (value == ParticipantProgressModel.BcgAdverse) { return; }
                 ParticipantProgressModel.BcgAdverse = value;
                 IsParticipantModelChanged = true;
-                NotifyPropertyChanged("BcgAdverse", "BcgAdverseDetail");
+                NotifyPropertyChanged("BcgAdverse", "BcgAdverseDetail", "DisplayBcgAdverse");
             }
         }
         public string BcgAdverseDetail
@@ -562,6 +530,13 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged ("NewVaccineName");
             }
         }
+        public bool DisplayBcgAdverse
+        {
+            get
+            {
+                return ParticipantProgressModel.BcgAdverse.HasValue || ParticipantProgressModel.HasBcgRecorded();
+            }
+        }
 
         public DateTime TodayOr28 // such a silly property is for the upper bound of the datepickers
         {
@@ -737,6 +712,10 @@ namespace BlowTrial.ViewModel
                         if (item.VaccineGiven != null)
                         {
                             AllVaccinesAvailable.First(a => a.Vaccine == item.VaccineGiven).IsGivenToThisPatient = false;
+                            if (item.VaccineGiven.IsBcg)
+                            {
+                                NotifyPropertyChanged("DisplayBcgAdverse", "BcgAdverse");
+                            }
                         }
                         IsVaccineAdminChanged = true;
                     }
@@ -755,6 +734,10 @@ namespace BlowTrial.ViewModel
             if (e.PropertyName == "AdministeredAtDate" || e.PropertyName == "AdministeredAtTime" || e.PropertyName == "SelectedVaccine")
             {
                 IsVaccineAdminChanged = true;
+                if (e.PropertyName == "SelectedVaccine")
+                {
+                    NotifyPropertyChanged("DisplayBcgAdverse", "BcgAdverse");
+                }
             }
         }
         private void NewVaccineAdminVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -884,7 +867,7 @@ namespace BlowTrial.ViewModel
                     case MessageBoxResult.Cancel:
                         return false;
                     default: //OK in Proceed ? OK/Cancel and No In Close without saving? yes/no/cancel
-                        CancelChanges();
+                        //CancelChanges();
                         break;
                 }
             }
@@ -892,6 +875,7 @@ namespace BlowTrial.ViewModel
             return true; 
         }
 
+        /*
         public EventHandler OnCancel;
 
         void CancelChanges()
@@ -912,6 +896,7 @@ namespace BlowTrial.ViewModel
                 OnCancel(this, new EventArgs());
             }
         }
+         */
 
         #endregion
 

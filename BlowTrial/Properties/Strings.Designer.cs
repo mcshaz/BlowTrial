@@ -1294,11 +1294,20 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please enter details of the adverse reaction.
+        ///   Looks up a localized string similar to Please enter details of the BCG reaction.
         /// </summary>
         public static string ParticipantModel_Error_BcgAdverseDetailRequired {
             get {
                 return ResourceManager.GetString("ParticipantModel_Error_BcgAdverseDetailRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter the details of when the BCG was given.
+        /// </summary>
+        public static string ParticipantModel_Error_BcgRequiredForAdverse {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_BcgRequiredForAdverse", resourceCulture);
             }
         }
         
@@ -1578,6 +1587,33 @@ namespace BlowTrial.Properties {
         public static string ParticipantUpdateVM_Option_BcgPapuleNull {
             get {
                 return ResourceManager.GetString("ParticipantUpdateVM_Option_BcgPapuleNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BCG given to a patient in the control arm! A violation {0} logged..
+        /// </summary>
+        public static string ParticipantUpdateVM_Warning_BcgInControl {
+            get {
+                return ResourceManager.GetString("ParticipantUpdateVM_Warning_BcgInControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to has been.
+        /// </summary>
+        public static string ParticipantUpdateVM_Warning_BcgInControl_HasBeen {
+            get {
+                return ResourceManager.GetString("ParticipantUpdateVM_Warning_BcgInControl_HasBeen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to will be.
+        /// </summary>
+        public static string ParticipantUpdateVM_Warning_BcgInControl_WillBee {
+            get {
+                return ResourceManager.GetString("ParticipantUpdateVM_Warning_BcgInControl_WillBee", resourceCulture);
             }
         }
         

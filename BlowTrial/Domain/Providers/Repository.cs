@@ -513,6 +513,12 @@ namespace BlowTrial.Domain.Providers
                 }
             }
             _dbContext.SaveChanges();
+            if (this.ParticipantUpdated != null)
+            {
+                var part = FindParticipant(participantId);
+                part.VaccinesAdministered = new List<VaccineAdministered>(vaccinesAdministered);
+                this.ParticipantUpdated(this, new ParticipantEventArgs(part));
+            }
         }
         public void Add(Vaccine newVaccine)
         {
@@ -599,9 +605,12 @@ namespace BlowTrial.Domain.Providers
         public void Restore()
         {
             //DateTime RecordLastModified = _dbContext.DbLastModifiedUtc(); //note this is all assuming user on backup end has no ability to modify data
-            IEnumerable<MatchedFilePair> filePairs = GetMatchedCloudAndExtractedFiles().Where(fp => fp.ExtractedBak == null || fp.ExtractedBak.CreationTimeUtc < fp.Zip.LastWriteTimeUtc);
-            List<BakFileDetails> bakDetails = new List<BakFileDetails>();
+            IEnumerable<MatchedFilePair> filePairs = GetMatchedCloudAndExtractedFiles()
+                .Where(fp => fp.ExtractedBak == null || fp.ExtractedBak.CreationTimeUtc < fp.Zip.LastWriteTimeUtc)
+                .ToList();
+            
             if (!filePairs.Any()) { return; }
+            List<BakFileDetails> bakDetails = new List<BakFileDetails>();
             _dbContext.Dispose();
 
             foreach (var fp in filePairs)

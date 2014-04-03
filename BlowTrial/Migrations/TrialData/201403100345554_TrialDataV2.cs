@@ -18,8 +18,8 @@ namespace BlowTrial.Migrations.TrialData
             Sql(string.Format("UPDATE [ProtocolViolations] SET [ViolationType] = {0} WHERE [Details] LIKE '%Receive%'", (int)ViolationTypeOption.MajorWrongTreatment));
             Sql(string.Format("UPDATE [ProtocolViolations] SET [ViolationType] = {0} WHERE  [ViolationType] <> {1} AND [MajorViolation] = 1", (int)ViolationTypeOption.MajorOther, (int)ViolationTypeOption.MajorWrongAllocation));
             AddColumn("dbo.ScreenedPatients", "Inborn", c => c.Boolean());
-            //AlterColumn("dbo.Participants", "BlockNumber", c => c.Int(nullable: true));
-            Sql("ALTER TABLE [Participants] ALTER COLUMN [BlockNumber] INTEGER NULL;");
+            AlterColumn("dbo.Participants", "BlockNumber", c => c.Int());
+            //Sql("ALTER TABLE [Participants] ALTER COLUMN [BlockNumber] INTEGER NULL;");
             DropColumn("dbo.ProtocolViolations", "MajorViolation");
             Sql("UPDATE [Participants] SET [PhoneNumber] = null WHERE SUBSTRING([PhoneNumber],LEN([PhoneNumber])-8,8) = '99999999';");
             AddColumn("dbo.Participants", "AdmissionDiagnosis", c => c.String(maxLength: 512));
@@ -30,8 +30,15 @@ namespace BlowTrial.Migrations.TrialData
             DropColumn("dbo.ScreenedPatients", "Abnormalities");
             AddColumn("dbo.ScreenedPatients", "AppVersionAtEnrollment", c => c.Int(nullable: false));
             AddColumn("dbo.Participants", "AppVersionAtEnrollment", c => c.Int(nullable: false));
+            /*
+            CreateIndex("dbo.Participants", "CentreId");
+            CreateIndex("dbo.ProtocolViolations", "ParticipantId");
+            CreateIndex("dbo.VaccinesAdministered", "VaccineId");
+            CreateIndex("dbo.VaccinesAdministered", "ParticipantId");
+            CreateIndex("dbo.ScreenedPatients", "CentreId");
+             * */
         }
-        
+
         public override void Down()
         {
             AddColumn("dbo.ScreenedPatients", "Abnormalities", c => c.String(maxLength: 512));
@@ -51,6 +58,13 @@ namespace BlowTrial.Migrations.TrialData
             DropColumn("dbo.Participants", "Notes");
             DropColumn("dbo.ScreenedPatients", "AppVersionAtEnrollment");
             DropColumn("dbo.Participants", "AppVersionAtEnrollment");
+            /*
+            DropIndex("dbo.ScreenedPatients", new[] { "CentreId" });
+            DropIndex("dbo.VaccinesAdministered", new[] { "ParticipantId" });
+            DropIndex("dbo.VaccinesAdministered", new[] { "VaccineId" });
+            DropIndex("dbo.ProtocolViolations", new[] { "ParticipantId" });
+            DropIndex("dbo.Participants", new[] { "CentreId" });
+             * */
         }
     }
 }

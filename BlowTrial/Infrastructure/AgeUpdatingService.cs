@@ -40,18 +40,34 @@ namespace BlowTrial.Infrastructure
             _participants.AddRange(from p in participants
                                    where p.AgeDays<=28 & p.IsKnownDead != true
                                    select new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(p.DateTimeBirth.TimeOfDay, p));
-            _comparer = new KeyComparer<TimeSpan, ParticipantListItemViewModel>();
-            _participants.Sort(_comparer);
-
-            _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(now.TimeOfDay, null) , _comparer);
-            if (_nextIndex < 0)
+            TimeSpan interval;
+            if (_participants.Any())
             {
-                _nextIndex = ~_nextIndex;
+                _comparer = new KeyComparer<TimeSpan, ParticipantListItemViewModel>();
+                _participants.Sort(_comparer);
+
+                _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(now.TimeOfDay, null), _comparer);
+                if (_nextIndex < 0)
+                {
+                    _nextIndex = ~_nextIndex;
+                }
+                TimeSpan rightNow = DateTime.Now.TimeOfDay;
+                if (_nextIndex >= _participants.Count)
+                {
+                    _nextIndex = 0;
+                    interval = new TimeSpan(1, 0, 0, 0) - rightNow + _participants[0].Key;
+                }
+                else
+                {
+                    interval = _participants[_nextIndex].Key <= rightNow
+                        ? new TimeSpan(0)
+                        : _participants[_nextIndex].Key - rightNow;
+                }
             }
-            TimeSpan rightNow = DateTime.Now.TimeOfDay;
-            TimeSpan interval = _participants[_nextIndex].Key <= rightNow
-                ?new TimeSpan(0)
-                :_participants[_nextIndex].Key - rightNow;
+            else
+            {
+                interval = new TimeSpan(24, 0, 0);
+            }
             _timer = new DispatcherTimer(priority)
             {
                 Interval = interval

@@ -318,6 +318,7 @@ namespace BlowTrial.Models
             "DeathOrLastContactTime",
             "OtherCauseOfDeathDetail",
             "CauseOfDeath",
+            "BcgAdverse",
             "BcgAdverseDetail",
             "Notes"
         };
@@ -356,6 +357,9 @@ namespace BlowTrial.Models
                 case "CauseOfDeath":
                     error = ValidateCauseOfDeath();
                     break;
+                case "BcgAdverse":
+                    error = ValidateBcgAdverse();
+                    break;
                 case "BcgAdverseDetail":
                     error = ValidateBcgAdverseDetail();
                     break;
@@ -393,6 +397,14 @@ namespace BlowTrial.Models
             if (IsKnownDead==true && CauseOfDeath==CauseOfDeathOption.Missing)
             {
                 return Strings.ParticipantModel_Error_CauseOfDeathRequired;
+            }
+            return null;
+        }
+        string ValidateBcgAdverse()
+        {
+            if (BcgAdverse.HasValue && !HasBcgRecorded())
+            {
+                return Strings.ParticipantModel_Error_BcgRequiredForAdverse;
             }
             return null;
         }
@@ -542,6 +554,10 @@ namespace BlowTrial.Models
         static double RateOfChange(double startingValue,double finishingValue ,double timeUnitsElapsed)
         {
             return Math.Pow(2, Math.Log(finishingValue / startingValue, 2) / timeUnitsElapsed); // work in log 2 as ? performance advantage for binary systems
+        }
+        public bool HasBcgRecorded()
+        {
+            return VaccineModelsAdministered.Any(vm => vm.VaccineGiven.IsBcg);
         }
         #endregion
 

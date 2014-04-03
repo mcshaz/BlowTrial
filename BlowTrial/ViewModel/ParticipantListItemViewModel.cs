@@ -138,7 +138,7 @@ namespace BlowTrial.ViewModel
                 if(ParticipantModel.VaccinesAdministered != value)
                 {
                     ParticipantModel.VaccinesAdministered = value;
-                    NotifyPropertyChanged("DataRequired");
+                    DataRequired = ParticipantModel.RecalculateDataRequired();
                 }
             }
         }

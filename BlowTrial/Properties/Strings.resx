@@ -350,7 +350,7 @@
     <comment>The description of the date/time of discharge field</comment>
   </data>
   <data name="ParticipantModel_Error_BcgAdverseDetailRequired" xml:space="preserve">
-    <value>Please enter details of the adverse reaction</value>
+    <value>Please enter details of the BCG reaction</value>
     <comment>Error message when an adverse reaction to BCG is present, but no details provided</comment>
   </data>
   <data name="ParticipantModel_Error_CauseOfDeathDataRequired" xml:space="preserve">
@@ -818,5 +818,17 @@
   </data>
   <data name="BackupService_DBupdateRequestHeader" xml:space="preserve">
     <value>Update Request Received</value>
+  </data>
+  <data name="ParticipantModel_Error_BcgRequiredForAdverse" xml:space="preserve">
+    <value>Please enter the details of when the BCG was given</value>
+  </data>
+  <data name="ParticipantUpdateVM_Warning_BcgInControl" xml:space="preserve">
+    <value>BCG given to a patient in the control arm! A violation {0} logged.</value>
+  </data>
+  <data name="ParticipantUpdateVM_Warning_BcgInControl_HasBeen" xml:space="preserve">
+    <value>has been</value>
+  </data>
+  <data name="ParticipantUpdateVM_Warning_BcgInControl_WillBee" xml:space="preserve">
+    <value>will be</value>
   </data>
 </root>

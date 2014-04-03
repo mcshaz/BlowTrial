@@ -6,7 +6,7 @@ namespace BlowTrial.Migrations.TrialData
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.0.2-21211")]
+    [GeneratedCode("EntityFramework.Migrations", "6.1.0-30225")]
     public sealed partial class TrialDataV2 : IMigrationMetadata
     {
         private readonly ResourceManager Resources = new ResourceManager(typeof(TrialDataV2));

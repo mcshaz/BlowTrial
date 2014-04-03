@@ -124,8 +124,8 @@
                             <ex:RowDefinitionExtended Style="{StaticResource ShowIfKnownOrSuspectedDead}" Height="30" />
                             <ex:RowDefinitionExtended Style="{StaticResource ShowIfKnownOrSuspectedDead}" Height="Auto" />
                             <ex:RowDefinitionExtended Style="{StaticResource ShowIfKnownOrSuspectedDead}" Height="30" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="30" />
+                            <ex:RowDefinitionExtended Visible="{Binding DisplayBcgAdverse}" Height="Auto" />
+                            <ex:RowDefinitionExtended Visible="{Binding DisplayBcgAdverse}"  Height="30" />
                             <ex:RowDefinitionExtended Visible="{Binding Path=BcgAdverse, Mode=OneWay, Converter={StaticResource nullBoolConvert}}" Height="Auto" />
                             <ex:RowDefinitionExtended Visible="{Binding Path=BcgAdverse, Mode=OneWay, Converter={StaticResource nullBoolConvert}}" Height="30" />
                             <ex:RowDefinitionExtended Height="Auto" Style="{StaticResource HideIfOutcomeMissing}"/>
