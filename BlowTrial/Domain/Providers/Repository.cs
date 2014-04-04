@@ -743,12 +743,13 @@ namespace BlowTrial.Domain.Providers
                     //move this down - need to check if vaccines administered
                     bool isPartAddedEvt = this.ParticipantAdded != null;
                     bool isPartUpdEvt = this.ParticipantUpdated != null;
-                    ILookup<bool, Participant> partWasAdded = null;
-                    if (isPartAddedEvt || isPartUpdEvt) 
+                    ILookup<bool, Participant> partAlreadyInDb;
+                    if (isPartAddedEvt || isPartUpdEvt)
                     {
                         int[] currentPartIds = _dbContext.Participants.Select(p => p.Id).ToArray();
-                        partWasAdded = newOrUpdatedParticipants.ToLookup(p => currentPartIds.Contains(p.Id));
+                        partAlreadyInDb = newOrUpdatedParticipants.ToLookup(p => currentPartIds.Contains(p.Id));
                     }
+                    else { partAlreadyInDb = null; } //purely to avoid use of unassigned variable error 
                     _dbContext.Participants.AddOrUpdate(newOrUpdatedParticipants);
                     if (isPartUpdEvt)
                     {
@@ -756,14 +757,14 @@ namespace BlowTrial.Domain.Providers
 
                         foreach (Participant p in _dbContext.Participants.AsNoTracking().Include("VaccinesAdministered")
                             .Where(p => newVaxAdminPartId.Contains(p.Id)).ToArray()
-                            .Concat(partWasAdded[false]))
+                            .Concat(partAlreadyInDb[true]))
                         {
                             this.ParticipantUpdated(this, new ParticipantEventArgs(p)); 
                         }
                     }
                     if (isPartAddedEvt)
                     {
-                        foreach (Participant p in partWasAdded[true])
+                        foreach (Participant p in partAlreadyInDb[false])
                         {
                             this.ParticipantAdded(this, new ParticipantEventArgs(p));
                         }

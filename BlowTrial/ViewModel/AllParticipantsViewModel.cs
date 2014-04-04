@@ -33,8 +33,8 @@ namespace BlowTrial.ViewModel
         public AllParticipantsViewModel(IRepository repository):base(repository)
         {
             base.DisplayName = Strings.AllParticipantsViewModel_DisplayName;
-            _repository.ParticipantAdded += OnParticipantAdded;
             GetAllParticipants();
+            _repository.ParticipantAdded += OnParticipantAdded;
             _repository.ParticipantUpdated += HandleParticipantUpdate;
 
             SortGridView = new RelayCommand(SortParticipants);
@@ -154,7 +154,6 @@ namespace BlowTrial.ViewModel
             model.StudyCentre = SelectedParticipant.StudyCentre;
             var vm = new PatientDemographicsViewModel(_repository, model);
             window.DataContext = vm;
-            _repository.ParticipantUpdated += HandleDemographicUpdate;
             EventHandler enrolCloseHandler = null;
             enrolCloseHandler = delegate
             {
@@ -164,15 +163,8 @@ namespace BlowTrial.ViewModel
 
             vm.RequestClose += enrolCloseHandler;
             window.ShowDialog();
-            _repository.ParticipantUpdated -= HandleDemographicUpdate;
         }
 
-        void HandleDemographicUpdate(object sender, ParticipantEventArgs e)
-        {
-            AllParticipants.EditItem(SelectedParticipant);
-            UpdateDemographics(e.Participant, SelectedParticipant);
-            AllParticipants.CommitEdit();
-        }
         static void UpdateDemographics(Participant p, ParticipantListItemViewModel vm)
         {
             vm.AgeDays = (DateTime.Now - p.DateTimeBirth).Days;
