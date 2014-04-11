@@ -18,7 +18,6 @@ using System.Collections.Specialized;
 //using System.Windows.Threading;
 using System.Windows.Media;
 using StatsForAge.DataSets;
-using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.ViewModel
 {

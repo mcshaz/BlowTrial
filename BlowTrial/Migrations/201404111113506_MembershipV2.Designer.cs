@@ -6,14 +6,14 @@ namespace BlowTrial.Migrations.Membership
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.0.2-21211")]
+    [GeneratedCode("EntityFramework.Migrations", "6.1.0-30225")]
     public sealed partial class MembershipV2 : IMigrationMetadata
     {
         private readonly ResourceManager Resources = new ResourceManager(typeof(MembershipV2));
         
         string IMigrationMetadata.Id
         {
-            get { return "201403070429267_MembershipV2"; }
+            get { return "201404111113506_MembershipV2"; }
         }
         
         string IMigrationMetadata.Source

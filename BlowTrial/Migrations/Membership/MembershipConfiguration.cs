@@ -45,7 +45,7 @@ namespace BlowTrial.Migrations.Membership
                 };
                 context.RandomisingMessages.Add(msgs);
             }
-            if (string.IsNullOrEmpty(msgs.DischargeExplanation))
+            if (string.IsNullOrEmpty( msgs.DischargeExplanation)) 
             {
                 //Danger - could make a circular reference if seed for TrialDataContext had a reference back to here
                 bool isChennai;

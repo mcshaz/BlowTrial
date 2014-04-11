@@ -269,7 +269,7 @@ namespace BlowTrial.Domain.Providers
             patient.AppVersionAtEnrollment = App.CurrentAppVersion;
 
             _dbContext.SaveChanges();
-            if (this.ParticipantAdded != null)
+            if (this.ScreenedPatientAdded != null)
             {
                 this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
             }

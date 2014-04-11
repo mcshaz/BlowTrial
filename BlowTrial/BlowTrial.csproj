@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.1.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>2.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -175,15 +175,15 @@
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
+    <Compile Include="Migrations\201404111106531_InitialMembership.cs" />
+    <Compile Include="Migrations\201404111106531_InitialMembership.Designer.cs">
+      <DependentUpon>201404111106531_InitialMembership.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201404111113506_MembershipV2.cs" />
+    <Compile Include="Migrations\201404111113506_MembershipV2.Designer.cs">
+      <DependentUpon>201404111113506_MembershipV2.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\CodeBasedMigration.cs" />
-    <Compile Include="Migrations\Membership\201403062252244_InitialMembership.cs" />
-    <Compile Include="Migrations\Membership\201403062252244_InitialMembership.Designer.cs">
-      <DependentUpon>201403062252244_InitialMembership.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.cs" />
-    <Compile Include="Migrations\Membership\201403070429267_MembershipV2.Designer.cs">
-      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\Membership\MembershipConfiguration.cs" />
     <Compile Include="Migrations\TrialData\201403062253529_InitialTrialData.cs">
       <SubType>Code</SubType>
@@ -195,7 +195,7 @@
     <Compile Include="Migrations\TrialData\201403100345554_TrialDataV2.Designer.cs">
       <DependentUpon>201403100345554_TrialDataV2.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\TrialData\TrialDataConfiguration.cs" />
+    <Compile Include="Migrations\TrialDataConfiguration.cs" />
     <Compile Include="Properties\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -498,11 +498,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\Membership\201403062252244_InitialMembership.resx">
-      <DependentUpon>201403062252244_InitialMembership.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201404111106531_InitialMembership.resx">
+      <DependentUpon>201404111106531_InitialMembership.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\Membership\201403070429267_MembershipV2.resx">
-      <DependentUpon>201403070429267_MembershipV2.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201404111113506_MembershipV2.resx">
+      <DependentUpon>201404111113506_MembershipV2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\TrialData\201403062253529_InitialTrialData.resx">
       <DependentUpon>201403062253529_InitialTrialData.cs</DependentUpon>
