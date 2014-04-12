@@ -766,7 +766,16 @@ namespace BlowTrial.ViewModel
         }
         void Save(object param)
         {
-            if (IsParticipantModelChanged)
+            IEnumerable<VaccineAdministered> vas = IsVaccineAdminChanged
+                        ?ParticipantProgressModel.VaccineModelsAdministered.Select
+                            (v => new VaccineAdministered 
+                            {
+                                Id = v.Id,
+                                AdministeredAt = v.AdministeredAtDateTime.Value,
+                                VaccineId = v.VaccineGiven.Id
+                            })
+                        :null;
+            if (IsParticipantModelChanged || IsVaccineAdminChanged)
             {
                 _repository.UpdateParticipant(
                     id : ParticipantProgressModel.Id,
@@ -780,29 +789,21 @@ namespace BlowTrial.ViewModel
                     dischargeDateTime : ParticipantProgressModel.DischargeDateTime,
                     deathOrLastContactDateTime : ParticipantProgressModel.DeathOrLastContactDateTime,
                     outcomeAt28Days : ParticipantProgressModel.OutcomeAt28Days,
-                    notes : ParticipantProgressModel.Notes
+                    notes : ParticipantProgressModel.Notes,
+                    vaccinesAdministered: vas
                 );
                 DataRequired = ParticipantProgressModel.RecalculateDataRequired();
-                IsParticipantModelChanged = false;
-            }
-            if (IsVaccineAdminChanged)
-            {
-                var vas = ParticipantProgressModel.VaccineModelsAdministered.Select
-                    (v => new VaccineAdministered 
-                    {
-                        Id = v.Id,
-                        AdministeredAt = v.AdministeredAtDateTime.Value,
-                        VaccineId = v.VaccineGiven.Id
-                    });
-                _repository.AddOrUpdateVaccinesFor(ParticipantProgressModel.Id, vas);
-                //use fact only 1 vaccine allowed per participant
-                foreach (var vm in ParticipantProgressModel.VaccineModelsAdministered)
+                if (IsVaccineAdminChanged)
                 {
-                    if (vm.Id == 0)
+                    foreach (var vm in ParticipantProgressModel.VaccineModelsAdministered)
                     {
-                        vm.Id = vas.First(v=>v.VaccineId == vm.VaccineGiven.Id).Id;
+                        if (vm.Id == 0)
+                        {
+                            vm.Id = vas.First(v => v.VaccineId == vm.VaccineGiven.Id).Id;
+                        }
                     }
                 }
+                IsParticipantModelChanged = false;
                 IsVaccineAdminChanged = false;
             }
             if (OnSave != null)

@@ -54,7 +54,9 @@ namespace BlowTrial.Infrastructure.Interfaces
             DateTime? dischargeDateTime,
             DateTime? deathOrLastContactDateTime,
             OutcomeAt28DaysOption outcomeAt28Days,
-            string notes);
+            string notes,
+            IEnumerable<VaccineAdministered> vaccinesAdministered=null);
+
         UpdateParticipantViolationType UpdateParticipant(int id,
             string name,
             bool isMale,

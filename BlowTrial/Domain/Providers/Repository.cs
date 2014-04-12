@@ -425,6 +425,22 @@ namespace BlowTrial.Domain.Providers
             }
             return returnVar;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="causeOfDeath"></param>
+        /// <param name="otherCauseOfDeathDetail"></param>
+        /// <param name="bcgAdverse"></param>
+        /// <param name="bcgAdverseDetail"></param>
+        /// <param name="bcgPapule"></param>
+        /// <param name="lastContactWeight"></param>
+        /// <param name="lastWeightDate"></param>
+        /// <param name="dischargeDateTime"></param>
+        /// <param name="deathOrLastContactDateTime"></param>
+        /// <param name="outcomeAt28Days"></param>
+        /// <param name="notes"></param>
+        /// <param name="vaccinesAdministered">if null (or ommitted) the vaccines administered will not be altered</param>
         public void UpdateParticipant(int id,
             CauseOfDeathOption causeOfDeath,
             string otherCauseOfDeathDetail,
@@ -436,7 +452,8 @@ namespace BlowTrial.Domain.Providers
             DateTime? dischargeDateTime,
             DateTime? deathOrLastContactDateTime,
             OutcomeAt28DaysOption outcomeAt28Days,
-            string notes)
+            string notes,
+            IEnumerable<VaccineAdministered> vaccinesAdministered=null)
         {
             Participant participant = _dbContext.Participants.Find(id);
             participant.CauseOfDeath = causeOfDeath;
@@ -461,6 +478,11 @@ namespace BlowTrial.Domain.Providers
                 _dbContext.Entry(attachedParticipant).CurrentValues.SetValues(participant);
             }
             _dbContext.Entry(participant).State = EntityState.Modified;
+            if (vaccinesAdministered!=null)
+            {
+                AddOrUpdateVaccinesAdministered(participant.Id, vaccinesAdministered);
+                participant.VaccinesAdministered = vaccinesAdministered.ToList();
+            }
             _dbContext.SaveChanges();
             if (this.ParticipantUpdated != null)
             {
@@ -472,6 +494,17 @@ namespace BlowTrial.Domain.Providers
         /// </summary>
         /// <param name="vaccinesAdministered"></param>
         public void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered)
+        {
+            AddOrUpdateVaccinesAdministered(participantId, vaccinesAdministered);
+            if (this.ParticipantUpdated != null)
+            {
+                var part = FindParticipant(participantId);
+                part.VaccinesAdministered = new List<VaccineAdministered>(vaccinesAdministered);
+                this.ParticipantUpdated(this, new ParticipantEventArgs(part));
+            }
+        }
+
+        void AddOrUpdateVaccinesAdministered(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
             var includedVaccineAdministeredIds = (from v in vaccinesAdministered
                                                   where v.Id != 0
@@ -513,12 +546,6 @@ namespace BlowTrial.Domain.Providers
                 }
             }
             _dbContext.SaveChanges();
-            if (this.ParticipantUpdated != null)
-            {
-                var part = FindParticipant(participantId);
-                part.VaccinesAdministered = new List<VaccineAdministered>(vaccinesAdministered);
-                this.ParticipantUpdated(this, new ParticipantEventArgs(part));
-            }
         }
         public void Add(Vaccine newVaccine)
         {
@@ -687,6 +714,9 @@ namespace BlowTrial.Domain.Providers
         {
             List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
             List<IntegerRange> newSiteIdRanges = new List<IntegerRange>();
+            List<Participant> updatedParticipants = null;
+            List<Participant> addedParticipants = null;
+            List<ScreenedPatient> addedScreenPatients = null;
             foreach (var f in bakupFiles)
             {
                 MigrateIfRequired(f.FullFilename);
@@ -737,7 +767,7 @@ namespace BlowTrial.Domain.Providers
                     var newVaxAdmin = _dbContext.VaccinesAdministered.AsNoTracking().AsExpandable().Where(vaccineAdminPredicate).ToArray();
                     _dbContext.VaccinesAdministered.AddOrUpdate(newVaxAdmin);
 
-                    var newOrUpdatedParticipants = (from p in downloadedDb.Participants.Include("VaccinesAdministered").AsNoTracking()
+                    var newOrUpdatedParticipants = (from p in downloadedDb.Participants.AsNoTracking()
                                         where p.RecordLastModified > mostRecentBak || newSiteIds.Contains(p.CentreId)
                                         select p).ToArray();
                     //move this down - need to check if vaccines administered
@@ -754,38 +784,37 @@ namespace BlowTrial.Domain.Providers
                     if (isPartUpdEvt)
                     {
                         int[] newVaxAdminPartId = newVaxAdmin.Select(va => va.ParticipantId).Distinct().Except(newOrUpdatedParticipants.Select(p => p.Id)).ToArray();
-
-                        foreach (Participant p in _dbContext.Participants.AsNoTracking().Include("VaccinesAdministered")
-                            .Where(p => newVaxAdminPartId.Contains(p.Id)).ToArray()
-                            .Concat(partAlreadyInDb[true]))
+                        if (updatedParticipants==null) 
                         {
-                            this.ParticipantUpdated(this, new ParticipantEventArgs(p)); 
+                            updatedParticipants = new List<Participant>();
                         }
+                        updatedParticipants.AddRange((from Participant p in _dbContext.Participants.AsNoTracking()
+                                                      where newVaxAdminPartId.Contains(p.Id)
+                                                      select p).AsEnumerable());
+                        updatedParticipants.AddRange(partAlreadyInDb[true]);
                     }
                     if (isPartAddedEvt)
                     {
-                        foreach (Participant p in partAlreadyInDb[false])
+                        if (addedParticipants == null)
                         {
-                            this.ParticipantAdded(this, new ParticipantEventArgs(p));
+                            addedParticipants = new List<Participant>();
                         }
+                        addedParticipants.AddRange(partAlreadyInDb[false]);
                     }
 
                     var screenedPatients = (from s in downloadedDb.ScreenedPatients.AsNoTracking()
                                             where s.RecordLastModified > mostRecentBak || newSiteIds.Contains(s.CentreId)
                                             select s).ToArray();
-                    ScreenedPatient[] newScreenedPatients = null;
-                    if (this.ScreenedPatientAdded != null)
-                    {
-                        int[] currentScreenedPatients = _dbContext.ScreenedPatients.Select(s => s.Id).ToArray();
-                        newScreenedPatients = ScreenedPatients.Where(s => !currentScreenedPatients.Contains(s.Id)).ToArray();
-                    }
                     _dbContext.ScreenedPatients.AddOrUpdate(screenedPatients);
                     if (this.ScreenedPatientAdded != null)
                     {
-                        foreach (ScreenedPatient s in newScreenedPatients)
+                        if (addedScreenPatients == null)
                         {
-                            ScreenedPatientAdded(this, new ScreenedPatientEventArgs(s));
+                            addedScreenPatients = new List<ScreenedPatient>();
                         }
+                        int[] currentScreenedPatients = _dbContext.ScreenedPatients.Select(s => s.Id).ToArray();
+                        addedScreenPatients.AddRange(ScreenedPatients.Where(s => !currentScreenedPatients.Contains(s.Id)).AsEnumerable());
+                    
                     }
 
                     var protocolViolPredicate = PredicateBuilder.False<ProtocolViolation>();
@@ -805,6 +834,29 @@ namespace BlowTrial.Domain.Providers
                     }
 
                     _dbContext.SaveChanges();
+                }
+            }
+            if (addedParticipants != null)
+            {
+                foreach(var p in addedParticipants)
+                {
+                    p.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == p.Id).ToList();
+                    ParticipantAdded(this, new ParticipantEventArgs(p));
+                }
+            }
+            if (updatedParticipants != null)
+            {
+                foreach (var p in updatedParticipants)
+                {
+                    p.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == p.Id).ToList();
+                    ParticipantUpdated(this, new ParticipantEventArgs(p));
+                }
+            }
+            if (addedScreenPatients != null)
+            {
+                foreach (var s in addedScreenPatients)
+                {
+                    ScreenedPatientAdded(this, new ScreenedPatientEventArgs(s));
                 }
             }
         }

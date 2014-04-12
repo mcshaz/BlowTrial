@@ -16,7 +16,7 @@ namespace BlowTrial.Infrastructure
         readonly DispatcherTimer _timer;
         int _nextIndex;
         readonly List<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _participants;
-        readonly IComparer<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _comparer;
+        readonly IComparer<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _comparer = new KeyComparer<TimeSpan, ParticipantListItemViewModel>();
         readonly TimeSpan _adjustIntoFuture = new TimeSpan(TimeSpan.TicksPerSecond);
         #endregion
 
@@ -43,7 +43,6 @@ namespace BlowTrial.Infrastructure
             TimeSpan interval;
             if (_participants.Any())
             {
-                _comparer = new KeyComparer<TimeSpan, ParticipantListItemViewModel>();
                 _participants.Sort(_comparer);
 
                 _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(now.TimeOfDay, null), _comparer);
