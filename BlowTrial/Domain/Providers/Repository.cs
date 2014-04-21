@@ -480,8 +480,9 @@ namespace BlowTrial.Domain.Providers
             _dbContext.Entry(participant).State = EntityState.Modified;
             if (vaccinesAdministered!=null)
             {
-                AddOrUpdateVaccinesAdministered(participant.Id, vaccinesAdministered);
-                participant.VaccinesAdministered = vaccinesAdministered.ToList();
+                var vas = VaccinesAdministered.ToList();
+                AddOrUpdateVaccinesAdministered(participant.Id, vas);
+                participant.VaccinesAdministered = vas;
             }
             _dbContext.SaveChanges();
             if (this.ParticipantUpdated != null)
@@ -496,6 +497,7 @@ namespace BlowTrial.Domain.Providers
         public void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
             AddOrUpdateVaccinesAdministered(participantId, vaccinesAdministered);
+            _dbContext.SaveChanges();
             if (this.ParticipantUpdated != null)
             {
                 var part = FindParticipant(participantId);
@@ -508,7 +510,7 @@ namespace BlowTrial.Domain.Providers
         {
             var includedVaccineAdministeredIds = (from v in vaccinesAdministered
                                                   where v.Id != 0
-                                                  select v.Id);
+                                                  select v.Id).ToArray();
             var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
                                                 where v.ParticipantId == participantId && !includedVaccineAdministeredIds.Contains(v.Id)
                                                 select v.Id).ToArray();
@@ -545,7 +547,6 @@ namespace BlowTrial.Domain.Providers
                     }
                 }
             }
-            _dbContext.SaveChanges();
         }
         public void Add(Vaccine newVaccine)
         {
