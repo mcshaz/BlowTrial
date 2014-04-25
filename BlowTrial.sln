@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericToDataString", "Gene
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsForAge", "StatsForAge\StatsForAge.csproj", "{BD45A88D-C81D-4160-83F4-6058EC553B6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepairDbConsole", "RepairDbConsole\RepairDbConsole.csproj", "{5172FD84-6A0C-45E2-99D4-D959D64CB13C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{BD45A88D-C81D-4160-83F4-6058EC553B6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD45A88D-C81D-4160-83F4-6058EC553B6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD45A88D-C81D-4160-83F4-6058EC553B6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

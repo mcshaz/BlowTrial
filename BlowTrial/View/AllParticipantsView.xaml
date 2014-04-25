@@ -71,6 +71,13 @@
                 <Hyperlink Command="{Binding ShowUpdateDetails}" >Update Progress</Hyperlink>
             </TextBlock>
         </StackPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" >
+            <Label Content="Search:" 
+                          Target="{Binding ElementName=searchTxt}" />
+            <TextBox  x:Name="searchTxt"  ToolTip="Search Trial Id, Hospital Id &amp; Name (Case Sensitive)"
+                            HorizontalAlignment="Stretch" 
+                                 Text="{Binding Path=SearchString, UpdateSourceTrigger=PropertyChanged}" MinWidth="200"/>
+        </StackPanel>
         <Separator DockPanel.Dock="Bottom" />
         <ListView 
           AlternationCount="2" DockPanel.Dock="Top"

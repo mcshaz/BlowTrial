@@ -440,7 +440,7 @@ namespace BlowTrial.Domain.Providers
         /// <param name="deathOrLastContactDateTime"></param>
         /// <param name="outcomeAt28Days"></param>
         /// <param name="notes"></param>
-        /// <param name="vaccinesAdministered">if null (or ommitted) the vaccines administered will not be altered</param>
+        /// <param name="participantVaccines">if null (or ommitted) the vaccines administered will not be altered</param>
         public void UpdateParticipant(int id,
             CauseOfDeathOption causeOfDeath,
             string otherCauseOfDeathDetail,
@@ -453,7 +453,7 @@ namespace BlowTrial.Domain.Providers
             DateTime? deathOrLastContactDateTime,
             OutcomeAt28DaysOption outcomeAt28Days,
             string notes,
-            IEnumerable<VaccineAdministered> vaccinesAdministered=null)
+            IEnumerable<VaccineAdministered> participantVaccines=null)
         {
             Participant participant = _dbContext.Participants.Find(id);
             participant.CauseOfDeath = causeOfDeath;
@@ -478,11 +478,10 @@ namespace BlowTrial.Domain.Providers
                 _dbContext.Entry(attachedParticipant).CurrentValues.SetValues(participant);
             }
             _dbContext.Entry(participant).State = EntityState.Modified;
-            if (vaccinesAdministered!=null)
+            if (participantVaccines!=null)
             {
-                var vas = VaccinesAdministered.ToList();
+                var vas = participantVaccines.ToList();
                 AddOrUpdateVaccinesAdministered(participant.Id, vas);
-                participant.VaccinesAdministered = vas;
             }
             _dbContext.SaveChanges();
             if (this.ParticipantUpdated != null)
@@ -506,9 +505,17 @@ namespace BlowTrial.Domain.Providers
             }
         }
 
-        void AddOrUpdateVaccinesAdministered(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered)
+        void AddOrUpdateVaccinesAdministered(int participantId, IEnumerable<VaccineAdministered> givenParticipantVaccines)
         {
-            var includedVaccineAdministeredIds = (from v in vaccinesAdministered
+            if (givenParticipantVaccines.GroupBy(va=>va.VaccineId).Any(g=>g.Count()>1))
+            {
+                throw new ArgumentException("Repeat vaccines for same participant");
+            }
+            if (givenParticipantVaccines.Any(va=>va.ParticipantId != 0 && va.ParticipantId !=participantId))
+            {
+                throw new ArgumentException("Participant Id differs from vaccine.ParticipantId");
+            }
+            var includedVaccineAdministeredIds = (from v in givenParticipantVaccines
                                                   where v.Id != 0
                                                   select v.Id).ToArray();
             var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
@@ -525,7 +532,7 @@ namespace BlowTrial.Domain.Providers
                                  where p.Id == participantId
                                  select p.CentreId).First();
             int nextId = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);
-            foreach (var v in vaccinesAdministered)
+            foreach (var v in givenParticipantVaccines)
             {
                 v.ParticipantId = participantId;
                 if (v.Id == 0)
@@ -543,7 +550,16 @@ namespace BlowTrial.Domain.Providers
                     }
                     else
                     {
-                        _dbContext.Entry(attachedVA).CurrentValues.SetValues(v);
+                        if (attachedVA.ParticipantId != participantId)
+                        {
+                            throw new InvalidForeignKeyException(string.Format("The Existing participant Id for VaccineAdministered (record ID {0}) is {1} which conflicts with attempted assignment to participant Id {2}", attachedVA.Id, attachedVA.ParticipantId, participantId));
+                        }
+                        if (attachedVA.VaccineId != v.VaccineId)
+                        {
+                            attachedVA.VaccineGiven = null;
+                            attachedVA.VaccineId = v.VaccineId;
+                        }
+                        attachedVA.AdministeredAt = v.AdministeredAt;
                     }
                 }
             }

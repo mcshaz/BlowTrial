@@ -44,4 +44,12 @@ namespace BlowTrial.Infrastructure.Exceptions
         {
         }
     }
+    [Serializable]
+    public class InvalidForeignKeyException : Exception
+    {
+        public InvalidForeignKeyException(string message)
+            : base(message)
+        {
+        }
+    }
 }

@@ -202,7 +202,7 @@
                         <!-- 28 day Outcome -->
 
                         <TextBlock Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5">
-                    28 day outcome (after discharge):
+                            28 day outcome (after discharge):
                         </TextBlock>
                         <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="4">
                             <StackPanel Orientation="Vertical">

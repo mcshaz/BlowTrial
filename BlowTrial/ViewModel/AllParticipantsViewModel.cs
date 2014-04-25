@@ -26,6 +26,8 @@ namespace BlowTrial.ViewModel
         ParticipantUpdateView _updateWindow;
         ParticipantListItemViewModel _selectedParticipant;
         AgeUpdatingService _ageUpdater;
+        string _searchString;
+        bool _isSearchStringEmpty = true;
         #endregion // Fields
 
         #region Constructor
@@ -70,6 +72,7 @@ namespace BlowTrial.ViewModel
             AllParticipants = new ListCollectionView(participantVMs);
             AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
             AllParticipants.SortDescriptions.Add(new SortDescription("DataRequiredSortOrder", ListSortDirection.Ascending));
+            AllParticipants.Filter = ParticipantFilter;
 
             if(_repository.LocalStudyCentres.Skip(1).Any())
             {
@@ -98,7 +101,21 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("SelectedParticipant");
             }
         }
-        
+
+        public string SearchString
+        {
+            get 
+            {
+                return _searchString;
+            }
+            set
+            {
+                _searchString = value;
+                _isSearchStringEmpty = value == null || value == "";
+                NotifyPropertyChanged("SearchString");
+                AllParticipants.Refresh();
+            }
+        }
         #endregion
 
         #region Public Interface
@@ -235,7 +252,15 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Methods
-
+        bool ParticipantFilter(object item)
+        {
+            if (_isSearchStringEmpty) { return true; } 
+            var p = (ParticipantListItemViewModel)item;
+            const StringComparison compare = StringComparison.Ordinal;
+            return p.HospitalIdentifier.IndexOf(_searchString, compare) != -1 ||
+                p.Id.ToString().IndexOf(_searchString, compare) != -1 ||
+                p.Name.IndexOf(_searchString, compare) != -1;
+        }
 
         #endregion //Methods
 
