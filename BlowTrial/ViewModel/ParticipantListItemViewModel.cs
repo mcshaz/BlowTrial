@@ -17,7 +17,7 @@ namespace BlowTrial.ViewModel
     public class ParticipantListItemViewModel : CrudWorkspaceViewModel
     {
         #region Fields
-        
+        string _searchableString;
         #endregion
 
         #region Constructors
@@ -88,6 +88,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == ParticipantModel.Name) { return; }
                 ParticipantModel.Name = value;
+                _searchableString = null;
                 NotifyPropertyChanged("Name");
             }
         }
@@ -186,6 +187,7 @@ namespace BlowTrial.ViewModel
                 if (ParticipantModel.HospitalIdentifier != value)
                 {
                     ParticipantModel.HospitalIdentifier = value;
+                    _searchableString = null;
                     NotifyPropertyChanged("HospitalIdentifier");
                 }
             }
@@ -235,15 +237,17 @@ namespace BlowTrial.ViewModel
                     return;
                 }
                 this.ParticipantModel.DataRequired = value;
+                _dataRequiredString = null;
                 NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
             }
         }
 
+        string _dataRequiredString;
         public string DataRequiredString
         {
             get
             {
-                return DetailsDictionary.GetDetails(ParticipantModel.DataRequired);
+                return _dataRequiredString ?? (_dataRequiredString = DetailsDictionary.GetDetails(ParticipantModel.DataRequired));
             }
         }
 
@@ -252,6 +256,14 @@ namespace BlowTrial.ViewModel
             get
             {
                 return (int)ParticipantModel.DataRequired;
+            }
+        }
+
+        public string SearchableString
+        {
+            get
+            {
+                return _searchableString ?? (_searchableString = ParticipantModel.Id.ToString() + '|' + ParticipantModel.HospitalIdentifier + '|' + ParticipantModel.Name);
             }
         }
 

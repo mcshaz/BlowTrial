@@ -554,6 +554,7 @@ namespace BlowTrial.Domain.Providers
                         {
                             throw new InvalidForeignKeyException(string.Format("The Existing participant Id for VaccineAdministered (record ID {0}) is {1} which conflicts with attempted assignment to participant Id {2}", attachedVA.Id, attachedVA.ParticipantId, participantId));
                         }
+                        //_dbContext.Entry(attachedVA).CurrentValues.SetValues(v);
                         if (attachedVA.VaccineId != v.VaccineId)
                         {
                             attachedVA.VaccineGiven = null;

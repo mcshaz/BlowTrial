@@ -5,12 +5,15 @@ using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Converters;
+using BlowTrial.Infrastructure.CustomSorters;
 using BlowTrial.Infrastructure.Interfaces;
+using BlowTrial.Infrastructure.ThreadHelpers;
 using BlowTrial.Models;
 using BlowTrial.Properties;
 using BlowTrial.View;
 using MvvmExtraLite.Helpers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -26,8 +29,8 @@ namespace BlowTrial.ViewModel
         ParticipantUpdateView _updateWindow;
         ParticipantListItemViewModel _selectedParticipant;
         AgeUpdatingService _ageUpdater;
+        DeferredAction _deferredAction;
         string _searchString;
-        bool _isSearchStringEmpty = true;
         #endregion // Fields
 
         #region Constructor
@@ -43,6 +46,8 @@ namespace BlowTrial.ViewModel
             ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null && _updateWindow==null);
             CreateProtocolViolation = new RelayCommand(ShowProtocolViolation, param => SelectedParticipant != null);
             ShowUpdateEnrolment = new RelayCommand(ShowEnrolDetails, param => SelectedParticipant != null);
+
+            SearchDelay = TimeSpan.FromMilliseconds(400);
 
             Mediator.Register("MainWindowClosing", OnMainWindowClosing);
         }
@@ -70,15 +75,6 @@ namespace BlowTrial.ViewModel
             _ageUpdater.OnAgeIncrement += OnNewAge;
 
             AllParticipants = new ListCollectionView(participantVMs);
-            AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
-            AllParticipants.SortDescriptions.Add(new SortDescription("DataRequiredSortOrder", ListSortDirection.Ascending));
-            AllParticipants.Filter = ParticipantFilter;
-
-            if(_repository.LocalStudyCentres.Skip(1).Any())
-            {
-                AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentre", new StudyCentreModelToNameConverter()));
-                //AllParticipants.SortDescriptions.Add(new SortDescription("StudyCentreName", ListSortDirection.Ascending));
-            }
 
             //creating dispatchertimer so that screen is rendered before setting up the birthtime updating algorithms
 
@@ -110,12 +106,32 @@ namespace BlowTrial.ViewModel
             }
             set
             {
+                if (_searchString == value) { return; }
                 _searchString = value;
-                _isSearchStringEmpty = value == null || value == "";
                 NotifyPropertyChanged("SearchString");
-                AllParticipants.Refresh();
+
+                if (this._deferredAction == null)
+                {
+                    this._deferredAction = DeferredAction.Create(() =>
+                    {
+                        if (string.IsNullOrEmpty(SearchString))
+                        {
+                            AllParticipants.Filter = null;
+                        }
+                        else
+                        {
+                            AllParticipants.Filter = new Predicate<object>(item => ((ParticipantListItemViewModel)item).SearchableString.IndexOf(_searchString, StringComparison.Ordinal) >= 0);
+                        }
+                    });
+                }
+
+                // Defer applying search criteria until time has elapsed.
+                _deferredAction.Defer(SearchDelay);
+                
             }
         }
+
+        public TimeSpan SearchDelay { get; set; }
         #endregion
 
         #region Public Interface
@@ -144,24 +160,59 @@ namespace BlowTrial.ViewModel
         {
             string propertyName = (string)param;
             bool isAscendingCol;
-            if (!_isAscending.TryGetValue(propertyName, out isAscendingCol))
+            if (_isAscending.TryGetValue(propertyName, out isAscendingCol))
+            {
+                isAscendingCol = _isAscending[propertyName] = !isAscendingCol;
+            }
+            else
             {
                 isAscendingCol = true;
                 _isAscending.Add(propertyName, true);
             }
-            AllParticipants.SortDescriptions.Clear();
-            if (isAscendingCol)
+            switch(propertyName)
             {
-                AllParticipants.SortDescriptions.Add
-		            (new SortDescription(propertyName, ListSortDirection.Ascending));
-                _isAscending[propertyName] = false;
-             }
-            else
-            {
-                AllParticipants.SortDescriptions.Add
-                   (new SortDescription(propertyName, ListSortDirection.Descending));
-                _isAscending[propertyName] = true;
+                case "Id":
+                    AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantIdSorter(): new ParticipantIdSortDesc();
+                    break;
+                case "Name":
+                    AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantNameSorter(): new ParticipantNameSortDesc();
+                    break;
+                case "HospitalIdentifier":
+                    AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantHospitalIdSorter(): new ParticipantHospitalIdSortDesc();
+                    break;
+                case "DateTimeBirth":
+                    AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantDateTimeBirthSorter(): new ParticipantDateTimeBirthSortDesc();
+                    break;
+                case "RegisteredAt":
+                    AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantRegisteredAtSorter(): new ParticipantRegisteredAtSortDesc();
+                    break;
             }
+        }
+        bool _groupByDataRequired;
+        public bool GroupByDataRequired { 
+            get 
+            { 
+                return _groupByDataRequired; 
+            } 
+            set 
+            {
+                if (value == _groupByDataRequired) { return; }
+                _groupByDataRequired = value;
+                if (_groupByDataRequired)
+                {
+                    AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
+                    if (_repository.LocalStudyCentres.Skip(1).Any())
+                    {
+                        AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentre", new StudyCentreModelToNameConverter()));
+                        //AllParticipants.SortDescriptions.Add(new SortDescription("StudyCentreName", ListSortDirection.Ascending));
+                    }
+                }
+                else
+                {
+                    AllParticipants.GroupDescriptions.Clear();
+                }
+                NotifyPropertyChanged("GroupByDataRequired");
+            } 
         }
         public RelayCommand ShowUpdateEnrolment { get; private set; }
         void ShowEnrolDetails(object param)
@@ -252,15 +303,6 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Methods
-        bool ParticipantFilter(object item)
-        {
-            if (_isSearchStringEmpty) { return true; } 
-            var p = (ParticipantListItemViewModel)item;
-            const StringComparison compare = StringComparison.Ordinal;
-            return p.HospitalIdentifier.IndexOf(_searchString, compare) != -1 ||
-                p.Id.ToString().IndexOf(_searchString, compare) != -1 ||
-                p.Name.IndexOf(_searchString, compare) != -1;
-        }
 
         #endregion //Methods
 
@@ -332,6 +374,7 @@ namespace BlowTrial.ViewModel
         public void Cleanup()
         {
             _ageUpdater.Cleanup();
+            if (_deferredAction != null) { _deferredAction.Dispose(); }
         }
         #endregion
 
@@ -341,6 +384,7 @@ namespace BlowTrial.ViewModel
             _repository.ParticipantAdded -= OnParticipantAdded;
             _repository.ParticipantUpdated -= HandleParticipantUpdate;
             
+            Cleanup();
             Mediator.Unregister("MainWindowClosing", OnMainWindowClosing);
         }
 

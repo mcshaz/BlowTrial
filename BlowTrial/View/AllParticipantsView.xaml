@@ -77,6 +77,7 @@
             <TextBox  x:Name="searchTxt"  ToolTip="Search Trial Id, Hospital Id &amp; Name (Case Sensitive)"
                             HorizontalAlignment="Stretch" 
                                  Text="{Binding Path=SearchString, UpdateSourceTrigger=PropertyChanged}" MinWidth="200"/>
+            <CheckBox IsChecked="{Binding Path=GroupByDataRequired, UpdateSourceTrigger=PropertyChanged}" Content="Group by data collection" Margin="5"/>
         </StackPanel>
         <Separator DockPanel.Dock="Bottom" />
         <ListView 

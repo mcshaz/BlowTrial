@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.1.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>2.6.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -76,10 +76,6 @@
     <Reference Include="AutoMapper, Version=3.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AutoMapper.3.2.0\lib\net40\AutoMapper.dll</HintPath>
-    </Reference>
-    <Reference Include="AutoMapper.Net4, Version=3.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\AutoMapper.3.2.0\lib\net40\AutoMapper.Net4.dll</HintPath>
     </Reference>
     <Reference Include="ColorMine, Version=1.1.2.1, Culture=neutral, PublicKeyToken=7a2c4d30138edc39, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -172,9 +168,11 @@
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\AgeUpdatingService.cs" />
     <Compile Include="Infrastructure\Converters\EnumToSeperatedWordsConverter.cs" />
+    <Compile Include="Infrastructure\CustomSorters.cs" />
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
+    <Compile Include="Infrastructure\ThreadHelpers.cs" />
     <Compile Include="Migrations\201404111106531_InitialMembership.cs" />
     <Compile Include="Migrations\201404111106531_InitialMembership.Designer.cs">
       <DependentUpon>201404111106531_InitialMembership.cs</DependentUpon>
