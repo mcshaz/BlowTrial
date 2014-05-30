@@ -1,4 +1,5 @@
-﻿using BlowTrial.Domain.Tables;
+﻿using BlowTrial.Domain.Providers;
+using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Interfaces;
@@ -23,6 +24,7 @@ namespace BlowTrial.Models
         #region fields
         Vaccine _vaccine;
         DateTimeSplitter _administeredAtDateTime = new DateTimeSplitter();
+        private readonly int[] BcgVaccines = new int[] { DataContextInitialiser.DanishBcg.Id, DataContextInitialiser.RussianBcg.Id };
         #endregion
 
         #region Properties
@@ -76,6 +78,7 @@ namespace BlowTrial.Models
             }
         }
         public ParticipantProgressModel AdministeredTo { get; set; }
+
         #endregion
 
         #region ValidationBase overrides
@@ -115,6 +118,10 @@ namespace BlowTrial.Models
             if (AdministeredTo.VaccineModelsAdministered.Any(v=>v.Id != this.Id && v.VaccineGiven==this.VaccineGiven))
             {
                 return Strings.VaccineAdministeredVM_DuplicateVaccine;
+            }
+            if (BcgVaccines.Contains(this.VaccineGiven.Id) && AdministeredTo.VaccineModelsAdministered.Any(v => v.Id != this.Id && BcgVaccines.Contains(v.VaccineGiven.Id)))
+            {
+                return Strings.VaccineAdministeredVM_DualBcg;
             }
             return null;
         }

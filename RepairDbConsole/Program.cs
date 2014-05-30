@@ -16,9 +16,27 @@ namespace RepairDbConsole
         [STAThread]
         static void Main(string[] args)
         {
-            var argList = Instruction.GetInstructions(args).ToDictionary(i=>i.OptionName,i=>i.OptionValues);
-            //UpdateVA(argList["directory"] + '\\' + argList["source"], argList["directory"] + '\\' + argList["dest"]);
-            MakeComparisonList(argList["directory"]);
+            var cmd = Command.GetCommand(args);
+            Dictionary<string, string[]> argList = cmd.Instructions.ToDictionary(i => i.OptionName, i => i.OptionValues);
+            string directory = (argList.ContainsKey("directory"))
+                ?string.Join(" ", argList["directory"])
+                :null;
+            switch (cmd.Name.ToLowerInvariant())
+            {
+                case "comparevaccinelist":
+                    MakeComparisonList(directory);
+                    break;
+                case "updatevaccines":
+                    UpdateVA(directory + '\\' + argList["source"], directory + '\\' + argList["dest"]);
+                    break;
+                case "compareparticipants":
+                    var files = argList["files"];
+                    Compare2DBParticipantId(directory + '\\' + files[0], directory + '\\' + files[1]);
+                    break;
+                default:
+                    Console.WriteLine("Command not found");
+                    break;
+            }
         }
         
         static void MakeComparisonList(string directory)
@@ -57,11 +75,11 @@ namespace RepairDbConsole
             return null;
         }
 
-        static void CompareFiles(string dbFilename1, string dbFilename2)
+        static void Compare2DBVaccines(string dbFilename1, string dbFilename2)
         {
             var sb = new StringBuilder();
             sb.AppendLine(string.Join("\t", new string[] { "Copies", "Id", "ParticipantId", "VaccineId", "AdministeredAt", "RecordLastModified" }));
-            foreach (var grp in Diff(dbFilename1, dbFilename2))
+            foreach (var grp in VaccineDiff(dbFilename1, dbFilename2))
             {
                 sb.AppendLine(Path.GetFileName(grp.Key.ToString()));
                 foreach (var match in grp)
@@ -79,7 +97,18 @@ namespace RepairDbConsole
             Console.WriteLine("tab seperated values written to clipboard. press enter to continue.");
             Console.ReadLine();
         }
-        static ILookup<int,List<VaccineAdministered>> Diff(string db1Filename, string db2Filename)
+        static void Compare2DBParticipantId(string dbFilename1, string dbFilename2)
+        {
+            var dif = ParticipantDiff(dbFilename1, dbFilename2);
+            Console.WriteLine("found in '{0}' only:", dbFilename1);
+            Console.WriteLine(string.Join(",", dif[true]));
+            Console.WriteLine();
+            Console.WriteLine("found in '{0}' only:", dbFilename2);
+            Console.WriteLine(string.Join(",", dif[false]));
+            Console.ReadLine();
+        }
+
+        static ILookup<int,List<VaccineAdministered>> VaccineDiff(string db1Filename, string db2Filename)
         {
             IEnumerable<VaccineAdministered> va1;
             using (var db = new TrialDataContext(db1Filename))
@@ -93,8 +122,30 @@ namespace RepairDbConsole
             }
             return (from va in va1.Concat(va2).ToList()
                     group va by va.AdministeredAt.ToString() + va.VaccineId.ToString() into s
-                    select s).Select(g=>g.ToList()).ToList().ToLookup(g=>g.Count);
-                    
+                    select s).Select(g=>g.ToList()).ToList().ToLookup(g=>g.Count);     
+        }
+
+        static Dictionary<bool, int[]> ParticipantDiff(string db1Filename, string db2Filename)
+        {
+            int[] participants1;
+            int[] centres1;
+            using (var db = new TrialDataContext(db1Filename))
+            {
+                participants1 = db.Participants.Select(p=>p.Id).ToArray();
+                centres1 = db.StudyCentres.Select(c => c.Id).ToArray();
+            }
+            int[] participants2;
+            using (var db = new TrialDataContext(db2Filename))
+            {
+                participants2 =(from p in db.Participants
+                                where centres1.Contains(p.CentreId)
+                                select p.Id).ToArray();
+            }
+            var returnVar = new Dictionary<bool, int[]>();
+            returnVar.Add(true, participants1.Where(p => !participants2.Contains(p)).ToArray());
+            returnVar.Add(false, participants2.Where(p => !participants1.Contains(p)).ToArray());
+            return returnVar;
+
         }
 
         static void UpdateVA(string source, string dest)

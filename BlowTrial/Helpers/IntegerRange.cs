@@ -9,14 +9,41 @@ namespace BlowTrial.Helpers
     {
         public IntegerRange(int min, int max)
         {
-            if (min>= max)
-            {
-                throw new ArgumentException("min must be less than max");
-            }
             Min = min;
             Max = max;
         }
-        public int Min { get; private set; }
-        public int Max { get; private set; }
+        public IntegerRange() { }
+        int? _min;
+        int? _max;
+        public int Min 
+        { 
+            get 
+            { 
+                return _min.Value; 
+            }
+            set
+            {
+                if (value>=_max)
+                {
+                    throw new ArgumentException("min must be less than max");
+                }
+                _min = value;
+            }
+        }
+        public int Max 
+        { 
+            get 
+            { 
+                return _max.Value; 
+            }
+            set 
+            {
+                if (value <= _min)
+                {
+                    throw new ArgumentException("min must be less than max");
+                }
+                _max = value;
+            }
+        }
     }
 }

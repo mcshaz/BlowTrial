@@ -61,7 +61,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All Participants.
+        ///   Looks up a localized string similar to Participants ({0} of {1} displayed).
         /// </summary>
         public static string AllParticipantsViewModel_DisplayName {
             get {
@@ -952,7 +952,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A randomising envelope should not be used. Id will be auto assigned..
+        ///   Looks up a localized string similar to A randomising envelope should not be used for this twin. Id will be auto assigned..
         /// </summary>
         public static string NewPatient_Error_TwinAndEnvelope {
             get {
@@ -1582,7 +1582,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No BCG given.
+        ///   Looks up a localized string similar to Unknown or BCG not given.
         /// </summary>
         public static string ParticipantUpdateVM_Option_BcgPapuleNull {
             get {
@@ -1825,11 +1825,11 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BCG.
+        ///   Looks up a localized string similar to Danish BCG.
         /// </summary>
-        public static string Vaccine_Bcg {
+        public static string Vaccine_DanishBcg {
             get {
-                return ResourceManager.GetString("Vaccine_Bcg", resourceCulture);
+                return ResourceManager.GetString("Vaccine_DanishBcg", resourceCulture);
             }
         }
         
@@ -1852,6 +1852,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Russian BCG.
+        /// </summary>
+        public static string Vaccine_RussianBcg {
+            get {
+                return ResourceManager.GetString("Vaccine_RussianBcg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please select the date of administration.
         /// </summary>
         public static string VaccineAdministeredModel_Error_NoAdminDate {
@@ -1866,6 +1875,15 @@ namespace BlowTrial.Properties {
         public static string VaccineAdministeredModel_Error_NoVaccine {
             get {
                 return ResourceManager.GetString("VaccineAdministeredModel_Error_NoVaccine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only 1 type of BCG can be given per patient.
+        /// </summary>
+        public static string VaccineAdministeredVM_DualBcg {
+            get {
+                return ResourceManager.GetString("VaccineAdministeredVM_DualBcg", resourceCulture);
             }
         }
         

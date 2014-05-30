@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AllParticipantsViewModel_DisplayName" xml:space="preserve">
-    <value>All Participants</value>
+    <value>Participants ({0} of {1} displayed)</value>
     <comment>The display name of an AllParticipantsViewModel object</comment>
   </data>
   <data name="Blowtrial_ProjectName" xml:space="preserve">
@@ -524,8 +524,8 @@
   <data name="DropDownList_Other" xml:space="preserve">
     <value>Other...</value>
   </data>
-  <data name="Vaccine_Bcg" xml:space="preserve">
-    <value>BCG</value>
+  <data name="Vaccine_RussianBcg" xml:space="preserve">
+    <value>Russian BCG</value>
   </data>
   <data name="Vaccine_HepB" xml:space="preserve">
     <value>Hep B</value>
@@ -754,7 +754,7 @@
     <value>The patient must be less than 22 days old at the time of randomising</value>
   </data>
   <data name="NewPatient_Error_TwinAndEnvelope" xml:space="preserve">
-    <value>A randomising envelope should not be used. Id will be auto assigned.</value>
+    <value>A randomising envelope should not be used for this twin. Id will be auto assigned.</value>
   </data>
   <data name="NewPatient_Error_TwinGestAge" xml:space="preserve">
     <value>A twin of that patient would be expected to have a gestation of {0} weeks</value>
@@ -790,7 +790,7 @@
     <value>No Phone</value>
   </data>
   <data name="ParticipantUpdateVM_Option_BcgPapuleNull" xml:space="preserve">
-    <value>No BCG given</value>
+    <value>Unknown or BCG not given</value>
   </data>
   <data name="RandomisedMessagesViewModel_DefaultDischarge_Hospital" xml:space="preserve">
     <value>Discharge from Hospital</value>
@@ -830,5 +830,11 @@
   </data>
   <data name="ParticipantUpdateVM_Warning_BcgInControl_WillBee" xml:space="preserve">
     <value>will be</value>
+  </data>
+  <data name="VaccineAdministeredVM_DualBcg" xml:space="preserve">
+    <value>Only 1 type of BCG can be given per patient</value>
+  </data>
+  <data name="Vaccine_DanishBcg" xml:space="preserve">
+    <value>Danish BCG</value>
   </data>
 </root>

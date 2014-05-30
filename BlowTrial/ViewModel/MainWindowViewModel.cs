@@ -274,11 +274,11 @@ namespace BlowTrial.ViewModel
             var updateWindow = new BlowTrial.View.RequestReverseUpdateView();
             EventHandler onRequestClose = null;
             updateVm.RequestClose += onRequestClose = (o, e) =>
-            {
-                updateWindow.Close();
-                updateVm.RequestClose -= onRequestClose;
-                onRequestClose = null;
-            };
+                {
+                    updateWindow.Close();
+                    updateVm.RequestClose -= onRequestClose;
+                    onRequestClose = null;
+                };
 
             updateWindow.DataContext = updateVm;
             updateWindow.ShowDialog();
@@ -292,6 +292,22 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(allParticipantsVM);
             }
             this.SetActiveWorkspace(allParticipantsVM);
+            allParticipantsVM.PropertyChanged += allParticipantsVM_PropertyChanged;
+            EventHandler onRequestClose = null;
+            allParticipantsVM.RequestClose += onRequestClose = (o, e) =>
+                {
+                    allParticipantsVM.PropertyChanged -= allParticipantsVM_PropertyChanged;
+                    allParticipantsVM.RequestClose -= onRequestClose;
+                    onRequestClose = null;
+                };
+        }
+
+        void allParticipantsVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "DisplayName")
+            {
+                base.DisplayName = ((AllParticipantsViewModel)sender).DisplayName;
+            }
         }
 
         void ShowScreenedPatients()

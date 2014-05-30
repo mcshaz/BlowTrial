@@ -12,6 +12,7 @@ namespace BlowTrial.Domain.Tables
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
+        [StringLength(16)]
         public string Name { get; set; }
         public DateTime RecordLastModified { get; set; }
 
@@ -19,7 +20,7 @@ namespace BlowTrial.Domain.Tables
         {
             get
             {
-                return this.Id == DataContextInitialiser.Bcg.Id;
+                return (this.Id == DataContextInitialiser.RussianBcg.Id || this.Id == DataContextInitialiser.DanishBcg.Id);
             }
         }
     }

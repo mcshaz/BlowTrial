@@ -1,0 +1,46 @@
+﻿<Window x:Class="BlowTrial.View.SelectDataRequiredOptionsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select which group to display" Height="300" Width="360">
+    <Grid>
+        <StackPanel Margin="5" >
+            <TextBlock>Data Collection:</TextBlock>
+            <ListBox Name="dataRequiredList"
+                 ItemsSource="{Binding AllOptions}"
+                 Margin="0,5">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding Path=DataRequiredString, Mode=OneTime}" IsChecked="{Binding Path=IsSelected}" Margin="5 5 0 0"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <TextBlock>Centre:</TextBlock>
+            <ListBox Name="centreList" IsEnabled="{Binding Path=MultiCentreOption, Mode=OneTime}"
+                 ItemsSource="{Binding AllCentres}"
+                 Margin="0,5">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding Path=Name, Mode=OneTime}" IsChecked="{Binding Path=IsSelected}" Margin="5 5 0 0"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Orientation="Horizontal">
+            <Button Content="Select All"
+                Margin="5,0" Padding="5,0"
+                Command="{Binding SelectAll}"/>
+            <Button Content="Unselect All"
+                Margin="5,0" Padding="5,0"
+                Command="{Binding UnselectAll}"/>
+            </StackPanel>
+            <Separator/>
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Height="16">
+                    <Hyperlink Command="{Binding Close}" >Close (without applying filter)</Hyperlink>
+                </TextBlock>
+                <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Height="16">
+                    <Hyperlink Command="{Binding Apply}" >Apply</Hyperlink>
+                </TextBlock>
+            </DockPanel>
+        </StackPanel>
+    </Grid>
+</Window>

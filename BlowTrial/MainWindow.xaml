@@ -65,7 +65,7 @@
                 <HeaderedContentControl 
           Content="{Binding Path=Workspaces}"
           ContentTemplate="{StaticResource WorkspacesTemplate}"
-          Header="{Binding Path=DisplayName}"
+          Header="{Binding Path=DisplayName, Mode=OneWay}"
           Style="{StaticResource MainHCCStyle}"
           />
             </Border>

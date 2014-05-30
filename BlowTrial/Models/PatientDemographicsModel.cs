@@ -327,17 +327,13 @@ namespace BlowTrial.Models
         }
         string ValidateEnvelopeNumber(bool hardErrorsOnly)
         {
-            if (!(WasEnvelopeRandomised && OkToRandomise())) 
+            if (!WasEnvelopeRandomised || !OkToRandomise() || (!IsNewRecord && !EnvelopeNumber.HasValue)) //last logical condition because those siblings who followed randomised to the same arm as another sibbling during envelope randomisation phase
             {
                 return null; 
             }
-            if (MultipleSiblingId==null && EnvelopeNumber==null)
+            if (!MultipleSiblingId.HasValue && !EnvelopeNumber.HasValue)
             {
                 return Strings.Field_Error_Empty;
-            }
-            if (MultipleSiblingId.HasValue)
-            {
-                return EnvelopeNumber.HasValue?Strings.NewPatient_Error_TwinAndEnvelope:null;
             }
             else if (EnvelopeNumber > StudyCentre.MaxIdForSite || EnvelopeNumber < StudyCentre.Id)
             {
@@ -459,7 +455,7 @@ namespace BlowTrial.Models
             if (error.DateError == null && DateTimeBirth.HasValue)
             {
                 var age = nowVal - DateTimeBirth.Value;
-                if (age.Days > MaxAgeDaysScreen)
+                if (IsNewRecord && age.Days > MaxAgeDaysScreen)
                 {
                     error.DateError = Strings.NewPatient_Error_DOBtooOldToScreen;
                 }

@@ -18,7 +18,7 @@ namespace BlowTrial.Helpers
                 var rm = Strings.ResourceManager;
                 _outcomeDict = Enum.GetValues(typeof(DataRequiredOption))
                     .Cast<DataRequiredOption>()
-                    .ToDictionary(d => d, 
+                    .ToDictionary(d => d,
                         d => rm.GetString(optionPrefix + d.ToString()));
             }
             return _outcomeDict[option];

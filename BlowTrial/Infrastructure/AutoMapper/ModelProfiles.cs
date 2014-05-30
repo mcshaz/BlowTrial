@@ -66,7 +66,7 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.LikelyDie24Hr, o => o.MapFrom(s => false))
                 .ForMember(d => d.Missed, o => o.MapFrom(s => false))
                 .ForMember(d => d.DateTimeOfEnrollment, o => o.MapFrom(s=>s.RegisteredAt))
-                .ForMember(d => d.EnvelopeNumber, o => o.MapFrom(s=>s.WasEnvelopeRandomised?(int?)s.Id:null))
+                .ForMember(d => d.EnvelopeNumber, o => o.MapFrom(s=>s.WasEnvelopeRandomised && s.Id<=EnvelopeDetails.MaxEnvelopeNumber?(int?)s.Id:null)) // because multiple siblings will have was envelope randomised =true;
                 .ForMember(d => d.IsInborn, o => o.MapFrom(s=>s.Inborn))
                 .ForMember(d => d.StudyCentre, o => o.Ignore())
                 .ForMember(d => d.GestAgeWeeks, o => o.Ignore())

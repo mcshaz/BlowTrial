@@ -256,7 +256,7 @@ namespace BlowTrial.Domain.Providers
 
             _dbContext.Participants.Add(participant);
 
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
             if (this.ParticipantAdded != null)
             {
                 this.ParticipantAdded(this, new ParticipantEventArgs(participant));
@@ -268,7 +268,7 @@ namespace BlowTrial.Domain.Providers
             patient.Id = GetNextId(_dbContext.ScreenedPatients, patient.CentreId);
             patient.AppVersionAtEnrollment = App.CurrentAppVersion;
 
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
             if (this.ScreenedPatientAdded != null)
             {
                 this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
@@ -280,7 +280,7 @@ namespace BlowTrial.Domain.Providers
             {
                 _dbContext.StudyCentres.AddOrUpdate(s);
             }
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
             _localStudyCentreDictionary = null;
         }
         public void AddOrUpdate(ProtocolViolation violation)
@@ -320,7 +320,7 @@ namespace BlowTrial.Domain.Providers
                     }
                 }
             }
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
         }
         const string BlockRandomisationViolation = "Alteration to data which would have affected randomisation:";
         static string GenderString(bool isMale)
@@ -418,7 +418,7 @@ namespace BlowTrial.Domain.Providers
             participant.HospitalIdentifier = hospitalIdentifier;
             participant.Inborn = isInborn;
             participant.RegisteredAt = registeredAt;
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
                 this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
@@ -483,7 +483,7 @@ namespace BlowTrial.Domain.Providers
                 var vas = participantVaccines.ToList();
                 AddOrUpdateVaccinesAdministered(participant.Id, vas);
             }
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
                 this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
@@ -496,7 +496,7 @@ namespace BlowTrial.Domain.Providers
         public void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered)
         {
             AddOrUpdateVaccinesAdministered(participantId, vaccinesAdministered);
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
                 var part = FindParticipant(participantId);
@@ -569,7 +569,7 @@ namespace BlowTrial.Domain.Providers
         {
             newVaccine.Id = GetNextId(_dbContext.Vaccines, LocalStudyCentres.First().Id);
             _dbContext.Vaccines.Add(newVaccine);
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
         }
         public void Update(Participant patient)
         {
@@ -589,7 +589,7 @@ namespace BlowTrial.Domain.Providers
             {
                 _dbContext.Entry(allParticipants.First(a=>a.Id == p.Id)).CurrentValues.SetValues(p);
             }
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
         }
         public void Update(ScreenedPatient patient)
         {
@@ -603,7 +603,7 @@ namespace BlowTrial.Domain.Providers
                 _dbContext.Entry(attachedPatient).CurrentValues.SetValues(patient);
             }
             _dbContext.Entry(patient).State = EntityState.Modified;
-            _dbContext.SaveChanges();
+            _dbContext.SaveChanges(true);
         }
         public void Backup()
         {
@@ -623,15 +623,7 @@ namespace BlowTrial.Domain.Providers
 
             if (cloudFile.Exists)
             {
-                DateTime? mostRecentEntry = (new DateTime?[]
-                    {
-                        _dbContext.Participants.Max(p=>(DateTime?)p.RecordLastModified),
-                        _dbContext.ScreenedPatients.Max(s=>(DateTime?)s.RecordLastModified),
-                        _dbContext.Vaccines.Max(v=>(DateTime?)v.RecordLastModified),
-                        _dbContext.VaccinesAdministered.Max(va=>(DateTime?)va.RecordLastModified),
-                        _dbContext.ProtocolViolations.Max(pv=>(DateTime?)pv.RecordLastModified),
-                        _dbContext.StudyCentres.Max(s=>(DateTime?)s.RecordLastModified)
-                    }).Max();
+                DateTime? mostRecentEntry = SyncronisationResult.MostRecentEntry(_dbContext);
                 if (mostRecentEntry==null || cloudFile.LastWriteTimeUtc >= mostRecentEntry)
                 {
                     return;
@@ -679,7 +671,7 @@ namespace BlowTrial.Domain.Providers
             }
 
             _dbContext = _createContext.Invoke();
-            AddOrUpdateBaks(bakDetails);
+            AddOrUpdateBaks(bakDetails.Select(b=>b.FullFilename));
 
         }
         public IEnumerable<KeyValuePair<string,IEnumerable<StudyCentreModel>>> GetFilenamesAndCentres()
@@ -728,151 +720,44 @@ namespace BlowTrial.Domain.Providers
                 }
             }
         }
-        void AddOrUpdateBaks(IEnumerable<BakFileDetails> bakupFiles)
+        void AddOrUpdateBaks(IEnumerable<string> bakupFilePaths)
         {
-            List<StudyCentre> knownSites = _dbContext.StudyCentres.ToList();
-            List<IntegerRange> newSiteIdRanges = new List<IntegerRange>();
-            List<Participant> updatedParticipants = null;
-            List<Participant> addedParticipants = null;
-            List<ScreenedPatient> addedScreenPatients = null;
-            foreach (var f in bakupFiles)
+
+            foreach (var f in bakupFilePaths)
             {
-                MigrateIfRequired(f.FullFilename);
-                IEnumerable<Guid> knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
-                using (var downloadedDb = _dbContext.AttachDb(f.FullFilename))
-                {      
-                    var newSites = (from s in downloadedDb.StudyCentres.AsNoTracking()
-                                    where !knownSiteIds.Contains(s.DuplicateIdCheck)
-                                    select s).ToList();
-                    foreach (StudyCentre s in newSites)
-                    {
-                        var dup = knownSites.FirstOrDefault(k=>k.Id == s.Id);
-                        if (dup != null)
-                        {
-                            throw new DuplicateDataKeyException(string.Format("Duplicate key for site Id:{0} (using Guids {1} & {2})",s.Id.ToString(),s.DuplicateIdCheck, dup.DuplicateIdCheck));
-                        }
-                        var overlappingSite = knownSites.FirstOrDefault(k=>s.Id <= k.MaxIdForSite && s.MaxIdForSite >= k.Id);
-                        if (overlappingSite != null)
-                        {
-                            throw new OverlappingDataKeyRangeException(string.Format("Potential for patient data overwrite - existing site Ids ({0}-{1}), new site Ids ({2}-{3})",
-                                overlappingSite.Id, overlappingSite.MaxIdForSite,
-                                s.Id, s.MaxIdForSite));
-                        }
-                        _dbContext.StudyCentres.Add(s); //because context will have been renewed, this should not cause a duplicate key exception
-                        knownSites.Add(s);
-                        newSiteIdRanges.Add(new IntegerRange(s.Id, s.MaxIdForSite));
-                        _localStudyCentreDictionary = null;
-                    }
-                    var newSiteIds = newSiteIdRanges.Select(n => n.Min);
-                    DateTime minDate = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
-                    DateTime mostRecentBak = (f.LastBackupUtc < minDate)?minDate:f.LastBackupUtc;
-
-                    var vaccinePredicate = PredicateBuilder.False<Vaccine>();
-                    vaccinePredicate.Or(p => p.RecordLastModified > mostRecentBak);
-                    foreach (IntegerRange rng in newSiteIdRanges)
-                    {
-                        vaccinePredicate = vaccinePredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
-                    }
-                    var newVax = _dbContext.Vaccines.AsNoTracking().AsExpandable().Where(vaccinePredicate).ToArray();
-                    _dbContext.Vaccines.AddOrUpdate(newVax);
-
-                    var vaccineAdminPredicate = PredicateBuilder.False<VaccineAdministered>();
-                    vaccineAdminPredicate.Or(p => p.RecordLastModified > mostRecentBak);
-                    foreach (IntegerRange rng in newSiteIdRanges)
-                    {
-                        vaccineAdminPredicate = vaccineAdminPredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
-                    }
-                    var newVaxAdmin = _dbContext.VaccinesAdministered.AsNoTracking().AsExpandable().Where(vaccineAdminPredicate).ToArray();
-                    _dbContext.VaccinesAdministered.AddOrUpdate(newVaxAdmin);
-
-                    var newOrUpdatedParticipants = (from p in downloadedDb.Participants.AsNoTracking()
-                                        where p.RecordLastModified > mostRecentBak || newSiteIds.Contains(p.CentreId)
-                                        select p).ToArray();
-                    //move this down - need to check if vaccines administered
-                    bool isPartAddedEvt = this.ParticipantAdded != null;
-                    bool isPartUpdEvt = this.ParticipantUpdated != null;
-                    ILookup<bool, Participant> partAlreadyInDb;
-                    if (isPartAddedEvt || isPartUpdEvt)
-                    {
-                        int[] currentPartIds = _dbContext.Participants.Select(p => p.Id).ToArray();
-                        partAlreadyInDb = newOrUpdatedParticipants.ToLookup(p => currentPartIds.Contains(p.Id));
-                    }
-                    else { partAlreadyInDb = null; } //purely to avoid use of unassigned variable error 
-                    _dbContext.Participants.AddOrUpdate(newOrUpdatedParticipants);
-                    if (isPartUpdEvt)
-                    {
-                        int[] newVaxAdminPartId = newVaxAdmin.Select(va => va.ParticipantId).Distinct().Except(newOrUpdatedParticipants.Select(p => p.Id)).ToArray();
-                        if (updatedParticipants==null) 
-                        {
-                            updatedParticipants = new List<Participant>();
-                        }
-                        updatedParticipants.AddRange((from Participant p in _dbContext.Participants.AsNoTracking()
-                                                      where newVaxAdminPartId.Contains(p.Id)
-                                                      select p).AsEnumerable());
-                        updatedParticipants.AddRange(partAlreadyInDb[true]);
-                    }
-                    if (isPartAddedEvt)
-                    {
-                        if (addedParticipants == null)
-                        {
-                            addedParticipants = new List<Participant>();
-                        }
-                        addedParticipants.AddRange(partAlreadyInDb[false]);
-                    }
-
-                    var screenedPatients = (from s in downloadedDb.ScreenedPatients.AsNoTracking()
-                                            where s.RecordLastModified > mostRecentBak || newSiteIds.Contains(s.CentreId)
-                                            select s).ToArray();
-                    _dbContext.ScreenedPatients.AddOrUpdate(screenedPatients);
-                    if (this.ScreenedPatientAdded != null)
-                    {
-                        if (addedScreenPatients == null)
-                        {
-                            addedScreenPatients = new List<ScreenedPatient>();
-                        }
-                        int[] currentScreenedPatients = _dbContext.ScreenedPatients.Select(s => s.Id).ToArray();
-                        addedScreenPatients.AddRange(ScreenedPatients.Where(s => !currentScreenedPatients.Contains(s.Id)).AsEnumerable());
-                    
-                    }
-
-                    var protocolViolPredicate = PredicateBuilder.False<ProtocolViolation>();
-                    protocolViolPredicate.Or(p => p.RecordLastModified > mostRecentBak);
-                    foreach (IntegerRange rng in newSiteIdRanges)
-                    {
-                        protocolViolPredicate = protocolViolPredicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
-                    }
-                    var newProtocolViol = _dbContext.ProtocolViolations.AsNoTracking().AsExpandable().Where(protocolViolPredicate).ToArray();
-                    _dbContext.ProtocolViolations.AddOrUpdate(newProtocolViol);
-                    if (ProtocolViolationAdded != null)
-                    {
-                        foreach(ProtocolViolation pv in newProtocolViol)
-                        {
-                            ProtocolViolationAdded(this,new ProtocolViolationEventArgs(pv));
-                        }
-                    }
-
-                    _dbContext.SaveChanges();
-                }
+                MigrateIfRequired(f);
             }
-            if (addedParticipants != null)
+
+            SyncronisationResult syncResults = SyncronisationResult.Sync(_dbContext, bakupFilePaths);
+
+            if (ParticipantAdded != null)
             {
-                foreach(var p in addedParticipants)
+                foreach(var p in (from part in _dbContext.Participants.Include("VaccinesAdministered")
+                                  where syncResults.AddedParticipantIds.Contains(part.Id)
+                                  select part))
                 {
-                    p.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == p.Id).ToList();
                     ParticipantAdded(this, new ParticipantEventArgs(p));
                 }
             }
-            if (updatedParticipants != null)
+            if (ParticipantUpdated != null)
             {
-                foreach (var p in updatedParticipants)
+                foreach (var p in (from part in _dbContext.Participants.Include("VaccinesAdministered")
+                                   where syncResults.UpdatedParticipantIds.Contains(part.Id)
+                                   select part)
+                                   .Concat(
+                                   (from va in _dbContext.VaccinesAdministered.Include("Participant.VaccinesAdministered")
+                                    where !syncResults.AddedParticipantIds.Contains(va.ParticipantId)
+                                        && !syncResults.UpdatedParticipantIds.Contains(va.ParticipantId)
+                                    select va.AdministeredTo)))
                 {
-                    p.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == p.Id).ToList();
                     ParticipantUpdated(this, new ParticipantEventArgs(p));
                 }
             }
-            if (addedScreenPatients != null)
+            if (ScreenedPatientAdded != null)
             {
-                foreach (var s in addedScreenPatients)
+                foreach (var s in from screen in _dbContext.ScreenedPatients
+                                  where syncResults.AddedScreenPatientIds.Contains(screen.Id)
+                                  select screen)
                 {
                     ScreenedPatientAdded(this, new ScreenedPatientEventArgs(s));
                 }

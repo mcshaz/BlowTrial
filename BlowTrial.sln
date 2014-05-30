@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsForAge", "StatsForAge\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepairDbConsole", "RepairDbConsole\RepairDbConsole.csproj", "{5172FD84-6A0C-45E2-99D4-D959D64CB13C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlowTrialUnitTests", "BlowTrialUnitTests\BlowTrialUnitTests.csproj", "{ECBAD83E-5B93-495F-8356-F280A392534E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5172FD84-6A0C-45E2-99D4-D959D64CB13C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECBAD83E-5B93-495F-8356-F280A392534E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECBAD83E-5B93-495F-8356-F280A392534E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECBAD83E-5B93-495F-8356-F280A392534E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECBAD83E-5B93-495F-8356-F280A392534E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

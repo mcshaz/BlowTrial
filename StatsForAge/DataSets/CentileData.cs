@@ -50,8 +50,7 @@ namespace StatsForAge
         #region methods
         public bool IsDataAvailable(double daysOfAge, bool isMale, double totalWeeksGestAtBirth = TermGestation)
         {
-            return (isMale ? GestAgeRange.MaleRange : GestAgeRange.FemaleRange).Min <= (int)(totalWeeksGestAtBirth + daysOfAge / 7)
-                && (isMale ? AgeMonthsRange.MaleRange : AgeMonthsRange.FemaleRange).Max >= (int)(daysOfAge / DaysPerMonth);
+            return (isMale ? GestAgeRange.MaleRange : GestAgeRange.FemaleRange).Min <= (int)(totalWeeksGestAtBirth + daysOfAge / 7);
         }
         public double CumSnormForAge(double value, double daysOfAge, bool isMale, double totalWeeksGestAtBirth=TermGestation)
         {

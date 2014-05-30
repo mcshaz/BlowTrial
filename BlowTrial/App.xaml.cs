@@ -15,9 +15,6 @@ using log4net.Appender;
 using System.Deployment.Application;
 using BlowTrial.Infrastructure.Extensions;
 using BlowTrial.Migrations;
-using System.Security.Permissions;
-using System.Security;
-using System.Security.AccessControl;
 
 namespace BlowTrial
 {

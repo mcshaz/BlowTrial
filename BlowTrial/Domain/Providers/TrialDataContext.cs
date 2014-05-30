@@ -55,27 +55,36 @@ namespace BlowTrial.Domain.Providers
                 .WillCascadeOnDelete(false);
             */
         }
+        /*
         public override int SaveChanges()
         {
-            try
+            throw new NotImplementedException("Use SaveChanges(bool) instead");
+        }
+        */
+        public int SaveChanges(bool updateTimes)
+        {
+            if (updateTimes)
             {
-                CheckValidation();
-            }
-            catch (DbEntityValidationException)
-            {
-                throw;
-            }
-            DateTime? updateTime = null;
-            foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
-            {
+                try
                 {
-                    var sr = ent.Entity as ISharedRecord;
-                    if (sr != null)
+                    CheckValidation();
+                }
+                catch (DbEntityValidationException)
+                {
+                    throw;
+                }
+                DateTime? updateTime = null;
+                foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
+                {
                     {
-                        if (ent.State == EntityState.Added || ent.State == EntityState.Modified)
+                        var sr = ent.Entity as ISharedRecord;
+                        if (sr != null)
                         {
-                            if (sr.Id == 0) {throw new InvalidOperationException("Id was not set on a non add opertation!"); }
-                            sr.RecordLastModified = (updateTime ?? (updateTime = DateTime.UtcNow)).Value;
+                            if (ent.State == EntityState.Added || ent.State == EntityState.Modified)
+                            {
+                                if (sr.Id == 0) { throw new InvalidOperationException("Id was not set on a non add opertation!"); }
+                                sr.RecordLastModified = (updateTime ?? (updateTime = DateTime.UtcNow)).Value;
+                            }
                         }
                     }
                 }

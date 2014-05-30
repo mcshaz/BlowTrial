@@ -34,11 +34,17 @@ namespace BlowTrial.ViewModel
         #endregion // Fields
 
         #region Constructor
+        void SetDisplayName()
+        {
+            base.DisplayName = string.Format(Strings.AllParticipantsViewModel_DisplayName,
+                    AllParticipants.Count,
+                    ((IList)AllParticipants.SourceCollection).Count);
+        }
 
         public AllParticipantsViewModel(IRepository repository):base(repository)
         {
-            base.DisplayName = Strings.AllParticipantsViewModel_DisplayName;
             GetAllParticipants();
+            SetDisplayName();
             _repository.ParticipantAdded += OnParticipantAdded;
             _repository.ParticipantUpdated += HandleParticipantUpdate;
 
@@ -71,10 +77,13 @@ namespace BlowTrial.ViewModel
 
             var participantVMs = new List<ParticipantListItemViewModel>(parts.Length);
             participantVMs.AddRange(parts.Select(p => new ParticipantListItemViewModel(p)));
+            participantVMs.Reverse(); // display items as added to database most recently first
             _ageUpdater = new AgeUpdatingService(participantVMs);
             _ageUpdater.OnAgeIncrement += OnNewAge;
 
             AllParticipants = new ListCollectionView(participantVMs);
+            AllParticipants.CustomSort = new ParticipantIdSortDesc();//put in reverse to speed things up, this will merely put new entries at the top
+
 
             //creating dispatchertimer so that screen is rendered before setting up the birthtime updating algorithms
 
@@ -112,23 +121,44 @@ namespace BlowTrial.ViewModel
 
                 if (this._deferredAction == null)
                 {
-                    this._deferredAction = DeferredAction.Create(() =>
-                    {
-                        if (string.IsNullOrEmpty(SearchString))
-                        {
-                            AllParticipants.Filter = null;
-                        }
-                        else
-                        {
-                            AllParticipants.Filter = new Predicate<object>(item => ((ParticipantListItemViewModel)item).SearchableString.IndexOf(_searchString, StringComparison.Ordinal) >= 0);
-                        }
-                    });
+                    this._deferredAction = DeferredAction.Create(SetFilter);
                 }
 
                 // Defer applying search criteria until time has elapsed.
                 _deferredAction.Defer(SearchDelay);
                 
             }
+        }
+
+        void SetFilter()
+        {
+            const StringComparison compareBy = StringComparison.Ordinal;
+            if (string.IsNullOrEmpty(_searchString))
+            {
+                if (_groupByDataRequired) 
+                {
+                    AllParticipants.Filter = new Predicate<object>(item => {
+                        var vm = (ParticipantListItemViewModel)item;
+                        return _selectedDataRequired.Contains(vm.DataRequired) && _selectedCentres.Contains(vm.StudyCentre);
+                    });
+                }
+                else { AllParticipants.Filter = null; }
+            }
+            else
+            {
+                if (_groupByDataRequired)
+                {
+                    AllParticipants.Filter = new Predicate<object>(item => {
+                        var vm = (ParticipantListItemViewModel)item;
+                        return _selectedDataRequired.Contains(vm.DataRequired) && _selectedCentres.Contains(vm.StudyCentre) && vm.SearchableString.IndexOf(_searchString, compareBy) >= 0;
+                    });
+                }
+                else
+                {
+                    AllParticipants.Filter = new Predicate<object>(item => ((ParticipantListItemViewModel)item).SearchableString.IndexOf(_searchString, compareBy) >= 0);
+                }
+            }
+            SetDisplayName();
         }
 
         public TimeSpan SearchDelay { get; set; }
@@ -188,6 +218,8 @@ namespace BlowTrial.ViewModel
                     break;
             }
         }
+        IEnumerable<DataRequiredOption>_selectedDataRequired;
+        IEnumerable<StudyCentreModel> _selectedCentres;
         bool _groupByDataRequired;
         public bool GroupByDataRequired { 
             get 
@@ -200,17 +232,38 @@ namespace BlowTrial.ViewModel
                 _groupByDataRequired = value;
                 if (_groupByDataRequired)
                 {
-                    AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
+                    var vm = new SelectDataRequiredOptionsViewModel(_repository, _selectedDataRequired, _selectedCentres);
+                    var win = new SelectDataRequiredOptionsView();
+                    win.DataContext = vm;
+                    EventHandler handler = null;
+                    handler = delegate
+                    {
+                        win.Close();
+                        vm.RequestClose -= handler;
+                    };
+                    vm.RequestClose += handler;
+                    win.ShowDialog();
+                    if (vm.WasCancelled)
+                    {
+                        _groupByDataRequired = false;
+                        return;
+                    }
+                    _selectedDataRequired = vm.SelectedDataRequired.ToList();
+                    _selectedCentres = vm.SelectedCentres.ToList();
+                    if (_selectedDataRequired.Any())
+                    {
+                        AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
+                    }
                     if (_repository.LocalStudyCentres.Skip(1).Any())
                     {
                         AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentre", new StudyCentreModelToNameConverter()));
-                        //AllParticipants.SortDescriptions.Add(new SortDescription("StudyCentreName", ListSortDirection.Ascending));
                     }
                 }
                 else
                 {
                     AllParticipants.GroupDescriptions.Clear();
                 }
+                SetFilter();
                 NotifyPropertyChanged("GroupByDataRequired");
             } 
         }
@@ -320,6 +373,7 @@ namespace BlowTrial.ViewModel
             _ageUpdater.AddParticipant(viewModel);
             AllParticipants.AddNewItem(viewModel);
             AllParticipants.CommitNew();
+            SetDisplayName();
         }
 
         void OnUpdateWindow_Closed(object sender, EventArgs e)

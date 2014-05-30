@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.1.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>2.6.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -56,6 +56,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>BlowTrial.App</StartupObject>
@@ -73,13 +74,13 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=3.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+    <Reference Include="AutoMapper, Version=3.2.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\AutoMapper.3.2.0\lib\net40\AutoMapper.dll</HintPath>
+      <HintPath>..\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.dll</HintPath>
     </Reference>
-    <Reference Include="ColorMine, Version=1.1.2.1, Culture=neutral, PublicKeyToken=7a2c4d30138edc39, processorArchitecture=MSIL">
+    <Reference Include="ColorMine, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ColorMine.1.1.2.1\lib\ColorMine.dll</HintPath>
+      <HintPath>..\packages\ColorMine.1.1.3.0\lib\ColorMine.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -156,6 +157,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Domain\DbPasswords.cs" />
+    <Compile Include="Domain\Providers\Syncronisation.cs" />
     <Compile Include="Helpers\Attached.cs" />
     <Compile Include="Helpers\DateTimeSplitter.cs" />
     <Compile Include="Helpers\DetailsRequired.cs" />
@@ -180,6 +182,10 @@
     <Compile Include="Migrations\201404111113506_MembershipV2.cs" />
     <Compile Include="Migrations\201404111113506_MembershipV2.Designer.cs">
       <DependentUpon>201404111113506_MembershipV2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405300510034_VaccineNameLength.cs" />
+    <Compile Include="Migrations\201405300510034_VaccineNameLength.Designer.cs">
+      <DependentUpon>201405300510034_VaccineNameLength.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\CodeBasedMigration.cs" />
     <Compile Include="Migrations\Membership\MembershipConfiguration.cs" />
@@ -232,11 +238,11 @@
     <Compile Include="ViewModel\ParticipantProgressViewModel.cs" />
     <Compile Include="ViewModel\ProtocolViolationViewModel.cs" />
     <Compile Include="ViewModel\RequestReverseUpdateViewModel.cs" />
-    <Compile Include="ViewModel\UtilityViewModels\ClosableWindowViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CommandViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\CrudWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\DataRepositoryViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\NotifyChangeBase.cs" />
+    <Compile Include="ViewModel\UtilityViewModels\SelectDataRequiredOptionsViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModel\UtilityViewModels\WorkspaceViewModel.cs" />
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />
@@ -292,6 +298,9 @@
     </Compile>
     <Compile Include="View\RequestReverseUpdateView.xaml.cs">
       <DependentUpon>RequestReverseUpdateView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\SelectDataRequiredOptionsView.xaml.cs">
+      <DependentUpon>SelectDataRequiredOptionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\SiteSettingsView.xaml.cs">
       <DependentUpon>SiteSettingsView.xaml</DependentUpon>
@@ -441,6 +450,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\SelectDataRequiredOptionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\SiteSettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -502,6 +515,9 @@
     <EmbeddedResource Include="Migrations\201404111113506_MembershipV2.resx">
       <DependentUpon>201404111113506_MembershipV2.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405300510034_VaccineNameLength.resx">
+      <DependentUpon>201405300510034_VaccineNameLength.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\TrialData\201403062253529_InitialTrialData.resx">
       <DependentUpon>201403062253529_InitialTrialData.cs</DependentUpon>
     </EmbeddedResource>
@@ -535,9 +551,9 @@
       <LastGenOutput>ScreenedPatientStataTemplate1.cs</LastGenOutput>
       <CustomToolNamespace>BlowTrial.TextTemplates</CustomToolNamespace>
     </None>
-    <Content Include="x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest">
+    <Resource Include="x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -628,5 +644,5 @@
   <Target Name="BeforePublish">
     <Error Condition="'$(DebugSymbols)' == 'true'" Text="You attempted to publish a configuration that defines the DEBUG constant!" />
   </Target>
-  <Import Project="..\packages\AutoMapper.3.2.0\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.2.0\tools\AutoMapper.targets')" />
+  <Import Project="..\packages\AutoMapper.3.2.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.2.1\tools\AutoMapper.targets')" />
 </Project>

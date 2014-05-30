@@ -214,7 +214,7 @@ namespace BlowTrial.Models
                 p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
-                        : (p.IsInterventionArm && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.Bcg.Id))
+                        : (p.IsInterventionArm && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.RussianBcg.Id || v.VaccineId==DataContextInitialiser.DanishBcg.Id))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
                                 ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28

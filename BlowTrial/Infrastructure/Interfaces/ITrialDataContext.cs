@@ -17,9 +17,6 @@ namespace BlowTrial.Domain.Interfaces
         DbSet<ProtocolViolation> ProtocolViolations { get; set; }
         DbSet<StudyCentre> StudyCentres { get; set; }
         Database Database { get; }
-
-        
-
         DbEntityEntry Entry(object entity);
         DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         /// <summary>
@@ -30,6 +27,6 @@ namespace BlowTrial.Domain.Interfaces
         string DbName { get; }
         //DateTime DbLastModifiedUtc();
         ITrialDataContext AttachDb(string backupFilePath);
-        int SaveChanges();
+        int SaveChanges(bool updateTimes);
     }
 }

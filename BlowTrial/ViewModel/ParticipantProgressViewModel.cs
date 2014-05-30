@@ -608,7 +608,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _bcgPapuleOptions ?? (_bcgPapuleOptions = CreateBoolPairs(nullString: Strings.ParticipantUpdateVM_Option_BcgPapuleNull));
+                return _bcgPapuleOptions ?? (_bcgPapuleOptions = CreateBoolPairs(/*nullString: Strings.ParticipantUpdateVM_Option_BcgPapuleNull*/));
             }
         }
 
