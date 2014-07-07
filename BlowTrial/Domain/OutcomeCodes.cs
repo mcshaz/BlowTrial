@@ -35,4 +35,10 @@ namespace BlowTrial.Domain.Outcomes
         AwaitingOutcomeOr28,
         Complete
     }
+    public enum RandomisationArm
+    {
+        Control,
+        RussianBCG,
+        DanishBcg
+    }
 }

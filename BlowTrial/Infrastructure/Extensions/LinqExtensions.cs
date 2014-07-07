@@ -39,5 +39,62 @@ namespace BlowTrial.Infrastructure.Extensions
                 }
             }
         }
+
+        /// <summary>
+        /// faster than select().toarray();
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static TResult[] Map<TSource, TResult>(this IList<TSource> source, Func<TSource, TResult> predicate)
+        {
+            TResult[] result = new TResult[source.Count];
+            for (int i = 0; i < source.Count; i++)
+            {
+                result[i] = predicate(source[i]);
+            }
+            return result;
+        }
+
+        public static bool AllEqual<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> predicate)
+        {
+            var en = source.GetEnumerator();
+            if (!en.MoveNext())
+            {
+                return true;
+            }
+            var primary = predicate(en.Current);
+            while (en.MoveNext())
+            {
+                if (!primary.Equals(predicate(en.Current)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static IEnumerable<T> AllExceptFirstMax<T>(this IEnumerable<T> source, Func<T, int> predicate)
+        {
+            List<int> resultList = new List<int>();
+            int max=int.MinValue;
+            int removeAt=0;
+            int i=0;
+            List<T> returnVar = new List<T>();
+            var en = source.GetEnumerator();
+            while (en.MoveNext())
+            {
+                if (predicate(en.Current) > max)
+                {
+                    removeAt = i;
+                }
+                returnVar.Add(en.Current);
+                i++;
+            }
+            returnVar.RemoveAt(removeAt);
+            return returnVar;
+        }
     }
 }

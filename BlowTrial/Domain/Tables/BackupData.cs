@@ -10,6 +10,7 @@ namespace BlowTrial.Domain.Tables
         public int BackupIntervalMinutes { get; set; }
         public bool IsBackingUpToCloud { get; set; }
         public bool IsEnvelopeRandomising { get; set; }
+        public AllocationGroups DefaultAllocation { get; set; } //named default because unbalanced will revert to balanced if each group has become so
     }
 
     public class CloudDirectory

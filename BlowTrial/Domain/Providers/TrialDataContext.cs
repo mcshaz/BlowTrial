@@ -1,5 +1,6 @@
 ﻿using BlowTrial.Domain.Interfaces;
 using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure.Exceptions;
 using BlowTrial.Infrastructure.Interfaces;
 using System;
 using System.Data.Entity;
@@ -41,6 +42,8 @@ namespace BlowTrial.Domain.Providers
         public DbSet<Participant> Participants { get; set; }
         public DbSet<ScreenedPatient> ScreenedPatients { get; set; }
         public DbSet<StudyCentre> StudyCentres { get; set; }
+        public DbSet<BalancedAllocation> BalancedAllocations { get; set; }
+        public DbSet<AllocationBlock> AllocationBlocks { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.Configuration.LazyLoadingEnabled = false;

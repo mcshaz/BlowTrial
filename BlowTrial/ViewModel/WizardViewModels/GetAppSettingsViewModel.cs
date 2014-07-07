@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Linq;
 using BlowTrial.Models;
 using BlowTrial.Helpers;
+using BlowTrial.Domain.Tables;
 
 namespace BlowTrial.ViewModel
 {
@@ -273,7 +274,8 @@ namespace BlowTrial.ViewModel
                     MessagesModel.DischargeExplanation,
                     BackupModel.CloudDirectories,
                     BackupModel.BackupIntervalMinutes.Value,
-                    BackupModel.IsBackingUpToCloud,
+                    BackupModel.AllocationType.Value,
+                    true,
                     BackupModel.PatientsPreviouslyRandomised
                     );
                 if (SitesModel != null)
@@ -287,7 +289,7 @@ namespace BlowTrial.ViewModel
                 BlowTrialDataService.SetBackupDetails(
                     BackupModel.CloudDirectories,
                     BackupModel.BackupIntervalMinutes.Value,
-                    BackupModel.IsBackingUpToCloud,
+                    false,
                     BackupModel.PatientsPreviouslyRandomised
                     );
             }

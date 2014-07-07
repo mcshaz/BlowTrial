@@ -61,6 +61,33 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to India - 3 arm (balanced assignnment).
+        /// </summary>
+        public static string AllocationGroups_IndiaThreeArmBalanced {
+            get {
+                return ResourceManager.GetString("AllocationGroups_IndiaThreeArmBalanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to India - 3 arm (catch up assignnment).
+        /// </summary>
+        public static string AllocationGroups_IndiaThreeArmUnbalanced {
+            get {
+                return ResourceManager.GetString("AllocationGroups_IndiaThreeArmUnbalanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to India - 2 arm.
+        /// </summary>
+        public static string AllocationGroups_IndiaTwoArm {
+            get {
+                return ResourceManager.GetString("AllocationGroups_IndiaTwoArm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Participants ({0} of {1} displayed).
         /// </summary>
         public static string AllParticipantsViewModel_DisplayName {
@@ -1042,7 +1069,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm with an ID of {1:n0}..
+        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm ({1}) with an ID of {2:n0}..
         /// </summary>
         public static string NewPatient_ToIntervention {
             get {
@@ -1825,7 +1852,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Danish BCG.
+        ///   Looks up a localized string similar to BCG-Danish.
         /// </summary>
         public static string Vaccine_DanishBcg {
             get {
@@ -1852,7 +1879,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Russian BCG.
+        ///   Looks up a localized string similar to BCG-India.
         /// </summary>
         public static string Vaccine_RussianBcg {
             get {

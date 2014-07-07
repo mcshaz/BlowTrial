@@ -64,6 +64,43 @@ namespace BlowTrial.Helpers
             return (from a in appData.BackupDataSet
                     select a.IsEnvelopeRandomising).First();
         }
+        public static AllocationGroups GetDefaultAllocationGroup()
+        {
+            using (var a = new MembershipContext())
+            {
+                return GetDefaultAllocationGroup(a);
+            }
+        }
+        public static AllocationGroups GetDefaultAllocationGroup(IAppData appData)
+        {
+            return (from a in appData.BackupDataSet
+                    select a.DefaultAllocation).First();
+        }
+        public static void SetDefaultAllocationGroup(AllocationGroups group)
+        {
+            using (var a = new MembershipContext())
+            {
+                SetDefaultAllocationGroup(group, a);
+            }
+        }
+        public static void SetDefaultAllocationGroup(AllocationGroups group, IAppData appData)
+        {
+            var a = appData.BackupDataSet.First();
+            a.DefaultAllocation = group;
+            appData.SaveChanges();
+        }
+        public static AllocationGroups DefaultAllocationGroup()
+        {
+            using (var a = new MembershipContext())
+            {
+                return DefaultAllocationGroup(a);
+            }
+        }
+        public static AllocationGroups DefaultAllocationGroup(IAppData appData)
+        {
+            return (from a in appData.BackupDataSet
+                    select a.DefaultAllocation).First();
+        }
         public static BackupDataSet GetBackupDetails()
         {
             using (var a = new MembershipContext())
@@ -102,22 +139,52 @@ namespace BlowTrial.Helpers
                 });
             appDataProvider.SaveChanges();
         }
-        public static void SetAppData(string interventionMessage, string controlMessage, string dischargeExplanation, IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising = null)
+        public static void SetAppData(string interventionMessage, string controlMessage, string dischargeExplanation, IEnumerable<string> cloudDirectories, int intervalMins, AllocationGroups defaultAllocation, bool isToBackupToCloud, bool isEnvelopeRandomising)
         {
             using (var a = new MembershipContext())
             {
-                SetBackupDetails(cloudDirectories, intervalMins, isTobackupToCloud, isEnvelopeRandomising, a);
+                SetBackupPaths(cloudDirectories, a);
+                SetBackupDetails(a, intervalMins, isToBackupToCloud, isEnvelopeRandomising, defaultAllocation);
                 SetRandomisingMessages(interventionMessage, controlMessage, dischargeExplanation,a);
             }
         }
-        public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool? isTobackupToCloud = null, bool? isEnvelopeRandomising=null)
+        public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins)
         {
             using (var a = new MembershipContext())
             {
-                SetBackupDetails(cloudDirectories,intervalMins, isTobackupToCloud,isEnvelopeRandomising,a);
+                SetBackupPaths(cloudDirectories, a);
+                a.BackupDataSet.First().BackupIntervalMinutes = intervalMins;
+                a.SaveChanges();
             }
         }
-        internal static void SetBackupDetails(IEnumerable<string> paths, int intervalMins, bool? isTobackupToCloud, bool? isEnvelopeRandomising,IAppData appDataProvider)
+        public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins, bool isToBackupToCloud, bool isEnvelopeRandomising)
+        {
+            using (var a = new MembershipContext())
+            {
+                SetBackupPaths(cloudDirectories, a);
+                SetBackupDetails(a, intervalMins, isToBackupToCloud, isEnvelopeRandomising);
+            }
+        }
+        internal static void SetBackupDetails(IAppData appDataProvider, int intervalMins, bool isTobackupToCloud, bool isEnvelopeRandomising, AllocationGroups defaultAllocation = AllocationGroups.IndiaTwoArm)
+        {
+            var data = GetBackupDetails(appDataProvider);
+            if (data.BackupData == null)
+            {
+                appDataProvider.BackupDataSet.Add(new BackupData
+                {
+                    BackupIntervalMinutes = intervalMins,
+                    IsBackingUpToCloud = isTobackupToCloud,
+                    IsEnvelopeRandomising = isEnvelopeRandomising,
+                    DefaultAllocation = defaultAllocation
+                });
+            }
+            else
+            {
+                data.BackupData.BackupIntervalMinutes = intervalMins;
+            }
+            appDataProvider.SaveChanges();
+        }
+        internal static void SetBackupPaths(IEnumerable<string> paths, IAppData appDataProvider)
         {
             try
             {
@@ -133,30 +200,7 @@ namespace BlowTrial.Helpers
                 }
                 appDataProvider.CloudDirectories.Add(new CloudDirectory { Path = p });
             }
-            var data = GetBackupDetails(appDataProvider);
-            if (data.BackupData == null)
-            {
-                if (isTobackupToCloud == null)
-                {
-                    throw new InvalidOperationException("IsToBackupToCloud must be set if there is no database entry as yet");
-                }
-                if (isEnvelopeRandomising == null)
-                {
-                    throw new InvalidOperationException("IsEnvelopeRandomising must be set if there is no database entry as yet");
-                }
-                appDataProvider.BackupDataSet.Add(new BackupData
-                {
-                    BackupIntervalMinutes = intervalMins, 
-                    IsBackingUpToCloud = isTobackupToCloud.Value,
-                    IsEnvelopeRandomising = isEnvelopeRandomising.Value
-                });
-            }
-            else
-            {
-                data.BackupData.BackupIntervalMinutes = intervalMins;
-                //var a = (MembershipContext)appDataProvider;
-                //var b = a.Entry(data.BackupData);
-            }
+            
             appDataProvider.SaveChanges();
         }
         public static bool AnyStudyCentres()

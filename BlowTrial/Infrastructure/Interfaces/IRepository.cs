@@ -1,6 +1,7 @@
 ﻿using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace BlowTrial.Infrastructure.Interfaces
             string otherCauseOfDeathDetail,
             bool? bcgAdverse,
             string bcgAdverseDetail,
-            bool? bcgPapule,
+            bool? BcgPapuleAtDischarge,
             int? lastContactWeight,
             DateTime? lastWeightDate,
             DateTime? dischargeDateTime,

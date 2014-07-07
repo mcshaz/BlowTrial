@@ -20,7 +20,7 @@ namespace BlowTrial.Models
         public const int MinGestAgeBirth = 24;
         public const int MaxGestAgeBirth = 43;
         public const int MinBirthWeightGrams = 350;
-        public const int MaxBirthWeightGrams = RandomisingEngine.MaxBirthWeightGrams;
+        public const int MaxBirthWeightGrams = BlowTrial.Infrastructure.Randomising.Engine.MaxBirthWeightGrams;
         public const int MaxBirthWeightOnUpdate = 3000;
         public const long MinEnrolAgeTicks = TimeSpan.TicksPerHour;
         #endregion

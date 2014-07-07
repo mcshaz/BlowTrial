@@ -19,6 +19,7 @@ using System.Windows;
 using CloudFileTransfer;
 using System.IO;
 using BlowTrial.Infrastructure.Extensions;
+using BlowTrial.Infrastructure.Randomising;
 
 
 namespace BlowTrial.ViewModel
@@ -48,7 +49,6 @@ namespace BlowTrial.ViewModel
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
-            ToggleEnvelopeCmd = new RelayCommand(param => ToggleEnvelopeRandomising(), param => IsAuthorised);
             ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
             ShowLogin();
@@ -137,7 +137,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand ToggleEnvelopeCmd { get; private set; }
         public RelayCommand ShowRandomisingMessagesCmd { get; private set; }
         public RelayCommand RequestReverseUpdateCmd { get; private set; }
-
+        /*
         void ToggleEnvelopeRandomising()
         {
             //var result = MessageBox.Show(Strings.MainWindow_StopEnvelopeRandomisingMsg,Strings.MainWindow_StopEnvelopeRandomisingCaption, MessageBoxButton.OKCancel, MessageBoxImage.Warning);
@@ -151,16 +151,19 @@ namespace BlowTrial.ViewModel
             }
             IsEnvelopeRandomising = !IsEnvelopeRandomising;
             BlowTrialDataService.ChangeEnvelopeRandomising(IsEnvelopeRandomising);
+            
             if (IsEnvelopeRandomising)
             {
-                RandomisingEngine.UnsetComputerisedBlocks(_repository);
+                Engine.UnsetComputerisedBlocks(_repository);
             }
             else
             {
-                RandomisingEngine.BalanceUnsetBlocks(_repository);
+                Engine.BalanceUnsetBlocks(_repository);
             }
+             * 
 
         }
+        */
         #endregion // Commands
 
         #region Workspaces

@@ -8,11 +8,10 @@ using BlowTrial.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.Entity;
-using System.Data.Entity.SqlServer;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using BlowTrial.Infrastructure.Randomising;
 
 namespace BlowTrial.Models
 {
@@ -33,7 +32,7 @@ namespace BlowTrial.Models
         public DateTime Becomes28On { get; private set; }
         public DateTime RegisteredAt { get; set; }
         public int CentreId { get; set; }
-        public bool IsInterventionArm { get; set; }
+        public RandomisationArm TrialArm { get; set; }
         public StudyCentreModel StudyCentre { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
@@ -54,13 +53,25 @@ namespace BlowTrial.Models
 
         public int AgeDays { get; set; }
 
-        public string TrialArm
+        internal static string GetTrialArmDescription(RandomisationArm arm)
+        {
+            switch (arm)
+                {
+                    case RandomisationArm.DanishBcg:
+                        return Strings.Vaccine_DanishBcg;
+                    case RandomisationArm.RussianBCG:
+                        return Strings.Vaccine_RussianBcg;
+                    case RandomisationArm.Control:
+                        return Strings.ParticipantUpdateVM_ControlArm;
+
+                }
+                throw new InvalidEnumArgumentException(arm.ToString());
+        }
+        public string TrialArmDescription
         {
             get
             {
-                return IsInterventionArm
-                    ? Strings.ParticipantUpdateVM_InterventionArm
-                    : Strings.ParticipantUpdateVM_ControlArm;
+                return GetTrialArmDescription(TrialArm);
             }
         }
         public string Gender
@@ -214,7 +225,7 @@ namespace BlowTrial.Models
                 p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
-                        : (p.IsInterventionArm && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.RussianBcg.Id || v.VaccineId==DataContextInitialiser.DanishBcg.Id))
+                        : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.RussianBcg.Id || v.VaccineId==DataContextInitialiser.DanishBcg.Id))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
                                 ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
@@ -251,7 +262,8 @@ namespace BlowTrial.Models
         public string RegisteringInvestigator { get; set; }
         public bool? BcgAdverse { get; set; }
         public string BcgAdverseDetail { get; set; }
-        public bool? BcgPapule { get; set; }
+        public bool? BcgPapuleAtDischarge { get; set; }
+        public bool? BcgPapuleAt28days { get; set; }
         public int? LastContactWeight { get; set; }
         public DateTime? LastWeightDate { get; set; }
         public string OtherCauseOfDeathDetail { get; set; }
@@ -416,28 +428,24 @@ namespace BlowTrial.Models
             }
             return null;
         }
-        enum RandomisationCategories { lowestWeight, midWeight, highestWeight}
+
         string ValidateWeight()
         {
             if (LastContactWeight.HasValue)
             {
                 var weightChange = (double)LastContactWeight / (double)AdmissionWeight;
-                RandomisationCategories weightCat = LastContactWeight<RandomisingEngine.BlockWeight1?
-                    RandomisationCategories.lowestWeight
-                    :LastContactWeight<RandomisingEngine.BlockWeight2? 
-                        RandomisationCategories.midWeight
-                        :RandomisationCategories.highestWeight;
+                var weightCat = RandomisingExtensions.RandomisationCategory(AdmissionWeight, true); // a slight hack making everone male to test weight cats!
                 int? daysOldAtWeight = (LastWeightDate.HasValue)?
                     (LastWeightDate.Value-DateTimeBirth.Date).Days
                     :(int?)null;
                 if (weightChange < 0.8 || 
                     weightChange > 1.6 ||
-                    (weightCat == RandomisationCategories.midWeight && weightChange >1.5) ||
-                    (weightCat == RandomisationCategories.lowestWeight && weightChange >1.4) ||
+                    (weightCat == RandomisationStrata.MidWeightMale && weightChange >1.5) ||
+                    (weightCat == RandomisationStrata.SmallestWeightMale && weightChange > 1.4) ||
                     (daysOldAtWeight.HasValue && 
                     (daysOldAtWeight<21 && (weightChange > 1.4 ||
-                    (weightCat == RandomisationCategories.midWeight && weightChange >1.35) ||
-                    (weightCat == RandomisationCategories.lowestWeight && weightChange >1.3))) ||
+                    (weightCat == RandomisationStrata.MidWeightMale && weightChange > 1.35) ||
+                    (weightCat == RandomisationStrata.SmallestWeightMale && weightChange > 1.3))) ||
                     (daysOldAtWeight<14 && weightChange >1.25)))
                 {
                     return string.Format(Strings.ParticipantModel_Error_LastWeightChange, AdmissionWeight);

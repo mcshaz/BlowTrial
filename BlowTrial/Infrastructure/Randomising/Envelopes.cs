@@ -12,16 +12,16 @@ namespace BlowTrial.Infrastructure
         public int BlockSize { get; set; }
         public int BlockNumber { get; set; }
 
-        public RandomisationCategories RandomisationCategory
+        public RandomisationStrata RandomisationCategory
         {
             get
             {
                 int returnInt;
-                if (WeightLessThan == RandomisingEngine.BlockWeight1)
+                if (WeightLessThan == Engine.BlockWeight1)
                 {
                     returnInt = 1;
                 }
-                else if (WeightLessThan == RandomisingEngine.BlockWeight2)
+                else if (WeightLessThan == Engine.BlockWeight2)
                 {
                     returnInt = 3;
                 }
@@ -33,7 +33,7 @@ namespace BlowTrial.Infrastructure
                 {
                     returnInt++;
                 }
-                return (RandomisationCategories)returnInt;
+                return (RandomisationStrata)returnInt;
             }
         }
         /*
@@ -47,7 +47,7 @@ namespace BlowTrial.Infrastructure
     }
     public static class EnvelopeDetails
     {
-        public static ILookup<RandomisationCategories, int> GetAllEnvelopeNumbers()
+        public static ILookup<RandomisationStrata, int> GetAllEnvelopeNumbersByStrata()
         {
             var allEnvelopes = new List<KeyValuePair<int,Envelope>>(400);
             for (int i=1;i<=MaxEnvelopeNumber;i++)
@@ -59,6 +59,34 @@ namespace BlowTrial.Infrastructure
                 }
             }
             return allEnvelopes.ToLookup(p => p.Value.RandomisationCategory,e=>e.Key);
+        }
+        public static IDictionary<int, RandomisationStrata> GetStrataByBlockNumber()
+        {
+            var allEnvelopes = new List<Envelope>(400);
+            int lastBlockNumber = 0;
+            var returnVar = new Dictionary<int, RandomisationStrata>();
+            for (int i = 1; i <= MaxEnvelopeNumber; i++)
+            {
+                Envelope e = GetEnvelope(i);
+                if (e != null && lastBlockNumber != e.BlockNumber)
+                {
+                    lastBlockNumber = e.BlockNumber;
+                    returnVar.Add(e.BlockNumber, e.RandomisationCategory);
+                }
+            }
+            return returnVar;
+        }
+        public static HashSet<int> GetAllEnvelopeNumbers()
+        {
+            var returnVar = new HashSet<int>();
+            for (int i = 1; i <= MaxEnvelopeNumber; i++)
+            {
+                if (GetEnvelope(i) != null)
+                {
+                    returnVar.Add(i);
+                }
+            }
+            return returnVar;
         }
         public const int MaxEnvelopeNumber = 5283;
         public const int FirstAvailableBlockNumber = 1752;

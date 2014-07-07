@@ -15,16 +15,18 @@ namespace BlowTrial.Models
     {
 
         #region Constructors
-
-        public CloudDirectoryModel()
+        protected CloudDirectoryModel(IEnumerable<string> validatedProperties)
         {
-            _validatedProperties = new string[]
+            _validatedProperties = (new string[]
             { 
                 "CloudDirectories",
                 "BackupIntervalMinutes",
                 "IsBackingUpToCloud"
-            };
+            }).Concat(validatedProperties).ToList();
             CloudDirectoryItems = new List<DirectoryItemModel>();
+        }
+        public CloudDirectoryModel() : this(new string[0])
+        {
         }
         #endregion //Constructors
 

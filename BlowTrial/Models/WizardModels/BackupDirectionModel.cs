@@ -1,4 +1,5 @@
-﻿using BlowTrial.Infrastructure;
+﻿using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure;
 using BlowTrial.Properties;
 using System;
 using System.Collections.Generic;
@@ -12,8 +13,13 @@ namespace BlowTrial.Models
 {
     public class BackupDirectionModel :CloudDirectoryModel
     {
+        public BackupDirectionModel()
+            : base(new string[] { "PatientsPreviouslyRandomised", "AllocationType" })
+        { }
 
         public bool PatientsPreviouslyRandomised { get; set; }
+
+        public AllocationGroups? AllocationType { get; set; }
 
         public override string GetValidationError(string propertyName)
         {
@@ -21,8 +27,14 @@ namespace BlowTrial.Models
             { 
                 case "PatientsPreviouslyRandomised":
                     return ValidatePatientsPreviouslyRandomised();
+                case "AllocationType":
+                    return ValidateAllocationType();
             }
             return base.GetValidationError(propertyName);
+        }
+        string ValidateAllocationType()
+        {
+            return ValidateDDLNotNull(AllocationType);
         }
         string ValidatePatientsPreviouslyRandomised()
         {

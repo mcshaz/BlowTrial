@@ -1,4 +1,5 @@
-﻿using BlowTrial.Domain.Outcomes;
+﻿using BlowTrial.Domain.Interfaces;
+using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Infrastructure.Randomising;
@@ -6,52 +7,99 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BlowTrial.Infrastructure.Extensions;
 
-namespace BlowTrial.Infrastructure
+namespace BlowTrial.Infrastructure.Randomising
 {
-    public static class RandomisingEngine
+    public static class Engine
     {
-        const int MaxAllocationsPerBlock = 4;
-        const int RandomAllocationMax = (MaxAllocationsPerBlock / 2) + 1;
-        static int GetNextBlockSize()
+        /*
+        public static WeightCategories GetWeightCat(int weight)
         {
-            return (new Random()).Next(1,RandomAllocationMax)*2;
+            return weight < Engine.BlockWeight1 ?
+                    WeightCategories.LowestWeight
+                    : weight < Engine.BlockWeight2 ?
+                        WeightCategories.MidWeight
+                        : WeightCategories.HighestWeight;
         }
-        public static void CreateAllocation(Participant participant, IRepository repos)
+        */
+#region constants
+        public const int BlockWeight1 = 1000;
+        public const int BlockWeight2 = 1500;
+        public const int MaxBirthWeightGrams = 1999;
+#endregion
+
+        static AllocationGroups GetNextAllocationGroup(int studyCentreId, RandomisationStrata strata, ITrialDataContext context = null)
+        {
+            AllocationGroups returnVar = BlowTrial.Helpers.BlowTrialDataService.GetDefaultAllocationGroup();
+            if (returnVar == AllocationGroups.IndiaThreeArmUnbalanced)
+            {  
+                var alloc = context.BalancedAllocations.First(a=>a.RandomisationCategory == strata && a.StudyCentreId==studyCentreId);
+                if (!alloc.IsEqualised) 
+                {
+                    var catQuery = from p in context.Participants
+                                   where p.CentreId == studyCentreId && p.Block.RandomisationCategory == strata
+                                   select p;
+                    if ((double)catQuery.Count()/catQuery.Count(p=>p.TrialArm == RandomisationArm.DanishBcg) >= 3){
+                        alloc.IsEqualised = true;
+                        context.SaveChanges(true);
+                        if (context.BalancedAllocations.All(a=>a.IsEqualised))
+                        {
+                            BlowTrial.Helpers.BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.IndiaThreeArmBalanced);
+                        }
+                    }
+                }
+                if (alloc.IsEqualised)
+                {
+                    return AllocationGroups.IndiaThreeArmBalanced;
+                }
+            }
+            return returnVar;
+        }
+        public static void CreateNewBlock(ITrialDataContext context)
+        {
+            
+        }
+        public static void CreateAllocation(Participant participant, ITrialDataContext context)
         {
             //try
+            //{
+            RandomisationStrata strata;
+            var currentBlock = GetCurrentBlock(participant, context, out strata);
+            BlockComponent component = (currentBlock == null)?null:currentBlock.GetComponents();
+            if (currentBlock==null || context.Participants.Count(p=>p.AllocationBlockId == currentBlock.Id) == component.TotalBlockSize())
             {
-                IEnumerable<Participant> currentBlock = GetCurrentBlock(participant, repos);
-                int noInBlock = currentBlock.Count();
-                if (noInBlock == 0)
-                {
-                    //for random block size add:
-                    // newAllocation.BlockSize = BlockRandomisation.BlockSize();
-                    participant.BlockNumber = 1;
-                    participant.BlockSize = GetNextBlockSize();
-                }
-                else if (noInBlock == currentBlock.First().BlockSize)
-                {
-                    participant.BlockNumber = currentBlock.First().BlockNumber + 1;
-                    participant.BlockSize = GetNextBlockSize();
-                    currentBlock = new List<Participant>();
-                }
-                else
-                {
-                    // for Random blocksize need to get the current blocksize 
-                    // int currentBlock.First().Blocksize;
-                    participant.BlockNumber = currentBlock.First().BlockNumber;
-                    participant.BlockSize = currentBlock.First().BlockSize;
-                }
-                participant.IsInterventionArm = BlockRandomisation.nextAllocation(participant.BlockSize, currentBlock, c => c.IsInterventionArm);
+                currentBlock = CreateNewAllocationBlock(participant, strata,out component ,context);                
             }
-            /*catch (Exception ex)
+            participant.AllocationBlockId = currentBlock.Id;
+            participant.TrialArm = BlockRandomisation.NextAllocation(from p in context.Participants 
+                                                                     where p.AllocationBlockId==currentBlock.Id 
+                                                                     select p.TrialArm, component);
+        }
+
+        static AllocationBlock CreateNewAllocationBlock(Participant participant, RandomisationStrata strata, out BlockComponent component,ITrialDataContext context)
+        {
+            var block = GetNextAllocationGroup(participant.CentreId, strata, context);
+            component = ArmData.GetRatio(block);
+            var returnVar = new AllocationBlock
+                {
+                    Id = context.AllocationBlocks.GetNextId(participant.CentreId, participant.Centre.MaxIdForSite),
+                    AllocationGroup = block, 
+                    GroupRepeats= component.Repeats
+                };
+            context.AllocationBlocks.Add(returnVar);
+                
+            return returnVar;
+        }
+        /*
+            }
+            catch (Exception ex)
             {
                 throw ex;
             }
-            */
+
         }
-        public static RandomisationCategories GetRandomisingCategory(Participant newParticipant)
+        public static WeightCategories GetRandomisingCategory(Participant newParticipant)
         {
             int returnInt;
             if (newParticipant.AdmissionWeight < BlockWeight1)
@@ -70,239 +118,93 @@ namespace BlowTrial.Infrastructure
             {
                 returnInt++;
             }
-            return (RandomisationCategories)returnInt;
+            return (WeightCategories)returnInt;
         }
-        public static void ForceAllocationToArm(Participant participant, IRepository repos)
+       */
+        public static void RemoveAllocationFromArm(Participant participant,ITrialDataContext context)
         {
-            var currentBlock = GetCurrentBlock(participant, repos).Where(p=>p.Id != participant.Id).ToList();
-            if (currentBlock.Count==0) 
+            RandomisationStrata strata;
+            var blocks = GetDescendingBlocks(participant, context, out strata);
+
+            //participant is in top block anyway (or no blocks yet existing for strata) - do nothing
+            int topBlockId = blocks.Select(b=>b.Id).FirstOrDefault();
+            if (topBlockId != 0 && participant.AllocationBlockId != topBlockId)
             {
-                participant.BlockNumber=1;
-                participant.BlockSize = GetNextBlockSize();
-                return;
+                //participant is not in top block, but another participant is able to replace position in earlier block
+                Participant movableParticipant = context.Participants.FirstOrDefault(p=>p.AllocationBlockId == topBlockId && p.TrialArm == participant.TrialArm);
+                if (movableParticipant == null)
+                {
+                    //no top allocations: merge with next block down
+                    AllocationBlock secondTopBlock = blocks.Skip(1).FirstOrDefault();
+                    if (secondTopBlock == null)
+                    {
+                        //there is nothing we can do
+                        return;
+                    }
+                    AllocationBlock topBlock = blocks.FirstOrDefault();
+                    if (topBlock.Participants == null) {topBlock.Participants = context.Participants.Where(p=>p.AllocationBlockId == topBlockId).ToList();}
+                    if (secondTopBlock.Participants == null) {secondTopBlock.Participants = context.Participants.Where(p=>p.AllocationBlockId == secondTopBlock.Id).ToList();}
+                    secondTopBlock.MergeBlock(topBlock);
+                    context.AllocationBlocks.Remove(topBlock);
+                    movableParticipant = secondTopBlock.Participants.First(p=>p.TrialArm == participant.TrialArm);
+                }
+                movableParticipant.AllocationBlockId = participant.AllocationBlockId;
             }
-            participant.BlockNumber = currentBlock.First().BlockNumber;
-            currentBlock.Add(participant);
-            if (BalanceBlocks(currentBlock))
+            participant.AllocationBlockId = 0;
+        }
+        public static void ForceAllocationToArm(Participant participant,ITrialDataContext context)
+        {
+            RandomisationStrata strata;
+            var currentBlock = GetCurrentBlock(participant, context, out strata);
+            if (currentBlock==null)
             {
-                currentBlock.RemoveAt(currentBlock.Count - 1);
-                repos.Update(currentBlock);
+                BlockComponent component;
+                currentBlock = CreateNewAllocationBlock(participant, strata, out component ,context);
             }
+            else if (currentBlock.GetCountInArm(participant.TrialArm) <= context.Participants.Count(p=>p.AllocationBlockId == currentBlock.Id && p.TrialArm==participant.TrialArm && p.Id != participant.Id))
+            {
+                currentBlock.GroupRepeats++;
+            }
+            participant.AllocationBlockId = currentBlock.Id;
+            participant.Block = currentBlock;
         }
         /// <summary>
         /// Balance allocations in a block when a new member is forced in. Used for twin allocations, and when violating to change enrollment info
         /// </summary>
         /// <param name="currentBlock">the block to be analysed. The list must be ordered so that the new allocation is LAST</param>
         /// <returns>whether entire block required resizing</returns>
-        static bool BalanceBlocks(IList<Participant> currentBlock)
+
+        static AllocationBlock GetCurrentBlock(Participant participant, ITrialDataContext context, out RandomisationStrata strata)
         {
-            Participant newParticipant;
-            switch (currentBlock.Count)
-            {
-                case 0:
-                    throw new ArgumentException("currentBlock must contain at least 1 element");
-                case 1:
-                    newParticipant = currentBlock[0];
-                    newParticipant.BlockSize = GetNextBlockSize();
-                    return false;
-            }
-            newParticipant = currentBlock[currentBlock.Count - 1];
-            int currentBlockSize = currentBlock[0].BlockSize;
-            int sameAllocationCount = currentBlock.Count(c => c.IsInterventionArm == newParticipant.IsInterventionArm);
-            if (sameAllocationCount <= (currentBlockSize / 2)) //block size adequate already
-            {
-                newParticipant.BlockSize = currentBlockSize;
-                return false;
-            }
-            currentBlockSize += 2;
-            // adjust existing block
-            foreach (var p in currentBlock)
-            {
-                p.BlockSize = currentBlockSize;
-            };
-            return true;
-        }
-        public const int BlockWeight1 = 1000;
-        public const int BlockWeight2 = 1500;
-        public const int MaxBirthWeightGrams = 1999;
-        static IEnumerable<Participant> GetCurrentBlock(Participant newParticipant, IRepository repos)
-        {
-            var returnVar = QueryForAllSameBlocks(repos.Participants, newParticipant).FirstOrDefault();
-            if (returnVar == null)
-            {
-                return new Participant[0];
-            }
-            return returnVar;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="participant"></param>
-        /// <param name="repos"></param>
-        /// <returns>whether reasignment was necessary</returns>
-        public static void ReasignBlockRandomisingData(Participant participant, bool newIsMale, int newAdmissionWeight ,IRepository repos)
-        {
-            //assign from currentblock in the old randomising category to block participant is currently in
-            //options are:
-            //currentBlock contains participant - move participant, nothing else required
-            //participant in lower block than currentblock:
-            //  currentblock contains same arm => move to block used by participant
-            //  currentblock all in other arm:
-            //      move from block below
-            //      coalesce 2 blocks!
-            var blocks = QueryForAllSameBlocks(repos.Participants, participant);
-            
-            if (!blocks.First().Any(p=>p.Id == participant.Id))
-            {
-                Participant replacingParticipant = blocks.First().FirstOrDefault(p=>p.IsInterventionArm == participant.IsInterventionArm);
-                if(replacingParticipant == null)
-                {
-                    var coalescingBlock = blocks.Take(2).SelectMany(g=>g).ToList();
-                    replacingParticipant = coalescingBlock.First(p=>p.IsInterventionArm == participant.IsInterventionArm);
-                    coalescingBlock.Remove(replacingParticipant);
-                    int newBlockSize = coalescingBlock.Count(p=>p.IsInterventionArm != participant.IsInterventionArm)*2;
-                    foreach (var p in coalescingBlock)
-                    {
-                        p.BlockNumber = replacingParticipant.BlockNumber;
-                        p.BlockSize = newBlockSize;
-                    }
-                    repos.Update(coalescingBlock);
-                }
-                replacingParticipant.BlockNumber = participant.BlockNumber;
-                repos.Update(replacingParticipant);
-            }
-            participant.AdmissionWeight = newAdmissionWeight;
-            participant.IsMale = newIsMale;
-            //Handle block participant is going to
-            ForceAllocationToArm(participant,repos);
+            return GetDescendingBlocks(participant, context, out strata).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Locates maximum block number for the given participant according to the block randomisation criteria
-        /// ie gender, weight category and study site
-        /// </summary>
-        /// <param name="entitySet"></param>
-        /// <param name="newParticipant"></param>
-        /// <returns></returns>
-        static IOrderedQueryable<IGrouping<int, Participant>> QueryForAllSameBlocks(IQueryable<Participant> entitySet, Participant newParticipant)
+        static IOrderedQueryable<AllocationBlock> GetDescendingBlocks(Participant participant, ITrialDataContext context, out RandomisationStrata strata)
         {
-            IQueryable<Participant> categoryQuery = entitySet.Where(p => p.IsMale == newParticipant.IsMale && p.CentreId == newParticipant.CentreId && p.BlockNumber.HasValue);
-            if (newParticipant.AdmissionWeight < BlockWeight1)
+            var internalStrata = strata = RandomisingExtensions.RandomisationCategory(participant);
+            if (participant.Centre == null)
             {
-                categoryQuery = categoryQuery.Where(p => p.AdmissionWeight < BlockWeight1);
+                participant.Centre = context.StudyCentres.Find(participant.CentreId);
             }
-            else if (newParticipant.AdmissionWeight < BlockWeight2)
-            {
-                categoryQuery = categoryQuery.Where(p => p.AdmissionWeight >= BlockWeight1 && p.AdmissionWeight < BlockWeight2);
-            }
-            else
-            {
-                categoryQuery = categoryQuery.Where(p2 => p2.AdmissionWeight >= BlockWeight2);
-            }
-            return (from p in categoryQuery
-                    orderby p.RegisteredAt descending 
-                    group p by p.BlockNumber.Value into blocks
-                    orderby blocks.Key descending
-                    select blocks);
-        }
-        /// <summary>
-        /// When adding in envelope numbers after computerised randomisation has begun, need to reclear lower block numbers
-        /// </summary>
-        public static void UnsetComputerisedBlocks(IRepository repos)
-        {
-            int?[] computerRandomisedBlockNumbers = (from p in repos.Participants
-                                                    where p.BlockNumber.HasValue && (!p.WasEnvelopeRandomised || p.MultipleSiblingId.HasValue)
-                                                    group p by p.BlockNumber into distinctBlocks
-                                                    select distinctBlocks.Key).ToArray();
-            repos.Database.ExecuteSqlCommand(string.Format("UPDATE [Participants] SET [BlockNumber] = NULL, [BlockSize] = 0 WHERE [WasEnvelopeRandomised] = 0 OR [MultipleSiblingId] IS NOT NULL"));
-            var parts = (from p in repos.Participants
-                         where computerRandomisedBlockNumbers.Contains(p.BlockNumber)
-                         select p).ToList();
-            List<Participant> partsForUpdate = new List<Participant>(parts.Count);
-            foreach (var p in parts)
-            {
-                var e = EnvelopeDetails.GetEnvelope(p.Id);
-                if (e != null && (e.BlockNumber != p.BlockNumber || e.BlockSize != p.BlockSize))
-                {
-                    if (e.RandomisationCategory == RandomisingExtensions.RandomisationCategory(p))
-                    {
-                        p.BlockNumber = e.BlockNumber;
-                        p.BlockSize = e.BlockSize;
-                    }
-                    else
-                    {
-                        p.BlockNumber = null;
-                        p.BlockSize = 0;
-                    }
-                    partsForUpdate.Add(p);
-                }
-            }
-            repos.Update(partsForUpdate);
-
+            return (from b in context.AllocationBlocks
+                    where b.RandomisationCategory == internalStrata && b.Id >= participant.CentreId && b.Id <= participant.Centre.MaxIdForSite
+                    orderby b.Id descending
+                    select b);
         }
 
         static string SqlToUnsetIncorrectEnvelopes()
         {
             StringBuilder returnVar = new StringBuilder("UPDATE [Participants] SET [BlockNumber] = NULL, [BlockSize] = 0 WHERE ");
-            var envelopeDetails = EnvelopeDetails.GetAllEnvelopeNumbers();
-            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 0 AND AdmissionWeight >= {1}) OR ",string.Join(",",envelopeDetails[RandomisationCategories.SmallestWeightFemale]),BlockWeight1);
-            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND AdmissionWeight >= {1}) OR ",string.Join(",",envelopeDetails[RandomisationCategories.SmallestWeightMale]),BlockWeight1);
-            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 0 AND (AdmissionWeight < {1} OR AdmissionWeight >= {2})) OR ", string.Join(",", envelopeDetails[RandomisationCategories.MidWeightFemale]), BlockWeight1, BlockWeight2);
-            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND (AdmissionWeight < {1} OR AdmissionWeight >= {2})) OR ", string.Join(",", envelopeDetails[RandomisationCategories.MidWeightMale]), BlockWeight1, BlockWeight2);
-            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 0 AND AdmissionWeight < {1}) OR ",string.Join(",",envelopeDetails[RandomisationCategories.TopWeightFemale]),BlockWeight2);
-            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND AdmissionWeight < {1});",string.Join(",",envelopeDetails[RandomisationCategories.TopWeightMale]),BlockWeight2);
+            var envelopeDetails = EnvelopeDetails.GetAllEnvelopeNumbersByStrata();
+            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 0 AND AdmissionWeight >= {1}) OR ",string.Join(",",envelopeDetails[RandomisationStrata.SmallestWeightFemale]),BlockWeight1);
+            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND AdmissionWeight >= {1}) OR ", string.Join(",", envelopeDetails[RandomisationStrata.SmallestWeightMale]), BlockWeight1);
+            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 0 AND (AdmissionWeight < {1} OR AdmissionWeight >= {2})) OR ", string.Join(",", envelopeDetails[RandomisationStrata.MidWeightFemale]), BlockWeight1, BlockWeight2);
+            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND (AdmissionWeight < {1} OR AdmissionWeight >= {2})) OR ", string.Join(",", envelopeDetails[RandomisationStrata.MidWeightMale]), BlockWeight1, BlockWeight2);
+            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 0 AND AdmissionWeight < {1}) OR ", string.Join(",", envelopeDetails[RandomisationStrata.TopWeightFemale]), BlockWeight2);
+            returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND AdmissionWeight < {1});", string.Join(",", envelopeDetails[RandomisationStrata.TopWeightMale]), BlockWeight2);
             return returnVar.ToString();
         }
-        /// <summary>
-        /// When returning to computerised randomisation
-        /// </summary>
-        public static void BalanceUnsetBlocks(IRepository repos)
-        {
-            int nextBalanceBlockNo = ((from p in repos.Participants
-                                      orderby p.BlockNumber descending
-                                      select p.BlockNumber).FirstOrDefault() ?? 0 )+ 1;
-            int nextUnbalanceBlockNumber = nextBalanceBlockNo + 1;
-            //
-            //Unset incorrectly envelope randomised patients
-            //repos.Database.ExecuteSqlCommand(SqlToUnsetIncorrectEnvelopes());
 
-            foreach (var rc in repos.Participants.ToLookup(p=>RandomisingExtensions.RandomisationCategory(p))) //loop through each randomisation category
-            {
-                List<Participant> unbalancedParticipants = new List<Participant>();
-                unbalancedParticipants.AddRange(rc.GroupBy(r => r.BlockNumber).Where(r=>r.Count() != r.First().BlockSize).SelectMany(r=>r));
-
-                int interventionCount = unbalancedParticipants.Count(p => p.IsInterventionArm);
-                int controlCount = unbalancedParticipants.Count - interventionCount;
-                int balanceControlCount  = interventionCount > controlCount ? controlCount : interventionCount;
-                int balanceInterventionCount = balanceControlCount;
-                int balanceBlockSize = 2* balanceInterventionCount;
-                int unbalanceBlockSize = Math.Abs(interventionCount - controlCount)*2;
-                foreach (var p in unbalancedParticipants)
-                {
-                    if ((p.IsInterventionArm && balanceInterventionCount > 0) || (!p.IsInterventionArm && balanceControlCount > 0))
-                    {
-                        p.BlockSize = balanceBlockSize;
-                        p.BlockNumber = nextBalanceBlockNo;
-                        if (p.IsInterventionArm)
-                        {
-                            balanceInterventionCount--;
-                        }
-                        else
-                        {
-                            balanceControlCount--;
-                        }
-                    }
-                    else
-                    {
-                        p.BlockSize = unbalanceBlockSize;
-                        p.BlockNumber = nextUnbalanceBlockNumber;
-                    }
-                }
-                repos.Update(unbalancedParticipants);
-                nextBalanceBlockNo += 2;
-                nextUnbalanceBlockNumber += 2;
-            }
-        }
     }
     public static class BlockRandomisation
     {
@@ -310,14 +212,46 @@ namespace BlowTrial.Infrastructure
         {
             return (new Random().Next(4) + 1) * 2; //A 32-bit signed integer greater than or equal to zero, and less than maxValue; that is, the range of return values ordinarily includes zero but not maxValue. However, if maxValue equals zero, maxValue is returned.
         }
-        public static bool nextAllocation<T>(int blockSize, IEnumerable<T> patientDataCollection, Func<T, bool> predicate)
+        public static bool IsNextAllocationIntervention(IEnumerable<bool> interventionArmWithinBlock, int blockSize)
         {
-            double remainingAllocations = blockSize - patientDataCollection.Count();
-            if (remainingAllocations <= 0) throw new ArgumentException("patientDataCollection must be smaller than blockSize.");
-            double remainingInterventions = blockSize / 2 - patientDataCollection.Count(predicate);
+            double remainingAllocations = blockSize;
+            double remainingInterventions = blockSize/2;
+            foreach (bool isIntervention in interventionArmWithinBlock)
+            {
+                remainingAllocations--;
+                if (isIntervention)
+                {
+                    remainingInterventions--;
+                }
+            }
+            if (remainingAllocations <= 0) throw new ArgumentException("No remaining allocations");
             double Pintervention = remainingInterventions / remainingAllocations;
             double rdm = new Random().NextDouble();
             return (rdm <= Pintervention);
+        }
+        internal static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, BlockComponent block)
+        {
+            return NextAllocation(currentBlock, block.GetAllocations());
+        }
+        public static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, IDictionary<RandomisationArm, int> ratios)
+        {
+            double totalRemainingAllocations = ratios.Values.Sum();
+            var remainingAllocations = new List<KeyValuePair<RandomisationArm, int>>();
+            foreach (var g in currentBlock.GroupBy(a => a))
+            {
+                int grpCount = g.Count();
+                totalRemainingAllocations -= grpCount;
+                remainingAllocations.Add(new KeyValuePair<RandomisationArm, int>(g.Key,ratios[g.Key] - grpCount));
+            }
+
+            if (totalRemainingAllocations <= 0) throw new ArgumentException("No remaining allocations");
+
+            double cumulativeP = 0;
+
+            double rdm = new Random().NextDouble();
+            //not worth a binary search, as unlikely to be more than 4 allocations
+            return remainingAllocations.First(a=>
+                (cumulativeP += a.Value / totalRemainingAllocations) <= rdm).Key;
         }
     }
 }

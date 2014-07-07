@@ -14,7 +14,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         DateTime? DischargeDateTime {get;}
         DateTime? DeathOrLastContactDateTime {get;}
         CauseOfDeathOption CauseOfDeath {get;}
-        bool IsInterventionArm {get;}
+        RandomisationArm TrialArm {get;}
         ICollection<VaccineAdministered> VaccinesAdministered {get;}
     }
 }

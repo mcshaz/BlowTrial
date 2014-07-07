@@ -148,7 +148,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _violation.Participant.TrialArm;
+                return _violation.Participant.TrialArmDescription;
             }
         }
 

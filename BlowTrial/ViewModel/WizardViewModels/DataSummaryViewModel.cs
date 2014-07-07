@@ -57,11 +57,9 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
         {
-            ParticipantData.TotalCount++;
-            if (e.Participant.IsInterventionArm)
-            {
-                ParticipantData.InterventionArmCount++;
-            }
+            ParticipantData.TrialArmCounts[e.Participant.TrialArm]++;
+            var dataRequired = ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant);
+            ParticipantData.DataRequiredCount[dataRequired]++;
             NotifyPropertyChanged("ParticipantData");
         }
         public ParticipantsSummary ParticipantData { get; private set; }

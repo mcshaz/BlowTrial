@@ -26,5 +26,6 @@ namespace BlowTrial.Domain.Tables
         public DateTime RecordLastModified { get; set; }
 
         public virtual ICollection<Participant> Participants { get; set; }
+        public virtual ICollection<BalancedAllocation> Allocations { get; set; }
     }
 }

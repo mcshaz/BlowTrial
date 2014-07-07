@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlowTrial.Infrastructure.Randomising
 {
-    public enum RandomisationCategories
+    public enum RandomisationStrata
     {
         NotSet = 0,
         SmallestWeightMale = 1,
@@ -21,20 +21,25 @@ namespace BlowTrial.Infrastructure.Randomising
     }
     internal static class RandomisingExtensions
     {
-        internal static RandomisationCategories RandomisationCategory(Participant p)
+        internal static RandomisationStrata RandomisationCategory(this Participant p)
         {
-            return p.AdmissionWeight < RandomisingEngine.BlockWeight1
-                ? p.IsMale ? RandomisationCategories.SmallestWeightMale : RandomisationCategories.SmallestWeightFemale
-                : p.AdmissionWeight >= RandomisingEngine.BlockWeight2
-                    ? p.IsMale ? RandomisationCategories.TopWeightMale : RandomisationCategories.TopWeightFemale
-                    : p.IsMale ? RandomisationCategories.MidWeightMale : RandomisationCategories.MidWeightFemale;
+            return RandomisationCategory(p.AdmissionWeight, p.IsMale);
+        }
+
+        internal static RandomisationStrata RandomisationCategory(double admissionWeight, bool isMale)
+        {
+            return admissionWeight < Engine.BlockWeight1
+                ? isMale ? RandomisationStrata.SmallestWeightMale : RandomisationStrata.SmallestWeightFemale
+                : admissionWeight >= Engine.BlockWeight2
+                    ? isMale ? RandomisationStrata.TopWeightMale : RandomisationStrata.TopWeightFemale
+                    : isMale ? RandomisationStrata.MidWeightMale : RandomisationStrata.MidWeightFemale;
         }
 
         internal static bool IsSameRandomisingCategory(bool oldIsMale, bool newIsMale, int oldWeight, int newWeight)
         {
             return oldIsMale == newIsMale &&
-                    oldWeight < RandomisingEngine.BlockWeight1 == newWeight < RandomisingEngine.BlockWeight1 &&
-                    oldWeight >= RandomisingEngine.BlockWeight2 == newWeight >= RandomisingEngine.BlockWeight2;
+                    oldWeight < Engine.BlockWeight1 == newWeight < Engine.BlockWeight1 &&
+                    oldWeight >= Engine.BlockWeight2 == newWeight >= Engine.BlockWeight2;
         }
     }
 }

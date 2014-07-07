@@ -342,7 +342,7 @@
     <comment>String format display message when randomised to control arm</comment>
   </data>
   <data name="NewPatient_ToIntervention" xml:space="preserve">
-    <value>{0} has been randomised to the INTERVENTION arm with an ID of {1:n0}.</value>
+    <value>{0} has been randomised to the INTERVENTION arm ({1}) with an ID of {2:n0}.</value>
     <comment>String format display message when randomised to intervention arm</comment>
   </data>
   <data name="ParticipantModel_Describe_DateTimeDischarge" xml:space="preserve">
@@ -525,7 +525,7 @@
     <value>Other...</value>
   </data>
   <data name="Vaccine_RussianBcg" xml:space="preserve">
-    <value>Russian BCG</value>
+    <value>BCG-India</value>
   </data>
   <data name="Vaccine_HepB" xml:space="preserve">
     <value>Hep B</value>
@@ -835,6 +835,15 @@
     <value>Only 1 type of BCG can be given per patient</value>
   </data>
   <data name="Vaccine_DanishBcg" xml:space="preserve">
-    <value>Danish BCG</value>
+    <value>BCG-Danish</value>
+  </data>
+  <data name="AllocationGroups_IndiaThreeArmBalanced" xml:space="preserve">
+    <value>India - 3 arm (balanced assignnment)</value>
+  </data>
+  <data name="AllocationGroups_IndiaThreeArmUnbalanced" xml:space="preserve">
+    <value>India - 3 arm (catch up assignnment)</value>
+  </data>
+  <data name="AllocationGroups_IndiaTwoArm" xml:space="preserve">
+    <value>India - 2 arm</value>
   </data>
 </root>

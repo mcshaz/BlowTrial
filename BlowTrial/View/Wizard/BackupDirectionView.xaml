@@ -29,6 +29,8 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="5" VerticalAlignment="Stretch" Width="6" />
         <!-- BackupToCloud-->
@@ -68,5 +70,25 @@
                           HorizontalAlignment="Right"
                           Content="{Binding ElementName=patientsPreviouslyRandomisedCombo, Path=(Validation.Errors).CurrentItem}"
                           />
+        <!-- AllocationType-->
+        <Label 
+                      Grid.Row="4" Grid.Column="0" 
+                      Content="Trial Allocations:" 
+                      HorizontalAlignment="Right"
+                      Target="{Binding ElementName=backupToCloudCombo}" 
+                      />
+        <ComboBox
+                        x:Name="allocationTypeCombo" Grid.Row="4" Grid.Column="2"
+                        ItemsSource="{Binding Path=AllocationTypeOptions, Mode=OneTime}"
+                        Style="{StaticResource enablePreviousEnrol}"
+                        SelectedValuePath="Key" 
+                        DisplayMemberPath="Value"
+                        SelectedValue="{Binding Path=AllocationType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+
+        <ContentPresenter 
+                        Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3"
+                      HorizontalAlignment="Right"
+                      Content="{Binding ElementName=allocationTypeCombo, Path=(Validation.Errors).CurrentItem}"
+                      />
     </Grid>
 </UserControl>

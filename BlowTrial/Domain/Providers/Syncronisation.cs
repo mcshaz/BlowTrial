@@ -131,6 +131,14 @@ namespace BlowTrial.Domain.Providers
                     context.ScreenedPatients.AddOrUpdate(modifiedScreenedPatients);
                     context.SaveChanges(false);
 
+                    var balanceAllocs = GetRecordsRequiringUpdating(downloadedDb.BalancedAllocations.AsNoTracking(), newSiteIdRanges, mostRecentBak);
+                    context.BalancedAllocations.AddOrUpdate(balanceAllocs);
+                    context.SaveChanges(false);
+
+                    var modifiedBlocks = GetRecordsRequiringUpdating(downloadedDb.AllocationBlocks.AsNoTracking(), newSiteIdRanges, mostRecentBak);
+                    context.AllocationBlocks.AddOrUpdate(modifiedBlocks);
+                    context.SaveChanges(false);
+
                     var modifiedParticipants = GetRecordsRequiringUpdating(downloadedDb.Participants.AsNoTracking(), newSiteIdRanges, mostRecentBak);
                     var modifiedParticipantIds = modifiedParticipants.Select(p=>p.Id).ToList();
                     var participantsInDb = (from p in context.Participants

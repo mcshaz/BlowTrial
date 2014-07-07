@@ -42,26 +42,31 @@ namespace BlowTrial.Domain.Tables
         public string MothersName { get; set; }
         [StringLength(16)]
         public string PhoneNumber { get; set; }
-        public bool IsInterventionArm { get; set; }
+        public RandomisationArm TrialArm { get; set; }
         public bool? BcgAdverse { get; set; }
         [StringLength(2056)]
         public string BcgAdverseDetail { get; set; }
-        public bool? BcgPapule { get; set; }
+        public bool? BcgPapuleAtDischarge { get; set; }
+        public bool? BcgPapuleAt28days { get; set; }
         public int? LastContactWeight { get; set; }
         public DateTime? LastWeightDate { get; set; }
         public virtual DateTime? DischargeDateTime { get; set; }
         public virtual DateTime? DeathOrLastContactDateTime { get; set; }
         [StringLength(2056)]
         public string OtherCauseOfDeathDetail { get; set; }
-        public int? BlockNumber { get; set; }
-        public int BlockSize { get; set; }
+        [ForeignKey("Block")]
+        public int? AllocationBlockId { get; set; }
         public int? MultipleSiblingId { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
         [StringLength(160)]
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
+        public bool UserMarkedFinished { get; set; }
+        public int? BlockNumber { get; set; }
+        public int BlockSize { get; set; }
 
+        public virtual AllocationBlock Block { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
         public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }
     }

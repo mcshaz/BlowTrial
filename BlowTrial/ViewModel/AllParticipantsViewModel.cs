@@ -325,7 +325,7 @@ namespace BlowTrial.ViewModel
                 sp.OtherCauseOfDeathDetail = e.Participant.OtherCauseOfDeathDetail;
                 sp.BcgAdverse = e.Participant.BcgAdverse;
                 sp.BcgAdverseDetail = e.Participant.BcgAdverseDetail;
-                sp.BcgPapule = e.Participant.BcgPapule;
+                sp.BcgPapuleAtDischarge = e.Participant.BcgPapuleAtDischarge;
                 sp.IsParticipantModelChanged = false;
                 sp.IsVaccineAdminChanged = false; //ensure save changes is not enabled
             }
@@ -385,7 +385,7 @@ namespace BlowTrial.ViewModel
         void OnMainWindowClosing(object args)
         {
             if (_updateWindow == null) { return; }
-            if (((ParticipantProgressViewModel)SelectedParticipant).OkToProceed())
+            if (_updateWindow != null && _updateWindow.DataContext != null && ((ParticipantProgressViewModel)_updateWindow.DataContext).OkToProceed())
             {
                 _updateWindow.Close();
             }
@@ -411,7 +411,7 @@ namespace BlowTrial.ViewModel
                              HospitalIdentifier = p.HospitalIdentifier,
                              DateTimeBirth = p.DateTimeBirth,
                              Id = p.Id,
-                             IsInterventionArm = p.IsInterventionArm,
+                             TrialArm = p.TrialArm,
                              IsMale = p.IsMale,
                              Name = p.Name,
                              RegisteredAt = p.RegisteredAt,

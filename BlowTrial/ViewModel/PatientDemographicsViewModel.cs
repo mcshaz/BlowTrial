@@ -805,10 +805,21 @@ namespace BlowTrial.ViewModel
             }
             if (!false.Equals(parameter)) // for testing purposes, supress dialog
             {
-                string userMsg = (newParticipant.IsInterventionArm) 
-                    ? Strings.NewPatient_ToIntervention + " " + InterventionArmMessage
-                    : Strings.NewPatient_ToControl + " " + ControlArmMessage;
-                userMsg = string.Format(userMsg, newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')', newParticipant.Id);
+                string userMsg;
+                if (newParticipant.TrialArm == Domain.Outcomes.RandomisationArm.Control)
+                {
+                    userMsg = string.Format(Strings.NewPatient_ToControl + " " + ControlArmMessage, 
+                        newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')', 
+                        newParticipant.Id);
+                }
+                else
+                {
+                    userMsg = string.Format(Strings.NewPatient_ToIntervention + " " + InterventionArmMessage, 
+                        newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')',
+                        ParticipantBaseModel.GetTrialArmDescription(newParticipant.TrialArm),
+                        newParticipant.Id);
+                }
+                
                 MessageBox.Show(userMsg, Strings.NewPatient_SuccesfullyRandomised, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             ClearAllFields();

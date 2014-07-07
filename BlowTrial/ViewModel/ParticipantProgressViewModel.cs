@@ -202,18 +202,18 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("BcgAdverseDetail");
             }
         }
-        public bool? BcgPapule
+        public bool? BcgPapuleAtDischarge
         {
             get
             {
-                return ParticipantProgressModel.BcgPapule;
+                return ParticipantProgressModel.BcgPapuleAtDischarge;
             }
             set
             {
-                if (value == ParticipantProgressModel.BcgPapule) { return; }
-                ParticipantProgressModel.BcgPapule = value;
+                if (value == ParticipantProgressModel.BcgPapuleAtDischarge) { return; }
+                ParticipantProgressModel.BcgPapuleAtDischarge = value;
                 IsParticipantModelChanged = true;
-                NotifyPropertyChanged("BcgPapule");
+                NotifyPropertyChanged("BcgPapuleAtDischarge");
             }
         }
         public int? LastContactWeight
@@ -783,7 +783,7 @@ namespace BlowTrial.ViewModel
                     otherCauseOfDeathDetail: ParticipantProgressModel.OtherCauseOfDeathDetail,
                     bcgAdverse : ParticipantProgressModel.BcgAdverse,
                     bcgAdverseDetail: ParticipantProgressModel.BcgAdverseDetail,
-                    bcgPapule : ParticipantProgressModel.BcgPapule,
+                    BcgPapuleAtDischarge : ParticipantProgressModel.BcgPapuleAtDischarge,
                     lastContactWeight : ParticipantProgressModel.LastContactWeight,
                     lastWeightDate : ParticipantProgressModel.LastWeightDate,
                     dischargeDateTime : ParticipantProgressModel.DischargeDateTime,

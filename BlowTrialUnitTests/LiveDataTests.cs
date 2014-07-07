@@ -7,6 +7,7 @@ using AutoMapper;
 using BlowTrial.Infrastructure.Automapper;
 using System.Linq;
 using BlowTrial.ViewModel;
+using BlowTrial.Migrations.TrialData;
 
 namespace BlowTrialUnitTests
 {
@@ -34,6 +35,22 @@ namespace BlowTrialUnitTests
                 }
             }
             Assert.IsFalse(idsCannotExecute.Any(), "unable to update demographics for ids: {0}", string.Join(",",idsCannotExecute));
+        }
+        [TestMethod]
+        public void TestTrialDataSeed()
+        {
+            var tst = new SeedTestUtility();
+            using (var t = new TrialDataContext())
+            {
+                tst.SeedTest(t);
+            }
+        }
+        private class SeedTestUtility : TrialDataConfiguration
+        {
+            internal void SeedTest(BlowTrial.Domain.Providers.TrialDataContext context)
+            {
+                Seed(context);
+            }
         }
     }
 }

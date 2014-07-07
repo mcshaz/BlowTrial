@@ -317,7 +317,7 @@
                               Content="{Binding ElementName=bcgAdverseDetailTxt, Path=(Validation.Errors).CurrentItem}"
                               />
 
-                        <!--BcgPapule-->
+                        <!--BcgPapuleAtDischarge-->
                         <Label Target="{Binding ElementName=bcgPapuleCombo}"
                             Grid.Row="16" Grid.Column="0"
                             HorizontalAlignment="Right" Content="{Binding Path=BcgPapuleLabel}"
@@ -326,7 +326,7 @@
                           ItemsSource="{Binding Path=BcgPapuleOptions, Mode=OneTime}"
                           SelectedValuePath="Key" 
                           DisplayMemberPath="Value"
-                          SelectedValue="{Binding Path=BcgPapule, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedValue="{Binding Path=BcgPapuleAtDischarge, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
 
                         <ContentPresenter Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"

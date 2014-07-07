@@ -1,4 +1,5 @@
-﻿using BlowTrial.Models;
+﻿using BlowTrial.Domain.Tables;
+using BlowTrial.Models;
 using BlowTrial.Properties;
 using System;
 using System.Collections.Generic;
@@ -55,7 +56,32 @@ namespace BlowTrial.ViewModel
                 if (value != true) { PatientsPreviouslyRandomised = false; }
             }
         }
+        public AllocationGroups? AllocationType
+        {
+            get
+            {
+                return _backupModel.AllocationType;
+            }
+            set
+            {
+                if (_backupModel.AllocationType == value) { return; }
+                _backupModel.AllocationType = value;
+                NotifyPropertyChanged("AllocationType");
+            }
+        }
         #endregion
+
+        #region ListBoxOptions
+        IEnumerable<KeyValuePair<AllocationGroups, string>> _allocationTypeOptions;
+        public IEnumerable<KeyValuePair<AllocationGroups, string>> AllocationTypeOptions
+        {
+            get
+            {
+                return _allocationTypeOptions
+                    ?? (_allocationTypeOptions = EnumToListOptions<AllocationGroups>());
+            }
+        }
+        #endregion // Listbox options
 
         #region Methods
         public override bool IsValid()

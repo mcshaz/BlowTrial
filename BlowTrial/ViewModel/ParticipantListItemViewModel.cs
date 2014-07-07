@@ -172,7 +172,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return this.ParticipantModel.TrialArm;
+                return this.ParticipantModel.TrialArmDescription;
             }
         }
 

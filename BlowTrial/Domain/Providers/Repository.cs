@@ -18,6 +18,7 @@ using LinqKit;
 using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Migrations;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -202,7 +203,7 @@ namespace BlowTrial.Domain.Providers
                 }
                 if (multipleSibling.IsMale == newParticipant.IsMale)
                 {
-                    newParticipant.IsInterventionArm = multipleSibling.IsInterventionArm;
+                    newParticipant.TrialArm = multipleSibling.TrialArm;
                     newParticipant.MultipleSiblingId = multipleSiblingId;
                     if (envelopeNumber.HasValue)
                     {
@@ -219,7 +220,7 @@ namespace BlowTrial.Domain.Providers
                     else
                     {
                         newParticipant.Id = GetNextId(_dbContext.Participants, centreId);
-                        RandomisingEngine.ForceAllocationToArm(newParticipant, this);
+                        Engine.ForceAllocationToArm(newParticipant, _dbContext);
                     }
                 }
             }
@@ -228,20 +229,30 @@ namespace BlowTrial.Domain.Providers
                 if (envelopeNumber.HasValue)
                 {
                     Envelope envelope = EnvelopeDetails.GetEnvelope(envelopeNumber.Value);
-                    newParticipant.BlockNumber = envelope.BlockNumber;
-                    newParticipant.BlockSize = envelope.BlockSize;
-                    newParticipant.IsInterventionArm = envelope.IsInterventionArm;
+                    if (!_dbContext.AllocationBlocks.Any(a=>a.Id==envelope.BlockNumber))
+                    {
+                        _dbContext.AllocationBlocks.Add(new AllocationBlock 
+                        {
+                            Id = envelope.BlockNumber, 
+                            GroupRepeats = (byte)(envelope.BlockSize/2), 
+                            AllocationGroup = AllocationGroups.IndiaTwoArm, 
+                            RandomisationCategory = envelope.RandomisationCategory
+                        });
+                    }
+                    newParticipant.AllocationBlockId = envelope.BlockNumber;
+                    newParticipant.TrialArm = envelope.IsInterventionArm ? RandomisationArm.RussianBCG : RandomisationArm.Control;
                     newParticipant.Id = envelopeNumber.Value;
                 }
                 else
                 {
                     newParticipant.Id = GetNextId(_dbContext.Participants, centreId);
-                    RandomisingEngine.CreateAllocation(newParticipant, this);
+                    Engine.CreateAllocation(newParticipant, _dbContext);
                 }
             }
             Add(newParticipant);
             return newParticipant;
         }
+
         void Add(Participant participant)
         {
             var centre = FindStudyCentre(participant.CentreId);
@@ -370,18 +381,10 @@ namespace BlowTrial.Domain.Providers
                         admissionWeight,
                         GenderString(isMale))
                 });
-                if (isEnvelopeRandomising)
-                {
-                    participant.BlockNumber = null;
-                    participant.BlockSize = 0;
-                }
-                else
-                {
-                    RandomisingEngine.ReasignBlockRandomisingData(participant, isMale, admissionWeight, this);
-                }
+                Engine.RemoveAllocationFromArm(participant, _dbContext);
                 returnVar |= UpdateParticipantViolationType.BlockCriteriaChanged;
             }
-            if (admissionWeight > RandomisingEngine.MaxBirthWeightGrams)
+            if (admissionWeight > Engine.MaxBirthWeightGrams)
             {
                 pv.Add(new ProtocolViolation
                 {
@@ -418,6 +421,10 @@ namespace BlowTrial.Domain.Providers
             participant.HospitalIdentifier = hospitalIdentifier;
             participant.Inborn = isInborn;
             participant.RegisteredAt = registeredAt;
+            if ((returnVar & UpdateParticipantViolationType.BlockCriteriaChanged) != 0)
+            {
+                Engine.ForceAllocationToArm(participant, _dbContext);
+            }
             _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
@@ -433,7 +440,7 @@ namespace BlowTrial.Domain.Providers
         /// <param name="otherCauseOfDeathDetail"></param>
         /// <param name="bcgAdverse"></param>
         /// <param name="bcgAdverseDetail"></param>
-        /// <param name="bcgPapule"></param>
+        /// <param name="BcgPapuleAtDischarge"></param>
         /// <param name="lastContactWeight"></param>
         /// <param name="lastWeightDate"></param>
         /// <param name="dischargeDateTime"></param>
@@ -446,7 +453,7 @@ namespace BlowTrial.Domain.Providers
             string otherCauseOfDeathDetail,
             bool? bcgAdverse,
             string bcgAdverseDetail,
-            bool? bcgPapule,
+            bool? BcgPapuleAtDischarge,
             int? lastContactWeight,
             DateTime? lastWeightDate,
             DateTime? dischargeDateTime,
@@ -460,7 +467,7 @@ namespace BlowTrial.Domain.Providers
             participant.OtherCauseOfDeathDetail = otherCauseOfDeathDetail;
             participant.BcgAdverse = bcgAdverse;
             participant.BcgAdverseDetail = bcgAdverseDetail;
-            participant.BcgPapule = bcgPapule;
+            participant.BcgPapuleAtDischarge = BcgPapuleAtDischarge;
             participant.LastContactWeight = lastContactWeight;
             participant.LastWeightDate = lastWeightDate;
             participant.DischargeDateTime = dischargeDateTime;
@@ -767,9 +774,8 @@ namespace BlowTrial.Domain.Providers
         {
             return new ParticipantsSummary
             {
-                TotalCount = _dbContext.Participants.Count(),
-                InterventionArmCount = _dbContext.Participants.Count(p => p.IsInterventionArm),
-                CompletedRecordCount = _dbContext.Participants.Select(ParticipantBaseModel.GetDataRequiredExpression()).Count(d => d == DataRequiredOption.Complete)
+                TrialArmCounts = _dbContext.Participants.GroupBy(p=>p.TrialArm).ToDictionary(k=>k.Key, v=>v.Count()),
+                DataRequiredCount = _dbContext.Participants.GroupBy(ParticipantBaseModel.GetDataRequiredExpression()).ToDictionary(k => k.Key, v => v.Count())
             };
         }
         public ScreenedPatientsSummary GetScreenedPatientSummary()
@@ -788,17 +794,7 @@ namespace BlowTrial.Domain.Providers
 
         int GetNextId(IQueryable<ISharedRecord> recordSet, int studyCentreId)
         {
-            int maxIdForSite = LocalStudyCentres.First(s=>s.Id == studyCentreId).MaxIdForSite;
-            int returnVar = (from r in recordSet
-                             where r.Id >= studyCentreId && r.Id <= maxIdForSite
-                             select r.Id).DefaultIfEmpty().Max();
-            if (returnVar == 0) { returnVar = studyCentreId; }
-            returnVar++; 
-            if (returnVar > maxIdForSite)
-            {
-                throw new DataKeyOutOfRangeException("Database has exceeded maximum size for site");
-            }
-            return returnVar;
+            return recordSet.GetNextId(studyCentreId,LocalStudyCentreDictionary[studyCentreId].MaxIdForSite);
         }
 
         ICollection<MatchedFilePair> GetMatchedCloudAndExtractedFiles()
