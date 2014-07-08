@@ -80,7 +80,27 @@ namespace BlowTrial.Helpers
         {
             get 
             {
-                return _postDischargeOutcomeKnown.HasValue && _diedAfterDischarge.HasValue;
+                return _outcomeAt28Days== OutcomeAt28DaysOption.DischargedAndOutcomeCompletelyUnknown
+                    || (_postDischargeOutcomeKnown.HasValue && _diedAfterDischarge.HasValue);
+            }
+        }
+        public bool OutcomeCompletelyUnknown
+        {
+            get
+            {
+                return _outcomeAt28Days == OutcomeAt28DaysOption.DischargedAndOutcomeCompletelyUnknown;
+            }
+            set
+            {
+                if (value)
+                {
+                    _outcomeAt28Days = OutcomeAt28DaysOption.DischargedAndOutcomeCompletelyUnknown;
+                    _diedAfterDischarge = _postDischargeOutcomeKnown = null;
+                }
+                else if (_outcomeAt28Days == OutcomeAt28DaysOption.DischargedAndOutcomeCompletelyUnknown)
+                {
+                    _outcomeAt28Days = OutcomeAt28DaysOption.DischargedBefore28Days;
+                }
             }
         }
         #endregion

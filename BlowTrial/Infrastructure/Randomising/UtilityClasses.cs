@@ -19,7 +19,8 @@ namespace BlowTrial.Infrastructure.Randomising
         internal byte Ratio { get; private set; }
     }
      * */
-    internal class BlockComponent
+    //to internal 
+    public class BlockComponent
     {
         internal BlockComponent(byte repeats, IDictionary<RandomisationArm, int> ratios)
         {
@@ -27,8 +28,8 @@ namespace BlowTrial.Infrastructure.Randomising
             Ratios = ratios as ReadOnlyDictionary<RandomisationArm,int>
                 ?? new ReadOnlyDictionary<RandomisationArm,int>(ratios);
         }
-        internal ReadOnlyDictionary<RandomisationArm, int> Ratios { get; private set; }
-        internal byte Repeats { get; private set; }
+        public ReadOnlyDictionary<RandomisationArm, int> Ratios { get; private set; }
+        public byte Repeats { get; private set; }
         internal IDictionary<RandomisationArm, int> GetAllocations()
         {
             if (Repeats == 1) { return Ratios; }
@@ -48,28 +49,36 @@ namespace BlowTrial.Infrastructure.Randomising
             return Ratios.Values.Sum() * Repeats;
         }
     }
-
-    internal static class ArmData
+    //to internal
+    public static class ArmData
     {
-        static Dictionary<AllocationGroups, BlockComponent> _allBlocks;
-        internal static BlockComponent GetRatio(AllocationGroups group)
+        static ReadOnlyDictionary<AllocationGroups, BlockComponent> _allBlocks;
+
+        internal static ReadOnlyDictionary<AllocationGroups, BlockComponent> GetAllBlocks()
         {
             if (_allBlocks == null)
             {
-                _allBlocks = new Dictionary<AllocationGroups,BlockComponent>(3);
+                var componentDict = new Dictionary<AllocationGroups,BlockComponent>(3);
                 var ratios = new Dictionary<RandomisationArm, int>(3);
                 ratios.Add(RandomisationArm.Control, 1);
                 ratios.Add(RandomisationArm.RussianBCG, 1);
-                _allBlocks.Add(AllocationGroups.IndiaTwoArm, new BlockComponent(2, ratios));
+                componentDict.Add(AllocationGroups.IndiaTwoArm, new BlockComponent(2, ratios));
+                ratios = new Dictionary<RandomisationArm, int>(ratios);
                 ratios.Add(RandomisationArm.DanishBcg, 1);
-                _allBlocks.Add(AllocationGroups.IndiaThreeArmBalanced, new BlockComponent(2, ratios));
+                componentDict.Add(AllocationGroups.IndiaThreeArmBalanced, new BlockComponent(2, ratios));
+                ratios = new Dictionary<RandomisationArm, int>(ratios);
                 ratios[RandomisationArm.DanishBcg] = 2;
-                _allBlocks.Add(AllocationGroups.IndiaThreeArmUnbalanced, new BlockComponent(1, ratios));
-                System.Diagnostics.Debug.Assert(_allBlocks[AllocationGroups.IndiaTwoArm].Ratios.Count == 2, "wrapping, not mapping readonlydictionary - need to create new instances");
+                componentDict.Add(AllocationGroups.IndiaThreeArmUnbalanced, new BlockComponent(1, ratios));
+                _allBlocks = new ReadOnlyDictionary<AllocationGroups,BlockComponent>(componentDict);
             }
-            return _allBlocks[group];
+            return _allBlocks;
         }
-        internal static BlockComponent GetComponents(this AllocationBlock block)
+
+        public static BlockComponent GetRatio(AllocationGroups group)
+        {
+            return GetAllBlocks()[group];
+        }
+        public static BlockComponent GetComponents(this AllocationBlock block)
         {
             return GetRatio(block.AllocationGroup).Clone(block.GroupRepeats);
         }

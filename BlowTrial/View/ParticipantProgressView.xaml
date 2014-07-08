@@ -204,24 +204,32 @@
                         <TextBlock Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5">
                             28 day outcome (after discharge):
                         </TextBlock>
-                        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="4">
-                            <StackPanel Orientation="Vertical">
-                                <RadioButton Content="Known" GroupName="KnownOptions" Name="isKnownRadio"  Validation.ErrorTemplate="{x:Null}"
-                                IsChecked="{Binding Path=PostDischargeOutcomeKnown, Mode=TwoWay, ValidatesOnDataErrors=True, 
-                                Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
-                                <RadioButton Content="Likely" GroupName="KnownOptions" 
-                                IsChecked="{Binding Path=PostDischargeOutcomeKnown, Mode=TwoWay,
-                                 Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                        <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="4">
+                            <RadioButton Content="Completely Unknown" GroupName="KnownOptions" Name="isCompletelyUnknownRadio"  Validation.ErrorTemplate="{x:Null}"
+                                    IsChecked="{Binding Path=PostDischargeCompletelyUnknown, Mode=TwoWay, ValidatesOnDataErrors=True, 
+                                    UpdateSourceTrigger=PropertyChanged}" Margin="4" HorizontalAlignment="left"/>
+                            <TextBlock Margin="20,0,0,4">Or</TextBlock>
+                            <Border BorderThickness="2" BorderBrush="Aqua">
+                            <StackPanel Orientation="Horizontal" >
+                                <StackPanel Orientation="Vertical">
+                                    <RadioButton Content="Known" GroupName="KnownOptions" Name="isKnownRadio"  Validation.ErrorTemplate="{x:Null}"
+                                    IsChecked="{Binding Path=PostDischargeOutcomeKnown, Mode=TwoWay, ValidatesOnDataErrors=True, 
+                                    Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                                    <RadioButton Content="Likely" GroupName="KnownOptions" 
+                                    IsChecked="{Binding Path=PostDischargeOutcomeKnown, Mode=TwoWay,
+                                     Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                                </StackPanel>
+                                <TextBlock VerticalAlignment="Center">to have</TextBlock>
+                                <StackPanel Orientation="Vertical">
+                                    <RadioButton Content="survived to 28 days " GroupName="DiedOptions" Name="isDeadRadio" Validation.ErrorTemplate="{x:Null}"
+                                    IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, ValidatesOnDataErrors=True, 
+                                    Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                                    <RadioButton Content="died before 28 days " GroupName="DiedOptions" 
+                                    IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, 
+                                    Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                                </StackPanel>
                             </StackPanel>
-                            <TextBlock VerticalAlignment="Center">to have</TextBlock>
-                            <StackPanel Orientation="Vertical">
-                                <RadioButton Content="survived to 28 days " GroupName="DiedOptions" Name="isDeadRadio" Validation.ErrorTemplate="{x:Null}"
-                                IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, ValidatesOnDataErrors=True, 
-                                Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
-                                <RadioButton Content="died before 28 days " GroupName="DiedOptions" 
-                                IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, 
-                                Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
-                            </StackPanel>
+                            </Border>
                         </StackPanel>
                         <ContentPresenter 
                   Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"

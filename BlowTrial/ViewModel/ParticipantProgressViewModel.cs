@@ -216,6 +216,20 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("BcgPapuleAtDischarge");
             }
         }
+        public bool? BcgPapuleAt28days
+        {
+            get
+            {
+                return ParticipantProgressModel.BcgPapuleAt28days;
+            }
+            set
+            {
+                if (value == ParticipantProgressModel.BcgPapuleAt28days) { return; }
+                ParticipantProgressModel.BcgPapuleAt28days = value;
+                IsParticipantModelChanged = true;
+                NotifyPropertyChanged("BcgPapuleAt28days");
+            }
+        }
         public int? LastContactWeight
         {
             get
@@ -453,7 +467,20 @@ namespace BlowTrial.ViewModel
                     ParticipantProgressModel.DeathOrLastContactTime = null;
                     ParticipantProgressModel.CauseOfDeath = CauseOfDeathOption.Missing;
                 }
-                NotifyPropertyChanged("OutcomeAt28Days", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath","DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
+                NotifyPropertyChanged("OutcomeAt28Days", "PostDischargeCompletelyUnknown", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath", "DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
+            }
+        }
+        public bool PostDischargeCompletelyUnknown
+        {
+            get 
+            {
+                return _outcomeSplitter.OutcomeCompletelyUnknown;
+            }
+            set 
+            {
+                if (value == _outcomeSplitter.OutcomeCompletelyUnknown) { return; }
+                _outcomeSplitter.OutcomeCompletelyUnknown = value;
+                OutcomeAt28Days = _outcomeSplitter.OutcomeAt28Days;
             }
         }
         public bool? PostDischargeOutcomeKnown

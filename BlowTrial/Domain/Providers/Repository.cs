@@ -735,7 +735,12 @@ namespace BlowTrial.Domain.Providers
                 MigrateIfRequired(f);
             }
 
-            SyncronisationResult syncResults = SyncronisationResult.Sync(_dbContext, bakupFilePaths);
+            if (ParticipantAdded == null && ParticipantUpdated == null && ScreenedPatientAdded==null)
+            {
+                SyncronisationResult.Sync(_dbContext, bakupFilePaths, false);
+                return;
+            }
+            SyncronisationResult syncResults = SyncronisationResult.Sync(_dbContext, bakupFilePaths, true);
 
             if (ParticipantAdded != null)
             {

@@ -67,6 +67,16 @@ namespace BlowTrial.Migrations.TrialData
                 //context.Database.ExecuteSqlCommand("Alter Table Participants Drop Column BlockNumber");
                 //context.Database.ExecuteSqlCommand("Alter Table Participants Drop Column BlockSize");
             }
+            const int replicatedPartId = 20206;
+            if (context.VaccinesAdministered.Count(va=>va.ParticipantId==replicatedPartId && va.VaccineId==1)>2)
+            {
+                var vaIds = (from va in context.VaccinesAdministered
+                             where va.ParticipantId == replicatedPartId
+                             orderby va.Id
+                             select va.Id).ToList();
+                vaIds.RemoveRange(vaIds.Count - 2, 2);
+                context.Database.ExecuteSqlCommand(string.Format("delete from VaccinesAdministered where Id in ({0})", string.Join(",", vaIds)));
+            }
         }
         class OldParticipant 
         {

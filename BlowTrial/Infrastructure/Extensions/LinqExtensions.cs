@@ -76,6 +76,18 @@ namespace BlowTrial.Infrastructure.Extensions
             return true;
         }
 
+        public static IEnumerable<Tsource> ConcatDistinct<Tsource, Tkey>(this IEnumerable<Tsource> source, IEnumerable<Tsource> extend, Func<Tsource, Tkey> keyPredicate)
+        {
+            var keySet = new HashSet<Tkey>();
+            foreach (Tsource el in source.Concat(extend))
+            {
+                if (keySet.Add(keyPredicate(el)))
+                {
+                    yield return el;
+                }
+            }
+        }
+
         public static IEnumerable<T> AllExceptFirstMax<T>(this IEnumerable<T> source, Func<T, int> predicate)
         {
             List<int> resultList = new List<int>();

@@ -26,6 +26,7 @@ namespace BlowTrial.Domain.Outcomes
         DischargedAndKnownToHaveDied = 5,
         DischargedAndLikelyToHaveSurvived = 6,
         DischargedAndLikelyToHaveDied = 7,
+        DischargedAndOutcomeCompletelyUnknown = 8
     }
     public enum DataRequiredOption
     {
@@ -37,6 +38,7 @@ namespace BlowTrial.Domain.Outcomes
     }
     public enum RandomisationArm
     {
+        NotSet,
         Control,
         RussianBCG,
         DanishBcg

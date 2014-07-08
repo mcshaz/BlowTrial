@@ -56,20 +56,21 @@ namespace BlowTrial.Infrastructure.Randomising
             }
             return returnVar;
         }
-        public static void CreateNewBlock(ITrialDataContext context)
-        {
-            
-        }
+
         public static void CreateAllocation(Participant participant, ITrialDataContext context)
         {
             //try
             //{
+            if (participant.TrialArm != RandomisationArm.NotSet)
+            {
+                throw new InvalidOperationException("participant.TrialArm must have a value of NotSet - use forceallocation if the allocation is pre-set");
+            }
             RandomisationStrata strata;
-            var currentBlock = GetCurrentBlock(participant, context, out strata);
+            var currentBlock = Get1stUnfilledBlock(participant, out strata,context);
             BlockComponent component = (currentBlock == null)?null:currentBlock.GetComponents();
             if (currentBlock==null || context.Participants.Count(p=>p.AllocationBlockId == currentBlock.Id) == component.TotalBlockSize())
             {
-                currentBlock = CreateNewAllocationBlock(participant, strata,out component ,context);                
+                currentBlock = CreateNewAllocationBlock(participant, strata, out component ,context);                
             }
             participant.AllocationBlockId = currentBlock.Id;
             participant.TrialArm = BlockRandomisation.NextAllocation(from p in context.Participants 
@@ -123,6 +124,7 @@ namespace BlowTrial.Infrastructure.Randomising
        */
         public static void RemoveAllocationFromArm(Participant participant,ITrialDataContext context)
         {
+            /*
             RandomisationStrata strata;
             var blocks = GetDescendingBlocks(participant, context, out strata);
 
@@ -150,20 +152,31 @@ namespace BlowTrial.Infrastructure.Randomising
                 }
                 movableParticipant.AllocationBlockId = participant.AllocationBlockId;
             }
+            */
             participant.AllocationBlockId = 0;
+            participant.Block = null;
         }
         public static void ForceAllocationToArm(Participant participant,ITrialDataContext context)
         {
+            if (participant.TrialArm == RandomisationArm.NotSet)
+            {
+                throw new InvalidOperationException("participant.TrialArm must be set before calling this method");
+            }
             RandomisationStrata strata;
-            var currentBlock = GetCurrentBlock(participant, context, out strata);
+            var currentBlock = Get1stBlockWithSpaceForSpecificAllocation(participant, out strata, context);
+                
             if (currentBlock==null)
             {
-                BlockComponent component;
-                currentBlock = CreateNewAllocationBlock(participant, strata, out component ,context);
-            }
-            else if (currentBlock.GetCountInArm(participant.TrialArm) <= context.Participants.Count(p=>p.AllocationBlockId == currentBlock.Id && p.TrialArm==participant.TrialArm && p.Id != participant.Id))
-            {
-                currentBlock.GroupRepeats++;
+                currentBlock = GetDescendingBlocks(participant.Centre ?? (participant.Centre = context.StudyCentres.Find(participant.CentreId)), strata, context).FirstOrDefault();
+                if (currentBlock == null)
+                {
+                    BlockComponent component;
+                    currentBlock = CreateNewAllocationBlock(participant, strata, out component, context);
+                }
+                else
+                {
+                    currentBlock.GroupRepeats++;
+                }
             }
             participant.AllocationBlockId = currentBlock.Id;
             participant.Block = currentBlock;
@@ -174,20 +187,91 @@ namespace BlowTrial.Infrastructure.Randomising
         /// <param name="currentBlock">the block to be analysed. The list must be ordered so that the new allocation is LAST</param>
         /// <returns>whether entire block required resizing</returns>
 
-        static AllocationBlock GetCurrentBlock(Participant participant, ITrialDataContext context, out RandomisationStrata strata)
+        /* testing only - public*/
+        /*testing public only*/
+        public static AllocationBlock Get1stBlockWithSpaceForSpecificAllocation(Participant participant, out RandomisationStrata strata, ITrialDataContext context)
         {
-            return GetDescendingBlocks(participant, context, out strata).FirstOrDefault();
+            const string queryTemplate =
+                "SELECT [Id]"
+                      + ",[GroupRepeats]"
+                      + ",[AllocationGroup]"
+                      + ",[RandomisationCategory]"
+                      + ",[RecordLastModified]"
+                  + " FROM [AllocationBlocks] a"
+                  + " JOIN"
+                    + " (SELECT AllocationBlockId, COUNT(Id) partCount"
+                     + " FROM Participants"
+                     + " WHERE Participants.TrialArm = {0} and Participants.CentreId={1}"
+                     + " GROUP BY Participants.AllocationBlockId) s"
+                  + " ON s.AllocationBlockId = a.id"
+                  + " WHERE a.RandomisationCategory={2} and s.partCount < GroupRepeats *(case a.AllocationGroup {3} end);";
+            string casestring = string.Join(" ", GetBaseCounts(participant.TrialArm)
+                .Select(kv=>string.Format(" when {0} then {1}",(int)kv.Key,kv.Value)));
+            strata = RandomisingExtensions.RandomisationCategory(participant);
+            string query = string.Format(queryTemplate,
+                (int)participant.TrialArm,
+                participant.CentreId,
+                (int)strata,
+                casestring);
+            return context.AllocationBlocks.SqlQuery(query).FirstOrDefault();
         }
 
-        static IOrderedQueryable<AllocationBlock> GetDescendingBlocks(Participant participant, ITrialDataContext context, out RandomisationStrata strata)
+        static IEnumerable<KeyValuePair<AllocationGroups,int>> GetBaseCounts(RandomisationArm arm)
         {
-            var internalStrata = strata = RandomisingExtensions.RandomisationCategory(participant);
-            if (participant.Centre == null)
+            var allBlocks = ArmData.GetAllBlocks();
+            var returnVar = new List<KeyValuePair<AllocationGroups, int>>(allBlocks.Count);
+            foreach (var a in allBlocks)
             {
-                participant.Centre = context.StudyCentres.Find(participant.CentreId);
+                int v;
+                if (a.Value.Ratios.TryGetValue(arm, out v))
+                {
+                    returnVar.Add(new KeyValuePair<AllocationGroups, int>(a.Key, v));
+                }
             }
+            return returnVar;
+        }
+
+        static IEnumerable<KeyValuePair<AllocationGroups, int>> GetBaseCounts()
+        {
+            var allBlocks = ArmData.GetAllBlocks();
+            var returnVar = new List<KeyValuePair<AllocationGroups, int>>(allBlocks.Count);
+            foreach (var a in allBlocks)
+            {
+                returnVar.Add(new KeyValuePair<AllocationGroups, int>(a.Key, a.Value.Ratios.Values.Sum()));
+            }
+            return returnVar;
+        }
+
+        public static AllocationBlock Get1stUnfilledBlock(Participant participant, out RandomisationStrata strata, ITrialDataContext context)
+        {
+            const string queryTemplate =
+                "SELECT [Id]"
+                      + ",[GroupRepeats]"
+                      + ",[AllocationGroup]"
+                      + ",[RandomisationCategory]"
+                      + ",[RecordLastModified]"
+                  + " FROM [AllocationBlocks] a"
+                  + " JOIN"
+                    + " (SELECT AllocationBlockId, COUNT(Id) partCount"
+                     + " FROM Participants"
+                     + " WHERE Participants.CentreId={0}"
+                     + " GROUP BY Participants.AllocationBlockId) s"
+                  + " ON s.AllocationBlockId = a.id"
+                  + " WHERE a.RandomisationCategory={1} and s.partCount < GroupRepeats *(case a.AllocationGroup {2} end);";
+            string casestring = string.Join(" ", GetBaseCounts()
+                .Select(kv => string.Format(" when {0} then {1}", (int)kv.Key, kv.Value)));
+            strata = RandomisingExtensions.RandomisationCategory(participant);
+            string query = string.Format(queryTemplate,
+                participant.CentreId,
+                (int)strata,
+                casestring);
+            return context.AllocationBlocks.SqlQuery(query).FirstOrDefault();
+        }
+
+        static IOrderedQueryable<AllocationBlock> GetDescendingBlocks(StudyCentre centre, RandomisationStrata strata, ITrialDataContext context)
+        {
             return (from b in context.AllocationBlocks
-                    where b.RandomisationCategory == internalStrata && b.Id >= participant.CentreId && b.Id <= participant.Centre.MaxIdForSite
+                    where b.RandomisationCategory == strata && b.Id >= centre.Id && b.Id <= centre.MaxIdForSite
                     orderby b.Id descending
                     select b);
         }
