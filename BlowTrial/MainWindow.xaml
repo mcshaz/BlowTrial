@@ -29,7 +29,7 @@
                     <MenuItem Header="Create _New User" Command="{Binding Path=CreateNewUserCmd}" />
                     <MenuItem Header="Change _Password" IsEnabled="False" />
                     <MenuItem Header="Manage _Users" IsEnabled="False"/>
-                    <MenuItem Header="{Binding Path=ToggleEnvelopeString, Mode=OneWay}" Command="{Binding Path=ToggleEnvelopeCmd}" />
+                    <MenuItem Header="Start 3 Arm Randomising" Command="{Binding Path=Start3Arm}" Style="{StaticResource CollapseIf3Way}"/>
                     <MenuItem Header="Update Trial Site Database" Command="{Binding Path=RequestReverseUpdateCmd}" />
                 </MenuItem>
                 <MenuItem Header="_Help" >

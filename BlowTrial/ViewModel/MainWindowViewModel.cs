@@ -17,9 +17,8 @@ using System.Windows.Data;
 using AutoMapper;
 using System.Windows;
 using CloudFileTransfer;
-using System.IO;
 using BlowTrial.Infrastructure.Extensions;
-using BlowTrial.Infrastructure.Randomising;
+using BlowTrial.Domain.Tables;
 
 
 namespace BlowTrial.ViewModel
@@ -51,6 +50,7 @@ namespace BlowTrial.ViewModel
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
             ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
+            Start3Arm = new RelayCommand(param => Set3Arm(), param => _can3WayRandomise);
             ShowLogin();
         }
 
@@ -60,6 +60,20 @@ namespace BlowTrial.ViewModel
         public string ProjectName
         {
             get { return Strings.Blowtrial_ProjectName; }
+        }
+        bool _can3WayRandomise;
+        public bool Can3WayRandomise
+        {
+            get
+            {
+                return _can3WayRandomise;
+            }
+            private set
+            {
+                if (value == _can3WayRandomise) { return; }
+                _can3WayRandomise = value;
+                NotifyPropertyChanged("Can3WayRandomise");
+            }
         }
         bool _isEnvelopeRandomising;
         bool IsEnvelopeRandomising { 
@@ -126,7 +140,6 @@ namespace BlowTrial.ViewModel
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_ViewProtocolViolations,
                     new RelayCommand(param => this.ShowViolations(), param => IsAuthorised))
-
             };
         }
         public RelayCommand ShowCloudDirectoryCmd {get; private set;}
@@ -134,7 +147,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand ShowCreateCsvCmd { get; private set; }
         public RelayCommand LogoutCmd { get; private set; }
         public RelayCommand CreateNewUserCmd { get; private set; }
-        public RelayCommand ToggleEnvelopeCmd { get; private set; }
+        public RelayCommand Start3Arm { get; private set; }
         public RelayCommand ShowRandomisingMessagesCmd { get; private set; }
         public RelayCommand RequestReverseUpdateCmd { get; private set; }
         /*
@@ -188,6 +201,16 @@ namespace BlowTrial.ViewModel
         #endregion // Workspaces
 
         #region Private Helpers
+        void Set3Arm()
+        {
+            if (MessageBox.Show(
+                "Are you sure you want to continue - this step cannot be undone. Please only click OK if Danish BCG is available.", "Are you sure?",
+                MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+            {
+                BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.IndiaThreeArmUnbalanced);
+                Can3WayRandomise = false;
+            }
+        }
         void Logout()
         {
 
@@ -461,7 +484,9 @@ namespace BlowTrial.ViewModel
                     using (var m = new MembershipContext())
                     {
                         _backupService = new BackupService(_repository, m);
-                        IsEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising(m);
+                        //IsEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising(m);
+
+                        Can3WayRandomise = BlowTrialDataService.GetDefaultAllocationGroup(m) == AllocationGroups.IndiaTwoArm;
                         var backDetails = BlowTrialDataService.GetBackupDetails(m);
                         if (backDetails.BackupData.IsBackingUpToCloud)
                         {

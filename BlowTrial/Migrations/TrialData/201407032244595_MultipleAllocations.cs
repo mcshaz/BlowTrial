@@ -43,7 +43,8 @@ namespace BlowTrial.Migrations.TrialData
             AddForeignKey("dbo.Participants", "AllocationBlockId", "dbo.AllocationBlocks", "Id");
 
             AddColumn("dbo.Participants", "BcgPapuleAtDischarge", c => c.Boolean());
-            Sql("update Participants Set Participants.BcgPapuleAtDischarge = Participants.BcgPapule");
+            Sql(string.Format("update Participants Set Participants.BcgPapuleAtDischarge = Participants.BcgPapule Where Participants.OutcomeAt28Days<>{0}",(int)OutcomeAt28DaysOption.InpatientAt28Days));
+            Sql(string.Format("update Participants Set Participants.BcgPapuleAt28days = Participants.BcgPapule Where Participants.OutcomeAt28Days={0}", (int)OutcomeAt28DaysOption.InpatientAt28Days));
             DropColumn("dbo.Participants", "BcgPapule");
             //RenameColumn("dbo.Participants", "BcgPapule", "BcgPapuleAtDischarge");
             
