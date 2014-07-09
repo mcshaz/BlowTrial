@@ -1312,11 +1312,38 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The patient can not be alive in hospital at 28 days until the patient is 28 days of age.
+        ///   Looks up a localized string similar to The patient can not be alive at 28 days until the patient is 28 days of age.
         /// </summary>
-        public static string ParticipantModel_Error_28daysNotElapsed {
+        public static string ParticipantModel_Error_Alive28daysNotElapsed {
             get {
-                return ResourceManager.GetString("ParticipantModel_Error_28daysNotElapsed", resourceCulture);
+                return ResourceManager.GetString("ParticipantModel_Error_Alive28daysNotElapsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The patient cannot have a BCG papule at 28 days if he/she died before day 28.
+        /// </summary>
+        public static string ParticipantModel_Error_Bcg28daysDead {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_Bcg28daysDead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The patient cannot have a BCG papule at 28 days if the 28 day outcome is unknown.
+        /// </summary>
+        public static string ParticipantModel_Error_Bcg28daysNoOutcome {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_Bcg28daysNoOutcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The patient cannot have a BCG papule at 28 days until they are 28 days of age.
+        /// </summary>
+        public static string ParticipantModel_Error_Bcg28daysNotElapsed {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_Bcg28daysNotElapsed", resourceCulture);
             }
         }
         
@@ -1326,6 +1353,15 @@ namespace BlowTrial.Properties {
         public static string ParticipantModel_Error_BcgAdverseDetailRequired {
             get {
                 return ResourceManager.GetString("ParticipantModel_Error_BcgAdverseDetailRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The patient can only have a value for BCG papule at death, discharge if one of these events has occurred.
+        /// </summary>
+        public static string ParticipantModel_Error_BcgNeitherDischOrDead {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_BcgNeitherDischOrDead", resourceCulture);
             }
         }
         

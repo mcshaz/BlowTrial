@@ -11,7 +11,8 @@ using BlowTrial.Migrations.TrialData;
 using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Domain.Outcomes;
-using BlowTrial.Infrastructure.Randomising;
+using BlowTrial.Infrastructure.Extensions;
+using System.Data.Entity;
 
 namespace BlowTrialUnitTests
 {
@@ -116,7 +117,7 @@ namespace BlowTrialUnitTests
                 }
             }
         }
-        IEnumerable<Participant> GetMultipleParticipantCategories(IEnumerable<int> centreIds)
+        IEnumerable<Participant> GetMultipleParticipantCategories(params int[] centreIds)
         {
             var returnVar = new List<Participant>();
             foreach (var cId in centreIds)
@@ -134,6 +135,31 @@ namespace BlowTrialUnitTests
             }
             return returnVar;
         }
+        [TestMethod]
+        public void TestDbSetExtensions()
+        {
+            IEnumerable<Participant> parts = GetMultipleParticipantCategories(1);
+            Participant p = parts.First();
+            p.Id = 1;
+            p.RecordLastModified = p.DateTimeBirth = p.RegisteredAt = DateTime.Now;
+            int testWt = p.AdmissionWeight;
+            RandomisationArm arm = p.TrialArm;
+            using (var context = new TrialDataContext())
+            {
+                context.AttachAndMarkModified(p);
+                context.SaveChanges();
+                p = context.Participants.Find(1);
+                Assert.AreEqual(testWt, p.AdmissionWeight);
+                Assert.AreEqual(arm, p.TrialArm);
+                context.Participants.Find(2);
+                p.Id = 2;
+                context.AttachAndMarkModified(p);
+                p = context.Participants.Find(2);
+                Assert.AreEqual(testWt, p.AdmissionWeight);
+                Assert.AreEqual(arm, p.TrialArm);
 
+            }
+
+        }
     }
 }

@@ -12,6 +12,8 @@ using ErikEJ.SqlCe;
 using System.Data.SqlServerCe;
 using BlowTrial.Infrastructure.Extensions;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Data;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -124,8 +126,8 @@ namespace BlowTrial.Domain.Providers
         public static SyncronisationResult Sync(ITrialDataContext destContext, IEnumerable<string> dbFileNames, bool updateResults)
         {
             List<StudyCentre> knownSites = destContext.StudyCentres.ToList();
-
             var returnVar = updateResults?new SyncronisationResult():null;
+            IEnumerable<Constraint> fk_constraints = DropFKConstraints(destContext.Database);
             foreach (string f in dbFileNames)
             {
                 IEnumerable<Guid> knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
@@ -156,20 +158,115 @@ namespace BlowTrial.Domain.Providers
                     var dbDestContext = (DbContext)destContext;
                     foreach (Type t in new Type[] { typeof(Vaccine), typeof(BalancedAllocation), typeof(AllocationBlock), typeof(ScreenedPatient), typeof(Participant), typeof(VaccineAdministered), typeof(ProtocolViolation) })
                     {
+                        WriteTime(t, null);
                         var destAllocations = RemainingAllocationsByCentre(t, destContext.Database, sourceCentreIdRanges);
+                        WriteTime(t, "RemainingAllocationsByCentre");
                         var modifiedIds = ModifiedIds(t, destContext.Database, sourceContext.Database, destAllocations.UsedAllocations);
-                        InsertISharedRecord(t, (SqlCeConnection)sourceContext.Database.Connection, (SqlCeConnection)destContext.Database.Connection, destAllocations.RemainingAllocations);
-                        UpdateISharedRecord(t, sourceContext.Database, dbDestContext, modifiedIds);
+                        WriteTime(t, "ModifiedIds");
+                        InsertISharedRecord(t, (SqlCeConnection)sourceContext.Database.Connection, (SqlCeConnection)destContext.Database.Connection, destAllocations.RemainingAllocations, modifiedIds);
+                        WriteTime(t, "InsertISharedRecord");
+                        //UpdateISharedRecord(t, sourceContext.Database, dbDestContext, modifiedIds);
+                        //WriteTime(t, "UpdateISharedRecord");
                         if (updateResults)
                         {
                             returnVar.Updated(t, modifiedIds);
+                            WriteTime(t, "returnVar.Updated");
                             returnVar.Added(t, GetNewRecordIds(t, destContext.Database, destAllocations.RemainingAllocations));
+                            WriteTime(t, "GetNewRecordIds & returnVar.Added");
                         }
+                        StopTimer();
                     }
                 }
             }
+            ReinstateConstraints((SqlCeConnection)destContext.Database.Connection, fk_constraints);
             return returnVar;
         }
+#if DEBUG
+        static Stopwatch watch = new Stopwatch();
+        static long lastMs = 0;
+#endif
+        [Conditional("DEBUG")]
+        [DebuggerStepThrough]
+        static void WriteTime(Type type, String executedFunction)
+        {
+#if DEBUG
+            if (watch.IsRunning)
+            {
+                watch.Stop();
+                Debug.WriteLine("Type:'{0}' function {1} completed execution at {2:N0} (difference {3:N0}) milliseconds", type.Name, executedFunction, watch.ElapsedMilliseconds, watch.ElapsedMilliseconds-lastMs);
+                lastMs = watch.ElapsedMilliseconds;
+            }
+            else
+            {
+                Debug.WriteLine("starting upsert for type:'{0}'", type.Name);
+            }
+            watch.Start();
+#endif
+        }
+        [Conditional("DEBUG")]
+        [DebuggerStepThrough]
+        static void StopTimer()
+        {
+#if DEBUG
+            watch.Stop();
+            watch.Reset();
+            lastMs = 0;
+#endif
+        }
+
+        static System.Text.RegularExpressions.Regex constraintNameComponents = new System.Text.RegularExpressions.Regex(@"FK_dbo\.(?<tableName>[^_]+)_dbo\.(?<referencedTable>[^_])+_?<referencedKey>(\w+)");
+        class Constraint
+        {
+            public string Name {get; set;}
+            public string Table {get; set;}
+            public string UniqueConstraintTable {get; set;}
+            public string ColumnName { get; set; }
+        }
+        static IEnumerable<Constraint> DropFKConstraints(Database destDb)
+        {
+            const string getConstraints = "select r.CONSTRAINT_NAME \"Name\", r.CONSTRAINT_TABLE_NAME \"Table\", r.UNIQUE_CONSTRAINT_TABLE_NAME UniqueConstraintTable, k.COLUMN_NAME ColumnName"
+                + " from INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS r"
+                + " INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE k"
+                + " ON r.CONSTRAINT_NAME = k.CONSTRAINT_NAME";
+
+            var returnVar = new List<Constraint>(destDb.SqlQuery<Constraint>(getConstraints));
+            foreach (Constraint c in returnVar)
+            {
+                destDb.ExecuteSqlCommand(string.Format("Alter Table {0} Drop Constraint \"{1}\"", c.Table, c.Name));
+            }
+            return returnVar;
+        }
+
+        static void ReinstateConstraints(SqlCeConnection destConn, IEnumerable<Constraint> constraints)
+        {
+            const string addConstraints = "Alter Table {0} Add Constraint \"{1}\" Foreign Key ({2}) references {3}(Id);";
+
+            bool wasDestClosed;
+            if (destConn.State == System.Data.ConnectionState.Closed)
+            {
+                wasDestClosed = true;
+                destConn.Open();
+            }
+            else
+            {
+                wasDestClosed = false;
+            }
+
+
+            using (SqlCeCommand cmd = new SqlCeCommand())
+            {
+                cmd.Connection = destConn;
+                cmd.CommandType = CommandType.Text;
+                foreach (var c in constraints)
+                {
+                    cmd.CommandText = string.Format(addConstraints, c.Table, c.Name, c.ColumnName, c.UniqueConstraintTable);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            if (wasDestClosed) { destConn.Close(); }
+        }
+
         public static DateTime? MostRecentEntry(ITrialDataContext context)
         {
             return (new DateTime?[]
@@ -199,35 +296,63 @@ namespace BlowTrial.Domain.Providers
 
         static void UpdateISharedRecord(Type tableType, Database sourceDb, DbContext destContext, IEnumerable<int> IdsToUpdate) 
         {
+            if (!IdsToUpdate.Any()) { return;  }
             string tableName = TableName(tableType);
             string queryForNewRecords = string.Format("select * from {0} where {0}.Id in ({1})", tableName, string.Join(",", IdsToUpdate));
-
-            var tSet =  destContext.Set(tableType);
-            foreach (object newEntity in sourceDb.SqlQuery(tableType, queryForNewRecords))
-            {
-                tSet.Attach(newEntity);
-                destContext.Entry(newEntity).State = EntityState.Modified;
-            }
+            var q = sourceDb.SqlQuery(tableType, queryForNewRecords);
+            WriteTime(tableType, "SqlQuery");
+            var qc = q.Cast<ISharedRecord>();
+            WriteTime(tableType, "Cast");
+            destContext.AttachAndMarkModified(qc);
+            WriteTime(tableType, "AttachAndMarkModified");
             destContext.SaveChanges();
         }
 
-        static void InsertISharedRecord(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> destDbRemainingAllocations) 
+        static void InsertISharedRecord(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> destDbRemainingAllocations, IEnumerable<int> IdsToUpdate) 
         {
             string tableName = TableName(tableType);
-            string queryForNewRecords = string.Format("select * from {0} where {1}", tableName, WhereRange(destDbRemainingAllocations, tableName));
-
-            sourceConn.Open();
-            destConn.Open();
-            using (SqlCeCommand cmd = new SqlCeCommand(queryForNewRecords, sourceConn))
+            
+            bool wasSourceClosed;
+            bool wasDestClosed;
+            if (sourceConn.State == System.Data.ConnectionState.Closed)
             {
-                using (SqlCeBulkCopy bc = new SqlCeBulkCopy(destConn))
+                wasSourceClosed = true;
+                sourceConn.Open();
+            }
+            else
+            {
+                wasSourceClosed = false;
+            }
+
+            if (destConn.State == System.Data.ConnectionState.Closed)
+            {
+                wasDestClosed = true;
+                destConn.Open();
+            }
+            else
+            {
+                wasDestClosed = false;
+            }
+            string queryForNewRecords = string.Format("select * from {0} where ({1})", tableName, WhereRange(destDbRemainingAllocations, tableName));
+            if (IdsToUpdate.Any())
+            {
+                string updatedRecordWhereClause = string.Format("Id in ({1})", tableName, string.Join(",", IdsToUpdate));
+                using (SqlCeCommand cmd = new SqlCeCommand(string.Format("delete from {0} where {1}", tableName, updatedRecordWhereClause), destConn))
                 {
-                    bc.DestinationTableName = "AllocationBlocks";
+                    cmd.ExecuteNonQuery();
+                }
+                queryForNewRecords += " or " + updatedRecordWhereClause;
+            }
+            using (SqlCeBulkCopy bc = new SqlCeBulkCopy(destConn))
+            {
+                using (SqlCeCommand cmd = new SqlCeCommand(queryForNewRecords, sourceConn))
+                {
+                    bc.DestinationTableName = tableName;
                     bc.WriteToServer((System.Data.IDataReader)cmd.ExecuteReader());
                 }
             }
-            destConn.Close();
-            sourceConn.Close();
+            if (wasDestClosed) { destConn.Close(); }
+            if (wasSourceClosed) { sourceConn.Close();}
         }
 
         static IEnumerable<int> GetNewRecordIds(Type tableType, Database destContext, IEnumerable<IntegerRange> destDbPriorRemainingAllocations)
@@ -249,9 +374,11 @@ namespace BlowTrial.Domain.Providers
             string whereRange = destDbUsedAllocations.Any()
                 ? ("and ("  + WhereRange(destDbUsedAllocations, tableName) +')')
                 : "";
+            var modifiedDateParam = new SqlCeParameter("@modified", System.Data.SqlDbType.DateTime);
+            modifiedDateParam.Value = mostRecentDestAllocation;
             return sourceDb.SqlQuery<int>(string.Format("select {0}.Id from {0} where {0}.RecordLastModified > @modified {1}",
                 tableName, 
-                whereRange), new SqlParameter("@modified", mostRecentDestAllocation)).ToList();
+                whereRange), modifiedDateParam).ToList();
         }
         class AllocationRanges
         {

@@ -210,7 +210,8 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
             OutcomeAt28DaysOption.DischargedAndKnownToHaveDied,
             OutcomeAt28DaysOption.DischargedAndLikelyToHaveDied,
-            OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived
+            OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived,
+            OutcomeAt28DaysOption.DischargedAndOutcomeCompletelyUnknown
         };
         protected static OutcomeAt28DaysOption[] KnownDeadOutcomes = new OutcomeAt28DaysOption[]
         {
@@ -228,9 +229,9 @@ namespace BlowTrial.Models
                         : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.RussianBcg.Id || v.VaccineId==DataContextInitialiser.DanishBcg.Id))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
-                                ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
+                                ? ((p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
                                     ? DataRequiredOption.AwaitingOutcomeOr28
-                                    : DataRequiredOption.OutcomeRequired
+                                    : DataRequiredOption.OutcomeRequired)
                                 : DataRequiredOption.Complete;
         }
 
@@ -332,7 +333,8 @@ namespace BlowTrial.Models
             "CauseOfDeath",
             "BcgAdverse",
             "BcgAdverseDetail",
-            "Notes"
+            "Notes",
+            "BcgPapuleAt28days",
         };
         public string GetValidationError(string propertyName, DateTime? now=null)
         {
@@ -343,7 +345,7 @@ namespace BlowTrial.Models
             switch (propertyName)
             {
                 case "OutcomeAt28Days":
-                    error = this.ValidateOutcomeAt28Days(now);
+                    error = this.ValidateOutcomeAt28Days();
                     break;
                 case "LastContactWeight":
                     error = this.ValidateWeight();
@@ -378,6 +380,14 @@ namespace BlowTrial.Models
                 case "Notes":
                     error = ValidateNotes();
                     break;
+                case "BcgPapuleAt28days":
+                    error = ValidateBcgPapuleAt28d();
+                    break;
+                /* - not used - reasonable to save info and get further info such as time of discharge later
+                case "BcgPapuleAtDischarge":
+                    error = ValidateBcgPapuleAtDischarge();
+                    break; 
+                 */
                 default:
                     Debug.Fail("Unexpected property being validated on ParticipantUpdateModel: " + propertyName);
                     break;
@@ -385,14 +395,38 @@ namespace BlowTrial.Models
             return error;
         }
 
-        string ValidateOutcomeAt28Days(DateTime? now = null)
+        string ValidateOutcomeAt28Days()
         {
-            if (OutcomeAt28Days==OutcomeAt28DaysOption.InpatientAt28Days)
+            if (IsKnownDead==false && AgeDays < 28)
+            {
+                return Strings.ParticipantModel_Error_Alive28daysNotElapsed;
+            }
+            return null;
+        }
+        string ValidateBcgPapuleAt28d()
+        {
+            if (BcgPapuleAt28days.HasValue)
             {
                 if (AgeDays < 28)
                 {
-                    return Strings.ParticipantModel_Error_28daysNotElapsed;
+                    return Strings.ParticipantModel_Error_Bcg28daysNotElapsed;
                 }
+                if (!IsKnownDead.HasValue)
+                {
+                    return Strings.ParticipantModel_Error_Bcg28daysNoOutcome;
+                }
+                if (IsKnownDead == true)
+                {
+                    return Strings.ParticipantModel_Error_Bcg28daysDead;
+                }
+            }
+            return null;
+        }
+        string ValidateBcgPapuleAtDischarge()
+        {
+            if (BcgPapuleAtDischarge.HasValue && OutcomeAt28Days == OutcomeAt28DaysOption.InpatientAt28Days)
+            {
+                return Strings.ParticipantModel_Error_BcgNeitherDischOrDead;
             }
             return null;
         }

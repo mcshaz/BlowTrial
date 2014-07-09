@@ -35,13 +35,18 @@ namespace BlowTrial.Migrations.TrialData
                 .Index(t => t.StudyCentreId);
             
             AddColumn("dbo.Participants", "TrialArm", c => c.Int(nullable: false));
+            
             AddColumn("dbo.Participants", "BcgPapuleAt28days", c => c.Boolean());
             AddColumn("dbo.Participants", "AllocationBlockId", c => c.Int());
             AddColumn("dbo.Participants", "UserMarkedFinished", c => c.Boolean(nullable: false));
             CreateIndex("dbo.Participants", "AllocationBlockId");
             AddForeignKey("dbo.Participants", "AllocationBlockId", "dbo.AllocationBlocks", "Id");
 
+            AddColumn("dbo.Participants", "BcgPapuleAtDischarge", c => c.Boolean());
+            Sql("update Participants Set Participants.BcgPapuleAtDischarge = Participants.BcgPapule");
+            DropColumn("dbo.Participants", "BcgPapule");
             //RenameColumn("dbo.Participants", "BcgPapule", "BcgPapuleAtDischarge");
+            
             Sql(string.Format("update Participants Set TrialArm = case when [IsInterventionArm]=0 then {0} else {1} end", (int)RandomisationArm.Control, (int)RandomisationArm.RussianBCG));
 
             DropColumn("dbo.Participants", "IsInterventionArm");
@@ -49,6 +54,8 @@ namespace BlowTrial.Migrations.TrialData
         
         public override void Down()
         {
+            AddColumn("dbo.Participants", "BcgPapule", c => c.Boolean());
+            Sql("update Participants Set Participants.BcgPapule = Participants.BcgPapuleAtDischarge");
             AddColumn("dbo.Participants", "IsInterventionArm", c => c.Boolean(nullable: false));
             DropForeignKey("dbo.BalancedAllocations", "StudyCentreId", "dbo.StudyCentres");
             DropForeignKey("dbo.Participants", "AllocationBlockId", "dbo.AllocationBlocks");
@@ -57,6 +64,7 @@ namespace BlowTrial.Migrations.TrialData
             DropColumn("dbo.Participants", "UserMarkedFinished");
             DropColumn("dbo.Participants", "AllocationBlockId");
             DropColumn("dbo.Participants", "BcgPapuleAt28days");
+            DropColumn("dbo.Participants", "BcgPapuleAtDischarge");
             DropColumn("dbo.Participants", "TrialArm");
             DropTable("dbo.BalancedAllocations");
             DropTable("dbo.AllocationBlocks");

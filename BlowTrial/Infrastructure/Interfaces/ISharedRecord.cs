@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlowTrial.Infrastructure.Interfaces
 {
-    interface ISharedRecord
+    public interface ISharedRecord
     {
         int Id { get; set; }
         DateTime RecordLastModified { get; set; }

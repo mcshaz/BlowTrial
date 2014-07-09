@@ -421,8 +421,8 @@
     <value>Update Participant (Blow Trial ID:{0})</value>
     <comment>Display name when updating participant</comment>
   </data>
-  <data name="ParticipantModel_Error_28daysNotElapsed" xml:space="preserve">
-    <value>The patient can not be alive in hospital at 28 days until the patient is 28 days of age</value>
+  <data name="ParticipantModel_Error_Alive28daysNotElapsed" xml:space="preserve">
+    <value>The patient can not be alive at 28 days until the patient is 28 days of age</value>
     <comment>Error message when in hospital at 28 days is selected for outcome, but the patient is not 28 days old</comment>
   </data>
   <data name="CauseOfDeathOption_CongenitalMalformation" xml:space="preserve">
@@ -845,5 +845,17 @@
   </data>
   <data name="AllocationGroups_IndiaTwoArm" xml:space="preserve">
     <value>India - 2 arm</value>
+  </data>
+  <data name="ParticipantModel_Error_Bcg28daysDead" xml:space="preserve">
+    <value>The patient cannot have a BCG papule at 28 days if he/she died before day 28</value>
+  </data>
+  <data name="ParticipantModel_Error_Bcg28daysNoOutcome" xml:space="preserve">
+    <value>The patient cannot have a BCG papule at 28 days if the 28 day outcome is unknown</value>
+  </data>
+  <data name="ParticipantModel_Error_Bcg28daysNotElapsed" xml:space="preserve">
+    <value>The patient cannot have a BCG papule at 28 days until they are 28 days of age</value>
+  </data>
+  <data name="ParticipantModel_Error_BcgNeitherDischOrDead" xml:space="preserve">
+    <value>The patient can only have a value for BCG papule at death, discharge if one of these events has occurred</value>
   </data>
 </root>

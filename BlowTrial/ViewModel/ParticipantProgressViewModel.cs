@@ -447,7 +447,7 @@ namespace BlowTrial.ViewModel
                     _outcomeSplitter.PostDischargeOutcomeKnown = null;
                     _outcomeSplitter.DiedAfterDischarge = null;
                 }
-                NotifyPropertyChanged("DischargeDate", "DischargeTime", "OutcomeAt28orDischarge", "BcgPapuleLabel", "PostDischargeOutcomeKnown", "DiedAfterDischarge");
+                NotifyPropertyChanged("DischargeDate", "DischargeTime", "OutcomeAt28orDischarge", "BcgPapuleLabel", "PostDischargeOutcomeKnown", "DiedAfterDischarge", "PostDischargeCompletelyUnknown");
             }
         }
         public OutcomeAt28DaysOption OutcomeAt28Days
@@ -467,8 +467,12 @@ namespace BlowTrial.ViewModel
                     ParticipantProgressModel.DeathOrLastContactTime = null;
                     ParticipantProgressModel.CauseOfDeath = CauseOfDeathOption.Missing;
                 }
-                NotifyPropertyChanged("OutcomeAt28Days", "PostDischargeCompletelyUnknown", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath", "DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
-            }
+                if (AgeDays>=28)
+                {
+                    NotifyPropertyChanged("Is28daysAndAlive");
+                }
+                NotifyPropertyChanged("OutcomeAt28Days", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath", "DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
+            } 
         }
         public bool PostDischargeCompletelyUnknown
         {
@@ -481,6 +485,7 @@ namespace BlowTrial.ViewModel
                 if (value == _outcomeSplitter.OutcomeCompletelyUnknown) { return; }
                 _outcomeSplitter.OutcomeCompletelyUnknown = value;
                 OutcomeAt28Days = _outcomeSplitter.OutcomeAt28Days;
+                NotifyPropertyChanged("PostDischargeCompletelyUnknown", "PostDischargeOutcomeKnown", "DiedAfterDischarge");
             }
         }
         public bool? PostDischargeOutcomeKnown
@@ -493,7 +498,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _outcomeSplitter.PostDischargeOutcomeKnown) { return; }
                 _outcomeSplitter.PostDischargeOutcomeKnown = value;
-                NotifyPropertyChanged("PostDischargeOutcomeKnown");
+                NotifyPropertyChanged("PostDischargeOutcomeKnown", "PostDischargeCompletelyUnknown");
                 OutcomeAt28Days = _outcomeSplitter.OutcomeAt28Days;
                 if (_outcomeSplitter.PostDischargeFieldsComplete)
                 {
@@ -512,7 +517,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == _outcomeSplitter.DiedAfterDischarge) { return; }
                 _outcomeSplitter.DiedAfterDischarge = value;
-                NotifyPropertyChanged("DiedAfterDischarge", "CauseOfDeath", "DeathOrLastContactTime", "DeathOrLastContactDate");
+                NotifyPropertyChanged("DiedAfterDischarge", "PostDischargeCompletelyUnknown");
                 OutcomeAt28Days = _outcomeSplitter.OutcomeAt28Days;
                 if (_outcomeSplitter.PostDischargeFieldsComplete)
                 {
@@ -521,11 +526,24 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        public bool Is28daysAndAlive
+        {
+            get
+            {
+                if (AgeDays >= 28)
+                {
+                    return IsKnownDead == false;
+                }
+                return false;
+            }
+
+        }
+
         public bool IsDeathOrLastContactRequired
         {
             get
             {
-                return IsKnownDead == true || PostDischargeOutcomeKnown == false;
+                return IsKnownDead == true || PostDischargeOutcomeKnown == false || PostDischargeCompletelyUnknown;
             }
         }
         public DateTime DischargeOrEnrolment

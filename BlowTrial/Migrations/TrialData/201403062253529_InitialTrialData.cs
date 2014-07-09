@@ -18,7 +18,7 @@ namespace BlowTrial.Migrations.TrialData
                         IsInterventionArm = c.Boolean(nullable: false),
                         BcgAdverse = c.Boolean(),
                         BcgAdverseDetail = c.String(maxLength: 2056),
-                        BcgPapuleAtDischarge = c.Boolean(),
+                        BcgPapule = c.Boolean(),
                         LastContactWeight = c.Int(),
                         LastWeightDate = c.DateTime(),
                         DischargeDateTime = c.DateTime(),

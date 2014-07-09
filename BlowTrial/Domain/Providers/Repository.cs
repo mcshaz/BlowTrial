@@ -316,20 +316,7 @@ namespace BlowTrial.Domain.Providers
             }
             else
             {
-                var entry = _dbContext.Entry<ProtocolViolation>(violation);
-
-                if (entry.State == EntityState.Detached)
-                {
-                    ProtocolViolation attachedViol = _dbContext.ProtocolViolations.Local.FirstOrDefault(v => v.Id == violation.Id);
-                    if (attachedViol == null)
-                    {
-                        entry.State = EntityState.Modified;
-                    }
-                    else
-                    {
-                        _dbContext.Entry(attachedViol).CurrentValues.SetValues(violation);
-                    }
-                }
+                ((DbContext)_dbContext).AttachAndMarkModified(violation);
             }
             _dbContext.SaveChanges(true);
         }
@@ -475,16 +462,8 @@ namespace BlowTrial.Domain.Providers
             participant.OutcomeAt28Days = outcomeAt28Days;
             participant.RecordLastModified = DateTime.UtcNow;
             participant.Notes = notes;
-            Participant attachedParticipant = _dbContext.Participants.Local.FirstOrDefault(p => p.Id == participant.Id);
-            if (attachedParticipant == null)
-            {
-                _dbContext.Participants.Attach(participant);
-            }
-            else
-            {
-                _dbContext.Entry(attachedParticipant).CurrentValues.SetValues(participant);
-            }
-            _dbContext.Entry(participant).State = EntityState.Modified;
+            
+            ((DbContext)_dbContext).AttachAndMarkModified(participant);
             if (participantVaccines!=null)
             {
                 var vas = participantVaccines.ToList();
@@ -524,10 +503,10 @@ namespace BlowTrial.Domain.Providers
             }
             var includedVaccineAdministeredIds = (from v in givenParticipantVaccines
                                                   where v.Id != 0
-                                                  select v.Id).ToArray();
+                                                  select v.Id).ToList();
             var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
                                                 where v.ParticipantId == participantId && !includedVaccineAdministeredIds.Contains(v.Id)
-                                                select v.Id).ToArray();
+                                                select v.Id).ToList();
             if (removeVaccineAdministeredIds.Any())
             {
                 string sqlString = string.Format("DELETE FROM {0} WHERE Id IN ({1})",
@@ -535,40 +514,23 @@ namespace BlowTrial.Domain.Providers
                     string.Join(",", removeVaccineAdministeredIds));
                 _dbContext.Database.ExecuteSqlCommand(sqlString);
             }
-            int studyCentreId = (from p in _dbContext.Participants
-                                 where p.Id == participantId
-                                 select p.CentreId).First();
-            int nextId = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);
-            foreach (var v in givenParticipantVaccines)
+
+            var newVaccines = givenParticipantVaccines.ToLookup(va => va.Id == 0);
+            if (newVaccines.Contains(false))
             {
-                v.ParticipantId = participantId;
-                if (v.Id == 0)
+                ((DbContext)_dbContext).AttachAndMarkModified(newVaccines[false]);
+            }
+            if (newVaccines.Contains(true))
+            {
+                int studyCentreId = (from p in _dbContext.Participants
+                                     where p.Id == participantId
+                                     select p.CentreId).First();
+                int nextId = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);
+                foreach (var v in givenParticipantVaccines)
                 {
+                    v.ParticipantId = participantId;
                     v.Id = nextId++;
                     _dbContext.VaccinesAdministered.Add(v);
-                }
-                else
-                {
-                    VaccineAdministered attachedVA = _dbContext.VaccinesAdministered.Local.FirstOrDefault(vax => vax.Id == v.Id);
-                    if (attachedVA == null)
-                    {
-                        _dbContext.VaccinesAdministered.Attach(v);
-                        _dbContext.Entry(v).State = EntityState.Modified;
-                    }
-                    else
-                    {
-                        if (attachedVA.ParticipantId != participantId)
-                        {
-                            throw new InvalidForeignKeyException(string.Format("The Existing participant Id for VaccineAdministered (record ID {0}) is {1} which conflicts with attempted assignment to participant Id {2}", attachedVA.Id, attachedVA.ParticipantId, participantId));
-                        }
-                        //_dbContext.Entry(attachedVA).CurrentValues.SetValues(v);
-                        if (attachedVA.VaccineId != v.VaccineId)
-                        {
-                            attachedVA.VaccineGiven = null;
-                            attachedVA.VaccineId = v.VaccineId;
-                        }
-                        attachedVA.AdministeredAt = v.AdministeredAt;
-                    }
                 }
             }
         }
@@ -600,16 +562,7 @@ namespace BlowTrial.Domain.Providers
         }
         public void Update(ScreenedPatient patient)
         {
-            ScreenedPatient attachedPatient = _dbContext.ScreenedPatients.Local.FirstOrDefault(p => p.Id == patient.Id);
-            if (attachedPatient == null)
-            {
-                _dbContext.ScreenedPatients.Attach(patient);
-            }
-            else
-            {
-                _dbContext.Entry(attachedPatient).CurrentValues.SetValues(patient);
-            }
-            _dbContext.Entry(patient).State = EntityState.Modified;
+            ((DbContext)_dbContext).AttachAndMarkModified(patient);
             _dbContext.SaveChanges(true);
         }
         public void Backup()
@@ -692,7 +645,7 @@ namespace BlowTrial.Domain.Providers
                     MigrateIfRequired(p.ExtractedBak.FullName);
                     using (var db = _dbContext.AttachDb(p.ExtractedBak.FullName))
                     {
-                        returnVar.Add(new KeyValuePair<string,IEnumerable<StudyCentreModel>>(p.Zip.FullName,db.StudyCentres.Select(s=>s.Id).ToList().Select(s=>LocalStudyCentreDictionary[s]).ToArray()));
+                        returnVar.Add(new KeyValuePair<string,IEnumerable<StudyCentreModel>>(p.Zip.FullName,db.StudyCentres.Select(s=>s.Id).ToList().Select(s=>LocalStudyCentreDictionary[s]).ToList()));
                     }
                 }
             }

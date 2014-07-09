@@ -179,14 +179,15 @@
     <Compile Include="Infrastructure\AgeUpdatingService.cs" />
     <Compile Include="Infrastructure\Converters\EnumToSeperatedWordsConverter.cs" />
     <Compile Include="Infrastructure\CustomSorters.cs" />
+    <Compile Include="Infrastructure\Extensions\EntityExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\IQueryableExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\UtilityClasses.cs" />
     <Compile Include="Infrastructure\ThreadHelpers.cs" />
-    <Compile Include="Migrations\201407032244595_MultipleAllocations.cs" />
-    <Compile Include="Migrations\201407032244595_MultipleAllocations.Designer.cs">
+    <Compile Include="Migrations\TrialData\201407032244595_MultipleAllocations.cs" />
+    <Compile Include="Migrations\TrialData\201407032244595_MultipleAllocations.Designer.cs">
       <DependentUpon>201407032244595_MultipleAllocations.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Membership\201407032252231_DefaultAllocationGroup.cs" />
@@ -527,7 +528,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\201407032244595_MultipleAllocations.resx">
+    <EmbeddedResource Include="Migrations\TrialData\201407032244595_MultipleAllocations.resx">
       <DependentUpon>201407032244595_MultipleAllocations.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Membership\201407032252231_DefaultAllocationGroup.resx">
