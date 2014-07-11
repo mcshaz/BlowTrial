@@ -22,17 +22,13 @@ namespace BlowTrial.Infrastructure.Interfaces
         {
             StartAt = startAt;
         }
-        DateTime _startSetAt;
         DateTime _startAt;
-        public DateTime StartAt 
+        public DateTime StartAt
         {
-            get 
-            {
-                return _startAt;
-            } 
-            set
-            {
-                _startSetAt = DateTime.Now;
+            get { return _startAt; }
+            set 
+            { 
+                LastNowCall = DateTime.Now;
                 _startAt = value;
             }
         }
@@ -41,8 +37,10 @@ namespace BlowTrial.Infrastructure.Interfaces
         {
             get
             {
-                LastNowCall = DateTime.Now;
-                return _startAt + (LastNowCall - _startSetAt);
+                var now = DateTime.Now;
+                var returnVar = _startAt + (now - LastNowCall);
+                LastNowCall = now;
+                return returnVar;
             }
         }
     }

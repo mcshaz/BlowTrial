@@ -28,6 +28,7 @@ namespace BlowTrial.Infrastructure
         public AgeUpdatingService(IList<ParticipantListItemViewModel> participants, IDispatcherTimer timer)
         {
             _timer = timer;
+            _timer.Tick += OnTick;
             _participants = new List<KeyValuePair<TimeSpan, ParticipantListItemViewModel>>(participants.Count);
             var now = DateTime.Now;
             for (int i=0; i<participants.Count;i++)
@@ -39,7 +40,7 @@ namespace BlowTrial.Infrastructure
                     _participants.Add(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(p.DateTimeBirth.TimeOfDay, p));
                 }
             }
-            TimeSpan interval;
+            
             if (_participants.Any())
             {
                 _participants.Sort(_comparer);
@@ -50,6 +51,7 @@ namespace BlowTrial.Infrastructure
                     _nextIndex = ~_nextIndex;
                 }
                 TimeSpan rightNow = DateTime.Now.TimeOfDay;
+                TimeSpan interval;
                 if (_nextIndex >= _participants.Count)
                 {
                     _nextIndex = 0;
@@ -61,15 +63,8 @@ namespace BlowTrial.Infrastructure
                         ? new TimeSpan(0)
                         : _participants[_nextIndex].Key - rightNow;
                 }
+                StartTimer(interval);
             }
-            else
-            {
-                interval = new TimeSpan(24, 0, 0);
-            }
-            _timer.Interval = interval;
-            System.Diagnostics.Debug.WriteLine("next interval set at:{0}", interval);
-            _timer.Tick += OnTick;
-            _timer.Start();
         }
         #endregion
 
@@ -101,7 +96,7 @@ namespace BlowTrial.Infrastructure
             
 #endif
             TimeSpan nowTime = now.TimeOfDay.Add(_adjustIntoFuture);
-            if (_participants.Count == 0) { return; }
+            //if (_participants.Count == 0) { _timer.Stop(); return; }
             do
             {
                 ParticipantListItemViewModel p =_participants[_nextIndex].Value;
@@ -116,7 +111,11 @@ namespace BlowTrial.Infrastructure
                 if (p.AgeDays>28 || p.IsKnownDead == true)
                 {
                     _participants.RemoveAt(_nextIndex);
-                    if (_participants.Count == 0) { return; }
+                    if (_participants.Count == 0) 
+                    {
+                        _timer.Stop();
+                        return; 
+                    }
                 }
                 else
                 {
@@ -140,7 +139,7 @@ namespace BlowTrial.Infrastructure
             }
 #endif
             TimeSpan nextInterval = _participants[_nextIndex].Key - nowTime;
-            if (nextInterval.Ticks < 0) { nextInterval += new TimeSpan(24, 0, 0); }
+            if (nextInterval.Ticks < 0) { nextInterval += TimeSpan.FromDays(1); }
             _timer.Interval = nextInterval;
         }
         #endregion
@@ -150,6 +149,12 @@ namespace BlowTrial.Infrastructure
         #endregion
 
         #region methods
+        void StartTimer(TimeSpan interval)
+        {
+            _timer.Interval = interval;
+            System.Diagnostics.Debug.WriteLine("next interval set at:{0}", interval);
+            _timer.Start();
+        }
         public void AddParticipant(ParticipantListItemViewModel p)
         {
             DateTime now = DateTime.Now;
@@ -167,24 +172,33 @@ namespace BlowTrial.Infrastructure
                 return;
             }
             _participants.Insert(index, newItem);
+
             if (_nextIndex == index)
             {
-                if (newItem.Key > now.TimeOfDay)
+                if (index == 0) 
+                {
+                    TimeSpan interval = newItem.Key - now.TimeOfDay;
+                    if (interval.Ticks < 0)
+                    {
+                        interval += TimeSpan.FromDays(1);
+                    }
+                    if (_participants.Count == 1)
+                    {
+                        _nextIndex = 0;
+                        StartTimer(interval);
+                    }
+                }
+                else if (newItem.Key >= now.TimeOfDay)
                 {
                     var rightNow = DateTime.Now;
                     TimeSpan nextInterval = newItem.Key - rightNow.TimeOfDay;
-                    if (nextInterval.Ticks <= 0) 
+                    if (nextInterval.Ticks <= 0)
                     {
-                        if (newItem.Key <= rightNow.TimeOfDay)
-                        {
-                            p.AgeDays++;
-                            _nextIndex++;
-                            return;
-                        }
-                        else
-                        {
-                            nextInterval += new TimeSpan(24, 0, 0);
-                        }
+                        //logically the only way to get here ie newitem time > now[start of function] & newitem time < now[right now] 
+                        //is for time to have elapsed while function was executing
+                        p.AgeDays++;
+                        _nextIndex++;
+                        return;
                     }
                     _timer.Interval = nextInterval;
                 }
@@ -193,9 +207,17 @@ namespace BlowTrial.Infrastructure
                     _nextIndex++;
                 }
             }
-            else if (_nextIndex > index) 
-            { 
-                _nextIndex++; 
+            else if (_nextIndex == 0 && index == _participants.Count - 1)
+            {
+                if (now.TimeOfDay < newItem.Key)
+                {
+                    _nextIndex = index;
+                    _timer.Interval = newItem.Key - now.TimeOfDay;
+                }
+            }
+            else if (_nextIndex > index)
+            {
+                _nextIndex++;
             }
         }
 
