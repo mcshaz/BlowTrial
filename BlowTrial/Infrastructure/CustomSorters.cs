@@ -62,6 +62,25 @@ namespace BlowTrial.Infrastructure.CustomSorters
             return partX.DataRequired.CompareTo(partY.DataRequired);
         }
     }
+    class ParticipantMarkedFinishedSorter : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return partX.UserMarkedFinished.CompareTo(partY.UserMarkedFinished);
+        }
+    }
+
+    class ParticipantMarkedFinishedSortDesc : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return -partX.UserMarkedFinished.CompareTo(partY.UserMarkedFinished);
+        }
+    }
 
     class ParticipantNameSortDesc : IComparer
     {

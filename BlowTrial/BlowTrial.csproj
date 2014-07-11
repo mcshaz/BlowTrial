@@ -183,6 +183,7 @@
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\IQueryableExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
+    <Compile Include="Infrastructure\Interfaces\IDispatcherTimer.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\UtilityClasses.cs" />
     <Compile Include="Infrastructure\ThreadHelpers.cs" />

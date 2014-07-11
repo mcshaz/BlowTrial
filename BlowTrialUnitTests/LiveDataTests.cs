@@ -136,6 +136,28 @@ namespace BlowTrialUnitTests
             return returnVar;
         }
         [TestMethod]
+        public void TestMappingVaccines()
+        {
+            Mapper.Initialize(x =>
+            {
+                x.AddProfile<PatientProfiles>();
+            });
+            using (var context = new TrialDataContext())
+            {
+                foreach (var p in context.Participants.Include("VaccinesAdministered").Take(10).ToList())
+                {
+                    
+                    var pb = Mapper.Map<ParticipantBaseModel>(p);
+                    Assert.IsNotNull(pb.VaccinesAdministered);
+                    var pm = Mapper.Map<ParticipantProgressModel>(p);
+                    Assert.IsNotNull(pm.VaccineModelsAdministered);
+                    Assert.IsNotNull(pm.VaccinesAdministered);
+                    
+                }
+                
+            }
+        }
+        [TestMethod]
         public void TestDbSetExtensions()
         {
             IEnumerable<Participant> parts = GetMultipleParticipantCategories(1);

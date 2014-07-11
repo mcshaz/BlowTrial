@@ -467,10 +467,6 @@ namespace BlowTrial.ViewModel
                     ParticipantProgressModel.DeathOrLastContactTime = null;
                     ParticipantProgressModel.CauseOfDeath = CauseOfDeathOption.Missing;
                 }
-                if (AgeDays>=28)
-                {
-                    NotifyPropertyChanged("Is28daysAndAlive");
-                }
                 NotifyPropertyChanged("OutcomeAt28Days", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath", "DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
             } 
         }
@@ -526,18 +522,16 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public bool Is28daysAndAlive
+        public bool Is28days
         {
             get
             {
-                if (AgeDays >= 28)
-                {
-                    return IsKnownDead == false;
-                }
-                return false;
+                return (AgeDays >= 27); // leeway for same day
             }
 
         }
+
+
 
         public bool IsDeathOrLastContactRequired
         {
@@ -828,7 +822,8 @@ namespace BlowTrial.ViewModel
                     otherCauseOfDeathDetail: ParticipantProgressModel.OtherCauseOfDeathDetail,
                     bcgAdverse : ParticipantProgressModel.BcgAdverse,
                     bcgAdverseDetail: ParticipantProgressModel.BcgAdverseDetail,
-                    BcgPapuleAtDischarge : ParticipantProgressModel.BcgPapuleAtDischarge,
+                    bcgPapuleAtDischarge : ParticipantProgressModel.BcgPapuleAtDischarge,
+                    bcgPapuleAt28days: ParticipantProgressModel.BcgPapuleAt28days,
                     lastContactWeight : ParticipantProgressModel.LastContactWeight,
                     lastWeightDate : ParticipantProgressModel.LastWeightDate,
                     dischargeDateTime : ParticipantProgressModel.DischargeDateTime,
@@ -1015,6 +1010,10 @@ namespace BlowTrial.ViewModel
                     DiedAfterDischarge.Value
                         ? Strings.ParticipantUpdateVM_Error_Death
                         : Strings.ParticipantUpdateVM_Error_Survival);
+            }
+            if (DiedAfterDischarge == false)
+            {
+                return ((IDataErrorInfo)ParticipantProgressModel)["OutcomeAt28Days"];
             }
             return null;
         }

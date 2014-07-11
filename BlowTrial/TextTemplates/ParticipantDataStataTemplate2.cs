@@ -12,6 +12,7 @@ namespace BlowTrial.TextTemplates
     using System.Linq;
     using System.Text;
     using System.Collections.Generic;
+    using BlowTrial.Domain.Outcomes;
     using System;
     
     /// <summary>
@@ -30,14 +31,14 @@ namespace BlowTrial.TextTemplates
         {
             this.Write("\r\nclear\r\ninsheet using \"");
             
-            #line 8 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 9 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.CsvFilename));
             
             #line default
             #line hidden
             this.Write("\", ");
             
-            #line 8 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 9 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.Delimiter));
             
             #line default
@@ -45,7 +46,7 @@ namespace BlowTrial.TextTemplates
             this.Write("\r\n\r\ntempname a\r\nforeach v of varlist dischargedatetime deathorlastcontactdatetime" +
                     " datetimebirth registeredat ");
             
-            #line 11 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 12 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(" ",_data.Vaccines)));
             
             #line default
@@ -70,11 +71,23 @@ if (!_rc) {
 	format lastweightdate %td
 }
 
-label define causeOfDeathOption 0 Missing 1 Infection 2 ""Congenital Malformation"" 3 ""Hyaline Membrane Disease"" 4 ""Intraventricular Haemorrhage"" 5 ""Necrotising Enterocollitis"" 6 Other 7 Unknown
-label define outcomeAt28DaysOption 0 Missing 1 ""Inpatient At 28 Days"" 2 ""Died In Hospital Before 28 Days"" 3 ""Discharged Before 28 Days"" 4 ""Discharged And Known To Have Survived"" 5 ""Discharged And Known To Have Died"" 6 ""Discharged And Likely To Have Survived"" 7 ""Discharged And Likely To Have Died""
-label define centreNames ");
+label define causeOfDeathOption ");
+            
+            #line 32 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<CauseOfDeathOption>()));
+            
+            #line default
+            #line hidden
+            this.Write("\r\nlabel define outcomeAt28DaysOption ");
             
             #line 33 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<OutcomeAt28DaysOption>()));
+            
+            #line default
+            #line hidden
+            this.Write("\r\nlabel define centreNames ");
+            
+            #line 34 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.CentresLabel));
             
             #line default
@@ -89,7 +102,7 @@ stset deathorlastcontactdatetime, id(id) failure(outcome==2,5) origin(time datet
 
 save """);
             
-            #line 41 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 42 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.StataFilename));
             
             #line default

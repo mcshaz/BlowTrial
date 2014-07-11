@@ -96,6 +96,17 @@
             </ListView.GroupStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="True" >
+
+                    <GridViewColumn >
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="UserMarkedFinished">
+                            Complete
+                        </GridViewColumnHeader>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Path=UserMarkedFinished}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Id, Mode=OneWay}" >
                         <GridViewColumnHeader Command="{Binding Path=SortGridView}" CommandParameter="Id" >
                             Trial Id

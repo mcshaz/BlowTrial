@@ -36,7 +36,8 @@ namespace BlowTrial.Models
         public StudyCentreModel StudyCentre { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
-        public ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
+        public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
+        public bool UserMarkedFinished { get; set; }
 
         public DateTime DateTimeBirth 
         { 
@@ -229,9 +230,9 @@ namespace BlowTrial.Models
                         : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v => v.VaccineId == DataContextInitialiser.RussianBcg.Id || v.VaccineId==DataContextInitialiser.DanishBcg.Id))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
-                                ? ((p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
+                                ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
                                     ? DataRequiredOption.AwaitingOutcomeOr28
-                                    : DataRequiredOption.OutcomeRequired)
+                                    : DataRequiredOption.OutcomeRequired
                                 : DataRequiredOption.Complete;
         }
 
@@ -271,13 +272,24 @@ namespace BlowTrial.Models
         public string Notes { get; set; }
 
         public ICollection<VaccineAdministeredModel> VaccineModelsAdministered { get; set; }
-        public new ICollection<VaccineAdministered> VaccinesAdministered 
+        
+
+        //purely to implement Ipatient
+        public override ICollection<VaccineAdministered> VaccinesAdministered 
         {
             get
             {
-                return VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineGiven.Id }).ToList();
+                return (VaccineModelsAdministered==null)
+                    ?null
+                    :VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineId }).ToList();
+            }
+            set
+            {
+                //possibly a mistake - will create stack overflow if already inside automapper method.
+                VaccineModelsAdministered = AutoMapper.Mapper.Map<List<VaccineAdministeredModel>>(value);
             }
         }
+        
 
         /// <summary>
         /// To implement IParticipant - mapping Id only at this point
@@ -397,7 +409,7 @@ namespace BlowTrial.Models
 
         string ValidateOutcomeAt28Days()
         {
-            if (IsKnownDead==false && AgeDays < 28)
+            if (IsKnownDead==false && AgeDays < 27) //27 not 28 as reasonable to call mother & hear child is doing well just before 28 days
             {
                 return Strings.ParticipantModel_Error_Alive28daysNotElapsed;
             }

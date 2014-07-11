@@ -12,25 +12,43 @@ namespace BlowTrial.Infrastructure.Extensions
 {
     public static class EntityExtensions
     {
-        public static void AttachAndMarkModified(this DbContext context, ISharedRecord newVals)
+        delegate bool TryGetVal<T>(int input, out T output);
+
+        public static void AttachAndMarkModified(this DbContext context, Type setType, params ISharedRecord[] newVals)
         {
-            AttachAndMarkModified(context, new ISharedRecord[] { newVals });
+            if (setType.Namespace == "System.Data.Entity.DynamicProxies")
+            {
+                setType = setType.BaseType;
+            }
+            if (!setType.GetInterfaces().Contains(typeof(ISharedRecord)))
+            {
+                throw new ArgumentException("setType must implement ISharedRecord");
+            }
+            ExecuteAttachAndMarkModified(context, setType, newVals);
         }
-        public static void AttachAndMarkModified(this DbContext context, IEnumerable<ISharedRecord> newVals)
+
+        static void ExecuteAttachAndMarkModified(DbContext context, Type setType, params ISharedRecord[] newVals)
         {
-            var firstVal = newVals.FirstOrDefault();
-            if (firstVal == null){return;}
-            Type valType = firstVal.GetType(); 
-            if (valType.Namespace == "System.Data.Entity.DynamicProxies") { valType = valType.BaseType; }
-            var objContext = ((System.Data.Entity.Infrastructure.IObjectContextAdapter)context).ObjectContext;
-            var localDict = context.Set(valType).Local.Cast<ISharedRecord>().ToDictionary(k=>k.Id);
-            
-            string entitySetName = objContext.DefaultContainerName + '.' + GetEntitySetName(valType);
+            TryGetVal<ISharedRecord> getVal;
+            if (newVals.Length > 1)
+            {
+                var localDict = context.Set(setType).Local.Cast<ISharedRecord>().ToDictionary(k => k.Id);
+                getVal = localDict.TryGetValue;
+            }
+            else
+            {
+                getVal = delegate(int input, out ISharedRecord output)
+                {
+                    output = context.Set(setType).Local.Cast<ISharedRecord>().FirstOrDefault(r => r.Id == input);
+                    return output != null;
+                };
+            }
+
 
             foreach (ISharedRecord v in newVals)
             {
                 ISharedRecord existingEntity;
-                if (localDict.TryGetValue(v.Id, out existingEntity))
+                if (getVal(v.Id, out existingEntity))
                 {
                     var ent = context.Entry(existingEntity);
                     ent.CurrentValues.SetValues(v);
@@ -38,12 +56,20 @@ namespace BlowTrial.Infrastructure.Extensions
                 }
                 else
                 {
-                    context.Set(valType).Attach(v);
+                    context.Set(setType).Attach(v);
                     context.Entry(v).State = EntityState.Modified;
                 }
             }
             
         }
+
+        public static void AttachAndMarkModified<T>(this DbContext context, params T[] newVals) where T : class, ISharedRecord
+        {
+
+            ExecuteAttachAndMarkModified(context, typeof(T), newVals);
+        }
+
+
         static string GetEntitySetName(Type entityType)
         {
             if (entityType==typeof(VaccineAdministered))

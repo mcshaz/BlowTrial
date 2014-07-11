@@ -26,6 +26,15 @@ namespace BlowTrial.TextTemplates
         {
             return string.Join(" ", centres.Select(c => c.Key.ToString() + " \"" + c.Value.ToString() + '"'));
         }
+        public static string GetStataLabel<T>() where T : struct, IConvertible
+        {
+            Type genericType = typeof(T);
+            if (!genericType.IsEnum)
+            {
+                throw new ArgumentException("T must be an enum");
+            }
+            return GetStataLabel(Enum.GetValues(genericType).Cast<T>().Select(e => new KeyValuePair<int, string>(Convert.ToInt32(e), e.ToString())));
+        }
         public string DelimitOption
         {
             get

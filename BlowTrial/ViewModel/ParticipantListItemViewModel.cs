@@ -21,7 +21,7 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Constructors
-        internal ParticipantListItemViewModel(ParticipantBaseModel participant, IRepository repository=null) : base(repository)
+        public ParticipantListItemViewModel(ParticipantBaseModel participant, IRepository repository=null) : base(repository)
         {
             ParticipantModel = participant;
         }
@@ -239,6 +239,20 @@ namespace BlowTrial.ViewModel
                 this.ParticipantModel.DataRequired = value;
                 _dataRequiredString = null;
                 NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
+            }
+        }
+
+        public bool UserMarkedFinished
+        {
+            get { return this.ParticipantModel.UserMarkedFinished; }
+            set
+            {
+                if (value == this.ParticipantModel.UserMarkedFinished)
+                {
+                    return;
+                }
+                this.ParticipantModel.UserMarkedFinished = value;
+                NotifyPropertyChanged("UserMarkedFinished");
             }
         }
 

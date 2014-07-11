@@ -49,7 +49,8 @@ namespace BlowTrial.Infrastructure.Interfaces
             string otherCauseOfDeathDetail,
             bool? bcgAdverse,
             string bcgAdverseDetail,
-            bool? BcgPapuleAtDischarge,
+            bool? bcgPapuleAtDischarge,
+            bool? bcgPapuleAt28days,
             int? lastContactWeight,
             DateTime? lastWeightDate,
             DateTime? dischargeDateTime,
@@ -57,7 +58,8 @@ namespace BlowTrial.Infrastructure.Interfaces
             OutcomeAt28DaysOption outcomeAt28Days,
             string notes,
             IEnumerable<VaccineAdministered> vaccinesAdministered=null);
-
+        void UpdateParticipant(int id,
+            bool userMarkedFinished);
         UpdateParticipantViolationType UpdateParticipant(int id,
             string name,
             bool isMale,
@@ -82,7 +84,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         DbQuery<VaccineAdministered> VaccinesAdministered { get; }
         DbQuery<Vaccine> Vaccines { get; }
         DbQuery<ProtocolViolation> ProtocolViolations { get; }
-        Participant FindParticipant(int participantId);
+        Participant FindParticipantAndVaccines(int participantId);
         ProtocolViolation FindViolation(int violationId);
         IEnumerable<string> CloudDirectories { get; set; }
         IEnumerable<StudyCentreModel> LocalStudyCentres { get; }

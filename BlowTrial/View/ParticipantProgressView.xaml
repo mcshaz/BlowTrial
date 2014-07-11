@@ -111,6 +111,32 @@
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
+                            
+                            <Style x:Key="ShowIf28dAndAlive" TargetType="{x:Type ex:RowDefinitionExtended}" >
+                                <Setter Property="Visible" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Is28days, Mode=OneWay}" Value="true" />
+                                            <Condition Binding="{Binding IsKnownDead, Mode=OneWay}" Value="false" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visible" Value="true" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+
+                            <Style x:Key="DisableIfLess28dAndKnown" TargetType="{x:Type RadioButton}" >
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Is28days, Mode=OneWay}" Value="false" />
+                                            <Condition Binding="{Binding PostDischargeOutcomeKnown, Mode=OneWay}" Value="true" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="IsEnabled" Value="false" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+
                         </Grid.Resources>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -137,8 +163,8 @@
                             <ex:RowDefinitionExtended Visible="{Binding Path=BcgAdverse, Mode=OneWay, Converter={StaticResource nullBoolConvert}}" Height="30" />
                             <ex:RowDefinitionExtended Height="Auto" Style="{StaticResource HideIfNotDeadOrDischarged}"/>
                             <ex:RowDefinitionExtended Height="30" Style="{StaticResource HideIfNotDeadOrDischarged}"/>
-                            <ex:RowDefinitionExtended Height="Auto" Visible="{Binding Is28daysAndAlive, Mode=OneWay}"/>
-                            <ex:RowDefinitionExtended Height="30" Visible="{Binding Is28daysAndAlive, Mode=OneWay}"/>
+                            <ex:RowDefinitionExtended Height="Auto" Style="{StaticResource ShowIf28dAndAlive}"/>
+                            <ex:RowDefinitionExtended Height="30" Style="{StaticResource ShowIf28dAndAlive}"/>
                             <ex:RowDefinitionExtended Height="Auto" Style="{StaticResource HideIfOutcomeMissing}"/>
                             <ex:RowDefinitionExtended Height="30" Style="{StaticResource HideIfOutcomeMissing}"/>
                             <ex:RowDefinitionExtended Style="{StaticResource HideIfOutcomeMissing}" Height="Auto" />
@@ -232,7 +258,7 @@
                                 <StackPanel Orientation="Vertical">
                                     <RadioButton Content="survived to 28 days " GroupName="DiedOptions" Name="isDeadRadio" Validation.ErrorTemplate="{x:Null}"
                                     IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, ValidatesOnDataErrors=True, 
-                                    Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                                    Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" Style="{StaticResource DisableIfLess28dAndKnown}"/>
                                     <RadioButton Content="died before 28 days " GroupName="DiedOptions" 
                                     IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, 
                                     Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
@@ -241,13 +267,13 @@
                             </Border>
                         </StackPanel>
                         <ContentPresenter 
-                  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
-                  Content="{Binding ElementName=isKnownRadio, Path=(Validation.Errors).CurrentItem}"
-                  />
+                          Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Content="{Binding ElementName=isKnownRadio, Path=(Validation.Errors).CurrentItem}"
+                        />
                         <ContentPresenter 
-                  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
-                  Content="{Binding ElementName=isDeadRadio, Path=(Validation.Errors).CurrentItem}"
-                  />
+                          Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Content="{Binding ElementName=isDeadRadio, Path=(Validation.Errors).CurrentItem}"
+                          />
 
                         <!-- DeathOrLastContactDateTime -->
                         <Label 

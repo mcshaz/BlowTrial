@@ -65,7 +65,7 @@ namespace BlowTrial.Models
                 //DischargeDateTime = _dischargeDateTime.DateAndTime;
             }
         }
-
+        public int VaccineId { get; set; }
         public Vaccine VaccineGiven 
         { 
             get

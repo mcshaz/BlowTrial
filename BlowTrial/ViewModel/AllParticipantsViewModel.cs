@@ -20,6 +20,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Windows.Data;
 using System.Windows.Threading;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.ViewModel
 {
@@ -65,24 +66,24 @@ namespace BlowTrial.ViewModel
                 new Converter<Participant, ParticipantListItemViewModel>(p => new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(p))));
              * */
             var parts = _repository.Participants.Include("VaccinesAdministered") //.Include("VaccinesAdministered.VaccineGiven")
-                         .Select(ParticipantBaseMapExpression()).ToArray();
+                         .Select(GetParticipantBaseMapExpression()).ToList();
             var now = DateTime.Now;
             var dt28prior = now.AddDays(-28);
             var dataRequired = ParticipantBaseModel.GetDataRequiredExpression(dt28prior).Compile();
-            foreach (var p in parts)
+            ParticipantListItemViewModel[] participantVMs = new ParticipantListItemViewModel[parts.Count];
+            for (int i=0; i<participantVMs.Length; i++)
             {
+                var p = parts[participantVMs.Length - i - 1];
                 p.DataRequired = dataRequired(p);
                 p.StudyCentre = _repository.FindStudyCentre(p.CentreId);
+                (participantVMs[i] = new ParticipantListItemViewModel(p)).PropertyChanged += OnListItemChanged;
             }
 
-            var participantVMs = new List<ParticipantListItemViewModel>(parts.Length);
-            participantVMs.AddRange(parts.Select(p => new ParticipantListItemViewModel(p)));
-            participantVMs.Reverse(); // display items as added to database most recently first
             _ageUpdater = new AgeUpdatingService(participantVMs);
             _ageUpdater.OnAgeIncrement += OnNewAge;
 
             AllParticipants = new ListCollectionView(participantVMs);
-            AllParticipants.CustomSort = new ParticipantIdSortDesc();//put in reverse to speed things up, this will merely put new entries at the top
+            //AllParticipants.CustomSort = new ParticipantIdSortDesc();//put in reverse to speed things up, this will merely put new entries at the top
 
 
             //creating dispatchertimer so that screen is rendered before setting up the birthtime updating algorithms
@@ -180,7 +181,7 @@ namespace BlowTrial.ViewModel
 
         ParticipantProgressViewModel GetSelectedProgressViewModel(int participantId)
         {
-                var part = Mapper.Map<ParticipantProgressModel>(_repository.FindParticipant(participantId));
+                var part = Mapper.Map<ParticipantProgressModel>(_repository.FindParticipantAndVaccines(participantId));
                 return new ParticipantProgressViewModel(_repository, part);
         }
 
@@ -215,6 +216,9 @@ namespace BlowTrial.ViewModel
                     break;
                 case "RegisteredAt":
                     AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantRegisteredAtSorter(): new ParticipantRegisteredAtSortDesc();
+                    break;
+                case "UserMarkedFinished":
+                    AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new ParticipantMarkedFinishedSorter() : new ParticipantMarkedFinishedSortDesc();
                     break;
             }
         }
@@ -271,7 +275,7 @@ namespace BlowTrial.ViewModel
         void ShowEnrolDetails(object param)
         {
             var window = new PatientDemographicUpdateView();
-            var model =  Mapper.Map<PatientDemographicsModel>(_repository.FindParticipant(SelectedParticipant.Id));
+            var model =  Mapper.Map<PatientDemographicsModel>(_repository.FindParticipantAndVaccines(SelectedParticipant.Id));
             model.StudyCentre = SelectedParticipant.StudyCentre;
             var vm = new PatientDemographicsViewModel(_repository, model);
             window.DataContext = vm;
@@ -289,6 +293,8 @@ namespace BlowTrial.ViewModel
         static void UpdateDemographics(Participant p, ParticipantListItemViewModel vm)
         {
             vm.AgeDays = (DateTime.Now - p.DateTimeBirth).Days;
+
+            //to do - inform ageUpdatingService
             vm.DateTimeBirth = p.DateTimeBirth;
             vm.IsMale = p.IsMale;
             vm.Name = p.Name;
@@ -367,9 +373,21 @@ namespace BlowTrial.ViewModel
             AllParticipants.CommitEdit();
         }
 
+        void OnListItemChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "UserMarkedFinished")
+            {
+                var p = (ParticipantListItemViewModel)sender;
+                _repository.UpdateParticipant(p.Id, p.UserMarkedFinished);
+            }
+        }
+
         private void OnParticipantAdded(object sender, ParticipantEventArgs e)
         {
-            var viewModel = new ParticipantProgressViewModel(_repository, Mapper.Map<ParticipantProgressModel>(e.Participant));
+            var partBase = ParticipantBaseMap(e.Participant);
+            partBase.RecalculateDataRequired();
+            partBase.StudyCentre = _repository.FindStudyCentre(partBase.CentreId);
+            var viewModel = new ParticipantListItemViewModel(partBase, _repository);
             _ageUpdater.AddParticipant(viewModel);
             AllParticipants.AddNewItem(viewModel);
             AllParticipants.CommitNew();
@@ -400,10 +418,10 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _participantBaseMap ?? (_participantBaseMap = ParticipantBaseMapExpression().Compile());
+                return _participantBaseMap ?? (_participantBaseMap = GetParticipantBaseMapExpression().Compile());
             }
         }
-        static Expression<Func<Participant, ParticipantBaseModel>> ParticipantBaseMapExpression()
+        static Expression<Func<Participant, ParticipantBaseModel>> GetParticipantBaseMapExpression()
         {
             return p => new ParticipantBaseModel
                          {
@@ -420,6 +438,7 @@ namespace BlowTrial.ViewModel
                              DeathOrLastContactDateTime = p.DeathOrLastContactDateTime,
                              CauseOfDeath = p.CauseOfDeath,
                              VaccinesAdministered = p.VaccinesAdministered,
+                             UserMarkedFinished = p.UserMarkedFinished
                          };
         }
         #endregion // Events

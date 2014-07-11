@@ -19,6 +19,7 @@ using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Migrations;
 using BlowTrial.Infrastructure.Extensions;
+using System.Data.SqlServerCe;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -152,9 +153,11 @@ namespace BlowTrial.Domain.Providers
         #endregion // Properties
 
         #region Methods
-        public Participant FindParticipant(int participantId)
+        public Participant FindParticipantAndVaccines(int participantId)
         {
-            return _dbContext.Participants.Find(participantId);
+            var returnVar = _dbContext.Participants.Find(participantId);
+            returnVar.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == participantId).ToList();
+                return returnVar;
         }
         public ProtocolViolation FindViolation(int violationId)
         {
@@ -419,6 +422,12 @@ namespace BlowTrial.Domain.Providers
             }
             return returnVar;
         }
+        public void UpdateParticipant(int id, bool userMarkedFinished)
+        {
+            _dbContext.Database.ExecuteSqlCommand("Update Participants Set Participants.UserMarkedFinished = @markedFinished Where Participants.Id = @id",
+                new SqlCeParameter("@markedFinished", userMarkedFinished),
+                new SqlCeParameter("@id", id));
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -427,7 +436,7 @@ namespace BlowTrial.Domain.Providers
         /// <param name="otherCauseOfDeathDetail"></param>
         /// <param name="bcgAdverse"></param>
         /// <param name="bcgAdverseDetail"></param>
-        /// <param name="BcgPapuleAtDischarge"></param>
+        /// <param name="bcgPapuleAtDischarge"></param>
         /// <param name="lastContactWeight"></param>
         /// <param name="lastWeightDate"></param>
         /// <param name="dischargeDateTime"></param>
@@ -440,7 +449,8 @@ namespace BlowTrial.Domain.Providers
             string otherCauseOfDeathDetail,
             bool? bcgAdverse,
             string bcgAdverseDetail,
-            bool? BcgPapuleAtDischarge,
+            bool? bcgPapuleAtDischarge,
+            bool? bcgPauleAt28days,
             int? lastContactWeight,
             DateTime? lastWeightDate,
             DateTime? dischargeDateTime,
@@ -454,7 +464,8 @@ namespace BlowTrial.Domain.Providers
             participant.OtherCauseOfDeathDetail = otherCauseOfDeathDetail;
             participant.BcgAdverse = bcgAdverse;
             participant.BcgAdverseDetail = bcgAdverseDetail;
-            participant.BcgPapuleAtDischarge = BcgPapuleAtDischarge;
+            participant.BcgPapuleAtDischarge = bcgPapuleAtDischarge;
+            participant.BcgPapuleAt28days = bcgPauleAt28days;
             participant.LastContactWeight = lastContactWeight;
             participant.LastWeightDate = lastWeightDate;
             participant.DischargeDateTime = dischargeDateTime;
@@ -485,7 +496,7 @@ namespace BlowTrial.Domain.Providers
             _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
-                var part = FindParticipant(participantId);
+                var part = FindParticipantAndVaccines(participantId);
                 part.VaccinesAdministered = new List<VaccineAdministered>(vaccinesAdministered);
                 this.ParticipantUpdated(this, new ParticipantEventArgs(part));
             }
@@ -518,7 +529,7 @@ namespace BlowTrial.Domain.Providers
             var newVaccines = givenParticipantVaccines.ToLookup(va => va.Id == 0);
             if (newVaccines.Contains(false))
             {
-                ((DbContext)_dbContext).AttachAndMarkModified(newVaccines[false]);
+                ((DbContext)_dbContext).AttachAndMarkModified(newVaccines[false].ToArray());
             }
             if (newVaccines.Contains(true))
             {

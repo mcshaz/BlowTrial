@@ -303,7 +303,7 @@ namespace BlowTrial.Domain.Providers
             WriteTime(tableType, "SqlQuery");
             var qc = q.Cast<ISharedRecord>();
             WriteTime(tableType, "Cast");
-            destContext.AttachAndMarkModified(qc);
+            destContext.AttachAndMarkModified(tableType, qc.ToArray());
             WriteTime(tableType, "AttachAndMarkModified");
             destContext.SaveChanges();
         }

@@ -36,7 +36,6 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.DeathOrLastContactTime, o => o.Ignore())
                 .ForMember(d => d.DischargeDate, o => o.Ignore())
                 .ForMember(d => d.DischargeTime, o => o.Ignore())
-                .ForMember(d => d.VaccinesAdministered, o => o.Ignore())
                 .ForMember(d => d.StudyCentre, o => o.Ignore())
                 .ForMember(d => d.Becomes28On, o => o.Ignore())
                 .ForMember(d => d.DataRequired, o => o.Ignore())
@@ -44,12 +43,13 @@ namespace BlowTrial.Infrastructure.Automapper
 
             Mapper.CreateMap<Participant, ParticipantProgressModel>()
                 .ForMember(d=>d.VaccineModelsAdministered, o=>o.MapFrom(s=>s.VaccinesAdministered))
+                .ForMember(d=>d.VaccinesAdministered, o=>o.Ignore())
                 .AfterMap((s,d) => {
                     foreach (var v in d.VaccineModelsAdministered)
                     {
                         v.AdministeredTo = d;
                     }
-                    d.DataRequired = ParticipantBaseModel.GetDataRequiredExpression().Compile()(d);
+                    d.RecalculateDataRequired();
                 });
 
             Mapper.CreateMap<Participant, PatientDemographicsModel>()

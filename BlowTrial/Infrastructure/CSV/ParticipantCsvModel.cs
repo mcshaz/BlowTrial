@@ -27,6 +27,10 @@ namespace BlowTrial.Domain.Tables
     }
     public partial class ParticipantCsvModel : PatientCsvModel
     {
+        public string Name { get; set; }
+        public string MothersName { get; set; }
+        public string PhoneNumber { get; set; }
+        public RandomisationArm TrialArm { get; set; }
         public bool? BcgAdverse { get; set; }
         public string BcgAdverseDetail { get; set; }
         public bool? BcgPapuleAtDischarge { get; set; }
@@ -36,16 +40,16 @@ namespace BlowTrial.Domain.Tables
         public DateTime? LastWeightDate { get; set; }
         public virtual DateTime? DischargeDateTime { get; set; }
         public virtual DateTime? DeathOrLastContactDateTime { get; set; }
-	    public int CauseOfDeathId {get; set;}
         public string OtherCauseOfDeathDetail { get; set; }
-        [Display(Name="28 Day Outcome Code")]
-        public int OutcomeAt28Id { get; set; }
-        public int AllocationBlockId { get; set; }
+        public int? AllocationBlockId { get; set; }
         public int? MultipleSiblingId { get; set; }
+        public int CauseOfDeathId { get; set; }
+        [Display(Name = "28 Day Outcome Code")]
+        public int OutcomeAt28Id { get; set; }
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
-        public RandomisationArm TrialArm { get; set; }
-
+        public bool UserMarkedFinished { get; set; }
+        
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
     }
     public class ScreenedPatientCsvModel : PatientCsvModel

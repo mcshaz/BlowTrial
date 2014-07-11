@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace BlowTrial.Infrastructure.Extensions
 {
-    static class LinqExtensions
+    public static class LinqExtensions
     {
         //http://stackoverflow.com/questions/1779129/how-to-take-all-but-the-last-element-in-a-sequence-using-linq
         public static IEnumerable<T> DropLast<T>(this IEnumerable<T> source, int n)
@@ -48,6 +49,7 @@ namespace BlowTrial.Infrastructure.Extensions
         /// <param name="source"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static TResult[] Map<TSource, TResult>(this IList<TSource> source, Func<TSource, TResult> predicate)
         {
             TResult[] result = new TResult[source.Count];

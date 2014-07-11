@@ -558,7 +558,7 @@ namespace BlowTrial.ViewModel
             {
                 if (_multipleSibling == null && MultipleSiblingId.HasValue)
                 {
-                    _multipleSibling = _repository.FindParticipant(MultipleSiblingId.Value);
+                    _multipleSibling = _repository.FindParticipantAndVaccines(MultipleSiblingId.Value);
                 }
                 return _multipleSibling;
             }

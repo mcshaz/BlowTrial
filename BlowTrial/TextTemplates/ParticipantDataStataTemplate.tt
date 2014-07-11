@@ -3,6 +3,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="BlowTrial.Domain.Outcomes" #>
 
 clear
 insheet using "<#= _data.CsvFilename #>", <#= _data.Delimiter #>
@@ -28,8 +29,8 @@ if (!_rc) {
 	format lastweightdate %td
 }
 
-label define causeOfDeathOption 0 Missing 1 Infection 2 "Congenital Malformation" 3 "Hyaline Membrane Disease" 4 "Intraventricular Haemorrhage" 5 "Necrotising Enterocollitis" 6 Other 7 Unknown
-label define outcomeAt28DaysOption 0 Missing 1 "Inpatient At 28 Days" 2 "Died In Hospital Before 28 Days" 3 "Discharged Before 28 Days" 4 "Discharged And Known To Have Survived" 5 "Discharged And Known To Have Died" 6 "Discharged And Likely To Have Survived" 7 "Discharged And Likely To Have Died"
+label define causeOfDeathOption <#= StataData.GetStataLabel<CauseOfDeathOption>() #>
+label define outcomeAt28DaysOption <#= StataData.GetStataLabel<OutcomeAt28DaysOption>() #>
 label define centreNames <#= _data.CentresLabel #>
 
 label values causeofdeathid causeOfDeathOption
