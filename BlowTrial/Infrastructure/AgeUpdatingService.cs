@@ -60,7 +60,7 @@ namespace BlowTrial.Infrastructure
                 else
                 {
                     interval = _participants[_nextIndex].Key <= rightNow
-                        ? new TimeSpan(0)
+                        ? new TimeSpan()
                         : _participants[_nextIndex].Key - rightNow;
                 }
                 StartTimer(interval);

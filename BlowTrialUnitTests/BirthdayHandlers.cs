@@ -34,7 +34,7 @@ namespace BlowTrialUnitTests
                     TimeSpan.FromHours(23),
                     TimeSpan.FromHours(-23));
             moq.AgeService.Cleanup();
-            moq.Moq.VerifySet(m => m.Stop(), Times.Once);
+            moq.Moq.Verify(m => m.Stop(), Times.Once);
         }
 
         [TestMethod]
@@ -79,9 +79,9 @@ namespace BlowTrialUnitTests
 
         MyMoq TestAgeUpdatingSetInterval(params DateTime[] birthDateTimes)
         {
-            if (birthDateTimes == null || birthDateTimes.Length == 0)
+            if (birthDateTimes == null || birthDateTimes.Length < 2)
             {
-                throw new ArgumentException("must include birthDateTimes");
+                throw new ArgumentException("must include at least 2 birthDateTimes");
             }
             var participants = new List<ParticipantListItemViewModel>(birthDateTimes.Length);
 
@@ -103,25 +103,49 @@ namespace BlowTrialUnitTests
                 participants.Add(p);
             }
 
-            var expectedTimesFromNow = TimesFromNow(birthDateTimes);
+            var expectedTimesFromNow = TimesFromNow(birthDateTimes, moqArgs.StartAt);
 
-            var mockTimer = new Mock<IDispatcherTimer>();
+            var mockTimer = new Mock<IDispatcherTimer>(MockBehavior.Strict);
             mockTimer.SetupProperty(m => m.Interval);
             mockTimer.Setup(m => m.Start());
             mockTimer.Setup(m => m.Stop());
-            mockTimer.SetupSet(m => m.Interval = It.IsInRange(
-                expectedTimesFromNow[0] - shorter, expectedTimesFromNow[0] + longer, Range.Inclusive));
+            TimeSpan expectedInterval = expectedTimesFromNow[0];
+            TimeSpan tolerance = TimeSpan.FromSeconds(defaultSecsTolerance);
+            bool requiresInterval = true;
+            mockTimer.SetupSet(m => m.Interval = It.IsAny<TimeSpan>()).Callback<TimeSpan>(i =>
+            {
+                string usrMsg = string.Format(intervalLogTemplate, i, expectedInterval, tolerance);
+                if (requiresInterval && (i < expectedInterval - tolerance || i > expectedInterval + tolerance))
+                {
+                    throw new ArgumentOutOfRangeException("Interval", usrMsg);
+                }
+                else
+                {
+                    Console.WriteLine(usrMsg);
+                }
+            });
             IDispatcherTimer timer = mockTimer.Object;
-            moqArgs.StartAt = DateTime.Now;
             Console.WriteLine("instantiating AgeUpdatingService");
             var ageService = new AgeUpdatingService(participants, timer);
-            LogInterval(timer.Interval, expectedTimesFromNow[0]);
             Console.WriteLine("finished instantiation");
             mockTimer.Verify(m => m.Start(), Times.AtLeastOnce);
+            
+            Action<TimeSpan, TimeSpan> validateIntervals = new Action<TimeSpan,TimeSpan>((last, curr) => {
+                if (curr.Ticks > 0)
+                {
+                    moqArgs.StartAt += last;
+                    expectedInterval = curr;
+                    mockTimer.Raise(m => m.Tick += null, moqArgs);
+                }
+            });
+            moqArgs.StartAt += expectedTimesFromNow.First(); //will have been set during instantiation
+            expectedTimesFromNow.AggregatePairSelect((prev, cur)=>cur-prev)
+                .Where(t=>t.Ticks != 0)
+                .AggregatePairForEach(new TimeSpan(), validateIntervals);
+            requiresInterval = false;
+            mockTimer.Raise(m => m.Tick += null, moqArgs);
 
-            EnumerateAndValidateIntervals(expectedTimesFromNow.Skip(1), timer, moqArgs, mockTimer);
-
-            // test add
+            Console.WriteLine("Adding new participants");
             foreach (var addedInterval in (new int[]{10,-10}).Select(i=>TimeSpan.FromSeconds(i)))
             {
                 participants.Add(new ParticipantListItemViewModel(
@@ -132,43 +156,29 @@ namespace BlowTrialUnitTests
                         }));
                 ageService.AddParticipant(participants[participants.Count-1]);
             }
+            requiresInterval = true;
 
             moqArgs.StartAt = DateTime.Now;
-            expectedTimesFromNow = TimesFromNow(from p in participants where p.AgeDays <= 28 select p.DateTimeBirth);
+            expectedTimesFromNow = TimesFromNow(from p in participants where p.AgeDays <= 28 select p.DateTimeBirth, moqArgs.StartAt);
 
-            EnumerateAndValidateIntervals(expectedTimesFromNow, timer, moqArgs, mockTimer);
+            expectedTimesFromNow.AggregatePairSelect(new TimeSpan(),(prev, cur) => cur - prev)
+                .Where(t=>t.Ticks!=0)
+                .AggregatePairForEach(new TimeSpan(), validateIntervals);
+
+            requiresInterval = false;
+            mockTimer.Raise(m => m.Tick += null, moqArgs);
 
             return new MyMoq { AgeService = ageService, Moq = mockTimer };
         }
 
-        void EnumerateAndValidateIntervals(IEnumerable<TimeSpan> expectedTimesFromNow, IDispatcherTimer timer, MoqTimerEventArgs moqArgs, Mock<IDispatcherTimer> mockTimer)
+        static List<TimeSpan> TimesFromNow(IEnumerable<DateTime> birthDateTimes, DateTime now)
         {
-            TimeSpan interval = new TimeSpan(0);
-            foreach (TimeSpan et in expectedTimesFromNow)
-            {
-                moqArgs.StartAt += interval;
-                interval = et - interval;
-                if (interval.Ticks != 0)
-                {
-                    mockTimer.SetupSet(m => m.Interval = It.IsInRange(
-                        interval - shorter, interval + longer, Range.Inclusive));
-                    
-                    mockTimer.Raise(m => m.Tick += null, moqArgs);
-
-                    LogInterval(timer.Interval, interval);
-                }
-            }
-        }
-
-        static List<TimeSpan> TimesFromNow(IEnumerable<DateTime> birthDateTimes)
-        {
-            DateTime currentDateTime = DateTime.Now;
-            TimeSpan currentTime = currentDateTime.TimeOfDay;
+            TimeSpan currentTime = now.TimeOfDay;
             TimeSpan oneDay = TimeSpan.FromDays(1);
             var expectedTimesFromNow = new List<TimeSpan>(birthDateTimes
                 .Select(dob =>
                 {
-                    if (dob > currentDateTime) { throw new ArgumentException("all dates must be before now"); }
+                    if (dob > now) { throw new ArgumentException("all dates must be before now"); }
                     var timeDif = dob.TimeOfDay - currentTime;
                     if (timeDif.Ticks < 0) { timeDif += oneDay; }
                     return timeDif;
@@ -180,10 +190,10 @@ namespace BlowTrialUnitTests
         public void TestAgeUpdatingStartOnAdd()
         {
             var moqArgs = new MoqTimerEventArgs();
-            var mockTimer = new Mock<IDispatcherTimer>();
+            var mockTimer = new Mock<IDispatcherTimer>(MockBehavior.Strict);
             mockTimer.SetupProperty(m => m.Interval);
-            mockTimer.Setup(m => m.Start());
-            mockTimer.Setup(m => m.Stop());
+            mockTimer.Setup(m => m.Start()).Verifiable();
+            mockTimer.Setup(m => m.Stop()).Verifiable();
             IDispatcherTimer timer = mockTimer.Object;
 
             var ageService = new AgeUpdatingService(new ParticipantListItemViewModel[0], timer);
@@ -196,13 +206,23 @@ namespace BlowTrialUnitTests
                     Id = 1,
                     DateTimeBirth = moqArgs.StartAt + toDob
                 });
-            TimeSpan interval = TimeSpan.FromDays(1) +toDob;
-            Console.WriteLine(interval);
-            mockTimer.SetupSet(m => m.Interval = It.IsInRange(
-                interval - shorter, interval + longer, Range.Inclusive));
+
+            TimeSpan expectedInterval = TimeSpan.FromDays(1) +toDob;
+            TimeSpan tolerance = TimeSpan.FromSeconds(defaultSecsTolerance);
+            mockTimer.SetupSet(m => m.Interval = It.IsAny<TimeSpan>()).Callback<TimeSpan>(i =>
+            {
+                string usrMsg = string.Format(intervalLogTemplate, i, expectedInterval, tolerance);
+                if (i < expectedInterval - tolerance || i > expectedInterval + tolerance)
+                {
+                    throw new ArgumentOutOfRangeException("Interval", usrMsg);
+                }
+                else
+                {
+                    Console.WriteLine(usrMsg);
+                }
+            });
             ageService.AddParticipant(p);
             mockTimer.Verify(m => m.Start(), Times.Once);
-            LogInterval(timer.Interval, interval);
 
             TimeSpan laterDayversary = TimeSpan.FromMinutes(-5);
             p = new ParticipantListItemViewModel(
@@ -211,10 +231,7 @@ namespace BlowTrialUnitTests
                     Id = 2,
                     DateTimeBirth = moqArgs.StartAt + laterDayversary
                 });
-            mockTimer.ResetCalls();
             ageService.AddParticipant(p);
-            mockTimer.VerifySet(x => x.Interval = It.IsAny<TimeSpan>(), Times.Never());
-            LogInterval(timer.Interval, interval);
 
             toDob = TimeSpan.FromMinutes(-30);
             p = new ParticipantListItemViewModel(
@@ -223,11 +240,9 @@ namespace BlowTrialUnitTests
                     Id = 2,
                     DateTimeBirth = moqArgs.StartAt + toDob
                 });
-            interval = TimeSpan.FromDays(1) + toDob;
-            mockTimer.SetupSet(m => m.Interval = It.IsInRange(
-                interval - shorter, interval + longer, Range.Inclusive));
+            expectedInterval = TimeSpan.FromDays(1) + toDob;
+
             ageService.AddParticipant(p);
-            LogInterval(timer.Interval, interval);
 
             toDob = TimeSpan.FromDays(-1).Add(TimeSpan.FromMinutes(5));
             p = new ParticipantListItemViewModel(
@@ -236,23 +251,11 @@ namespace BlowTrialUnitTests
                     Id = 2,
                     DateTimeBirth = moqArgs.StartAt + toDob
                 });
-            interval = TimeSpan.FromDays(1) + toDob;
-            mockTimer.SetupSet(m => m.Interval = It.IsInRange(
-                interval - shorter, interval + longer, Range.Inclusive));
+            expectedInterval = TimeSpan.FromDays(1) + toDob;
+
             ageService.AddParticipant(p);
-            LogInterval(timer.Interval, interval);
         }
-
-        //[DebuggerStepThrough]
-        static void LogInterval(TimeSpan actualInterval, TimeSpan expectedInterval)
-        {
-            const int allowedSecs = 2;
-            TimeSpan minInterval = expectedInterval - TimeSpan.FromSeconds(allowedSecs);
-            TimeSpan maxInterval = expectedInterval + TimeSpan.FromSeconds(allowedSecs);
-            Console.WriteLine(@"interval was {0:hh\:mm\:ss} (expected {1:hh\:mm\:ss})", actualInterval, expectedInterval);
-            //Assert.IsTrue(minInterval < actualInterval && actualInterval < maxInterval, @"interval was {0:hh\:mm\:ss}, should be {1:hh\:mm\:ss} (+/-{2}sec)", actualInterval, expectedInterval, allowedSecs);
-        }
-
-        
+        const int defaultSecsTolerance = 2;
+        const string intervalLogTemplate = @"interval was {0:hh\:mm\:ss}, expected {1:hh\:mm\:ss} (+/-{2}sec)";
     }
 }

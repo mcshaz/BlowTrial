@@ -81,6 +81,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="LinqExtensions.cs" />
     <Compile Include="LiveDataTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestoreDbToCentre.cs" />
