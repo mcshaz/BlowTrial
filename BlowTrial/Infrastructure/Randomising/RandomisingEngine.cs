@@ -40,7 +40,7 @@ namespace BlowTrial.Infrastructure.Randomising
                     var catQuery = from p in context.Participants
                                    where p.CentreId == studyCentreId && p.Block.RandomisationCategory == strata
                                    select p;
-                    if ((double)catQuery.Count()/catQuery.Count(p=>p.TrialArm == RandomisationArm.DanishBcg) >= 3){
+                    if ((double)catQuery.Count()/catQuery.Count(p=>p.TrialArm == RandomisationArm.DanishBcg) <= 3){
                         alloc.IsEqualised = true;
                         context.SaveChanges(true);
                         if (context.BalancedAllocations.All(a=>a.IsEqualised))
@@ -82,6 +82,7 @@ namespace BlowTrial.Infrastructure.Randomising
         {
             var block = GetNextAllocationGroup(participant.CentreId, strata, context);
             component = ArmData.GetRatio(block);
+            if (participant.Centre == null) { participant.Centre = context.StudyCentres.Find(participant.CentreId); }
             var returnVar = new AllocationBlock
                 {
                     Id = context.AllocationBlocks.GetNextId(participant.CentreId, participant.Centre.MaxIdForSite),
@@ -313,29 +314,44 @@ namespace BlowTrial.Infrastructure.Randomising
             double rdm = new Random().NextDouble();
             return (rdm <= Pintervention);
         }
-        internal static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, BlockComponent block)
+        public static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, BlockComponent block)
         {
-            return NextAllocation(currentBlock, block.GetAllocations());
+            return NextAllocation(currentBlock, block, new RandomAdaptor());
+        }
+        public static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, BlockComponent block, IRandom randomGenerator)
+        {
+            return NextAllocation(currentBlock, block.GetAllocations(), randomGenerator);
         }
         public static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, IDictionary<RandomisationArm, int> ratios)
         {
-            double totalRemainingAllocations = ratios.Values.Sum();
+            return NextAllocation(currentBlock, ratios, new RandomAdaptor());
+        }
+        public static RandomisationArm NextAllocation(IEnumerable<RandomisationArm> currentBlock, IDictionary<RandomisationArm, int> ratios, IRandom randomGenerator)
+        {
+            double totalRemainingAllocations = 0;
+            var usedAllocations = currentBlock.GroupBy(c => c).ToDictionary(k => k.Key, v => v.Count());
             var remainingAllocations = new List<KeyValuePair<RandomisationArm, int>>();
-            foreach (var g in currentBlock.GroupBy(a => a))
+
+            foreach (var g in ratios)
             {
-                int grpCount = g.Count();
-                totalRemainingAllocations -= grpCount;
-                remainingAllocations.Add(new KeyValuePair<RandomisationArm, int>(g.Key,ratios[g.Key] - grpCount));
+                int usedInGroup;
+                int remainingAllocationsInGroup = g.Value;
+                if (usedAllocations.TryGetValue(g.Key, out usedInGroup))
+                {
+                    remainingAllocationsInGroup -= usedInGroup;
+                }
+                totalRemainingAllocations += remainingAllocationsInGroup;
+                remainingAllocations.Add(new KeyValuePair<RandomisationArm, int>(g.Key, remainingAllocationsInGroup));
             }
 
             if (totalRemainingAllocations <= 0) throw new ArgumentException("No remaining allocations");
 
             double cumulativeP = 0;
 
-            double rdm = new Random().NextDouble();
+            double rdm = randomGenerator.NextDouble();
             //not worth a binary search, as unlikely to be more than 4 allocations
             return remainingAllocations.First(a=>
-                (cumulativeP += a.Value / totalRemainingAllocations) <= rdm).Key;
+                rdm <= (cumulativeP += (a.Value / totalRemainingAllocations))).Key;
         }
     }
 }

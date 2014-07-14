@@ -13,6 +13,7 @@ using BlowTrial.Domain.Tables;
 using BlowTrial.Domain.Outcomes;
 using BlowTrial.Infrastructure.Extensions;
 using System.Data.Entity;
+using System.Data.SqlServerCe;
 
 namespace BlowTrialUnitTests
 {
@@ -88,6 +89,57 @@ namespace BlowTrialUnitTests
                 }
             }
         }
+        [TestMethod]
+        public void TestRandomising()
+        {
+            var parts = new List<Participant>(GetMultipleParticipantCategories(1));
+            DateTime now = DateTime.Now;
+            DateTime yesterday = now - TimeSpan.FromDays(1);
+            int maxId;
+            using (var db = new TrialDataContext())
+            {
+                maxId = (from p in db.Participants
+                        where p.Id<20000
+                        select p.Id).Max();
+            }
+            
+            using (var repo = new Repository(typeof(TrialDataContext)))
+            {
+                //ratio 2:9:18
+                for (int i=1;i <2000;i++)
+                {
+                    string dummyInfo = "dummyInfo" + i;
+                    int weight;
+                    if (i < 137) { weight = 1000-i; }
+                    else if (i < 620) { weight = 1500 - i / 2; }
+                    else { weight = 2000 - i / 5; }
+                    repo.AddParticipant(dummyInfo, dummyInfo, dummyInfo, weight, 32, yesterday,
+                        "", "1111111", i%2==0, true, now, 1, null, null);
+                }
+            }
+            using (var context = new TrialDataContext())
+            {
+                var allAllocations = context.Participants.GroupBy(p => p.TrialArm).ToDictionary(p => p.Key, p => p.Count());
+                int total = allAllocations.Values.Sum();
+                const double tolerance = 0.01;
+                const double thirdMin = 1 / 3 - tolerance;
+                const double thirdMax = 1 / 3 + tolerance;
+                foreach (var kv in allAllocations)
+                {
+                    double ratio = (double)kv.Value/total;
+                    string msg =  string.Format("{0} ratio {1}",kv.Key,ratio);
+                    Console.WriteLine(ratio);
+                    Assert.IsTrue(thirdMin <= ratio && ratio <= thirdMax, "ratio shoule be 1/3 " + msg);
+                }
+                foreach (var kv in context.BalancedAllocations.ToDictionary(b=>b.RandomisationCategory, b=>b.IsEqualised))
+                {
+                    Assert.IsTrue(kv.Value, "Balanced Allocations not set to true for {0}", kv.Value);
+                }
+                //teardown
+                context.Database.ExecuteSqlCommand(String.Format("delete from Participants where Id > {0} and Id <20000", maxId));
+            }
+        }
+
         [TestMethod]
         public void TestUnfilledAllocationBlocks()
         {

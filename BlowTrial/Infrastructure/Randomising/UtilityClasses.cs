@@ -30,7 +30,7 @@ namespace BlowTrial.Infrastructure.Randomising
         }
         public ReadOnlyDictionary<RandomisationArm, int> Ratios { get; private set; }
         public byte Repeats { get; private set; }
-        internal IDictionary<RandomisationArm, int> GetAllocations()
+        public IDictionary<RandomisationArm, int> GetAllocations()
         {
             if (Repeats == 1) { return Ratios; }
             var returnVar = new Dictionary<RandomisationArm, int>(Ratios.Count);
@@ -40,11 +40,11 @@ namespace BlowTrial.Infrastructure.Randomising
             }
             return returnVar;
         }
-        internal BlockComponent Clone(byte repeats)
+        public BlockComponent Clone(byte repeats)
         {
             return new BlockComponent(repeats, this.Ratios);
         }
-        internal int TotalBlockSize()
+        public int TotalBlockSize()
         {
             return Ratios.Values.Sum() * Repeats;
         }

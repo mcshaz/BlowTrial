@@ -4,14 +4,10 @@ using BlowTrial.Infrastructure;
 using BlowTrial.ViewModel;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
 using BlowTrial.Models;
-using System.Threading.Tasks;
 using Moq;
 using BlowTrial.Infrastructure.Interfaces;
-using System.Threading;
 using BlowTrial.Infrastructure.Extensions;
-using System.Diagnostics;
 
 namespace BlowTrialUnitTests
 {
@@ -50,6 +46,27 @@ namespace BlowTrialUnitTests
         {
             var moq = TestAgeUpdatingSetInterval(DateTime.Now.Date ,20,15,5,15 );
         }
+        [TestMethod]
+        public void TestParticipantsGreater29NotStartingTimer()
+        {
+            TestParticipantsNotStartingTimer(MapAroundDate(DateTime.Now.AddDays(-29),0,-1,-2,-3));
+        }
+        [TestMethod]
+        public void NoParticipantsNotStartingTimer()
+        {
+            TestParticipantsNotStartingTimer();
+        }
+        void TestParticipantsNotStartingTimer(params DateTime[] birthDateTimes)
+        {
+            var mockTimer = new Mock<IDispatcherTimer>(MockBehavior.Strict);
+            mockTimer.SetupProperty(m => m.Interval);
+            mockTimer.Setup(m => m.Start());
+            mockTimer.Setup(m => m.Stop());
+            var moqArgs = new  MoqTimerEventArgs();
+            var participants = GetParticipants(moqArgs, birthDateTimes);
+            var ageService = new AgeUpdatingService(participants,mockTimer.Object);
+            mockTimer.Verify(m => m.Start(), Times.Never);
+        }
 
         class MyMoq
         {
@@ -76,32 +93,35 @@ namespace BlowTrialUnitTests
         {
             return TestAgeUpdatingSetInterval(MapAroundDate(date, around));
         }
-
+        List<ParticipantListItemViewModel> GetParticipants(MoqTimerEventArgs moqArgs, DateTime[] birthDateTimes)
+        {
+            var returnVar = new List<ParticipantListItemViewModel>(birthDateTimes.Length);
+            for (int i = 0; i < birthDateTimes.Length; i++)
+            {
+                var p = new ParticipantListItemViewModel(
+                    new ParticipantBaseModel
+                    {
+                        Id = i + 1,
+                        DateTimeBirth = birthDateTimes[i]
+                    });
+                p.PropertyChanged += (s, e) =>
+                {
+                    var returnedP = (ParticipantListItemViewModel)s;
+                    Console.WriteLine("Id:{0}, DOB:{1:dd/MM hh:mm}, daysOld:{2}, called:{3:dd/MM hh:mm}", p.Id, p.DateTimeBirth, p.AgeDays, moqArgs.StartAt);
+                };
+                returnVar.Add(p);
+            }
+            return returnVar;
+        }
         MyMoq TestAgeUpdatingSetInterval(params DateTime[] birthDateTimes)
         {
             if (birthDateTimes == null || birthDateTimes.Length < 2)
             {
                 throw new ArgumentException("must include at least 2 birthDateTimes");
             }
-            var participants = new List<ParticipantListItemViewModel>(birthDateTimes.Length);
 
             var moqArgs = new MoqTimerEventArgs();
-
-            for (int i = 0; i < birthDateTimes.Length; i++)
-            {
-                var p = new ParticipantListItemViewModel(
-                    new ParticipantBaseModel 
-                    { 
-                        Id = i + 1, 
-                        DateTimeBirth = birthDateTimes[i] 
-                    } );
-                p.PropertyChanged += (s, e) =>
-                {
-                    var returnedP = (ParticipantListItemViewModel)s;
-                    Console.WriteLine("Id:{0}, DOB:{1:dd/MM hh:mm}, daysOld:{2}, called:{3:dd/MM hh:mm}", p.Id, p.DateTimeBirth, p.AgeDays, moqArgs.StartAt);
-                };
-                participants.Add(p);
-            }
+            var participants = GetParticipants(moqArgs, birthDateTimes);
 
             var expectedTimesFromNow = TimesFromNow(birthDateTimes, moqArgs.StartAt);
 
