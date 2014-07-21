@@ -202,7 +202,7 @@ namespace BlowTrial.ViewModel
             {
                 case TableOptions.Participant:
                     var participants = Mapper.Map<ParticipantCsvModel[]>(_repository.Participants.Include("VaccinesAdministered").ToArray());
-                    var vaccines = _repository.Vaccines.ToArray();
+                    var vaccines = _repository.Vaccines.ToList();
                     var csvEncodedParticipants = PatientDataToCSV.ParticipantDataToCSV(participants, vaccines, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
                     File.WriteAllText(Path.ChangeExtension(_model.Filename, ".do"), ListConverters.ToStataDo(Mapper.Map<IEnumerable<ParticipantCsvModel>>(_repository.Participants.ToArray())));
                     try

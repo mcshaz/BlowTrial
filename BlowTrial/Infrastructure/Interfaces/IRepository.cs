@@ -82,7 +82,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         DbQuery<Participant> Participants { get; }
         DbQuery<ScreenedPatient> ScreenedPatients { get; }
         DbQuery<VaccineAdministered> VaccinesAdministered { get; }
-        DbQuery<Vaccine> Vaccines { get; }
+        IEnumerable<Vaccine> Vaccines { get; }
         DbQuery<ProtocolViolation> ProtocolViolations { get; }
         Participant FindParticipantAndVaccines(int participantId);
         ProtocolViolation FindViolation(int violationId);

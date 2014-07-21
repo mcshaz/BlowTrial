@@ -273,7 +273,7 @@ namespace BlowTrial.Domain.Providers
                     {
                         context.Participants.Max(p=>(DateTime?)p.RecordLastModified),
                         context.ScreenedPatients.Max(s=>(DateTime?)s.RecordLastModified),
-                        context.Vaccines.Where(v=>!DataContextInitialiser.SeedVaccineIds.Contains(v.Id)).Max(v=>(DateTime?)v.RecordLastModified),
+                        context.Vaccines.Where(v=>v.Id>DataContextInitialiser.MaxReservedVaccineId).Max(v=>(DateTime?)v.RecordLastModified),
                         context.VaccinesAdministered.Max(va=>(DateTime?)va.RecordLastModified),
                         context.ProtocolViolations.Max(pv=>(DateTime?)pv.RecordLastModified),
                     }).Max();
@@ -286,7 +286,7 @@ namespace BlowTrial.Domain.Providers
                     {
                         context.Participants.Where(p=>p.CentreId == rng.Min).Max(p=>(DateTime?)p.RecordLastModified),
                         context.ScreenedPatients.Where(p=>p.CentreId == rng.Min).Max(s=>(DateTime?)s.RecordLastModified),
-                        context.Vaccines.Where(p=> !DataContextInitialiser.SeedVaccineIds.Contains(p.Id) && p.Id >= rng.Min && p.Id<= rng.Max).Max(v=>(DateTime?)v.RecordLastModified),
+                        context.Vaccines.Where(p=> p.Id > DataContextInitialiser.MaxReservedVaccineId && p.Id >= rng.Min && p.Id<= rng.Max).Max(v=>(DateTime?)v.RecordLastModified),
                         context.VaccinesAdministered.Where(p=>p.Id >= rng.Min && p.Id<= rng.Max).Max(va=>(DateTime?)va.RecordLastModified),
                         context.ProtocolViolations.Where(p=>p.Id >= rng.Min && p.Id<= rng.Max).Max(pv=>(DateTime?)pv.RecordLastModified),
                     }).Max()).Max();

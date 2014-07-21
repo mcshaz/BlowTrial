@@ -19,8 +19,7 @@ namespace BlowTrial.ViewModel
         {
             VaccineList = vaccineList;
             this.VaccineAdministeredModel = vaccineModel;
-            SelectedVaccine = (vaccineModel.VaccineGiven==null)?vaccineList.First(l => l.Vaccine == null)
-                : VaccineList.First(l => l.Vaccine!=null && l.Vaccine.Id == vaccineModel.VaccineGiven.Id);
+            SelectedVaccine = VaccineList.First(l => l.VaccineId == vaccineModel.VaccineId);
         }
         #endregion
         #region Fields
@@ -95,12 +94,19 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("AdministeredAtDate", "AdministeredAtTime", "SelectedVaccine");
             }
         }
+        public bool IsBcg
+        {
+            get
+            {
+                return VaccineAdministeredModel.IsBcg;
+            }
+        }
 
         public DateTime EarliestDate
         {
             get
             {
-                if (SelectedVaccine.Vaccine == null || !SelectedVaccine.Vaccine.IsBcg)
+                if (SelectedVaccine.Vaccine == null || !IsBcg)
                 {
                     return VaccineAdministeredModel.AdministeredTo.DateTimeBirth;
                 }

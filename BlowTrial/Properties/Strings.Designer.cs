@@ -1888,6 +1888,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to BCG-Moreau(Brazil).
+        /// </summary>
+        public static string Vaccine_BcgBrazil {
+            get {
+                return ResourceManager.GetString("Vaccine_BcgBrazil", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BCG-Danish.
         /// </summary>
         public static string Vaccine_DanishBcg {

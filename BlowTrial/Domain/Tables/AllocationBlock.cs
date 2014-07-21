@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BlowTrial.Domain.Tables
 {
-    public enum AllocationGroups {NotApplicable = 0, IndiaTwoArm = 1, IndiaThreeArmUnbalanced=2, IndiaThreeArmBalanced=3}
+    public enum AllocationGroups {NotApplicable = 0, India2Arm = 1, India3ArmUnbalanced=2, India3ArmBalanced=3, Brazil2Arm=4}
     public class AllocationBlock : ISharedRecord
     {
         [Key]

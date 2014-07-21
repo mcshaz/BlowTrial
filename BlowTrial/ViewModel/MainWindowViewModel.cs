@@ -207,7 +207,7 @@ namespace BlowTrial.ViewModel
                 "Are you sure you want to continue - this step cannot be undone. Please only click OK if Danish BCG is available.", "Are you sure?",
                 MessageBoxButton.OKCancel) == MessageBoxResult.OK)
             {
-                BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.IndiaThreeArmUnbalanced);
+                BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.India3ArmUnbalanced);
                 Can3WayRandomise = false;
             }
         }
@@ -486,7 +486,7 @@ namespace BlowTrial.ViewModel
                         _backupService = new BackupService(_repository, m);
                         //IsEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising(m);
 
-                        Can3WayRandomise = BlowTrialDataService.GetDefaultAllocationGroup(m) == AllocationGroups.IndiaTwoArm;
+                        Can3WayRandomise = BlowTrialDataService.GetDefaultAllocationGroup(m) == AllocationGroups.India2Arm;
                         var backDetails = BlowTrialDataService.GetBackupDetails(m);
                         if (backDetails.BackupData.IsBackingUpToCloud)
                         {

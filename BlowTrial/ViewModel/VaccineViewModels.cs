@@ -14,7 +14,9 @@ namespace BlowTrial.ViewModel
         public VaccineViewModel(Vaccine vaccine)
         {
             this.Vaccine = vaccine;
+            if (vaccine != null) { VaccineId = vaccine.Id; }
         }
+        public int VaccineId { get; private set; }
         public Vaccine Vaccine { get; private set;}
         bool _isGivenToThisPatient;
         public bool IsGivenToThisPatient

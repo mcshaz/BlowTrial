@@ -130,7 +130,7 @@ namespace BlowTrial.Migrations.TrialData
                     var currentAlloc = new AllocationBlock
                     {
                         Id = g.Key.BlockNumber.Value,
-                        AllocationGroup = AllocationGroups.IndiaTwoArm,
+                        AllocationGroup = AllocationGroups.India2Arm,
                         RecordLastModified = now
                     };
                     blocksToInsert.Add(currentAlloc);
@@ -180,7 +180,7 @@ namespace BlowTrial.Migrations.TrialData
                     blocksToInsert.Add(new AllocationBlock 
                     { 
                         Id = nextId++, 
-                        AllocationGroup = AllocationGroups.IndiaTwoArm, 
+                        AllocationGroup = AllocationGroups.India2Arm, 
                         GroupRepeats = (byte)((s.Count()-1) / 2 + 1), 
                         RandomisationCategory = (RandomisationStrata)s.Key, 
                         RecordLastModified = now });

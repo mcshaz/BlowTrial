@@ -14,7 +14,7 @@ namespace BlowTrial.Infrastructure.Extensions
     {
         delegate bool TryGetVal<T>(int input, out T output);
 
-        public static void AttachAndMarkModified(this DbContext context, Type setType, params ISharedRecord[] newVals)
+        public static void AttachAndMarkModified(this DbContext context, Type setType, IEnumerable<ISharedRecord> newVals)
         {
             if (setType.Namespace == "System.Data.Entity.DynamicProxies")
             {
@@ -27,10 +27,10 @@ namespace BlowTrial.Infrastructure.Extensions
             ExecuteAttachAndMarkModified(context, setType, newVals);
         }
 
-        static void ExecuteAttachAndMarkModified(DbContext context, Type setType, params ISharedRecord[] newVals)
+        static void ExecuteAttachAndMarkModified(DbContext context, Type setType, IEnumerable<ISharedRecord> newVals)
         {
             TryGetVal<ISharedRecord> getVal;
-            if (newVals.Length > 1)
+            if (newVals.Skip(1).Any())
             {
                 var localDict = context.Set(setType).Local.Cast<ISharedRecord>().ToDictionary(k => k.Id);
                 getVal = localDict.TryGetValue;
@@ -63,12 +63,15 @@ namespace BlowTrial.Infrastructure.Extensions
             
         }
 
-        public static void AttachAndMarkModified<T>(this DbContext context, params T[] newVals) where T : class, ISharedRecord
+        public static void AttachAndMarkModified<T>(this DbContext context, IEnumerable<T> newVals) where T : class, ISharedRecord
         {
-
             ExecuteAttachAndMarkModified(context, typeof(T), newVals);
         }
 
+        public static void AttachAndMarkModified<T>(this DbContext context, T newVal) where T : class, ISharedRecord
+        {
+            ExecuteAttachAndMarkModified(context, typeof(T), new T[] { newVal });
+        }
 
         static string GetEntitySetName(Type entityType)
         {

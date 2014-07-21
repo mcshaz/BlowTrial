@@ -18,7 +18,12 @@ namespace BlowTrialUnitTests
 
         public bool Equals(IList<T> x, IList<T> y) 
         {
-            return GetHashCode(x) == GetHashCode(y);
+            if (x.Count != y.Count) { return false; }
+            for (int i=0;i<x.Count;i++)
+            {
+                if (!x[i].Equals(y[i])) { return false; }
+            }
+            return true;
         }
 
         public int GetHashCode(IList<T> list) {

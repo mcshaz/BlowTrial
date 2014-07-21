@@ -32,7 +32,7 @@ namespace BlowTrial.Infrastructure.Randomising
         static AllocationGroups GetNextAllocationGroup(int studyCentreId, RandomisationStrata strata, ITrialDataContext context = null)
         {
             AllocationGroups returnVar = BlowTrial.Helpers.BlowTrialDataService.GetDefaultAllocationGroup();
-            if (returnVar == AllocationGroups.IndiaThreeArmUnbalanced)
+            if (returnVar == AllocationGroups.India3ArmUnbalanced)
             {  
                 var alloc = context.BalancedAllocations.First(a=>a.RandomisationCategory == strata && a.StudyCentreId==studyCentreId);
                 if (!alloc.IsEqualised) 
@@ -43,15 +43,15 @@ namespace BlowTrial.Infrastructure.Randomising
                     if ((double)catQuery.Count()/catQuery.Count(p=>p.TrialArm == RandomisationArm.DanishBcg) <= 3){
                         alloc.IsEqualised = true;
                         context.SaveChanges(true);
-                        if (context.BalancedAllocations.All(a=>a.IsEqualised))
+                        if (context.BalancedAllocations.All(a=>a.IsEqualised && a.StudyCentreId==studyCentreId))
                         {
-                            BlowTrial.Helpers.BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.IndiaThreeArmBalanced);
+                            BlowTrial.Helpers.BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.India3ArmBalanced);
                         }
                     }
                 }
                 if (alloc.IsEqualised)
                 {
-                    return AllocationGroups.IndiaThreeArmBalanced;
+                    return AllocationGroups.India3ArmBalanced;
                 }
             }
             return returnVar;
@@ -73,6 +73,7 @@ namespace BlowTrial.Infrastructure.Randomising
                 currentBlock = CreateNewAllocationBlock(participant, strata, out component ,context);                
             }
             participant.AllocationBlockId = currentBlock.Id;
+            participant.Block = currentBlock;
             participant.TrialArm = BlockRandomisation.NextAllocation(from p in context.Participants 
                                                                      where p.AllocationBlockId==currentBlock.Id 
                                                                      select p.TrialArm, component);
@@ -87,7 +88,8 @@ namespace BlowTrial.Infrastructure.Randomising
                 {
                     Id = context.AllocationBlocks.GetNextId(participant.CentreId, participant.Centre.MaxIdForSite),
                     AllocationGroup = block, 
-                    GroupRepeats= component.Repeats
+                    GroupRepeats= component.Repeats,
+                    RandomisationCategory = strata
                 };
             context.AllocationBlocks.Add(returnVar);
                 

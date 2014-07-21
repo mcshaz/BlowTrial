@@ -45,7 +45,7 @@ namespace BlowTrialUnitTests
             }
         }
         [TestMethod]
-        public void TestRandomisingAlgorythm()
+        public void TestRandomisingAlgorithm()
         {
             var moqRand = new Mock<IRandom>(MockBehavior.Strict);
             var rnd = new Random();
@@ -119,19 +119,20 @@ namespace BlowTrialUnitTests
                     }
                     int unusedPermutations = (int)permutations - ocurrences.Count;
                     var cc = ocurrences.CountOfCounts();
+                    cc[0] = unusedPermutations;
+                    var mean = (double)cc.Sum(kv=>kv.Key*kv.Value)/permutations;
+                    var variance = (double)cc.Sum(kv=>Math.Pow(kv.Key - mean,2)*kv.Value)/permutations;
+                    Console.WriteLine("mean: {0} variance: {1}", mean, variance);
                     if (unusedPermutations > 0)
                     {
-                        //not sure about this, but may step away from bernouli distributions
-                        double p0 = bin.Probability(0);
-                        string msg = String.Format("{0} other permutations were never used, p {1:N4} that {0} elements would not ",
+                        //double p0 = MathNet.Numerics.Distributions.Binomial.PMF(unusedPermutations / permutations, (int)permutations * sameBlockRpt, 0);
+                        double lambda = sameBlockRpt/permutations;
+                        double p0 = MathNet.Numerics.Distributions.Poisson.PMF(lambda,0);
+                        double z = (unusedPermutations/sameBlockRpt-p0)/Math.Sqrt(lambda);
+                        string msg = String.Format("{0} other permutations were never used, p {1:N4}",
                             unusedPermutations,
                             p0);
                         Console.WriteLine(msg);
-                        if (p0 < accceptableP)
-                        {
-                            assertMessage = msg;
-                        }
-                        cc[0] = unusedPermutations;
                     }
                     
                     /*

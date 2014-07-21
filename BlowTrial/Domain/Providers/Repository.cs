@@ -20,6 +20,7 @@ using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Migrations;
 using BlowTrial.Infrastructure.Extensions;
 using System.Data.SqlServerCe;
+using System.Collections.ObjectModel;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -80,12 +81,12 @@ namespace BlowTrial.Domain.Providers
             get;
             set;
         }
-
-        public DbQuery<Vaccine> Vaccines
+        List<Vaccine> _vaccines;
+        public IEnumerable<Vaccine> Vaccines
         {
             get
             {
-                return _dbContext.Vaccines.AsNoTracking();
+                return _vaccines ?? (_vaccines = _dbContext.Vaccines.AsNoTracking().ToList());
             }
         }
         public DbQuery<Participant> Participants
@@ -195,7 +196,8 @@ namespace BlowTrial.Domain.Providers
                 RegisteringInvestigator = System.Threading.Thread.CurrentPrincipal.Identity.Name,
                 CentreId = centreId,
                 WasEnvelopeRandomised = envelopeNumber.HasValue,
-                AppVersionAtEnrollment = App.CurrentAppVersion
+                AppVersionAtEnrollment = App.CurrentAppVersion,
+                VaccinesAdministered = new List<VaccineAdministered>()
             };
             if (multipleSiblingId.HasValue)
             {
@@ -238,7 +240,7 @@ namespace BlowTrial.Domain.Providers
                         {
                             Id = envelope.BlockNumber, 
                             GroupRepeats = (byte)(envelope.BlockSize/2), 
-                            AllocationGroup = AllocationGroups.IndiaTwoArm, 
+                            AllocationGroup = AllocationGroups.India2Arm, 
                             RandomisationCategory = envelope.RandomisationCategory
                         });
                     }
@@ -504,17 +506,30 @@ namespace BlowTrial.Domain.Providers
 
         void AddOrUpdateVaccinesAdministered(int participantId, IEnumerable<VaccineAdministered> givenParticipantVaccines)
         {
-            if (givenParticipantVaccines.GroupBy(va=>va.VaccineId).Any(g=>g.Count()>1))
+            HashSet<int> vaccineIds = new HashSet<int>();
+            foreach (var v in givenParticipantVaccines)
             {
-                throw new ArgumentException("Repeat vaccines for same participant");
-            }
-            if (givenParticipantVaccines.Any(va=>va.ParticipantId != 0 && va.ParticipantId !=participantId))
-            {
-                throw new ArgumentException("Participant Id differs from vaccine.ParticipantId");
+
+                if(v.ParticipantId != participantId)
+                {
+                    throw new ArgumentException("Participant Id differs from vaccine.ParticipantId");
+                }
+                if (v.ParticipantId == 0)
+                {
+                    v.ParticipantId = participantId;
+                }
+                if(v.VaccineId==0)
+                {
+                    throw new InvalidOperationException("Attempted to add VaccineAdministered with vaccine Id 0");
+                }
+                if(!vaccineIds.Add(v.VaccineId))
+                {
+                    throw new InvalidOperationException("Attempted to add VaccineAdministered with repeat vaccine Id");
+                }
             }
             var includedVaccineAdministeredIds = (from v in givenParticipantVaccines
                                                   where v.Id != 0
-                                                  select v.Id).ToList();
+                                                  select v.Id);
             var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
                                                 where v.ParticipantId == participantId && !includedVaccineAdministeredIds.Contains(v.Id)
                                                 select v.Id).ToList();
@@ -529,7 +544,7 @@ namespace BlowTrial.Domain.Providers
             var newVaccines = givenParticipantVaccines.ToLookup(va => va.Id == 0);
             if (newVaccines.Contains(false))
             {
-                ((DbContext)_dbContext).AttachAndMarkModified(newVaccines[false].ToArray());
+                ((DbContext)_dbContext).AttachAndMarkModified(newVaccines[false]);
             }
             if (newVaccines.Contains(true))
             {
@@ -537,9 +552,8 @@ namespace BlowTrial.Domain.Providers
                                      where p.Id == participantId
                                      select p.CentreId).First();
                 int nextId = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);
-                foreach (var v in givenParticipantVaccines)
+                foreach (var v in newVaccines[true])
                 {
-                    v.ParticipantId = participantId;
                     v.Id = nextId++;
                     _dbContext.VaccinesAdministered.Add(v);
                 }
@@ -548,8 +562,13 @@ namespace BlowTrial.Domain.Providers
         public void Add(Vaccine newVaccine)
         {
             newVaccine.Id = GetNextId(_dbContext.Vaccines, LocalStudyCentres.First().Id);
+            if (newVaccine.Id <= DataContextInitialiser.MaxReservedVaccineId)
+            {
+                newVaccine.Id = DataContextInitialiser.MaxReservedVaccineId + 1;
+            }
             _dbContext.Vaccines.Add(newVaccine);
             _dbContext.SaveChanges(true);
+            _vaccines.Add(newVaccine);
         }
         public void Update(Participant patient)
         {

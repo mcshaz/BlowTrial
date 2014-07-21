@@ -634,7 +634,7 @@ namespace BlowTrial.ViewModel
             {
                 if (_allVaccinesAvailable == null)
                 {
-                    var allVaccines = _repository.Vaccines.ToList()
+                    var allVaccines = _repository.Vaccines
                         .Select(v=>new VaccineViewModel(v)).ToList();
                     allVaccines.Insert(0, new VaccineViewModel(null));
                     _allVaccinesAvailable = new ObservableCollection<VaccineViewModel>(allVaccines);
@@ -716,9 +716,9 @@ namespace BlowTrial.ViewModel
                 VaccineVMsAdministered.CollectionChanged += VaccinesAdministered_CollectionChanged;
             }
 
-            foreach (VaccineAdministeredModel model in ParticipantProgressModel.VaccineModelsAdministered)
+            foreach (VaccineAdministeredModel vam in ParticipantProgressModel.VaccineModelsAdministered)
             {
-                VaccineAdministeredViewModel vm = new VaccineAdministeredViewModel (model, AllVaccinesAvailable);
+                VaccineAdministeredViewModel vm = new VaccineAdministeredViewModel (vam, AllVaccinesAvailable);
                 VaccineVMsAdministered.Add(vm);
             }
             VaccineVMsAdministered.Add(NewVaccineAdministeredViewModel());
@@ -750,7 +750,7 @@ namespace BlowTrial.ViewModel
                         if (item.VaccineGiven != null)
                         {
                             AllVaccinesAvailable.First(a => a.Vaccine == item.VaccineGiven).IsGivenToThisPatient = false;
-                            if (item.VaccineGiven.IsBcg)
+                            if (item.IsBcg)
                             {
                                 NotifyPropertyChanged("DisplayBcgAdverse", "BcgAdverse");
                             }
@@ -811,7 +811,8 @@ namespace BlowTrial.ViewModel
                             {
                                 Id = v.Id,
                                 AdministeredAt = v.AdministeredAtDateTime.Value,
-                                VaccineId = v.VaccineGiven.Id
+                                VaccineId = v.VaccineId,
+                                ParticipantId = Id
                             })
                         :null;
             if (IsParticipantModelChanged || IsVaccineAdminChanged)
@@ -839,7 +840,7 @@ namespace BlowTrial.ViewModel
                     {
                         if (vm.Id == 0)
                         {
-                            vm.Id = vas.First(v => v.VaccineId == vm.VaccineGiven.Id).Id;
+                            vm.Id = vas.First(v => v.VaccineId == vm.VaccineId).Id;
                         }
                     }
                 }

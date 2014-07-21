@@ -165,7 +165,7 @@ namespace BlowTrial.Helpers
                 SetBackupDetails(a, intervalMins, isToBackupToCloud, isEnvelopeRandomising);
             }
         }
-        internal static void SetBackupDetails(IAppData appDataProvider, int intervalMins, bool isTobackupToCloud, bool isEnvelopeRandomising, AllocationGroups defaultAllocation = AllocationGroups.IndiaTwoArm)
+        internal static void SetBackupDetails(IAppData appDataProvider, int intervalMins, bool isTobackupToCloud, bool isEnvelopeRandomising, AllocationGroups defaultAllocation = AllocationGroups.India2Arm)
         {
             var data = GetBackupDetails(appDataProvider);
             if (data.BackupData == null)

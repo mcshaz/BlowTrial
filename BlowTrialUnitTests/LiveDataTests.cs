@@ -102,28 +102,52 @@ namespace BlowTrialUnitTests
                         where p.Id<20000
                         select p.Id).Max();
             }
-            
+            var ballanceDictionary = Enum.GetValues(typeof(RandomisationStrata)).Cast<RandomisationStrata>().ToDictionary(r=>r, r=>false);
             using (var repo = new Repository(typeof(TrialDataContext)))
             {
-                //ratio 2:9:18
-                for (int i=1;i <2000;i++)
+                //ratio 2:9:18-19
+                const int dummyPtCount = 2500;
+                const int smallWtCount = dummyPtCount * 2 / 29;
+                const int midWtCount = smallWtCount + dummyPtCount * 9 / 29;
+                var rnd = new Random();
+                for (int i = 1; i < dummyPtCount; i++)
                 {
                     string dummyInfo = "dummyInfo" + i;
                     int weight;
-                    if (i < 137) { weight = 1000-i; }
-                    else if (i < 620) { weight = 1500 - i / 2; }
-                    else { weight = 2000 - i / 5; }
-                    repo.AddParticipant(dummyInfo, dummyInfo, dummyInfo, weight, 32, yesterday,
-                        "", "1111111", i%2==0, true, now, 1, null, null);
+                    bool isMale = i%2==0;
+                    if (i < smallWtCount) { weight = rnd.Next(400,999); }
+                    else if (i < midWtCount) { weight = rnd.Next(1001,1499); }
+                    else { weight = rnd.Next(1501,1999); }
+                    var p = repo.AddParticipant(dummyInfo, dummyInfo, dummyInfo, weight, 32, yesterday,
+                        "", "1111111", isMale, true, now, 1, null, null);
+                    Assert.AreNotEqual(RandomisationArm.NotSet,p.TrialArm);
+                    RandomisationStrata cat;
+                    if (weight<1000)
+                    {
+                        cat = RandomisationStrata.SmallestWeightMale;
+                    }
+                    else if(weight>=1500)
+                    {
+                        cat = RandomisationStrata.TopWeightMale;
+                    }
+                    else
+                    {
+                        cat = RandomisationStrata.MidWeightMale;
+                    }
+                    
+                    if (!isMale) { cat = (RandomisationStrata)((int)cat + 1); }
+                    Assert.AreEqual(cat, p.Block.RandomisationCategory);
                 }
             }
             using (var context = new TrialDataContext())
             {
-                var allAllocations = context.Participants.GroupBy(p => p.TrialArm).ToDictionary(p => p.Key, p => p.Count());
+                var allAllocations = (from p in context.Participants
+                                     where p.CentreId == 1
+                                     group p by p.TrialArm).ToDictionary(p => p.Key, p => p.Count());
                 int total = allAllocations.Values.Sum();
-                const double tolerance = 0.01;
-                const double thirdMin = 1 / 3 - tolerance;
-                const double thirdMax = 1 / 3 + tolerance;
+                const double tolerance = 0.015;
+                const double thirdMin = 1.0 / 3 - tolerance;
+                const double thirdMax = 1.0 / 3 + tolerance;
                 foreach (var kv in allAllocations)
                 {
                     double ratio = (double)kv.Value/total;
@@ -131,9 +155,11 @@ namespace BlowTrialUnitTests
                     Console.WriteLine(ratio);
                     Assert.IsTrue(thirdMin <= ratio && ratio <= thirdMax, "ratio shoule be 1/3 " + msg);
                 }
-                foreach (var kv in context.BalancedAllocations.ToDictionary(b=>b.RandomisationCategory, b=>b.IsEqualised))
+                foreach (var e in (from b in context.BalancedAllocations
+                                 where b.StudyCentreId < 20000
+                                 select b))
                 {
-                    Assert.IsTrue(kv.Value, "Balanced Allocations not set to true for {0}", kv.Value);
+                    Assert.IsTrue(e.IsEqualised, "Balanced Allocations not set to true for Id:{0} (randomisationCat:{1})", e.Id, e.RandomisationCategory);
                 }
                 //teardown
                 context.Database.ExecuteSqlCommand(String.Format("delete from Participants where Id > {0} and Id <20000", maxId));

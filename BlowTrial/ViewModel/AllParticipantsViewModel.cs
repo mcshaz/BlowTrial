@@ -2,7 +2,6 @@
 using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
-using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Converters;
 using BlowTrial.Infrastructure.CustomSorters;
@@ -19,8 +18,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Windows.Data;
-using System.Windows.Threading;
-using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.ViewModel
 {
@@ -65,25 +62,27 @@ namespace BlowTrial.ViewModel
             var participantVMs = Array.ConvertAll(_repository.Participants.ToArray(),
                 new Converter<Participant, ParticipantListItemViewModel>(p => new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(p))));
              * */
-            var parts = _repository.Participants.Include("VaccinesAdministered") //.Include("VaccinesAdministered.VaccineGiven")
-                         .Select(GetParticipantBaseMapExpression()).ToList();
             var now = DateTime.Now;
             var dt28prior = now.AddDays(-28);
             var dataRequired = ParticipantBaseModel.GetDataRequiredExpression(dt28prior).Compile();
-            ParticipantListItemViewModel[] participantVMs = new ParticipantListItemViewModel[parts.Count];
-            for (int i=0; i<participantVMs.Length; i++)
+
+            List<ParticipantListItemViewModel> participantVMs = new List<ParticipantListItemViewModel>(_repository.Participants.Count());
+            foreach (var p in _repository.Participants.Include("VaccinesAdministered").OrderByDescending(dp=>dp.Id) 
+                         .Select(GetParticipantBaseMapExpression()))
             {
-                var p = parts[participantVMs.Length - i - 1];
                 p.DataRequired = dataRequired(p);
                 p.StudyCentre = _repository.FindStudyCentre(p.CentreId);
-                (participantVMs[i] = new ParticipantListItemViewModel(p)).PropertyChanged += OnListItemChanged;
+                var newVm = new ParticipantListItemViewModel(p);
+                newVm.PropertyChanged += OnListItemChanged;
+                participantVMs.Add(newVm);
             }
 
             _ageUpdater = new AgeUpdatingService(participantVMs);
             _ageUpdater.OnAgeIncrement += OnNewAge;
 
             AllParticipants = new ListCollectionView(participantVMs);
-            //AllParticipants.CustomSort = new ParticipantIdSortDesc();//put in reverse to speed things up, this will merely put new entries at the top
+            AllParticipants.CustomSort = new ParticipantIdSortDesc();
+            //put in reverse to speed things up, this will merely put new entries at the top
 
 
             //creating dispatchertimer so that screen is rendered before setting up the birthtime updating algorithms

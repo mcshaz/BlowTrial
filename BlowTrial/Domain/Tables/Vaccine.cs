@@ -15,14 +15,6 @@ namespace BlowTrial.Domain.Tables
         [StringLength(16)]
         public string Name { get; set; }
         public DateTime RecordLastModified { get; set; }
-
-        public bool IsBcg
-        {
-            get
-            {
-                return (this.Id == DataContextInitialiser.RussianBcg.Id || this.Id == DataContextInitialiser.DanishBcg.Id);
-            }
-        }
     }
     [Table(VaccineAdminTableName)]
     public class VaccineAdministered : ISharedRecord

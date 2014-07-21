@@ -858,4 +858,7 @@
   <data name="ParticipantModel_Error_BcgNeitherDischOrDead" xml:space="preserve">
     <value>The patient can only have a value for BCG papule at death, discharge if one of these events has occurred</value>
   </data>
+  <data name="Vaccine_BcgBrazil" xml:space="preserve">
+    <value>BCG-Moreau(Brazil)</value>
+  </data>
 </root>

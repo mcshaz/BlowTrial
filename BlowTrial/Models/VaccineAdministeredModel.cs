@@ -17,14 +17,13 @@ namespace BlowTrial.Models
         #region Constructor
         public VaccineAdministeredModel()
         {
-            _validatedProperties = new string[] { "AdministeredAtDate", "AdministeredAtTime","VaccineGiven" };
+            _validatedProperties = new string[] { "VaccineGiven" ,"AdministeredAtDate", "AdministeredAtTime"};
         }
         #endregion
 
         #region fields
         Vaccine _vaccine;
         DateTimeSplitter _administeredAtDateTime = new DateTimeSplitter();
-        private readonly int[] BcgVaccines = new int[] { DataContextInitialiser.DanishBcg.Id, DataContextInitialiser.RussianBcg.Id };
         #endregion
 
         #region Properties
@@ -65,7 +64,6 @@ namespace BlowTrial.Models
                 //DischargeDateTime = _dischargeDateTime.DateAndTime;
             }
         }
-        public int VaccineId { get; set; }
         public Vaccine VaccineGiven 
         { 
             get
@@ -75,9 +73,19 @@ namespace BlowTrial.Models
             set
             {
                 _vaccine = value;
+                if (value == null) { VaccineId = 0; }
+                else { VaccineId = value.Id; }
+             }
+        }
+        public int VaccineId{ get; set; }
+        public ParticipantProgressModel AdministeredTo { get; set; }
+        public bool IsBcg
+        {
+            get
+            {
+                return DataContextInitialiser.BcgVaccineIds.Contains(VaccineId);
             }
         }
-        public ParticipantProgressModel AdministeredTo { get; set; }
 
         #endregion
 
@@ -119,7 +127,7 @@ namespace BlowTrial.Models
             {
                 return Strings.VaccineAdministeredVM_DuplicateVaccine;
             }
-            if (BcgVaccines.Contains(this.VaccineGiven.Id) && AdministeredTo.VaccineModelsAdministered.Any(v => v.Id != this.Id && BcgVaccines.Contains(v.VaccineGiven.Id)))
+            if (DataContextInitialiser.BcgVaccineIds.Contains(this.VaccineId) && AdministeredTo.VaccineModelsAdministered.Any(v => v.Id != this.Id && DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
             {
                 return Strings.VaccineAdministeredVM_DualBcg;
             }
@@ -128,7 +136,7 @@ namespace BlowTrial.Models
         DateTimeErrorString ValidateAdministrationDateTime(DateTime? now=null)
         {
             var error = _administeredAtDateTime.ValidateNotEmpty();
-            if (VaccineGiven!=null && VaccineGiven.IsBcg)
+            if (VaccineGiven!=null && IsBcg)
             {
                 _administeredAtDateTime.ValidateIsAfter(Strings.ParticipantModel_Error_RegistrationDateTime, AdministeredTo.RegisteredAt, ref error);
             }
