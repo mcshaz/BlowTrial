@@ -220,7 +220,7 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DischargedAndKnownToHaveDied
         };
 
-        internal static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequiredExpression(DateTime? dt28Prior=null)
+        public static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequiredExpression(DateTime? dt28Prior=null)
         {
             DateTime twentyEightPrior = dt28Prior ?? DateTime.Now.AddDays(-28);
             return

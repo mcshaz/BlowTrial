@@ -55,7 +55,7 @@ namespace BlowTrial.Domain.Tables
         [StringLength(2056)]
         public string OtherCauseOfDeathDetail { get; set; }
         [ForeignKey("Block")]
-        public int? AllocationBlockId { get; set; }
+        public int AllocationBlockId { get; set; }
         public int? MultipleSiblingId { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
@@ -63,8 +63,6 @@ namespace BlowTrial.Domain.Tables
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
         public bool UserMarkedFinished { get; set; }
-        public int? BlockNumber { get; set; }
-        public int BlockSize { get; set; }
 
         public virtual AllocationBlock Block { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }

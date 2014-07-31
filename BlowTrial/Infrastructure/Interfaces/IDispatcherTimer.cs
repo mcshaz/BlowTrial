@@ -16,11 +16,12 @@ namespace BlowTrial.Infrastructure.Interfaces
     }
     public class MoqTimerEventArgs : EventArgs
     {
-        public MoqTimerEventArgs() : this(DateTime.Now)
+        public MoqTimerEventArgs(bool isClockTicking) : this(DateTime.Now, isClockTicking)
         { }
-        public MoqTimerEventArgs(DateTime startAt)
+        public MoqTimerEventArgs(DateTime startAt, bool isClockTicking)
         {
             StartAt = startAt;
+            _isClockTicking = isClockTicking;
         }
         DateTime _startAt;
         public DateTime StartAt
@@ -32,15 +33,23 @@ namespace BlowTrial.Infrastructure.Interfaces
                 _startAt = value;
             }
         }
+        readonly bool _isClockTicking;
         public DateTime LastNowCall {get; set;}
         public DateTime Now
         {
             get
             {
-                var now = DateTime.Now;
-                var returnVar = _startAt + (now - LastNowCall);
-                LastNowCall = now;
-                return returnVar;
+                if (_isClockTicking)
+                {
+                    var now = DateTime.Now;
+                    var returnVar = _startAt + (now - LastNowCall);
+                    LastNowCall = now;
+                    return returnVar;
+                }
+                else
+                {
+                    return _startAt;
+                }
             }
         }
     }

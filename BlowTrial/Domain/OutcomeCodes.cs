@@ -30,17 +30,19 @@ namespace BlowTrial.Domain.Outcomes
     }
     public enum DataRequiredOption
     {
-        DetailsMissing,
-        OutcomeRequired,
-        BcgDataRequired,
-        AwaitingOutcomeOr28,
-        Complete
+        NotSet = 0,
+        DetailsMissing = 1,
+        OutcomeRequired = 2,
+        BcgDataRequired = 3,
+        AwaitingOutcomeOr28 =4,
+        Complete = 5
     }
     public enum RandomisationArm
     {
         NotSet,
         Control,
         RussianBCG,
-        DanishBcg
+        DanishBcg,
+        MoreauBcg
     }
 }

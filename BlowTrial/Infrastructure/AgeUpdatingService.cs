@@ -15,8 +15,7 @@ namespace BlowTrial.Infrastructure
         #region fields
         readonly IDispatcherTimer _timer;
         int _nextIndex;
-        readonly List<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _participants;
-        readonly IComparer<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _comparer = new KeyComparer<TimeSpan, ParticipantListItemViewModel>();
+        readonly OrderedList<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _participants;
         readonly TimeSpan _adjustIntoFuture = TimeSpan.FromSeconds(1);
         #endregion
 
@@ -29,7 +28,7 @@ namespace BlowTrial.Infrastructure
         {
             _timer = timer;
             _timer.Tick += OnTick;
-            _participants = new List<KeyValuePair<TimeSpan, ParticipantListItemViewModel>>(participants.Count);
+            _participants = new OrderedList<KeyValuePair<TimeSpan, ParticipantListItemViewModel>>(participants.Count, new KeyComparer<TimeSpan, ParticipantListItemViewModel>());
             var now = DateTime.Now;
             for (int i=0; i<participants.Count;i++)
             {
@@ -43,9 +42,8 @@ namespace BlowTrial.Infrastructure
             
             if (_participants.Any())
             {
-                _participants.Sort(_comparer);
 
-                _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(now.TimeOfDay, null), _comparer);
+                _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(now.TimeOfDay, null));
                 if (_nextIndex < 0)
                 {
                     _nextIndex = ~_nextIndex;
@@ -161,18 +159,9 @@ namespace BlowTrial.Infrastructure
             p.AgeDays = (now - p.DateTimeBirth).Days;
             if (p.AgeDays > 28 || p.IsKnownDead == true) { return; }
             var newItem = new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(p.DateTimeBirth.TimeOfDay, p);
-            var index = _participants.BinarySearch(newItem, _comparer);
-            if (index < 0)
-            {
-                index = ~index;
-            }
-            else
-            {
-                _participants.Insert(index, newItem);
-                return;
-            }
-            _participants.Insert(index, newItem);
-
+            var index = _participants.Add(newItem);
+            while (--index>=0 && _participants[index].Key == p.DateTimeBirth.TimeOfDay) { }
+            index++;
             if (_nextIndex == index)
             {
                 if (index == 0) 

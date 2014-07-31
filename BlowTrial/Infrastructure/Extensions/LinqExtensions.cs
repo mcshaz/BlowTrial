@@ -62,17 +62,19 @@ namespace BlowTrial.Infrastructure.Extensions
 
         public static bool AllEqual<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> predicate)
         {
-            var en = source.GetEnumerator();
-            if (!en.MoveNext())
-            {
-                return true;
-            }
-            var primary = predicate(en.Current);
-            while (en.MoveNext())
-            {
-                if (!primary.Equals(predicate(en.Current)))
+            using (var en = source.GetEnumerator())
+            { 
+                if (!en.MoveNext())
                 {
-                    return false;
+                    return true;
+                }
+                var primary = predicate(en.Current);
+                while (en.MoveNext())
+                {
+                    if (!primary.Equals(predicate(en.Current)))
+                    {
+                        return false;
+                    }
                 }
             }
             return true;
@@ -97,15 +99,17 @@ namespace BlowTrial.Infrastructure.Extensions
             int removeAt=0;
             int i=0;
             List<T> returnVar = new List<T>();
-            var en = source.GetEnumerator();
-            while (en.MoveNext())
+            using (var en = source.GetEnumerator())
             {
-                if (predicate(en.Current) > max)
+                while (en.MoveNext())
                 {
-                    removeAt = i;
+                    if (predicate(en.Current) > max)
+                    {
+                        removeAt = i;
+                    }
+                    returnVar.Add(en.Current);
+                    i++;
                 }
-                returnVar.Add(en.Current);
-                i++;
             }
             returnVar.RemoveAt(removeAt);
             return returnVar;

@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.6.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -184,10 +184,15 @@
     <Compile Include="Infrastructure\Extensions\IQueryableExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
     <Compile Include="Infrastructure\Interfaces\IDispatcherTimer.cs" />
+    <Compile Include="Infrastructure\OrderedList.cs" />
     <Compile Include="Infrastructure\Randomising\IRandom.cs" />
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\UtilityClasses.cs" />
     <Compile Include="Infrastructure\ThreadHelpers.cs" />
+    <Compile Include="Migrations\TrialData\201407280249147_AllocationBlockIdNotNull.cs" />
+    <Compile Include="Migrations\TrialData\201407280249147_AllocationBlockIdNotNull.Designer.cs">
+      <DependentUpon>201407280249147_AllocationBlockIdNotNull.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\TrialData\201407032244595_MultipleAllocations.cs" />
     <Compile Include="Migrations\TrialData\201407032244595_MultipleAllocations.Designer.cs">
       <DependentUpon>201407032244595_MultipleAllocations.cs</DependentUpon>
@@ -270,7 +275,7 @@
     <Compile Include="ViewModel\VaccineViewModels.cs" />
     <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\CloudDirectoryViewModel.cs" />
-    <Compile Include="ViewModel\WizardViewModels\DataSummaryViewModel.cs" />
+    <Compile Include="ViewModel\DataSummaryViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\GetAppSettingsViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\RandomisedMessagesViewModel.cs" />
     <Compile Include="ViewModel\WizardViewModels\StudySitesViewModel.cs" />
@@ -530,6 +535,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="Migrations\TrialData\201407280249147_AllocationBlockIdNotNull.resx">
+      <DependentUpon>201407280249147_AllocationBlockIdNotNull.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\TrialData\201407032244595_MultipleAllocations.resx">
       <DependentUpon>201407032244595_MultipleAllocations.cs</DependentUpon>
     </EmbeddedResource>

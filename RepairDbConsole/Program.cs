@@ -17,7 +17,7 @@ namespace RepairDbConsole
         static void Main(string[] args)
         {
             var cmd = Command.GetCommand(args);
-            Dictionary<string, string[]> argList = cmd.Instructions.ToDictionary(i => i.OptionName, i => i.OptionValues);
+            Dictionary<string, string[]> argList = cmd.Instructions.ToDictionary(i => i.OptionName ?? "a", i => i.OptionValues);
             string directory = (argList.ContainsKey("directory"))
                 ?string.Join(" ", argList["directory"])
                 :null;
@@ -32,6 +32,9 @@ namespace RepairDbConsole
                 case "compareparticipants":
                     var files = argList["files"];
                     Compare2DBParticipantId(directory + '\\' + files[0], directory + '\\' + files[1]);
+                    break;
+                case "comparenames":
+                    CompareParticipantId.CompareDb(args[1], args[2]);
                     break;
                 default:
                     Console.WriteLine("Command not found");

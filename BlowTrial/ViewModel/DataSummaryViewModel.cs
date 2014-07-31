@@ -1,4 +1,5 @@
-﻿using BlowTrial.Infrastructure.Interfaces;
+﻿using BlowTrial.Domain.Outcomes;
+using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
@@ -20,9 +21,12 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
         {
-            //too hard - can alter this later 
-            ParticipantData = _repository.GetParticipantSummary();
-            NotifyPropertyChanged("ParticipantData");
+            var move = ParticipantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm,ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
+            if (move.OldRow != move.NewRow)
+            {
+                NotifyPropertyChanged("ParticipantData");
+            }
+            
         }
 
         void _repository_ScreenedPatientAdded(object sender, Domain.Providers.ScreenedPatientEventArgs e)
@@ -57,9 +61,8 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
         {
-            ParticipantData.TrialArmCounts[e.Participant.TrialArm]++;
-            var dataRequired = ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant);
-            ParticipantData.DataRequiredCount[dataRequired]++;
+            ParticipantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
+            
             NotifyPropertyChanged("ParticipantData");
         }
         public ParticipantsSummary ParticipantData { get; private set; }

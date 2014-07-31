@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BlowTrial.Infrastructure.Interfaces
 {
-    interface IParticipant
+    public interface IParticipant
     {
         OutcomeAt28DaysOption OutcomeAt28Days {get;}
         DateTime DateTimeBirth {get;}

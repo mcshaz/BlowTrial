@@ -62,7 +62,7 @@ namespace BlowTrialUnitTests
             mockTimer.SetupProperty(m => m.Interval);
             mockTimer.Setup(m => m.Start());
             mockTimer.Setup(m => m.Stop());
-            var moqArgs = new  MoqTimerEventArgs();
+            var moqArgs = new  MoqTimerEventArgs(true);
             var participants = GetParticipants(moqArgs, birthDateTimes);
             var ageService = new AgeUpdatingService(participants,mockTimer.Object);
             mockTimer.Verify(m => m.Start(), Times.Never);
@@ -120,7 +120,7 @@ namespace BlowTrialUnitTests
                 throw new ArgumentException("must include at least 2 birthDateTimes");
             }
 
-            var moqArgs = new MoqTimerEventArgs();
+            var moqArgs = new MoqTimerEventArgs(true); 
             var participants = GetParticipants(moqArgs, birthDateTimes);
 
             var expectedTimesFromNow = TimesFromNow(birthDateTimes, moqArgs.StartAt);
@@ -166,19 +166,20 @@ namespace BlowTrialUnitTests
             mockTimer.Raise(m => m.Tick += null, moqArgs);
 
             Console.WriteLine("Adding new participants");
+            moqArgs.StartAt = DateTime.Now;
             foreach (var addedInterval in (new int[]{10,-10}).Select(i=>TimeSpan.FromSeconds(i)))
             {
                 participants.Add(new ParticipantListItemViewModel(
                         new ParticipantBaseModel
                         {
                             Id = participants.Count + 1,
-                            DateTimeBirth = moqArgs.StartAt - TimeSpan.FromDays(1)
+                            DateTimeBirth = moqArgs.StartAt - TimeSpan.FromDays(1) + addedInterval
                         }));
                 ageService.AddParticipant(participants[participants.Count-1]);
             }
             requiresInterval = true;
-
-            moqArgs.StartAt = DateTime.Now;
+            moqArgs.StartAt += TimeSpan.FromSeconds(10);
+            
             expectedTimesFromNow = TimesFromNow(from p in participants where p.AgeDays <= 28 select p.DateTimeBirth, moqArgs.StartAt);
 
             expectedTimesFromNow.AggregatePairSelect(new TimeSpan(),(prev, cur) => cur - prev)
@@ -209,7 +210,7 @@ namespace BlowTrialUnitTests
         [TestMethod]
         public void TestAgeUpdatingStartOnAdd()
         {
-            var moqArgs = new MoqTimerEventArgs();
+            var moqArgs = new MoqTimerEventArgs(true);
             var mockTimer = new Mock<IDispatcherTimer>(MockBehavior.Strict);
             mockTimer.SetupProperty(m => m.Interval);
             mockTimer.Setup(m => m.Start()).Verifiable();

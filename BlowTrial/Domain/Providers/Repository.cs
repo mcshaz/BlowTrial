@@ -760,11 +760,14 @@ namespace BlowTrial.Domain.Providers
         }
         public ParticipantsSummary GetParticipantSummary()
         {
-            return new ParticipantsSummary
-            {
-                TrialArmCounts = _dbContext.Participants.GroupBy(p=>p.TrialArm).ToDictionary(k=>k.Key, v=>v.Count()),
-                DataRequiredCount = _dbContext.Participants.GroupBy(ParticipantBaseModel.GetDataRequiredExpression()).ToDictionary(k => k.Key, v => v.Count())
-            };
+            var dataRqd = ParticipantBaseModel.GetDataRequiredExpression();
+            return new ParticipantsSummary(from p in _dbContext.Participants.AsExpandable()
+                                           select new ParticipantStage 
+                                           { 
+                                               Id = p.Id, 
+                                               Arm = p.TrialArm, 
+                                               DataRequired=dataRqd.Invoke(p)
+                                           });
         }
         public ScreenedPatientsSummary GetScreenedPatientSummary()
         {
