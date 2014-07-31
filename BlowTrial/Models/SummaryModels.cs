@@ -1,5 +1,6 @@
 ﻿using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Randomising;
 using System;
 using System.Collections.Generic;
@@ -11,76 +12,76 @@ namespace BlowTrial.Models
     [Serializable]
     public class ParticipantsSummary
     {
-        ParticipantsSummary(AllocationGroups group)
+        public ParticipantsSummary(IEnumerable<IGrouping<ParticipantDataStage, int>> participantSummaryData)
         {
-            var arms = ArmData.GetRatio(group).Ratios.Keys;
-            ColHeaders = new RandomisationArm[arms.Count];
-            arms.CopyTo(ColHeaders, 0);
-            RowHeaders = (DataRequiredOption[])Enum.GetValues(typeof(DataRequiredOption));
-            Participants = new List<int>[RowHeaders.Length][];
-            for (int i=0;i<RowHeaders.Length;i++)
+            RowHeaders = Enum.GetValues(typeof(DataRequiredOption)).Cast<DataRequiredOption>().Skip(1).ToArray();
+            const int maxArmCount = 3;
+            ColHeaders = new List<RandomisationArm>(maxArmCount);
+            Participants = new List<OrderedList<int>>[RowHeaders.Length];
+            
+            for (int i = 0; i < Participants.Length;i++ )
             {
-                Participants[i] = new List<int>[ColHeaders.Length];
-                for(int j=0;j<ColHeaders.Length;j++)
-                {
-                    Participants[i][j] = new List<int>();
-                }
+                Participants[i] = new List<OrderedList<int>>(maxArmCount);
+            }
+            foreach (var g in participantSummaryData)
+            {
+                Participants[RowIndex(g.Key.DataRequired)][ColIndex(g.Key.Arm)] = new OrderedList<int>(g);
             }
         }
-        public ParticipantsSummary(IEnumerable<ParticipantStage> participantSummaryData) 
+        public ParticipantsSummary(IEnumerable<ParticipantStage> participantSummaryData)
+            : this(participantSummaryData.GroupBy(p => new ParticipantDataStage { Arm = p.Arm, DataRequired = p.DataRequired },p=>p.Id))
         {
-            AddParticipants(participantSummaryData);
         }
 
-        void AddParticipants(IEnumerable<ParticipantStage> participantSummaryData)
-        {
-            foreach (var sd in participantSummaryData)
-            {
-                int row = Array.IndexOf(RowHeaders, sd.DataRequired);
-                int col = Array.IndexOf(ColHeaders, sd.Arm);
-                Participants[row][col].Add(sd.Id);
-            }
-        }
         public void AddParticipant(int participantId, RandomisationArm arm, DataRequiredOption dataRequired)
         {
-            AddParticipants(new ParticipantStage[] { new ParticipantStage { Id = participantId, Arm = arm, DataRequired = dataRequired } } );
+            Participants[RowIndex(dataRequired)][ColIndex(arm)].Add(participantId);
         }
 
         //returns true if the given participantId requires assignment to a new DataRequiredOption, otherwise returns false.
         public RowMove AlterParticipant(int participantId, RandomisationArm arm, DataRequiredOption dataRequired)
         {
-            var oldPos = Coordinates(participantId, arm);
-            if (oldPos==null)
+            int col = ColIndex(arm);
+            int row = 0;
+            var returnVar = new RowMove
+            { 
+                OldRow = Participants.Select(r=>new { rowIndex = row++, cellData = r[col]})
+                                        .First(c=>c.cellData.Contains(participantId))
+                                        .rowIndex,
+                NewRow = RowIndex(dataRequired)
+            };
+            if (returnVar.OldRow != returnVar.NewRow)
             {
-                throw new KeyNotFoundException(string.Format("The participantId: {0} could not be found. Use Add Participant if the participant has not previously been registered", participantId));
+                Participants[returnVar.OldRow][col].Remove(participantId);
+                Participants[returnVar.NewRow][col].Add(participantId);
             }
-            int newX = Array.IndexOf(RowHeaders, dataRequired);
-            if (newX == oldPos.x) { return new RowMove(newX); }
-            Participants[oldPos.x][oldPos.y].RemoveAt(oldPos.z);
-            Participants[newX][oldPos.y].Add(participantId);
-            return new RowMove(oldPos.x, newX);
+            return returnVar;
         }
 
-        ThreeDPoint Coordinates(int participantId, RandomisationArm arm)
+        static int RowIndex(DataRequiredOption dataRqd)
         {
-            int y = Array.IndexOf(ColHeaders, arm);
-            for (int x = 0; x < RowHeaders.Length; x++)
-            {
-                int indx = Participants[x][y].IndexOf(participantId);
-                if (indx!=-1)
-                {
-                    return new ThreeDPoint(x, y,indx);
-                }
-            }
-            return null;
+            return (int)dataRqd - 1;
         }
-        
-        public RandomisationArm[] ColHeaders{ get;private set; }
+        int ColIndex(RandomisationArm arm)
+        {
+            int returnVar = ColHeaders.IndexOf(arm);
+            if (returnVar==-1)
+            {
+                ColHeaders.Add(arm);
+                foreach (var row in Participants)
+                {
+                    row.Add(new OrderedList<int>());
+                }
+                return ColHeaders.Count - 1;
+            }
+            return returnVar;
+        }
+        public List<RandomisationArm> ColHeaders{ get;private set; }
         public DataRequiredOption[] RowHeaders { get;private set; }
         /// <summary>
         /// [rows(datarequired)][columns(randomisationArm)][participantIds]
         /// </summary>
-        public List<int>[][] Participants { get; private set; }
+        public List<OrderedList<int>>[] Participants { get; private set; }
         
     }
 
@@ -92,40 +93,30 @@ namespace BlowTrial.Models
         public DataRequiredOption DataRequired { get;  set; }
     }
     [Serializable]
-    public struct ParticipantDataStage
+    public class ParticipantDataStage
     {
+        public ParticipantDataStage(){}
         public ParticipantDataStage(RandomisationArm arm, DataRequiredOption dataRequired)
         {
-            _arm = arm;
-            _dataRequired = dataRequired;
+            Arm = arm;
+            DataRequired = dataRequired;
         }
-        RandomisationArm _arm;
-        DataRequiredOption _dataRequired;
-        public RandomisationArm Arm { get { return _arm; } }
-        public DataRequiredOption DataRequired { get { return _dataRequired; } }
+
+        public RandomisationArm Arm { get; set;}
+        public DataRequiredOption DataRequired { get; set; }
         public override int GetHashCode()
         {
             return (int)Arm ^ (int)DataRequired;
         }
         public override bool Equals(System.Object obj)
         {
-            if (obj is ParticipantDataStage)
-            {
-                ParticipantDataStage p = (ParticipantDataStage)obj;
-                return Arm == p.Arm && DataRequired == p.DataRequired;
-            }
-            else
-            {
-                return false;
-            }
-            /*
             // If parameter is null return false.
             if (obj == null)
             {
                 return false;
             }
 
-            // If parameter cannot be cast to Point return false.
+            // If parameter cannot be cast to ParticipantDataStage return false.
             ParticipantDataStage p = obj as ParticipantDataStage;
             if ((System.Object)p == null)
             {
@@ -134,21 +125,20 @@ namespace BlowTrial.Models
 
             // Return true if the fields match:
             return (Arm == p.Arm) && (DataRequired == p.DataRequired);
-            */
         }
 
         public bool Equals(ParticipantDataStage p)
         {
             // If parameter is null return false:
-            //if ((object)p == null)
-            //{
-            //    return false;
-            //}
+            if ((object)p == null)
+            {
+                return false;
+            }
 
             // Return true if the fields match:
             return (Arm == p.Arm) && (DataRequired == p.DataRequired);
         }
-
+        /*
         public static bool operator ==(ParticipantDataStage a, ParticipantDataStage b)
         {
             // If both are null, or both are same instance, return true.
@@ -158,10 +148,10 @@ namespace BlowTrial.Models
             }
 
             // If one is null, but not both, return false.
-            //if (((object)a == null) || ((object)b == null))
-            //{
-            //    return false;
-            //}
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
 
             // Return true if the fields match:
             return a.Arm == b.Arm && a.DataRequired == b.DataRequired;
@@ -171,11 +161,14 @@ namespace BlowTrial.Models
         {
             return !(a == b);
         }
+         * */
     }
     [Serializable]
     public class RowMove
     {
-        public readonly int OldRow, NewRow;
+        public int OldRow { get; set; }
+        public int NewRow { get; set; }
+        public RowMove() { }
         public RowMove(int sameRow)
         {
             OldRow = NewRow = sameRow;
