@@ -8,39 +8,31 @@
   VerticalAlignment="Top"
   >
     <UserControl.Resources>
+        <!--
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
+                <ResourceDictionary>
+                    <DataTemplate x:Key="CellTemplate">
+                        <ContentControl>
+                            <TextBlock Text="{Binding Path=Count}" ToolTip="{Binding Path=IdList}" />
+                        </ContentControl>
+                    </DataTemplate>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        -->
         <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
     </UserControl.Resources>
     <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" >
         <StackPanel Orientation="Vertical">
-            <GroupBox Header="Participants" DataContext="{Binding Path=ParticipantData}">
-                <Grid Margin="0,2,5,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="6" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition  />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Total:" />
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Path=TotalCount, Mode=OneWay}" />
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Intervention Arm:" />
-                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Path=InterventionArmCount, Mode=OneWay}" />
-                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Path=InterventionArmFrac, Mode=OneWay, StringFormat='{}({0:p})'}" />
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Control Arm" />
-                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Path=ControlArmCount, Mode=OneWay}" />
-                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Path=ControlArmFrac, Mode=OneWay, StringFormat='{}({0:p})'}" />
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Completed Records" />
-                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Path=CompletedRecordCount, Mode=OneWay}" />
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Incomplete Records" />
-                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Path=PendingRecordCount, Mode=OneWay}" />
-                </Grid>
+            <GroupBox Header="Participants" DataContext="{Binding Path=ParticipantData, Mode=OneWay}">
+                <DataGrid x:Name="Participants" AutoGenerateColumns="False" DataContextChanged="Participants_DataContextChanged" 
+                          IsReadOnly="True" ItemsSource="{Binding Path=Row,Mode=OneWay}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Path=RowHeader,Mode=OneWay}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </GroupBox>
             <GroupBox Header="Screened Patients" DataContext="{Binding Path=ScreenedPatientData}">
                 <Grid Margin="0,2,5,0">

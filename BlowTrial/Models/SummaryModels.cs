@@ -33,9 +33,11 @@ namespace BlowTrial.Models
         {
         }
 
-        public void AddParticipant(int participantId, RandomisationArm arm, DataRequiredOption dataRequired)
+        public TwoDPoint AddParticipant(int participantId, RandomisationArm arm, DataRequiredOption dataRequired)
         {
-            Participants[RowIndex(dataRequired)][ColIndex(arm)].Add(participantId);
+            var returnVar = new TwoDPoint (RowIndex(dataRequired), ColIndex(arm));
+            Participants[returnVar.x][returnVar.y].Add(participantId);
+            return returnVar;
         }
 
         //returns true if the given participantId requires assignment to a new DataRequiredOption, otherwise returns false.
@@ -62,7 +64,7 @@ namespace BlowTrial.Models
         {
             return (int)dataRqd - 1;
         }
-        int ColIndex(RandomisationArm arm)
+        public int ColIndex(RandomisationArm arm)
         {
             int returnVar = ColHeaders.IndexOf(arm);
             if (returnVar==-1)

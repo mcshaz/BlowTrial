@@ -3,8 +3,10 @@ using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.ViewModel
 {
@@ -12,21 +14,12 @@ namespace BlowTrial.ViewModel
     {
         public DataSummaryViewModel(IRepository repository) : base(repository)
         {
-            ParticipantData = _repository.GetParticipantSummary();
+            _participantData = _repository.GetParticipantSummary();
+            ParticipantData = new ParticipantSummaryViewModel(_participantData);
             ScreenedPatientData = _repository.GetScreenedPatientSummary();
             _repository.ParticipantAdded += _repository_ParticipantAdded;
             _repository.ParticipantUpdated += _repository_ParticipantUpdated;
             _repository.ScreenedPatientAdded += _repository_ScreenedPatientAdded;
-        }
-
-        void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
-        {
-            var move = ParticipantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm,ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
-            if (move.OldRow != move.NewRow)
-            {
-                NotifyPropertyChanged("ParticipantData");
-            }
-            
         }
 
         void _repository_ScreenedPatientAdded(object sender, Domain.Providers.ScreenedPatientEventArgs e)
@@ -61,11 +54,74 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
         {
-            ParticipantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
-            
-            NotifyPropertyChanged("ParticipantData");
+            var newPos =_participantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
+            ParticipantData.Row[newPos.x].SummaryCells[newPos.y].ParticipantIds = _participantData.Participants[newPos.x][newPos.y];
+            if (_participantData.ColHeaders.Count > ParticipantData.ColHeaders.Count) //1st patient randomised to new arm
+            {
+                int newColIndex = _participantData.ColHeaders.Count - 1;
+                for (var i=0;i<_participantData.Participants.Length;i++)
+                {
+                    ParticipantData.Row[i].SummaryCells.Add(new ParticipantSummaryItemViewModel(_participantData.Participants[i][newColIndex]));
+                }
+                ParticipantData.ColHeaders.Add(_participantData.ColHeaders[newColIndex].ToString());
+            }
         }
-        public ParticipantsSummary ParticipantData { get; private set; }
+
+        void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
+        {
+            var move = _participantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
+            if (move.OldRow != move.NewRow)
+            {
+                int col = _participantData.ColIndex(e.Participant.TrialArm);
+                ParticipantData.Row[move.OldRow].SummaryCells[col].ParticipantIds = _participantData.Participants[move.OldRow][col];
+                ParticipantData.Row[move.NewRow].SummaryCells[col].ParticipantIds = _participantData.Participants[move.NewRow][col];
+            }
+
+        }
+
+        ParticipantsSummary _participantData;
+        public ParticipantSummaryViewModel ParticipantData { get; private set; }
         public ScreenedPatientsSummary ScreenedPatientData { get; private set; }
+    }
+    public class ParticipantSummaryViewModel : NotifyChangeBase
+    {
+        public ParticipantSummaryViewModel(ParticipantsSummary summary)
+        {
+            ColHeaders = new ObservableCollection<string>(summary.ColHeaders.Select(c=>c.ToString()));
+            Row = new ParticipantSummaryRowViewModel[summary.RowHeaders.Length];
+            for (var i = 0; i < Row.Length;i++ )
+            {
+                Row[i] = new ParticipantSummaryRowViewModel
+                {
+                    RowHeader = summary.RowHeaders[i].ToString(),
+                    SummaryCells = summary.Participants[i].Select(p => new ParticipantSummaryItemViewModel(p)).ToList()
+                };
+            }
+        }
+        public ParticipantSummaryRowViewModel[] Row { get; private set; }
+        public ObservableCollection<string> ColHeaders { get; private set; } //???observablecollection
+    }
+    public class ParticipantSummaryRowViewModel
+    {
+        public string RowHeader { get; set; }
+        public List<ParticipantSummaryItemViewModel> SummaryCells { get; set; } 
+    }
+    public class ParticipantSummaryItemViewModel : NotifyChangeBase
+    {
+        public ParticipantSummaryItemViewModel(ICollection<int> participantIds)
+        {
+            ParticipantIds = participantIds;
+        }
+        public ICollection<int> ParticipantIds 
+        {
+            set 
+            {
+                IdList = string.Join(",", value);
+                Count = value.Count;
+                NotifyPropertyChanged("IdList", "Count");
+            }
+        }
+        public string IdList { get; private set; }
+        public int Count { get; private set; }
     }
 }
