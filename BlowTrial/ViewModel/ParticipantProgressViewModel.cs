@@ -261,7 +261,7 @@ namespace BlowTrial.ViewModel
             }
         }
         
-        public CauseOfDeathOption CauseOfDeath
+        public override CauseOfDeathOption CauseOfDeath
         {
             get
             {
@@ -276,13 +276,13 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public DateTime? DischargeDateTime
+        public override DateTime? DischargeDateTime
         {
             get
             {
                 return ParticipantProgressModel.DischargeDateTime;
             }
-            internal set
+            set
             {
                 if (ParticipantProgressModel.DischargeDateTime == value) { return; }
                 ParticipantProgressModel.DischargeDateTime = value;
@@ -316,13 +316,13 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public DateTime? DeathOrLastContactDateTime
+        public override DateTime? DeathOrLastContactDateTime
         {
             get
             {
                 return ParticipantProgressModel.DeathOrLastContactDateTime;
             }
-            internal set
+            set
             {
                 if (ParticipantProgressModel.DeathOrLastContactDateTime == value) { return; }
                 ParticipantProgressModel.DeathOrLastContactDateTime = value;
@@ -450,13 +450,13 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("DischargeDate", "DischargeTime", "OutcomeAt28orDischarge", "BcgPapuleLabel", "PostDischargeOutcomeKnown", "DiedAfterDischarge", "PostDischargeCompletelyUnknown");
             }
         }
-        public OutcomeAt28DaysOption OutcomeAt28Days
+        public override OutcomeAt28DaysOption OutcomeAt28Days
         {
             get 
             {
                 return ParticipantProgressModel.OutcomeAt28Days;
             }
-            internal set 
+            set 
             {
                 if (value == ParticipantProgressModel.OutcomeAt28Days) { return; }
                 ParticipantProgressModel.OutcomeAt28Days = value;
