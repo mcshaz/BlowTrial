@@ -187,7 +187,7 @@ namespace BlowTrial.Infrastructure
             int index = BinarySearch(item);
             if (index < 0) return -1;
             while(_list[--index].Equals(item)){}
-            return ++index;
+            return index+1;
         }
         int IList.IndexOf(object item)
         {
@@ -198,7 +198,7 @@ namespace BlowTrial.Infrastructure
             int index = BinarySearch(item);
             if (index < 0) return -1;
             while (_list[++index].Equals(item)) { }
-            return --index;
+            return index-1;
         }
         #endregion
         #region NotImplemented

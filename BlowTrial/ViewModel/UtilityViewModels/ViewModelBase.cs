@@ -29,7 +29,7 @@ namespace BlowTrial.ViewModel
         /// <param name="falseString">string to associate with false</param>
         /// <param name="nullString">string to associate with null</param>
         /// <returns></returns>
-        protected static KeyValuePair<bool?, string>[] CreateBoolPairs(
+        protected static KeyDisplayNamePair<bool?>[] CreateBoolPairs(
             string trueString = null, 
             string falseString = null, 
             string nullString = null)
@@ -37,37 +37,49 @@ namespace BlowTrial.ViewModel
             if (trueString ==null) { trueString = Strings.DropDownList_True; }
             if (falseString ==null) { falseString = Strings.DropDownList_False; }
             if (nullString ==null) { nullString = Strings.DropDownList_PleaseSelect; }
-            return new KeyValuePair<bool?,string>[]
+            return new KeyDisplayNamePair<bool?>[]
             {
-                new KeyValuePair<bool?,string>((bool?)null,nullString),
-                new KeyValuePair<bool?,string>(true,trueString),
-                new KeyValuePair<bool?,string>(false,falseString)
+                new KeyDisplayNamePair<bool?>((bool?)null,nullString),
+                new KeyDisplayNamePair<bool?>(true,trueString),
+                new KeyDisplayNamePair<bool?>(false,falseString)
             };
         }
-        protected static IEnumerable<KeyValuePair<T, string>> EnumToListOptions<T>() where T : struct, IConvertible
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T">must be an enum</typeparam>
+        /// <returns></returns>
+        protected static IList<KeyDisplayNamePair<T>> EnumToListOptions<T>(T? toPleaseSelect, params T[] excludeFromList) where T : struct, IConvertible
         {
             Type enumType = typeof(T);
+#if DEBUG
+            if (!enumType.IsEnum)
+            {
+                throw new ArgumentException("Type supplied must be an enum");
+            }
+#endif
             string enumName = enumType.Name + '_';
             var culture = CultureInfo.CurrentUICulture;
             var resourceManager = Strings.ResourceManager;
-            return Enum.GetValues(enumType)
-                .Cast<T>()
-                .Select(t=>
-                    {
-                        string st = t.ToString();
-                        st = (st=="Missing")
-                            ?Strings.DropDownList_PleaseSelect
-                            :resourceManager.GetString(enumName + st, culture);
-                        return new KeyValuePair<T, string>(t, st);
-                    });
+            return 
+                (from e in Enum.GetValues(enumType).Cast<T>()
+                 where !excludeFromList.Contains(e)
+                 select new KeyDisplayNamePair<T>(e,
+                    toPleaseSelect.Equals(e)
+                        ? Strings.DropDownList_PleaseSelect
+                        : resourceManager.GetString(enumName + e.ToString(), culture)))
+                .ToList();
+        }
+        protected static IList<KeyDisplayNamePair<T>> EnumToListOptions<T>() where T : struct, IConvertible
+        {
+            return EnumToListOptions((T?)default(T));
         }
 
-        protected static IEnumerable<KeyValuePair<Nullable<T>, string>> NullableEnumToListOptions<T>(string nullString = null) where T : struct, IConvertible
+        protected static IList<KeyDisplayNamePair<T?>> NullableEnumToListOptions<T>() where T : struct, IConvertible
         {
-            if (nullString ==null) { nullString = Strings.DropDownList_PleaseSelect; }
-            var returnVar = new List<KeyValuePair<Nullable<T>, string>>();
-            returnVar.Add(new KeyValuePair<Nullable<T>, string>(null, nullString));
-            returnVar.AddRange(EnumToListOptions<T>().Select(l => new KeyValuePair<Nullable<T>, string>(l.Key, l.Value)));
+            List<KeyDisplayNamePair<T?>> returnVar = new List<KeyDisplayNamePair<T?>>();
+            returnVar.Add(new KeyDisplayNamePair<T?>((T?)null, Strings.DropDownList_PleaseSelect));
+            returnVar.AddRange(EnumToListOptions((T?)null).Select(o=>new KeyDisplayNamePair<T?>((T?)o.Key,o.Value)));
             return returnVar;
         }
 
@@ -107,5 +119,17 @@ namespace BlowTrial.ViewModel
             System.Diagnostics.Debug.WriteLine(msg);
         }
 #endif
+    }
+
+    public class KeyDisplayNamePair<T>
+    {
+        public KeyDisplayNamePair() { }
+        public KeyDisplayNamePair(T key, string displayName)
+        {
+            Key = key;
+            Value = displayName;
+        }
+        public T Key { get; set; }
+        public string Value { get; set; }
     }
 }

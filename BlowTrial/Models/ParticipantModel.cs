@@ -2,7 +2,6 @@
 using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
-using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Properties;
 using System;
@@ -227,7 +226,7 @@ namespace BlowTrial.Models
                 p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
-                        : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v =>DataContextInitialiser.BcgVaccineIds.Contains(v.Id)))
+                        : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v =>DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
                                 ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28

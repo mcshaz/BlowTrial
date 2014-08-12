@@ -274,7 +274,7 @@ namespace BlowTrial.ViewModel
                     MessagesModel.DischargeExplanation,
                     BackupModel.CloudDirectories,
                     BackupModel.BackupIntervalMinutes.Value,
-                    BackupModel.AllocationType.Value,
+                    BackupModel.AllocationType,
                     true,
                     BackupModel.PatientsPreviouslyRandomised
                     );

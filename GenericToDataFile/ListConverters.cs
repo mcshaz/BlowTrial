@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -57,24 +58,23 @@ namespace GenericToDataString
         static string ToStataDo(Type collectionType, IEnumerable collection)
         {
             var convertedList = ToStringValues(collectionType, collection, 
-                new DataTypeOption<string>(s => ToStataString(s)),
-                new DataTypeOption<char>(c => ToStataString(c.ToString())),
-                new DataTypeOption<char[]>(c => ToStataString(new string(c))),
-                new DataTypeOption<bool>(t => t ? "1" : "0"),
-                new DataTypeOption<DateTime>((d, atts)=>
+                new DataTypeOption(typeof(string),(s,attr) => ToStataString((string)s)),
+                new DataTypeOption(typeof(char),(c,attr) => ToStataString(c.ToString())),
+                new DataTypeOption(typeof(char[]),(c,attr) => ToStataString(new string((char[])c))),
+                new DataTypeOption(typeof(DateTime),(d, atts)=>
                 {
                     var dataType = (DataTypeAttribute)atts.FirstOrDefault(a => a.GetType() == typeof(DataTypeAttribute));
                     if (dataType != null)
                     {
                         if (dataType.DataType == DataType.Date)
                         {
-                            return TicksToStataDate(d.Ticks);
+                            return TicksToStataDate(((DateTime)d).Ticks);
                         }
                     }
-                    return TicksToStataDateTime(d.Ticks);
+                    return TicksToStataDateTime(((DateTime)d).Ticks);
                 }),
-                new DataTypeOption<TimeSpan>(ts=>ts.Milliseconds.ToString()), // note these 2 are not tested yet as they 
-                new DataTypeOption<DateTimeOffset>(d=>TicksToStataDateTime(d.UtcTicks))); // are never used by myself within data repositories
+                new DataTypeOption(typeof(TimeSpan),(ts,attr)=>((TimeSpan)ts).Milliseconds.ToString()), // note these 2 are not tested yet as they 
+                new DataTypeOption(typeof(DateTimeOffset), (d, attr) => TicksToStataDateTime(((DateTimeOffset)d).UtcTicks))); // are never used by myself within data repositories
             int rows = convertedList.StringValues.Length;
             StringBuilder sb = new StringBuilder(string.Format("set obs {0}\r\n", rows));
             for (int c=0;c<convertedList.PropertiesDetail.Count;c++)
@@ -164,37 +164,76 @@ namespace GenericToDataString
         }
         static PropertyValues ToStringValues(Type collectionType, IEnumerable collection, params DataTypeOption[] typeOptions)
         {
-            typeOptions = typeOptions ?? new DataTypeOption[0];
-            var propTypeOptions = GetDatabaseTypes();
-            foreach (DataTypeOption dto in typeOptions)
+            var dataTypeSet = GetDatabaseTypes();
+            var customTypeDictionary = typeOptions.ToDictionary(o => o.PropertyType);
+            foreach (var dt in BaseTransforms())
             {
-                if (propTypeOptions.ContainsKey(dto.PropertyType))
+                if (!customTypeDictionary.ContainsKey(dt.PropertyType))
                 {
-                    propTypeOptions[dto.PropertyType] = dto;
+                    customTypeDictionary.Add(dt.PropertyType, dt);
                 }
-                else
+            }
+            List<DataTypeOption> nullables = new List<DataTypeOption>(customTypeDictionary.Count);
+            foreach (var kv in customTypeDictionary)
+            {
+                if (kv.Key.IsValueType && !kv.Key.IsGenericType)
                 {
-                    propTypeOptions.Add(dto.PropertyType, dto);
+                    Type nullable = typeof(Nullable<>).MakeGenericType(kv.Key);
+
+                    if (!customTypeDictionary.ContainsKey(nullable))
+                    {
+                        nullables.Add(new DataTypeOption(nullable, (o, attr) => o == null ? "" : kv.Value.GetString(o, attr)));
+                    }
                 }
+            }
+            foreach (var n in nullables)
+            {
+                customTypeDictionary.Add(n.PropertyType, n);
             }
 
             PropertyInfo[] allProps = collectionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             List<PropertyDetail> headers = new List<PropertyDetail>(allProps.Length);
-            List<Func<object, string>> propertyConverters = new List<Func<object, string>>(allProps.Length);
+            List<Func<object,string>> propertyConverters = new List<Func<object,string>>(allProps.Length);
 
             foreach (PropertyInfo pi in allProps)
             {
                 if (pi.CanRead
                     && !Attribute.IsDefined(pi, typeof(NotMappedAttribute)))
                 {
-                    Type baseType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType;
                     DataTypeOption dto;
-                    if (propTypeOptions.TryGetValue(baseType, out dto))
+                    if (customTypeDictionary.TryGetValue(pi.PropertyType, out dto) || dataTypeSet.Contains(pi.PropertyType) || pi.PropertyType.IsEnum)
                     {
-                        var atts = pi.GetCustomAttributes(false);
-                        propertyConverters.Add(new Func<object,string>(o => dto.ConversionFunction(pi.GetValue(o, null),atts)));
+                        object[] atts = pi.GetCustomAttributes(false);
+                        if (dto==null)
+                        {
+                            if (pi.PropertyType.IsEnum)
+                            {
+                                propertyConverters.Add(new Func<object, string>(o => {
+                                    var convert = pi.GetValue(o, null);
+                                    if (convert==null) {return "";}
+                                    return Convert.ToInt32(convert).ToString();
+                                }));
+                            }
+                            else if (pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                            {
+                                propertyConverters.Add(new Func<object, string>(o => 
+                                {
+                                    object val = pi.GetValue(o, null);
+                                    if (val==null) {return "";} 
+                                    return val.ToString();
+                                }));
+                            }
+                            else
+                            {
+                                propertyConverters.Add(new Func<object, string>(o => pi.GetValue(o, null).ToString()));
+                            }
+                        }
+                        else
+                        {
+                            propertyConverters.Add(new Func<object, string>(o => dto.GetString(pi.GetValue(o, null), atts)));
+                        }
                         DisplayAttribute attr = (DisplayAttribute)atts.FirstOrDefault(a=>a.GetType() == typeof(DisplayAttribute));
-                        headers.Add(new PropertyDetail{ Name = pi.Name, BaseType = baseType, Attributes = atts });
+                        headers.Add(new PropertyDetail { Name = pi.Name, BaseType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType, Attributes = atts });
                     }
                 }
             }
@@ -231,29 +270,47 @@ namespace GenericToDataString
             public string[][] StringValues { get; internal set; }
         }
 
-        static IDictionary<Type, DataTypeOption> GetDatabaseTypes()
+        static HashSet<Type> GetDatabaseTypes()
         {
-            return (new DataTypeOption[]
-            {
-                new DataTypeOption<char>(),
-                new DataTypeOption<string>(),
-                new DataTypeOption<char[]>(c=>new string(c)),
-                new DataTypeOption<bool>(),
-                new DataTypeOption<byte>(),
-                new DataTypeOption<Int16>(),
-                new DataTypeOption<Int32>(),
-                new DataTypeOption<Int64>(),
-                new DataTypeOption<Single>(),
-                new DataTypeOption<double>(),
-                new DataTypeOption<DateTime>(),
-                new DataTypeOption<TimeSpan>(),
-                new DataTypeOption<DateTimeOffset>(),
-            }).ToDictionary(dto=>dto.PropertyType);
+            return new HashSet<Type>(
+                new Type[]{
+                    typeof(char),
+                    typeof(string),
+                    typeof(char[]),
+                    typeof(bool),
+                    typeof(byte),
+                    typeof(Int16),
+                    typeof(Int32),
+                    typeof(Int64),
+                    typeof(Single),
+                    typeof(double),
+                    typeof(DateTime),
+                    typeof(TimeSpan),
+                    typeof(DateTimeOffset),
+                    typeof(char?),
+                    typeof(bool?),
+                    typeof(byte?),
+                    typeof(Int16?),
+                    typeof(Int32?),
+                    typeof(Int64?),
+                    typeof(Single?),
+                    typeof(double?),
+                    typeof(DateTime?),
+                    typeof(TimeSpan?),
+                    typeof(DateTimeOffset?)
+                });
         }
 
-        public static DataTypeOption GetBoolToBinaryConverter()
+        static DataTypeOption[] BaseTransforms()
         {
-            return new DataTypeOption<bool>(t => t ? "1" : "0");
+            return new DataTypeOption[]
+            {
+                new DataTypeOption(typeof(string), new Func<object, object[],string>((o,a)=>o==null?"":(string)o)),
+                new DataTypeOption(typeof(bool), new Func<object, object[],string>((o,a)=>o.Equals(true)?"1":"0")),
+                new DataTypeOption(typeof(bool?), new Func<object, object[],string>((o,a)=>o==null
+                    ?""
+                    :o.Equals(true)?"1":"0"))
+            };
         }
         //stackoverflow.com/questions/906499/getting-type-t-from-ienumerablet#906538
         public static Type GetGenericIEnumerable(IEnumerable e)
@@ -279,5 +336,15 @@ namespace GenericToDataString
             while (enumerator.MoveNext()) { count++; }
             return count;
         }
+    }
+    public class DataTypeOption
+    {
+        public DataTypeOption(Type propertyType, Func<object, object[], string> getString)
+        {
+            PropertyType = propertyType;
+            GetString = getString;
+        }
+        public readonly Type PropertyType;
+        public readonly Func<object, object[], string> GetString;
     }
 }

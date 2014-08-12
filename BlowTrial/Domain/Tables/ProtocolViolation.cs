@@ -27,6 +27,7 @@ namespace BlowTrial.Domain.Tables
     }
     public enum ViolationTypeOption
     {
+        NotSelected = 0,
         Minor = 1,
         MajorWrongTreatment = 2,
         MajorWrongAllocation = 3,

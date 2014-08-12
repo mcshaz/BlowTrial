@@ -61,6 +61,33 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Brazil (Control &amp; BCG Brazil).
+        /// </summary>
+        public static string AllocationGroups_Brazil2Arm {
+            get {
+                return ResourceManager.GetString("AllocationGroups_Brazil2Arm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to India 2 arm (Control &amp; BCG India).
+        /// </summary>
+        public static string AllocationGroups_India2Arm {
+            get {
+                return ResourceManager.GetString("AllocationGroups_India2Arm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to India 3 arm (Control, BCG India &amp; Danish).
+        /// </summary>
+        public static string AllocationGroups_India3ArmBalanced {
+            get {
+                return ResourceManager.GetString("AllocationGroups_India3ArmBalanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to India - 3 arm (balanced assignnment).
         /// </summary>
         public static string AllocationGroups_IndiaThreeArmBalanced {

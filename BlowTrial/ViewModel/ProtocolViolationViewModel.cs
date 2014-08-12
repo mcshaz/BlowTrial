@@ -1,21 +1,14 @@
 ﻿using BlowTrial.Domain.Tables;
-using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Models;
 using BlowTrial.Properties;
 using MvvmExtraLite.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Input;
-using BlowTrial.Infrastructure.Extensions;
 using System.Windows.Media;
-using BlowTrial.Helpers;
 using AutoMapper;
 
 namespace BlowTrial.ViewModel
@@ -45,7 +38,7 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
-        public ViolationTypeOption? ViolationType
+        public ViolationTypeOption ViolationType
         {
             get
             {
@@ -64,15 +57,15 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                if (!ViolationType.HasValue)
+                switch (ViolationType)
                 {
-                    return null;
-                }
-                if (ViolationType==ViolationTypeOption.Minor)
-                {
-                    return Strings.ProtocolViolationVM_Minor;
-                }
-                return Strings.ProtocolViolationVM_Major;
+                    case ViolationTypeOption.NotSelected:
+                        return null;
+                    case ViolationTypeOption.Minor:
+                        return Strings.ProtocolViolationVM_Minor;
+                    default:
+                        return Strings.ProtocolViolationVM_Major;
+                }               
             }
         }
 
@@ -198,12 +191,12 @@ namespace BlowTrial.ViewModel
         }
         //End legacy */
 
-        IEnumerable<KeyValuePair<ViolationTypeOption?, string>> _violationTypeOptions;
-        public IEnumerable<KeyValuePair<ViolationTypeOption?, string>> ViolationTypeOptions
+        IEnumerable<KeyDisplayNamePair<ViolationTypeOption>> _violationTypeOptions;
+        public IEnumerable<KeyDisplayNamePair<ViolationTypeOption>> ViolationTypeOptions
         {
             get
             {
-                return _violationTypeOptions ?? (_violationTypeOptions = NullableEnumToListOptions<ViolationTypeOption>());
+                return _violationTypeOptions ?? (_violationTypeOptions = EnumToListOptions<ViolationTypeOption>());
             }
         }
         #endregion // Listbox options
@@ -214,7 +207,7 @@ namespace BlowTrial.ViewModel
         {
             ProtocolViolation violation = new ProtocolViolation
                 {
-                    ViolationType = _violation.ViolationType.Value,
+                    ViolationType = _violation.ViolationType,
                     Details = _violation.Details,
                     ParticipantId = _violation.Participant.Id
                 };

@@ -61,7 +61,7 @@ namespace BlowTrial.Migrations.TrialData
                 context.SaveChanges();
             }
 
-            if (!context.AllocationBlocks.Any())
+            if (!context.AllocationBlocks.Any() && context.Participants.Any())
             {
                 CreateAllocationBlocks(context);
                 //context.Database.ExecuteSqlCommand("Alter Table Participants Drop Column BlockNumber");

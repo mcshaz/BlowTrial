@@ -72,6 +72,26 @@ namespace BlowTrial.Infrastructure.CustomSorters
         }
     }
 
+    class TrialArmSorter : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return partX.TrialArm.CompareTo(partY.TrialArm);
+        }
+    }
+
+    class TrialArmSortDesc : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return -partX.TrialArm.CompareTo(partY.TrialArm);
+        }
+    }
+
     class ParticipantMarkedFinishedSortDesc : IComparer
     {
         public int Compare(object x, object y)

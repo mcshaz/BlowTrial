@@ -129,13 +129,13 @@
                     </GridViewColumn>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=AgeDaysString, Mode=OneWay}">
                         <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="DateTimeBirth" >
-                            Days of age
+                            Days old
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn>
                         <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="RegisteredAt">
-                            Date Of Enrolment
+                            Enrolled
                         </GridViewColumnHeader>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -144,6 +144,11 @@
                                       ContentStringFormat="d" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=TrialArm, Mode=OneWay}">
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="TrialArm" >
+                            Arm
+                        </GridViewColumnHeader>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>

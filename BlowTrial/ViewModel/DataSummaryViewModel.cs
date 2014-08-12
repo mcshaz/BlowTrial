@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using BlowTrial.Infrastructure.Extensions;
+using BlowTrial.Properties;
+using BlowTrial.Helpers;
 
 namespace BlowTrial.ViewModel
 {
@@ -55,7 +57,7 @@ namespace BlowTrial.ViewModel
         void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
         {
             var newPos =_participantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
-            ParticipantData.Row[newPos.x].SummaryCells[newPos.y].ParticipantIds = _participantData.Participants[newPos.x][newPos.y];
+
             if (_participantData.ColHeaders.Count > ParticipantData.ColHeaders.Count) //1st patient randomised to new arm
             {
                 int newColIndex = _participantData.ColHeaders.Count - 1;
@@ -63,8 +65,9 @@ namespace BlowTrial.ViewModel
                 {
                     ParticipantData.Row[i].SummaryCells.Add(new ParticipantSummaryItemViewModel(_participantData.Participants[i][newColIndex]));
                 }
-                ParticipantData.ColHeaders.Add(_participantData.ColHeaders[newColIndex].ToString());
+                ParticipantData.ColHeaders.Add(ParticipantBaseModel.GetTrialArmDescription(_participantData.ColHeaders[newColIndex]));
             }
+            ParticipantData.Row[newPos.x].SummaryCells[newPos.y].ParticipantIds = _participantData.Participants[newPos.x][newPos.y];
         }
 
         void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
@@ -87,13 +90,13 @@ namespace BlowTrial.ViewModel
     {
         public ParticipantSummaryViewModel(ParticipantsSummary summary)
         {
-            ColHeaders = new ObservableCollection<string>(summary.ColHeaders.Select(c=>c.ToString()));
+            ColHeaders = new ObservableCollection<string>(summary.ColHeaders.Select(c => ParticipantBaseModel.GetTrialArmDescription(c)));
             Row = new ParticipantSummaryRowViewModel[summary.RowHeaders.Length];
             for (var i = 0; i < Row.Length;i++ )
             {
                 Row[i] = new ParticipantSummaryRowViewModel
                 {
-                    RowHeader = summary.RowHeaders[i].ToString(),
+                    RowHeader = DataRequiredStrings.GetDetails(summary.RowHeaders[i]),
                     SummaryCells = summary.Participants[i].Select(p => new ParticipantSummaryItemViewModel(p)).ToList()
                 };
             }

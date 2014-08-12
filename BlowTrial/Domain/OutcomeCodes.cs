@@ -39,7 +39,7 @@ namespace BlowTrial.Domain.Outcomes
     }
     public enum RandomisationArm
     {
-        NotSet,
+        NotSet = 0,
         Control,
         RussianBCG,
         DanishBcg,

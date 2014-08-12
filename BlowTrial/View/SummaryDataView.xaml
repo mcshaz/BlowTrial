@@ -8,26 +8,29 @@
   VerticalAlignment="Top"
   >
     <UserControl.Resources>
-        <!--
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
                 <ResourceDictionary>
-                    <DataTemplate x:Key="CellTemplate">
-                        <ContentControl>
-                            <TextBlock Text="{Binding Path=Count}" ToolTip="{Binding Path=IdList}" />
-                        </ContentControl>
-                    </DataTemplate>
+                    <Style TargetType="ToolTip">
+                        <Setter Property="ContentTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding}" MaxWidth="800" TextWrapping='Wrap' />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-        -->
-        <ResourceDictionary Source="/View/WorkspaceResources.xaml" />
     </UserControl.Resources>
     <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" >
         <StackPanel Orientation="Vertical">
             <GroupBox Header="Participants" DataContext="{Binding Path=ParticipantData, Mode=OneWay}">
-                <DataGrid x:Name="Participants" AutoGenerateColumns="False" DataContextChanged="Participants_DataContextChanged" 
+                <DataGrid x:Name="Participants" AutoGenerateColumns="False"  
                           IsReadOnly="True" ItemsSource="{Binding Path=Row,Mode=OneWay}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Binding="{Binding Path=RowHeader,Mode=OneWay}"/>

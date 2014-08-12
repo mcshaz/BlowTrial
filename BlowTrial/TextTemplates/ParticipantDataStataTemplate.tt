@@ -6,10 +6,10 @@
 <#@ import namespace="BlowTrial.Domain.Outcomes" #>
 
 clear
-insheet using "<#= _data.CsvFilename #>", <#= _data.Delimiter #>
+insheet using "<#= _data.CsvFilename #>", <#= _data.DelimitOption #>
 
 tempname a
-foreach v of varlist dischargedatetime deathorlastcontactdatetime datetimebirth registeredat <#= string.Join(" ",_data.Vaccines) #> {
+foreach v of varlist dischargedatetime deathorlastcontactdatetime datetimebirth registeredat recordlastmodified <#= string.Join(" ",_data.Vaccines) #> {
 	capture confirm string variable `v'
     if (!_rc) {
 		gen double `a' = clock( `v', "YMDhms#")
@@ -31,11 +31,13 @@ if (!_rc) {
 
 label define causeOfDeathOption <#= StataData.GetStataLabel<CauseOfDeathOption>() #>
 label define outcomeAt28DaysOption <#= StataData.GetStataLabel<OutcomeAt28DaysOption>() #>
+label define trialarms <#= StataData.GetStataLabel<RandomisationArm>() #>
 label define centreNames <#= _data.CentresLabel #>
 
-label values causeofdeathid causeOfDeathOption
-label values outcomeat28id outcomeAt28DaysOption
+label values causeofdeath causeOfDeathOption
+label values outcomeat28days outcomeAt28DaysOption
 label values centreid centreNames
+label values trialarm trialarms
 
 stset deathorlastcontactdatetime, id(id) failure(outcome==2,5) origin(time datetimebirth) enter(time registeredat ) scale(`=msofhours(24)')
 

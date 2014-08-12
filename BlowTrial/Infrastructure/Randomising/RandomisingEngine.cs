@@ -311,7 +311,7 @@ namespace BlowTrial.Infrastructure.Randomising
                     remainingInterventions--;
                 }
             }
-            if (remainingAllocations <= 0) throw new ArgumentException("No remaining allocations");
+            if (remainingAllocations <= 0) { throw new ArgumentException("No remaining allocations"); }
             double Pintervention = remainingInterventions / remainingAllocations;
             double rdm = new Random().NextDouble();
             return (rdm <= Pintervention);

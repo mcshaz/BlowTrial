@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BlowTrial.Helpers
 {
-    public static class DetailsDictionary
+    public static class DataRequiredStrings
     {
         const string optionPrefix = "DataRequiredOption_";
         static IDictionary<DataRequiredOption, string> _outcomeDict;

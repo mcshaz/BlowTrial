@@ -28,7 +28,7 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region properties
-        public ParticipantBaseModel ParticipantModel { get; protected set; }
+        public ParticipantBaseModel ParticipantModel {get; private set;}
         public StudyCentreModel StudyCentre
         {
             get
@@ -241,6 +241,42 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
             }
         }
+        public OutcomeAt28DaysOption OutcomeAt28Days
+        {
+            set
+            {
+                if (value == ParticipantModel.OutcomeAt28Days) { return; }
+                ParticipantModel.OutcomeAt28Days = value;
+                DataRequired = ParticipantModel.RecalculateDataRequired();
+            }
+        }
+        public DateTime? DischargeDateTime
+        {
+            set
+            {
+                if (value == ParticipantModel.DischargeDateTime) { return; }
+                ParticipantModel.DischargeDateTime = value;
+                DataRequired = ParticipantModel.RecalculateDataRequired();
+            }
+        }
+        public DateTime? DeathOrLastContactDateTime
+        {
+            set
+            {
+                if (value == ParticipantModel.DeathOrLastContactDateTime) { return; }
+                ParticipantModel.DeathOrLastContactDateTime = value;
+                DataRequired = ParticipantModel.RecalculateDataRequired();
+            }
+        }
+        public CauseOfDeathOption CauseOfDeath
+        {
+            set
+            {
+                if (value == ParticipantModel.CauseOfDeath) { return; }
+                ParticipantModel.CauseOfDeath = value;
+                DataRequired = ParticipantModel.RecalculateDataRequired();
+            }
+        }
 
         public bool UserMarkedFinished
         {
@@ -261,7 +297,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return _dataRequiredString ?? (_dataRequiredString = DetailsDictionary.GetDetails(ParticipantModel.DataRequired));
+                return _dataRequiredString ?? (_dataRequiredString = DataRequiredStrings.GetDetails(ParticipantModel.DataRequired));
             }
         }
 

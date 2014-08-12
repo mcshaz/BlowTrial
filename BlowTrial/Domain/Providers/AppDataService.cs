@@ -229,7 +229,7 @@ namespace BlowTrial.Helpers
                         MaxIdForSite = s.MaxIdForSite().Value
                     });
                 }
-                t.SaveChanges();
+                t.SaveChanges(true);
             }
         }
     }

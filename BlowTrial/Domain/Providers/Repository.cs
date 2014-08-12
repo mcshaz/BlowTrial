@@ -13,14 +13,12 @@ using System.Reflection;
 using System.Data.Entity.Migrations;
 using BlowTrial.Infrastructure.Exceptions;
 using System.Data.Entity.Infrastructure;
-using BlowTrial.Helpers;
 using LinqKit;
 using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Migrations;
 using BlowTrial.Infrastructure.Extensions;
 using System.Data.SqlServerCe;
-using System.Collections.ObjectModel;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -159,6 +157,10 @@ namespace BlowTrial.Domain.Providers
             var returnVar = _dbContext.Participants.Find(participantId);
             returnVar.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == participantId).ToList();
                 return returnVar;
+        }
+        public Participant FindParticipant(int participantId)
+        {
+            return _dbContext.Participants.Find(participantId);
         }
         public ProtocolViolation FindViolation(int violationId)
         {
@@ -808,6 +810,16 @@ namespace BlowTrial.Domain.Providers
             di = new DirectoryInfo(App.DataDirectory);
             foreach (FileInfo f in di.GetFiles())
             {
+                if (f.Name.EndsWith(".sdf.tmp"))
+                {
+                    try
+                    {
+                        f.Delete();
+                    }
+                    catch (Exception) { }
+                    continue;
+
+                }
                 if (f.Name.Length == fnLen && f.Name.Substring(0, prefixLen) == filePrefix && f.Extension == BakExtension)
                 {
                     var matchedPair = returnVar.FirstOrDefault(r => Path.GetFileNameWithoutExtension(r.Zip.Name) == Path.GetFileNameWithoutExtension(f.Name));

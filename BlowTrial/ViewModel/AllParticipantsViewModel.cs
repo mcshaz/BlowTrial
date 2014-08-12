@@ -219,6 +219,10 @@ namespace BlowTrial.ViewModel
                 case "UserMarkedFinished":
                     AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new ParticipantMarkedFinishedSorter() : new ParticipantMarkedFinishedSortDesc();
                     break;
+                case "TrialArm":
+                    AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new TrialArmSorter() : new TrialArmSortDesc();
+                    break;
+
             }
         }
         IEnumerable<DataRequiredOption>_selectedDataRequired;
@@ -316,9 +320,14 @@ namespace BlowTrial.ViewModel
             AllParticipants.EditItem(assdVM);
             UpdateDemographics(e.Participant, assdVM);
             assdVM.VaccinesAdministered = e.Participant.VaccinesAdministered;
+            assdVM.OutcomeAt28Days = e.Participant.OutcomeAt28Days;
+            assdVM.DischargeDateTime = e.Participant.DischargeDateTime;
+            assdVM.DeathOrLastContactDateTime = e.Participant.DeathOrLastContactDateTime;
+            assdVM.CauseOfDeath = e.Participant.CauseOfDeath;
             
             if (_updateWindow != null && ((ParticipantProgressViewModel)_updateWindow.DataContext).Id == assdVM.Id)
             {
+                //this is here for data oversite, when update comes without having entered the data. For data collection sites, values should be the same and so updates will not be notified
                 ParticipantProgressViewModel sp = (ParticipantProgressViewModel)_updateWindow.DataContext;
                 UpdateDemographics(e.Participant, sp);
                 sp.OutcomeAt28Days = e.Participant.OutcomeAt28Days;
@@ -333,8 +342,8 @@ namespace BlowTrial.ViewModel
                 sp.BcgPapuleAtDischarge = e.Participant.BcgPapuleAtDischarge;
                 sp.IsParticipantModelChanged = false;
                 sp.IsVaccineAdminChanged = false; //ensure save changes is not enabled
+                //assdVM.ParticipantModel = sp.ParticipantModel;
             }
-
             AllParticipants.CommitEdit();
         }
 

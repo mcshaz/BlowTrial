@@ -19,7 +19,7 @@ namespace BlowTrial.Models
 
         public int Id { get; set; }
 
-        public ViolationTypeOption? ViolationType { get; set; }
+        public ViolationTypeOption ViolationType { get; set; }
 
         public string Details { get; set; }
 
@@ -34,7 +34,7 @@ namespace BlowTrial.Models
             switch (propertyName)
             {
                 case "ViolationType":
-                    error = ValidateDDLNotNull(ViolationType);
+                    error = ValidateEnumNotDefault(ViolationType);
                     break;
                 case "Details":
                     error = ValidateFieldNotEmpty(Details);

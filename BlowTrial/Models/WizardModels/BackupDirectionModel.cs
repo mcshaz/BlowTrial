@@ -19,7 +19,7 @@ namespace BlowTrial.Models
 
         public bool PatientsPreviouslyRandomised { get; set; }
 
-        public AllocationGroups? AllocationType { get; set; }
+        public AllocationGroups AllocationType { get; set; }
 
         public override string GetValidationError(string propertyName)
         {
@@ -34,7 +34,7 @@ namespace BlowTrial.Models
         }
         string ValidateAllocationType()
         {
-            return ValidateDDLNotNull(AllocationType);
+            return ValidateEnumNotDefault(AllocationType);
         }
         string ValidatePatientsPreviouslyRandomised()
         {

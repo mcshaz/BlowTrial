@@ -56,7 +56,7 @@ namespace BlowTrial.ViewModel
                 if (value != true) { PatientsPreviouslyRandomised = false; }
             }
         }
-        public AllocationGroups? AllocationType
+        public AllocationGroups AllocationType
         {
             get
             {
@@ -72,13 +72,12 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region ListBoxOptions
-        IEnumerable<KeyValuePair<AllocationGroups, string>> _allocationTypeOptions;
-        public IEnumerable<KeyValuePair<AllocationGroups, string>> AllocationTypeOptions
+        IEnumerable<KeyDisplayNamePair<AllocationGroups>> _allocationTypeOptions;
+        public IEnumerable<KeyDisplayNamePair<AllocationGroups>> AllocationTypeOptions
         {
             get
             {
-                return _allocationTypeOptions
-                    ?? (_allocationTypeOptions = EnumToListOptions<AllocationGroups>());
+                return _allocationTypeOptions ?? (_allocationTypeOptions = EnumToListOptions<AllocationGroups>(default(AllocationGroups), AllocationGroups.India3ArmUnbalanced));
             }
         }
         #endregion // Listbox options
@@ -109,8 +108,8 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region ListBoxOptions
-        KeyValuePair<bool?, string>[] _backupToCloudOptions;
-        public KeyValuePair<bool?, string>[] BackupToCloudOptions
+        KeyDisplayNamePair<bool?>[] _backupToCloudOptions;
+        public KeyDisplayNamePair<bool?>[] BackupToCloudOptions
         {
             get
             {

@@ -861,4 +861,13 @@
   <data name="Vaccine_BcgBrazil" xml:space="preserve">
     <value>BCG-Moreau(Brazil)</value>
   </data>
+  <data name="AllocationGroups_Brazil2Arm" xml:space="preserve">
+    <value>Brazil (Control &amp; BCG Brazil)</value>
+  </data>
+  <data name="AllocationGroups_India2Arm" xml:space="preserve">
+    <value>India 2 arm (Control &amp; BCG India)</value>
+  </data>
+  <data name="AllocationGroups_India3ArmBalanced" xml:space="preserve">
+    <value>India 3 arm (Control, BCG India &amp; Danish)</value>
+  </data>
 </root>

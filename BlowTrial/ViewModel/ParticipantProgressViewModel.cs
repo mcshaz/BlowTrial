@@ -600,8 +600,8 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Listbox options
-        IEnumerable<KeyValuePair<CauseOfDeathOption, string>> _CauseOfDeathOptions;
-        public IEnumerable<KeyValuePair<CauseOfDeathOption, string>> CauseOfDeathOptions
+        IEnumerable<KeyDisplayNamePair<CauseOfDeathOption>> _CauseOfDeathOptions;
+        public IEnumerable<KeyDisplayNamePair<CauseOfDeathOption>> CauseOfDeathOptions
         {
             get
             {
@@ -642,8 +642,8 @@ namespace BlowTrial.ViewModel
                 return _allVaccinesAvailable;
             }
         }
-        KeyValuePair<bool?, string>[] _bcgPapuleOptions;
-        public KeyValuePair<bool?, string>[] BcgPapuleOptions
+        KeyDisplayNamePair<bool?>[] _bcgPapuleOptions;
+        public KeyDisplayNamePair<bool?>[] BcgPapuleOptions
         {
             get
             {
@@ -651,8 +651,8 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        KeyValuePair<bool?, string>[] _requiredBoolOptions;
-        public KeyValuePair<bool?, string>[] RequiredBoolOptions
+        KeyDisplayNamePair<bool?>[] _requiredBoolOptions;
+        public KeyDisplayNamePair<bool?>[] RequiredBoolOptions
         {
             get
             {

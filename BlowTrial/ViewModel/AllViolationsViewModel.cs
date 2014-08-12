@@ -29,7 +29,12 @@ namespace BlowTrial.ViewModel
 
         private void ViolationAdded(object sender, Domain.Providers.ProtocolViolationEventArgs e)
         {
+            if (e.Violation.Participant == null)
+            {
+                e.Violation.Participant = _repository.FindParticipant(e.Violation.ParticipantId);
+            }
             var violModel = Mapper.Map<ProtocolViolationModel>(e.Violation);
+            
             violModel.Participant.StudyCentre = _repository.FindStudyCentre(violModel.Participant.CentreId);
             AllViolations.Add(new ProtocolViolationViewModel(_repository,violModel));
         }

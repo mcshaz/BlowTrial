@@ -85,6 +85,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         IEnumerable<Vaccine> Vaccines { get; }
         DbQuery<ProtocolViolation> ProtocolViolations { get; }
         Participant FindParticipantAndVaccines(int participantId);
+        Participant FindParticipant(int participantId);
         ProtocolViolation FindViolation(int violationId);
         IEnumerable<string> CloudDirectories { get; set; }
         IEnumerable<StudyCentreModel> LocalStudyCentres { get; }

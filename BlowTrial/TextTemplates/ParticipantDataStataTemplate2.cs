@@ -39,12 +39,12 @@ namespace BlowTrial.TextTemplates
             this.Write("\", ");
             
             #line 9 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(_data.Delimiter));
+            this.Write(this.ToStringHelper.ToStringWithCulture(_data.DelimitOption));
             
             #line default
             #line hidden
             this.Write("\r\n\r\ntempname a\r\nforeach v of varlist dischargedatetime deathorlastcontactdatetime" +
-                    " datetimebirth registeredat ");
+                    " datetimebirth registeredat recordlastmodified ");
             
             #line 12 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(" ",_data.Vaccines)));
@@ -85,24 +85,32 @@ label define causeOfDeathOption ");
             
             #line default
             #line hidden
-            this.Write("\r\nlabel define centreNames ");
+            this.Write("\r\nlabel define trialarms ");
             
             #line 34 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<RandomisationArm>()));
+            
+            #line default
+            #line hidden
+            this.Write("\r\nlabel define centreNames ");
+            
+            #line 35 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.CentresLabel));
             
             #line default
             #line hidden
             this.Write(@"
 
-label values causeofdeathid causeOfDeathOption
-label values outcomeat28id outcomeAt28DaysOption
+label values causeofdeath causeOfDeathOption
+label values outcomeat28days outcomeAt28DaysOption
 label values centreid centreNames
+label values trialarm trialarms
 
 stset deathorlastcontactdatetime, id(id) failure(outcome==2,5) origin(time datetimebirth) enter(time registeredat ) scale(`=msofhours(24)')
 
 save """);
             
-            #line 42 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 44 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.StataFilename));
             
             #line default

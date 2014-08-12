@@ -43,7 +43,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return string.Format(Strings.NewPatient_ToIntervention, examplePatient, exampleId);
+                return string.Format(Strings.NewPatient_ToIntervention, examplePatient, Strings.Vaccine_RussianBcg, exampleId);
             }
         }
 

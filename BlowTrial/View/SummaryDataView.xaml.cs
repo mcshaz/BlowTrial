@@ -1,4 +1,5 @@
 ﻿using BlowTrial.ViewModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,22 +9,28 @@ namespace BlowTrial.View
     {
         public SummaryDataView()
         {
+            DataContextChanged += Participants_DataContextChanged;
             InitializeComponent();
         }
+        private ParticipantSummaryViewModel _participantDataSummary;
 
         private void Participants_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
+            DataContextChanged -= Participants_DataContextChanged;
+            _participantDataSummary = ((DataSummaryViewModel)DataContext).ParticipantData;
             AddPartCols();
-            ((ParticipantSummaryViewModel)e.NewValue).ColHeaders.CollectionChanged += ColHeaders_CollectionChanged;
+            _participantDataSummary.ColHeaders.CollectionChanged += ColHeaders_CollectionChanged;
         }
 
-        void ColHeaders_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        void ColHeaders_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
- 	        AddPartCols();
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                AddPartCols();
+            }
         }
         void AddPartCols()
         {
-            ParticipantSummaryViewModel part = ((DataSummaryViewModel)DataContext).ParticipantData;
             DataTemplate cellTemplate = (DataTemplate)Resources["CellTemplate"];
             int colIndex = Participants.Columns.Count;
             /*
@@ -41,7 +48,7 @@ namespace BlowTrial.View
                 //
             }
              * */
-            for(;colIndex <= part.ColHeaders.Count;colIndex++)
+            for (; colIndex <= _participantDataSummary.ColHeaders.Count; colIndex++)
             {
                 /*
                 DataGridTemplateColumn templateColumn = new DataGridTemplateColumn
@@ -70,7 +77,7 @@ namespace BlowTrial.View
 
                 var col = new DataGridTextColumn
                 {
-                    Header = part.ColHeaders[colIndex-1], //should potentially make the number of pre-existing cols a property
+                    Header = _participantDataSummary.ColHeaders[colIndex - 1], //should potentially make the number of pre-existing cols a property
                     Binding = new Binding
                     {
                         Path = new System.Windows.PropertyPath("SummaryCells[" + (colIndex - 1) + "].Count"),

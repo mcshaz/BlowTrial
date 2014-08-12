@@ -201,13 +201,13 @@ namespace BlowTrial.ViewModel
             switch (TableType)
             {
                 case TableOptions.Participant:
-                    var participants = Mapper.Map<ParticipantCsvModel[]>(_repository.Participants.Include("VaccinesAdministered").ToArray());
                     var vaccines = _repository.Vaccines.ToList();
-                    var csvEncodedParticipants = PatientDataToCSV.ParticipantDataToCSV(participants, vaccines, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes);
-                    File.WriteAllText(Path.ChangeExtension(_model.Filename, ".do"), ListConverters.ToStataDo(Mapper.Map<IEnumerable<ParticipantCsvModel>>(_repository.Participants.ToArray())));
                     try
                     {
-                        File.WriteAllLines(_model.FileNameWithExtension, csvEncodedParticipants);
+                        using (StreamWriter sw = new StreamWriter(_model.Filename))
+                        {
+                            PatientDataToCSV.ParticipantDataToCSV(_repository.Participants.Include("VaccinesAdministered").ToList(), vaccines, SelectedFileType.Delimiter, DateFormat, IsStringInQuotes, IsDateInQuotes, sw);
+                        }
                     }
                     catch(System.IO.IOException e)
                     {
@@ -305,17 +305,17 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Listbox options
-        IEnumerable<KeyValuePair<TableOptions, string>> _tableTypeOptions;
+        IEnumerable<KeyDisplayNamePair<TableOptions>> _tableTypeOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public IEnumerable<KeyValuePair<TableOptions, string>> TableTypeOptions
+        public IEnumerable<KeyDisplayNamePair<TableOptions>> TableTypeOptions
         {
             get
             {
                 if (_tableTypeOptions == null)
                 {
-                    _tableTypeOptions = EnumToListOptions<TableOptions>();
+                    _tableTypeOptions = EnumToListOptions<TableOptions>(null);
                 }
                 return _tableTypeOptions;
             }

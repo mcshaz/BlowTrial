@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 
 namespace BlowTrial.Models
 {
-    public enum TableOptions { Participant = 0, ScreenedPatients, ProtocolViolations }
+    public enum TableOptions { Participant, ScreenedPatients, ProtocolViolations }
     public class CreateCsvModel : ValidationBase
     {
         #region Constructor

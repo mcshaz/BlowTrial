@@ -30,6 +30,14 @@ namespace BlowTrial.Infrastructure
             }
             return null;
         }
+        public static string ValidateEnumNotDefault<T>(T toValidate) where T : struct, IConvertible
+        {
+            if (default(T).Equals(toValidate))
+            {
+                return Strings.DropDownList_Error_BoolNull;
+            }
+            return null;
+        }
         public static string ValidateFieldNotEmpty(string toValidate)
         {
             if (string.IsNullOrWhiteSpace(toValidate))

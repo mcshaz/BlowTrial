@@ -558,7 +558,7 @@ namespace BlowTrial.ViewModel
             {
                 if (_multipleSibling == null && MultipleSiblingId.HasValue)
                 {
-                    _multipleSibling = _repository.FindParticipantAndVaccines(MultipleSiblingId.Value);
+                    _multipleSibling = _repository.FindParticipant(MultipleSiblingId.Value);
                 }
                 return _multipleSibling;
             }
@@ -612,11 +612,11 @@ namespace BlowTrial.ViewModel
         #endregion // Private Methods
 
         #region Listbox Options
-        KeyValuePair<bool?, string>[] _requiredBoolOptions;
+        KeyDisplayNamePair<bool?>[] _requiredBoolOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public KeyValuePair<bool?,string>[] RequiredBoolOptions
+        public KeyDisplayNamePair<bool?>[] RequiredBoolOptions
         {
             get
             {
@@ -624,11 +624,11 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        KeyValuePair<bool?, string>[] _isInbornOptions;
+        KeyDisplayNamePair<bool?>[] _isInbornOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public KeyValuePair<bool?, string>[] IsInbornOptions
+        public KeyDisplayNamePair<bool?>[] IsInbornOptions
         {
             get
             {
@@ -636,44 +636,44 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        KeyValuePair<bool?, string>[] _isMaleOptions;
+        KeyDisplayNamePair<bool?>[] _isMaleOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public KeyValuePair<bool?, string>[] IsMaleOptions
+        public KeyDisplayNamePair<bool?>[] IsMaleOptions
         {
             get
             {
                 return _isMaleOptions ?? (_isMaleOptions = CreateBoolPairs("Male","Female"));
             }
         }
-        KeyValuePair<bool?, string>[] _likelyDie24HrOptions;
+        KeyDisplayNamePair<bool?>[] _likelyDie24HrOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public KeyValuePair<bool?, string>[] LikelyDie24HrOptions
+        public KeyDisplayNamePair<bool?>[] LikelyDie24HrOptions
         {
             get
             {
                 return _likelyDie24HrOptions ?? (_likelyDie24HrOptions = CreateBoolPairs(Strings.NewPatient_IsLikelyDie24, Strings.NewPatient_NotLikelyDie24));
             }
         }
-        KeyValuePair<bool?, string>[] _refusedConsentOptions;
+        KeyDisplayNamePair<bool?>[] _refusedConsentOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public KeyValuePair<bool?, string>[] RefusedConsentOptions
+        public KeyDisplayNamePair<bool?>[] RefusedConsentOptions
         {
             get
             {
                 return _refusedConsentOptions ?? (_refusedConsentOptions = CreateBoolPairs(Strings.NewPatient_ConsentRefused, Strings.NewPatient_ConsentObtained));
             }
         }
-        KeyValuePair<bool?, string>[] _wasGivenBcgPriorOptions;
+        KeyDisplayNamePair<bool?>[] _wasGivenBcgPriorOptions;
         /// <summary>
         /// Returns a list of strings used to populate a drop down list for a bool? property.
         /// </summary>
-        public KeyValuePair<bool?, string>[] WasGivenBcgPriorOptions
+        public KeyDisplayNamePair<bool?>[] WasGivenBcgPriorOptions
         {
             get
             {
@@ -681,21 +681,20 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        IEnumerable<KeyValuePair<StudyCentreModel, string>> _studyCentreOptions;
-        public IEnumerable<KeyValuePair<StudyCentreModel, string>> StudyCentreOptions
+        IEnumerable<KeyDisplayNamePair<StudyCentreModel>> _studyCentreOptions;
+        public IEnumerable<KeyDisplayNamePair<StudyCentreModel>> StudyCentreOptions
         {
             get
             {
                 if (_studyCentreOptions==null)
                 {
                     var studyCentres = _repository.LocalStudyCentres;
-                    var returnVar = new List<KeyValuePair<StudyCentreModel, string>>(
-                        _repository.LocalStudyCentres
-                        .Select(s => new KeyValuePair<StudyCentreModel, string>(s, s.Name)));
+                    var returnVar = new List<KeyDisplayNamePair<StudyCentreModel>>(
+                        studyCentres.Select(s => new KeyDisplayNamePair<StudyCentreModel>(s, s.Name)));
                     if (studyCentres.Skip(1).Any())
                     {
                         returnVar.Insert(0,
-                            new KeyValuePair<StudyCentreModel, string>(null, Strings.DropDownList_PleaseSelect));
+                            new KeyDisplayNamePair<StudyCentreModel>(null, Strings.DropDownList_PleaseSelect));
                     }
                     else
                     {

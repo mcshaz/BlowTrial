@@ -158,7 +158,7 @@ namespace BlowTrial.ViewModel
         public DataRequiredOptionsViewModel(DataRequiredOption dataRequired)
         {
             DataRequired = dataRequired;
-            DataRequiredString = DetailsDictionary.GetDetails(dataRequired);
+            DataRequiredString = DataRequiredStrings.GetDetails(dataRequired);
         }
 
         bool _isSelected;
