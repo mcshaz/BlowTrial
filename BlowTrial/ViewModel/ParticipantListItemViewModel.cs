@@ -230,14 +230,14 @@ namespace BlowTrial.ViewModel
         {
             get 
             {
-                _dataRequired = ParticipantModel.DataRequired;
-                return ParticipantModel.DataRequired; 
+                return _dataRequired = ParticipantModel.DataRequired; 
             }
         }
         protected void RecalculateDataRequired()
         {
-            if (_dataRequired == ParticipantModel.DataRequired) { return; }
-            _dataRequired = ParticipantModel.DataRequired;
+            DataRequiredOption newRequired = ParticipantModel.DataRequired;
+            if (_dataRequired == newRequired) { return; }
+            _dataRequired = newRequired;
             _dataRequiredString = null;
             NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
         }

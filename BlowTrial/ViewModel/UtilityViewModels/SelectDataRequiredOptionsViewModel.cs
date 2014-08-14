@@ -17,12 +17,13 @@ namespace BlowTrial.ViewModel
 
         public SelectDataRequiredOptionsViewModel(IRepository _repo, IEnumerable<DataRequiredOption> selectedDataRequired = null, IEnumerable<StudyCentreModel> centres = null) 
         {
-            var options = (DataRequiredOption[])Enum.GetValues(typeof(DataRequiredOption));
+            var options = Enum.GetValues(typeof(DataRequiredOption)).Cast<DataRequiredOption>()
+                .Where(d=>d!= DataRequiredOption.NotSet).ToList();
             AllOptions = selectedDataRequired==null
                 ?options.Select(dro => new DataRequiredOptionsViewModel(dro) { IsSelected = true })
-                    .ToArray()
+                    .ToList()
                 :options.Select(dro => new DataRequiredOptionsViewModel(dro) { IsSelected = selectedDataRequired.Contains(dro) })
-                    .ToArray();
+                    .ToList();
 
             AllCentres = centres==null
                 ? _repo.LocalStudyCentres.Select(c => new StudyCentreOptionsViewModel(c) { IsSelected = true }).ToArray()
