@@ -56,7 +56,7 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
         {
-            var newPos =_participantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
+            var newPos =_participantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.DataRequiredFunc(e.Participant));
 
             if (_participantData.ColHeaders.Count > ParticipantData.ColHeaders.Count) //1st patient randomised to new arm
             {
@@ -72,7 +72,7 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
         {
-            var move = _participantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.GetDataRequiredExpression().Compile()(e.Participant));
+            var move = _participantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.DataRequiredFunc(e.Participant));
             if (move.OldRow != move.NewRow)
             {
                 int col = _participantData.ColIndex(e.Participant.TrialArm);

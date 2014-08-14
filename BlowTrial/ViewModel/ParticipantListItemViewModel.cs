@@ -107,7 +107,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("AgeDays");
                 if (DataRequired== DataRequiredOption.AwaitingOutcomeOr28 && ParticipantModel.AgeDays>=28)
                 {
-                    DataRequired = ParticipantModel.RecalculateDataRequired();
+                    RecalculateDataRequired();
                 }
             }
         }
@@ -139,7 +139,6 @@ namespace BlowTrial.ViewModel
                 if(ParticipantModel.VaccinesAdministered != value)
                 {
                     ParticipantModel.VaccinesAdministered = value;
-                    DataRequired = ParticipantModel.RecalculateDataRequired();
                 }
             }
         }
@@ -226,20 +225,21 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("DateTimeBirth");
             }
         }
-
+        DataRequiredOption _dataRequired;
         public DataRequiredOption DataRequired
         {
-            get { return this.ParticipantModel.DataRequired; }
-            set
+            get 
             {
-                if (value == this.ParticipantModel.DataRequired)
-                {
-                    return;
-                }
-                this.ParticipantModel.DataRequired = value;
-                _dataRequiredString = null;
-                NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
+                _dataRequired = ParticipantModel.DataRequired;
+                return ParticipantModel.DataRequired; 
             }
+        }
+        protected void RecalculateDataRequired()
+        {
+            if (_dataRequired == ParticipantModel.DataRequired) { return; }
+            _dataRequired = ParticipantModel.DataRequired;
+            _dataRequiredString = null;
+            NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
         }
         public virtual OutcomeAt28DaysOption OutcomeAt28Days
         {
@@ -248,7 +248,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == ParticipantModel.OutcomeAt28Days) { return; }
                 ParticipantModel.OutcomeAt28Days = value;
-                DataRequired = ParticipantModel.RecalculateDataRequired();
+                RecalculateDataRequired();
             }
         }
         public virtual DateTime? DischargeDateTime
@@ -258,7 +258,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == ParticipantModel.DischargeDateTime) { return; }
                 ParticipantModel.DischargeDateTime = value;
-                DataRequired = ParticipantModel.RecalculateDataRequired();
+                RecalculateDataRequired();
             }
         }
         public virtual DateTime? DeathOrLastContactDateTime
@@ -268,7 +268,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == ParticipantModel.DeathOrLastContactDateTime) { return; }
                 ParticipantModel.DeathOrLastContactDateTime = value;
-                DataRequired = ParticipantModel.RecalculateDataRequired();
+                RecalculateDataRequired();
             }
         }
         public virtual CauseOfDeathOption CauseOfDeath
@@ -278,7 +278,7 @@ namespace BlowTrial.ViewModel
             {
                 if (value == ParticipantModel.CauseOfDeath) { return; }
                 ParticipantModel.CauseOfDeath = value;
-                DataRequired = ParticipantModel.RecalculateDataRequired();
+                RecalculateDataRequired();
             }
         }
 
@@ -309,7 +309,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return (int)ParticipantModel.DataRequired;
+                return (int)_dataRequired;
             }
         }
 

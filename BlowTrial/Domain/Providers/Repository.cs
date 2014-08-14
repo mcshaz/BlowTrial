@@ -762,13 +762,12 @@ namespace BlowTrial.Domain.Providers
         }
         public ParticipantsSummary GetParticipantSummary()
         {
-            var dataRqd = ParticipantBaseModel.GetDataRequiredExpression();
             return new ParticipantsSummary(from p in _dbContext.Participants.AsExpandable()
                                            select new ParticipantStage 
                                            { 
                                                Id = p.Id, 
-                                               Arm = p.TrialArm, 
-                                               DataRequired=dataRqd.Invoke(p)
+                                               Arm = p.TrialArm,
+                                               DataRequired = ParticipantBaseModel.DataRequiredExpression.Invoke(p)
                                            });
         }
         public ScreenedPatientsSummary GetScreenedPatientSummary()

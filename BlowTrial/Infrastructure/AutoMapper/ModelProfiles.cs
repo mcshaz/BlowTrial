@@ -49,7 +49,6 @@ namespace BlowTrial.Infrastructure.Automapper
                     {
                         v.AdministeredTo = d;
                     }
-                    d.RecalculateDataRequired();
                 });
 
             Mapper.CreateMap<Participant, PatientDemographicsModel>()

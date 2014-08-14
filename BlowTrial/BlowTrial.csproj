@@ -197,6 +197,7 @@
     <Compile Include="Helpers\OutcomeAt28DaysSplitter.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Helpers\ReplaceMethodCallVisitor.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\AgeUpdatingService.cs" />
     <Compile Include="Infrastructure\Converters\EnumToSeperatedWordsConverter.cs" />

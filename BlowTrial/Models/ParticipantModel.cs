@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using BlowTrial.Infrastructure.Randomising;
+using System.Data.Entity;
+using System.Reflection;
 
 namespace BlowTrial.Models
 {
@@ -20,7 +22,26 @@ namespace BlowTrial.Models
         DateTime _dateTimeBirth;
         #endregion
 
-        #region Constructor
+        #region Static Constructor
+        static ParticipantBaseModel()
+        {
+            DataRequiredExpression = p => 
+                ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
+                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
+                        ? DataRequiredOption.DetailsMissing
+                        : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v => DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
+                            ? DataRequiredOption.BcgDataRequired
+                            : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
+                                ? DbFunctions.DiffDays(p.DateTimeBirth, DateTime.Now) < 28
+                                    ? DataRequiredOption.AwaitingOutcomeOr28
+                                    : DataRequiredOption.OutcomeRequired
+                                : DataRequiredOption.Complete;
+            var visitor = new ReplaceMethodCallVisitor(
+                typeof(DbFunctions).GetMethod("DiffDays", BindingFlags.Static | BindingFlags.Public, null, new Type[]{ typeof(DateTime?), typeof(DateTime?)},null),
+                args => 
+                    Expression.Property(Expression.Subtract(args[1], args[0]), "Days"));
+            DataRequiredFunc = ((Expression<Func<IParticipant, DataRequiredOption>>)visitor.Visit(DataRequiredExpression)).Compile();
+        }
         #endregion
 
 
@@ -95,8 +116,7 @@ namespace BlowTrial.Models
 
         public DataRequiredOption DataRequired
         {
-            get;
-            internal set;
+            get { return DataRequiredFunc(this); }
         }
 
         internal DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();
@@ -194,10 +214,6 @@ namespace BlowTrial.Models
         }
 
         #region Methods
-        public DataRequiredOption RecalculateDataRequired()
-        {
-            return GetDataRequiredExpression().Compile()(this);
-        }
         /*
         public TimeSpan GetAge(DateTime? now = null)
         {
@@ -219,21 +235,8 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DischargedAndKnownToHaveDied
         };
 
-        public static Expression<Func<IParticipant, DataRequiredOption>> GetDataRequiredExpression(DateTime? dt28Prior=null)
-        {
-            DateTime twentyEightPrior = dt28Prior ?? DateTime.Now.AddDays(-28);
-            return
-                p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
-                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
-                        ? DataRequiredOption.DetailsMissing
-                        : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v =>DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
-                            ? DataRequiredOption.BcgDataRequired
-                            : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
-                                ? (p.DateTimeBirth > twentyEightPrior) //DbFunctions.DiffDays(p.DateTimeBirth, now) < 28
-                                    ? DataRequiredOption.AwaitingOutcomeOr28
-                                    : DataRequiredOption.OutcomeRequired
-                                : DataRequiredOption.Complete;
-        }
+        internal readonly static Expression<Func<IParticipant, DataRequiredOption>> DataRequiredExpression;
+        internal readonly static Func<IParticipant, DataRequiredOption> DataRequiredFunc;
 
         #endregion //Static Methds
         #endregion //Methods

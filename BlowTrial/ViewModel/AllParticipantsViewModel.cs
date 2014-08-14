@@ -64,13 +64,11 @@ namespace BlowTrial.ViewModel
              * */
             var now = DateTime.Now;
             var dt28prior = now.AddDays(-28);
-            var dataRequired = ParticipantBaseModel.GetDataRequiredExpression(dt28prior).Compile();
 
             List<ParticipantListItemViewModel> participantVMs = new List<ParticipantListItemViewModel>(_repository.Participants.Count());
             foreach (var p in _repository.Participants.Include("VaccinesAdministered").OrderByDescending(dp=>dp.Id) 
                          .Select(GetParticipantBaseMapExpression()))
             {
-                p.DataRequired = dataRequired(p);
                 p.StudyCentre = _repository.FindStudyCentre(p.CentreId);
                 var newVm = new ParticipantListItemViewModel(p);
                 newVm.PropertyChanged += OnListItemChanged;
@@ -393,7 +391,6 @@ namespace BlowTrial.ViewModel
         private void OnParticipantAdded(object sender, ParticipantEventArgs e)
         {
             var partBase = ParticipantBaseMap(e.Participant);
-            partBase.RecalculateDataRequired();
             partBase.StudyCentre = _repository.FindStudyCentre(partBase.CentreId);
             var viewModel = new ParticipantListItemViewModel(partBase, _repository);
             _ageUpdater.AddParticipant(viewModel);

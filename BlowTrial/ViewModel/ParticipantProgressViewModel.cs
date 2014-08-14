@@ -833,7 +833,7 @@ namespace BlowTrial.ViewModel
                     notes : ParticipantProgressModel.Notes,
                     vaccinesAdministered: vas
                 );
-                DataRequired = ParticipantProgressModel.RecalculateDataRequired();
+                RecalculateDataRequired();
                 if (IsVaccineAdminChanged)
                 {
                     foreach (var vm in ParticipantProgressModel.VaccineModelsAdministered)
