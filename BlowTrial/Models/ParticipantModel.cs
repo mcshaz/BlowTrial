@@ -229,7 +229,7 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DischargedAndLikelyToHaveSurvived,
             OutcomeAt28DaysOption.DischargedAndOutcomeCompletelyUnknown
         };
-        protected static OutcomeAt28DaysOption[] KnownDeadOutcomes = new OutcomeAt28DaysOption[]
+        internal static OutcomeAt28DaysOption[] KnownDeadOutcomes = new OutcomeAt28DaysOption[]
         {
             OutcomeAt28DaysOption.DiedInHospitalBefore28Days,
             OutcomeAt28DaysOption.DischargedAndKnownToHaveDied

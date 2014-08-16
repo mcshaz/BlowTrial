@@ -26,6 +26,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
+        event EventHandler<FailedRestoreEvent> FailedDbRestore;
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         Participant AddParticipant(
             string name,
@@ -88,7 +89,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         Participant FindParticipant(int participantId);
         ProtocolViolation FindViolation(int violationId);
         IEnumerable<string> CloudDirectories { get; set; }
-        IEnumerable<StudyCentreModel> LocalStudyCentres { get; }
+        ICollection<StudyCentreModel> LocalStudyCentres { get; }
         ParticipantsSummary GetParticipantSummary();
         ScreenedPatientsSummary GetScreenedPatientSummary();
         StudyCentreModel FindStudyCentre(int studyCentreId);

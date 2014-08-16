@@ -15,6 +15,16 @@ namespace BlowTrial.Domain.Providers
 
         public Participant Participant { get; private set; }
     }
+    public class FailedRestoreEvent : EventArgs
+    {
+        public FailedRestoreEvent(string filename, Exception exception)
+        {
+            this.Exception = exception;
+            Filename = filename;
+        }
+        public string Filename { get; private set; }
+        public Exception Exception { get; private set; }
+    }
     public class ScreenedPatientEventArgs : EventArgs
     {
         public ScreenedPatientEventArgs(ScreenedPatient screenedPatient)

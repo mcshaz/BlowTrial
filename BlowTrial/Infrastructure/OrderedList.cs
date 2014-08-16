@@ -94,6 +94,12 @@ namespace BlowTrial.Infrastructure
             {
                 return;
             }
+            if (_list.Count == 0) 
+            { 
+                _list.AddRange(collection);
+                _list.Sort(_comparer);
+                return;
+            }
             //if we insert backwards, index we are inserting at does not keep incrementing
             insertList.Sort(_comparer);
             int searchLength = _list.Count;

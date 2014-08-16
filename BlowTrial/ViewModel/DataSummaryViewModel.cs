@@ -9,11 +9,14 @@ using System.Text;
 using BlowTrial.Infrastructure.Extensions;
 using BlowTrial.Properties;
 using BlowTrial.Helpers;
+using BlowTrial.Infrastructure;
+using BlowTrial.Domain.Providers;
 
 namespace BlowTrial.ViewModel
 {
     public class DataSummaryViewModel : WorkspaceViewModel
     {
+        AgeUpdatingService _ageService;
         public DataSummaryViewModel(IRepository repository) : base(repository)
         {
             _participantData = _repository.GetParticipantSummary();
@@ -22,8 +25,14 @@ namespace BlowTrial.ViewModel
             _repository.ParticipantAdded += _repository_ParticipantAdded;
             _repository.ParticipantUpdated += _repository_ParticipantUpdated;
             _repository.ScreenedPatientAdded += _repository_ScreenedPatientAdded;
-        }
+            _ageService = AgeUpdatingMediator.GetService(repository);
+            _ageService.OnAgeIncrement += OnNewAge;
 
+        }
+        void OnNewAge(object sender, AgeIncrementingEventArgs e)
+        {
+            _repository_ParticipantUpdated(null, new ParticipantEventArgs(_repository.FindParticipant(e.Participant.Id)));
+        }
         void _repository_ScreenedPatientAdded(object sender, Domain.Providers.ScreenedPatientEventArgs e)
         {
             ScreenedPatientData.TotalCount++;
@@ -54,7 +63,7 @@ namespace BlowTrial.ViewModel
             NotifyPropertyChanged("ScreenedPatientData");
         }
 
-        void _repository_ParticipantAdded(object sender, Domain.Providers.ParticipantEventArgs e)
+        void _repository_ParticipantAdded(object sender, ParticipantEventArgs e)
         {
             var newPos =_participantData.AddParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.DataRequiredFunc(e.Participant));
 
@@ -70,7 +79,7 @@ namespace BlowTrial.ViewModel
             ParticipantData.Row[newPos.x].SummaryCells[newPos.y].ParticipantIds = _participantData.Participants[newPos.x][newPos.y];
         }
 
-        void _repository_ParticipantUpdated(object sender, Domain.Providers.ParticipantEventArgs e)
+        void _repository_ParticipantUpdated(object sender, ParticipantEventArgs e)
         {
             var move = _participantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.DataRequiredFunc(e.Participant));
             if (move.OldRow != move.NewRow)
@@ -85,6 +94,10 @@ namespace BlowTrial.ViewModel
         ParticipantsSummary _participantData;
         public ParticipantSummaryViewModel ParticipantData { get; private set; }
         public ScreenedPatientsSummary ScreenedPatientData { get; private set; }
+        ~DataSummaryViewModel()
+        {
+            _ageService.OnAgeIncrement -= OnNewAge;
+        }
     }
     public class ParticipantSummaryViewModel : NotifyChangeBase
     {

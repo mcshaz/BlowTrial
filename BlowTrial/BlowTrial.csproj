@@ -30,8 +30,8 @@
     <MinimumRequiredVersion>2.6.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>3.1.0.%2a</ApplicationVersion>
+    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationVersion>3.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -119,9 +119,8 @@
     <Reference Include="ErikEJ.SqlCe40">
       <HintPath>..\packages\ErikEJ.SqlCeBulkCopy.2.1.6.4\lib\net40\ErikEJ.SqlCe40.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\packages\DotNetZip.1.9.3\lib\net20\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="LinqKit, Version=1.1.1.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -188,7 +187,9 @@
     <Compile Include="Domain\Providers\Syncronisation.cs" />
     <Compile Include="Domain\Tables\AllocationBlock.cs" />
     <Compile Include="Domain\Tables\BalancedAllocation.cs" />
+    <Compile Include="Helpers\AgeUpdatingMediator.cs" />
     <Compile Include="Helpers\Attached.cs" />
+    <Compile Include="Helpers\BackupHelper.cs" />
     <Compile Include="Helpers\DateTimeSplitter.cs" />
     <Compile Include="Helpers\DetailsRequired.cs" />
     <Compile Include="Helpers\EventToCommand.cs" />
@@ -206,6 +207,7 @@
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\IQueryableExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\VersionNumberExtensions.cs" />
+    <Compile Include="Infrastructure\Interfaces\IBirthday.cs" />
     <Compile Include="Infrastructure\Interfaces\IDispatcherTimer.cs" />
     <Compile Include="Infrastructure\OrderedList.cs" />
     <Compile Include="Infrastructure\Randomising\IRandom.cs" />

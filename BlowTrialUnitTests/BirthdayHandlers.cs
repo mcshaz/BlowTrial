@@ -29,7 +29,6 @@ namespace BlowTrialUnitTests
                     TimeSpan.FromMinutes(1),
                     TimeSpan.FromHours(23),
                     TimeSpan.FromHours(-23));
-            moq.AgeService.Cleanup();
             moq.Moq.Verify(m => m.Stop(), Times.Once);
         }
 

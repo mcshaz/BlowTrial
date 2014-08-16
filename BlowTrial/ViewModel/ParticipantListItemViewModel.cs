@@ -14,10 +14,12 @@ using System.Windows.Media;
 
 namespace BlowTrial.ViewModel
 {
-    public class ParticipantListItemViewModel : CrudWorkspaceViewModel
+    public class ParticipantListItemViewModel : CrudWorkspaceViewModel, IBirthday
     {
         #region Fields
         string _searchableString;
+        DataRequiredOption? _dataRequired;
+        string _dataRequiredString;
         #endregion
 
         #region Constructors
@@ -225,22 +227,30 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("DateTimeBirth");
             }
         }
-        DataRequiredOption _dataRequired;
+
         public DataRequiredOption DataRequired
         {
             get 
             {
-                return _dataRequired = ParticipantModel.DataRequired; 
+                return (_dataRequired = ParticipantModel.DataRequired).Value; 
             }
         }
-        protected void RecalculateDataRequired()
+        public string DataRequiredString
         {
-            DataRequiredOption newRequired = ParticipantModel.DataRequired;
-            if (_dataRequired == newRequired) { return; }
-            _dataRequired = newRequired;
-            _dataRequiredString = null;
-            NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
+            get
+            {
+                return _dataRequiredString ?? (_dataRequiredString = DataRequiredStrings.GetDetails(_dataRequired ?? DataRequired));
+            }
         }
+
+        public int DataRequiredSortOrder
+        {
+            get
+            {
+                return (int)(_dataRequired ?? DataRequired);
+            }
+        }
+
         public virtual OutcomeAt28DaysOption OutcomeAt28Days
         {
             get { return ParticipantModel.OutcomeAt28Days; }
@@ -296,23 +306,6 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        string _dataRequiredString;
-        public string DataRequiredString
-        {
-            get
-            {
-                return _dataRequiredString ?? (_dataRequiredString = DataRequiredStrings.GetDetails(ParticipantModel.DataRequired));
-            }
-        }
-
-        public int DataRequiredSortOrder
-        {
-            get
-            {
-                return (int)_dataRequired;
-            }
-        }
-
         public string SearchableString
         {
             get
@@ -330,5 +323,13 @@ namespace BlowTrial.ViewModel
         }
         #endregion
 
+        protected void RecalculateDataRequired()
+        {
+            DataRequiredOption newRequired = ParticipantModel.DataRequired;
+            if (_dataRequired == newRequired) { return; }
+            _dataRequired = newRequired;
+            _dataRequiredString = null;
+            NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
+        }
     }
 }

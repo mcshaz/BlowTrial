@@ -10,56 +10,44 @@ using System.Collections.Specialized;
 
 namespace BlowTrial.Infrastructure
 {
-    public class AgeUpdatingService : ICleanup
+    public class AgeUpdatingService: ICleanup
     {
         #region fields
         readonly IDispatcherTimer _timer;
         int _nextIndex;
-        readonly OrderedList<KeyValuePair<TimeSpan, ParticipantListItemViewModel>> _participants;
+        readonly OrderedList<KeyValuePair<TimeSpan, IBirthday>> _participants;
         readonly TimeSpan _adjustIntoFuture = TimeSpan.FromSeconds(1);
         #endregion
 
         #region constructor
-        public AgeUpdatingService(IList<ParticipantListItemViewModel> participants, DispatcherPriority priority = DispatcherPriority.Normal)
-            : this (participants, new DispatcherTimerAdaper(priority))
+        public AgeUpdatingService(IEnumerable<IBirthday> participants, DispatcherPriority priority = DispatcherPriority.Normal, int capacity=4)
+            : this (participants, new DispatcherTimerAdaper(priority), capacity)
         {
         }
-        public AgeUpdatingService(IList<ParticipantListItemViewModel> participants, IDispatcherTimer timer)
+        public AgeUpdatingService(IEnumerable<IBirthday> participants, IDispatcherTimer timer, int capacity=4)
         {
             _timer = timer;
             _timer.Tick += OnTick;
-            _participants = new OrderedList<KeyValuePair<TimeSpan, ParticipantListItemViewModel>>(participants.Count, new KeyComparer<TimeSpan, ParticipantListItemViewModel>());
-            var now = DateTime.Now;
-            for (int i=0; i<participants.Count;i++)
-            {
-                ParticipantListItemViewModel p = participants[i];
-                p.AgeDays = (now - p.DateTimeBirth).Days;
-                if (p.AgeDays<=28 & p.IsKnownDead != true)
-                {
-                    _participants.Add(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(p.DateTimeBirth.TimeOfDay, p));
-                }
-            }
+            _participants = new OrderedList<KeyValuePair<TimeSpan, IBirthday>>(capacity, new KeyComparer<TimeSpan, IBirthday>());
+            _participants.AddRange(participants.Select(p => new KeyValuePair<TimeSpan, IBirthday>(p.DateTimeBirth.TimeOfDay, p)));
             
             if (_participants.Any())
             {
-
-                _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(now.TimeOfDay, null));
+                TimeSpan nowTime = DateTime.Now.TimeOfDay;
+                _nextIndex = _participants.BinarySearch(new KeyValuePair<TimeSpan, IBirthday>(nowTime, null));
                 if (_nextIndex < 0)
                 {
                     _nextIndex = ~_nextIndex;
                 }
-                TimeSpan rightNow = DateTime.Now.TimeOfDay;
                 TimeSpan interval;
                 if (_nextIndex >= _participants.Count)
                 {
                     _nextIndex = 0;
-                    interval = TimeSpan.FromDays(1) - rightNow + _participants[0].Key;
+                    interval = TimeSpan.FromDays(1) - nowTime + _participants[0].Key;
                 }
                 else
                 {
-                    interval = _participants[_nextIndex].Key <= rightNow
-                        ? new TimeSpan()
-                        : _participants[_nextIndex].Key - rightNow;
+                    interval = _participants[_nextIndex].Key - nowTime;
                 }
                 StartTimer(interval);
             }
@@ -97,27 +85,29 @@ namespace BlowTrial.Infrastructure
             //if (_participants.Count == 0) { _timer.Stop(); return; }
             do
             {
-                ParticipantListItemViewModel p =_participants[_nextIndex].Value;
                 if (OnAgeIncrement == null)
                 {
-                    p.AgeDays++;
-                }
-                else
-                {
-                    OnAgeIncrement(this, new AgeIncrementingEventArgs(p, p.AgeDays + 1));
-                }
-                if (p.AgeDays>28 || p.IsKnownDead == true)
-                {
-                    _participants.RemoveAt(_nextIndex);
-                    if (_participants.Count == 0) 
-                    {
-                        _timer.Stop();
-                        return; 
-                    }
-                }
-                else
-                {
                     _nextIndex++;
+                }
+                else
+                {
+                    IBirthday p = _participants[_nextIndex].Value;
+                    p.AgeDays = (now - p.DateTimeBirth).Days;
+                    AgeIncrementingEventArgs arg = new AgeIncrementingEventArgs(p);
+                    OnAgeIncrement(this, arg);
+                    if (arg.Remove)
+                    {
+                        _participants.RemoveAt(_nextIndex);
+                        if (_participants.Count == 0)
+                        {
+                            _timer.Stop();
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        _nextIndex++;
+                    }
                 }
                 if (_nextIndex >= _participants.Count)
                 {
@@ -147,18 +137,21 @@ namespace BlowTrial.Infrastructure
         #endregion
 
         #region methods
+        void SetAllAges()
+        {
+            DateTime now = DateTime.Now;
+            _participants.ForEach(p=>p.Value.AgeDays = (now - p.Value.DateTimeBirth).Days);
+        }
         void StartTimer(TimeSpan interval)
         {
             _timer.Interval = interval;
             System.Diagnostics.Debug.WriteLine("next interval set at:{0}", interval);
             _timer.Start();
         }
-        public void AddParticipant(ParticipantListItemViewModel p)
+        public void AddParticipant(IBirthday p)
         {
             DateTime now = DateTime.Now;
-            p.AgeDays = (now - p.DateTimeBirth).Days;
-            if (p.AgeDays > 28 || p.IsKnownDead == true) { return; }
-            var newItem = new KeyValuePair<TimeSpan, ParticipantListItemViewModel>(p.DateTimeBirth.TimeOfDay, p);
+            var newItem = new KeyValuePair<TimeSpan, IBirthday>(p.DateTimeBirth.TimeOfDay, p);
             var index = _participants.Add(newItem);
             while (--index>=0 && _participants[index].Key == p.DateTimeBirth.TimeOfDay) { }
             index++;
@@ -185,7 +178,7 @@ namespace BlowTrial.Infrastructure
                     {
                         //logically the only way to get here ie newitem time > now[start of function] & newitem time < now[right now] 
                         //is for time to have elapsed while function was executing
-                        p.AgeDays++;
+                        OnTick(this, null);
                         _nextIndex++;
                         return;
                     }
@@ -237,12 +230,11 @@ namespace BlowTrial.Infrastructure
 
     public class AgeIncrementingEventArgs : EventArgs
     {
-        internal AgeIncrementingEventArgs(ParticipantListItemViewModel p, int newAge)
+        internal AgeIncrementingEventArgs(IBirthday p)
         {
-            ParticipantViewModel = p;
-            NewAge = newAge;
+            Participant = p;
         }
-        public ParticipantListItemViewModel ParticipantViewModel {get; private set;}
-        public int NewAge { get; private set; }
+        public IBirthday Participant {get; private set;}
+        public bool Remove { get; set; }
     }
 }

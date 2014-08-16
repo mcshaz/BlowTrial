@@ -85,6 +85,9 @@
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"
           ItemsSource="{Binding Path=AllParticipants}"
             SelectedItem="{Binding Path=SelectedParticipant}"
+            VirtualizingStackPanel.IsVirtualizing="True"
+            VirtualizingPanel.IsVirtualizingWhenGrouping ="True"
+            VirtualizingStackPanel.ScrollUnit="Pixel"
           >
             <ListView.GroupStyle>
                 <StaticResourceExtension 

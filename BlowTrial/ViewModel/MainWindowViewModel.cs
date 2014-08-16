@@ -51,7 +51,21 @@ namespace BlowTrial.ViewModel
             ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
             Start3Arm = new RelayCommand(param => Set3Arm(), param => _can3WayRandomise);
+            _repository.FailedDbRestore += _repository_FailedDbRestore;
             ShowLogin();
+        }
+
+        void _repository_FailedDbRestore(object sender, FailedRestoreEvent args)
+        {
+            string folder = GetLastFolderName(args.Filename);
+            MessageBox.Show(string.Format("Unable to extract zip file from {0} - error:{1} occured", folder, args.Exception));
+        }
+
+        static string GetLastFolderName(string fullpath)
+        {
+            int lastBackslash = fullpath.LastIndexOf('\\')-1;
+            int secondLastBackslash = fullpath.LastIndexOf('\\',lastBackslash);
+            return fullpath.Substring(secondLastBackslash+1, lastBackslash - secondLastBackslash);
         }
 
         #endregion // Constructor
@@ -243,10 +257,11 @@ namespace BlowTrial.ViewModel
                 _backupService.Cleanup();
                 _backupService = null;
             }
-            var allPart = (AllParticipantsViewModel)Workspaces.FirstOrDefault(w=>w is AllParticipantsViewModel);
+            AgeUpdatingMediator.Cleanup();
+            var allPart = (AllParticipantsViewModel)Workspaces.FirstOrDefault(w=>w is AllParticipantsViewModel); //should probably be with idisposable - I ahve a memory of this being problematic due to order of disposal
             if (allPart != null)
             {
-                allPart.Cleanup();
+                allPart.Dispose();
             }
             _log = null;
         }
@@ -592,7 +607,12 @@ namespace BlowTrial.ViewModel
                 Cleanup();
                 if (disposing)
                 {
-                    if (_repository != null) { _repository.Dispose(); }
+                    if (_repository != null) 
+                    {
+                        _repository.FailedDbRestore -= _repository_FailedDbRestore;
+                        _repository.Dispose(); 
+                    
+                    }
                 }
                 // Indicate that the instance has been disposed.
                 _repository = null;

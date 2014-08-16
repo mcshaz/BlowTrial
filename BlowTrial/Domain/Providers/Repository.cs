@@ -19,6 +19,8 @@ using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Migrations;
 using BlowTrial.Infrastructure.Extensions;
 using System.Data.SqlServerCe;
+using BlowTrial.Helpers;
+using System.Threading;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -59,6 +61,7 @@ namespace BlowTrial.Domain.Providers
         private ITrialDataContext _dbContext;
         private const string BakExtension = ".sdf"; //obviously change if using non-compact
         private List<string> _baksForgoingMigration;
+        private log4net.ILog _log;
         #endregion // Members
 
         #region EventHandlers
@@ -66,6 +69,7 @@ namespace BlowTrial.Domain.Providers
         public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
+        public event EventHandler<FailedRestoreEvent> FailedDbRestore;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         #endregion // EventHandlers
 
@@ -73,6 +77,14 @@ namespace BlowTrial.Domain.Providers
         public Database Database
         {
             get { return _dbContext.Database; }
+        }
+        private log4net.ILog Log
+        {
+            get
+            {
+                return _log ?? (_log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
+
+            }
         }
         public IEnumerable<string> CloudDirectories
         {
@@ -139,7 +151,7 @@ namespace BlowTrial.Domain.Providers
             }
         }
 
-        public IEnumerable<StudyCentreModel> LocalStudyCentres
+        public ICollection<StudyCentreModel> LocalStudyCentres
         {
             get { return LocalStudyCentreDictionary.Values; }
         }
@@ -608,8 +620,9 @@ namespace BlowTrial.Domain.Providers
                 throw new InvalidOperationException("Backup called without cloud directories set to a single directory");
             }
 #endif
-            string cloudPathWithoutExtension = Path.GetFileNameWithoutExtension(bakFileName) + '_' + LocalStudyCentres.First().DuplicateIdCheck.ToString("N");
-            string cloudZipName = CloudDirectories.First() + '\\' + cloudPathWithoutExtension + ".zip"; 
+            string uniqueFileNameSuffix = '_' + LocalStudyCentres.First().DuplicateIdCheck.ToString("N");
+            string cloudDir = CloudDirectories.First();
+            string cloudZipName = cloudDir + '\\' + Path.GetFileNameWithoutExtension(bakFileName) + uniqueFileNameSuffix + ".zip"; 
             
             var cloudFile = new FileInfo(cloudZipName);
 
@@ -622,12 +635,15 @@ namespace BlowTrial.Domain.Providers
                 }
             }
             _dbContext.Dispose(); // only necessary for ce
-            string cloudBakName = cloudPathWithoutExtension + Path.GetExtension(bakFileName);
-            using (ZipFile zip = new ZipFile())
+            int dotPos = bakFileName.LastIndexOf('.');
+            string copiedFileName = bakFileName.Insert(dotPos, uniqueFileNameSuffix);
+            File.Copy(bakFileName, copiedFileName, true);
+
+            ThreadStart work = delegate
             {
-                zip.AddFile(bakFile.FullName, "").FileName = cloudBakName;
-                zip.Save(cloudFile.FullName);
-            }
+                BackupHelper.ZipVerifyAndPutInCloudDir(copiedFileName, cloudDir);
+            };
+            new Thread(work).Start();
             _dbContext = _createContext.Invoke();
         }
 
@@ -646,7 +662,17 @@ namespace BlowTrial.Domain.Providers
             {
                 using (ZipFile readFile = ZipFile.Read(fp.Zip.FullName))
                 {
-                    readFile[0].Extract(App.DataDirectory, ExtractExistingFileAction.OverwriteSilently);
+                    try
+                    {
+                        readFile[0].Extract(App.DataDirectory, ExtractExistingFileAction.OverwriteSilently);
+                    }
+                    catch(Exception e)
+                    {
+                        if (FailedDbRestore!=null)
+                        {
+                            FailedDbRestore(this, new FailedRestoreEvent(fp.Zip.FullName, e));
+                        }
+                    }
                 }
                 BakFileDetails newBak = new BakFileDetails();
                 bakDetails.Add(newBak);

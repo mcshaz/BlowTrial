@@ -2,6 +2,7 @@
 using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
+using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Converters;
 using BlowTrial.Infrastructure.CustomSorters;
@@ -21,7 +22,7 @@ using System.Windows.Data;
 
 namespace BlowTrial.ViewModel
 {
-    public class AllParticipantsViewModel : WorkspaceViewModel, ICleanup
+    public sealed class AllParticipantsViewModel : WorkspaceViewModel, IDisposable
     {
         #region Fields
         ParticipantUpdateView _updateWindow;
@@ -29,6 +30,7 @@ namespace BlowTrial.ViewModel
         AgeUpdatingService _ageUpdater;
         DeferredAction _deferredAction;
         string _searchString;
+        const int buffer = 16;
         #endregion // Fields
 
         #region Constructor
@@ -63,19 +65,22 @@ namespace BlowTrial.ViewModel
                 new Converter<Participant, ParticipantListItemViewModel>(p => new ParticipantListItemViewModel(Mapper.Map<ParticipantModel>(p))));
              * */
             var now = DateTime.Now;
-            var dt28prior = now.AddDays(-28);
-
-            List<ParticipantListItemViewModel> participantVMs = new List<ParticipantListItemViewModel>(_repository.Participants.Count());
+            int partCount = _repository.Participants.Count();
+            List<ParticipantListItemViewModel> participantVMs = new List<ParticipantListItemViewModel>(partCount);
             foreach (var p in _repository.Participants.Include("VaccinesAdministered").OrderByDescending(dp=>dp.Id) 
                          .Select(GetParticipantBaseMapExpression()))
             {
                 p.StudyCentre = _repository.FindStudyCentre(p.CentreId);
+                p.AgeDays = (now - p.DateTimeBirth).Days;
                 var newVm = new ParticipantListItemViewModel(p);
                 newVm.PropertyChanged += OnListItemChanged;
                 participantVMs.Add(newVm);
             }
 
-            _ageUpdater = new AgeUpdatingService(participantVMs);
+            _ageUpdater = AgeUpdatingMediator.GetService(participants: (from p in participantVMs
+                                                                        where p.IsKnownDead != true && p.AgeDays <=28
+                                                                        select (IBirthday)p),
+                                                           capacity:partCount);
             _ageUpdater.OnAgeIncrement += OnNewAge;
 
             AllParticipants = new ListCollectionView(participantVMs);
@@ -133,7 +138,7 @@ namespace BlowTrial.ViewModel
             const StringComparison compareBy = StringComparison.Ordinal;
             if (string.IsNullOrEmpty(_searchString))
             {
-                if (_groupByDataRequired) 
+                if (_groupByDataRequired && (_selectedDataRequired.Count < Enum.GetValues(typeof(DataRequiredOption)).Length-1 || _selectedCentres.Count < _repository.LocalStudyCentres.Count)) 
                 {
                     AllParticipants.Filter = new Predicate<object>(item => {
                         var vm = (ParticipantListItemViewModel)item;
@@ -223,8 +228,8 @@ namespace BlowTrial.ViewModel
 
             }
         }
-        IEnumerable<DataRequiredOption>_selectedDataRequired;
-        IEnumerable<StudyCentreModel> _selectedCentres;
+        ICollection<DataRequiredOption>_selectedDataRequired;
+        ICollection<StudyCentreModel> _selectedCentres;
         bool _groupByDataRequired;
         public bool GroupByDataRequired { 
             get 
@@ -374,8 +379,17 @@ namespace BlowTrial.ViewModel
         #region Events
         void OnNewAge(object sender, AgeIncrementingEventArgs e)
         {
-            AllParticipants.EditItem(e.ParticipantViewModel);
-            e.ParticipantViewModel.AgeDays = e.NewAge;
+            var participant = e.Participant as ParticipantListItemViewModel;
+            if (participant==null)
+            {
+                participant = ((List<ParticipantListItemViewModel>)AllParticipants.SourceCollection).First(p => p.Id == e.Participant.Id);
+                participant.AgeDays = e.Participant.AgeDays;
+            }
+            AllParticipants.EditItem(participant);
+            if (participant.IsKnownDead == true || participant.AgeDays > 28)
+            {
+                e.Remove = true;
+            }
             AllParticipants.CommitEdit();
         }
 
@@ -448,22 +462,33 @@ namespace BlowTrial.ViewModel
         }
         #endregion // Events
 
-        #region ICleanup Implementation
-        public void Cleanup()
+        #region IDisposable Implementation
+        bool disposed;
+        public void Dispose()
         {
-            _ageUpdater.Cleanup();
-            if (_deferredAction != null) { _deferredAction.Dispose(); }
+            if (!disposed)
+            {
+                if (_deferredAction != null)
+                {
+                    _deferredAction.Dispose();
+                }
+                _repository.ParticipantAdded -= OnParticipantAdded;
+                _repository.ParticipantUpdated -= HandleParticipantUpdate;
+                _ageUpdater.OnAgeIncrement -= OnNewAge;
+                Mediator.Unregister("MainWindowClosing", OnMainWindowClosing);
+                disposed = true;
+                GC.SuppressFinalize(this);
+            }
         }
         #endregion
 
         #region  finalizer
         ~AllParticipantsViewModel()
         {
-            _repository.ParticipantAdded -= OnParticipantAdded;
-            _repository.ParticipantUpdated -= HandleParticipantUpdate;
-            
-            Cleanup();
-            Mediator.Unregister("MainWindowClosing", OnMainWindowClosing);
+            if (!disposed)
+            {
+                Dispose();
+            }
         }
 
         #endregion // finalizer
