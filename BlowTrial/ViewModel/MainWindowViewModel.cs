@@ -51,6 +51,7 @@ namespace BlowTrial.ViewModel
             ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
             Start3Arm = new RelayCommand(param => Set3Arm(), param => _can3WayRandomise);
+            OpenBrowser = new RelayCommand(param => Process.Start(new ProcessStartInfo((string)param)));
             _repository.FailedDbRestore += _repository_FailedDbRestore;
             ShowLogin();
         }
@@ -164,6 +165,7 @@ namespace BlowTrial.ViewModel
         public RelayCommand Start3Arm { get; private set; }
         public RelayCommand ShowRandomisingMessagesCmd { get; private set; }
         public RelayCommand RequestReverseUpdateCmd { get; private set; }
+        public RelayCommand OpenBrowser { get; private set; }
         /*
         void ToggleEnvelopeRandomising()
         {

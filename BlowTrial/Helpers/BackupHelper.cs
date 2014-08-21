@@ -9,7 +9,7 @@ namespace BlowTrial.Helpers
     {
         static ILog GetLog()
         {
-            return log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            return log4net.LogManager.GetLogger("BackupHelper");
         }
         /// <summary>
         /// 

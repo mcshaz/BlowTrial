@@ -61,7 +61,6 @@ namespace BlowTrial.Domain.Providers
         private ITrialDataContext _dbContext;
         private const string BakExtension = ".sdf"; //obviously change if using non-compact
         private List<string> _baksForgoingMigration;
-        private log4net.ILog _log;
         #endregion // Members
 
         #region EventHandlers
@@ -78,14 +77,7 @@ namespace BlowTrial.Domain.Providers
         {
             get { return _dbContext.Database; }
         }
-        private log4net.ILog Log
-        {
-            get
-            {
-                return _log ?? (_log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
 
-            }
-        }
         public IEnumerable<string> CloudDirectories
         {
             get;

@@ -54,7 +54,7 @@ namespace BlowTrial
 #if !DEBUG
             if (_log == null)
             {
-                _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+                _log = LogManager.GetLogger(typeof(App));
             };
             if (CurrentClickOnceVersion != null)
             {
@@ -175,26 +175,29 @@ namespace BlowTrial
         static ILog _log;
         void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            _log.Error("Application_DispatcherUnhandledException", e.Exception);
-            if (_log.IsErrorEnabled)
+            _log.Fatal("Application_DispatcherUnhandledException", e.Exception);
+        }
+        protected override void OnExit(ExitEventArgs e)
+        {
+            MoveLogFileToCloud();
+            base.OnExit(e);
+        } 
+        internal static void MoveLogFileToCloud()
+        {
+            try
             {
-                try
+                string fn = GetLogOutputPath();
+                if (fn != null)
                 {
-                    string fn = GetLogOutputPath();
-                    if (fn != null)
-                    {
-                        MoveLogFileToCloud(fn);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("Application_DispatcherUnhandled_ImplementationException", ex);
-                    return;
+                    MoveLogFileToCloud(fn);
                 }
             }
+            catch (Exception ex)
+            {
+                _log.Error("Application_DispatcherUnhandled_ImplementationException", ex);
+                return;
+            }
         }
-
-
 
         static string GetLogOutputPath()
         {
@@ -219,10 +222,15 @@ namespace BlowTrial
                 var fileAppender = appender as FileAppender;
                 if (fileAppender != null)
                 {
-                    string fn = fileAppender.File;
                     try 
                     {
-                        File.Copy(fn, cloudFileName,true);
+                        FileInfo log = new FileInfo(fileAppender.File);
+                        if (!log.Exists) { return true; }
+                        FileInfo cloudLog = new FileInfo(cloudFileName);
+                        if (!cloudLog.Exists || log.LastWriteTimeUtc > cloudLog.LastWriteTimeUtc)
+                        {
+                            log.CopyTo(cloudFileName, true);
+                        }
                     }
                     catch (Exception ex)
                     {
