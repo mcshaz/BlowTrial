@@ -73,7 +73,6 @@ namespace BlowTrial.ViewModel
                 p.StudyCentre = _repository.FindStudyCentre(p.CentreId);
                 p.AgeDays = (now - p.DateTimeBirth).Days;
                 var newVm = new ParticipantListItemViewModel(p);
-                newVm.PropertyChanged += OnListItemChanged;
                 participantVMs.Add(newVm);
             }
 
@@ -218,9 +217,6 @@ namespace BlowTrial.ViewModel
                     break;
                 case "RegisteredAt":
                     AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantRegisteredAtSorter(): new ParticipantRegisteredAtSortDesc();
-                    break;
-                case "UserMarkedFinished":
-                    AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new ParticipantMarkedFinishedSorter() : new ParticipantMarkedFinishedSortDesc();
                     break;
                 case "TrialArm":
                     AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new TrialArmSorter() : new TrialArmSortDesc();
@@ -393,15 +389,6 @@ namespace BlowTrial.ViewModel
             AllParticipants.CommitEdit();
         }
 
-        void OnListItemChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "UserMarkedFinished")
-            {
-                var p = (ParticipantListItemViewModel)sender;
-                _repository.UpdateParticipant(p.Id, p.UserMarkedFinished);
-            }
-        }
-
         private void OnParticipantAdded(object sender, ParticipantEventArgs e)
         {
             var partBase = ParticipantBaseMap(e.Participant);
@@ -457,7 +444,6 @@ namespace BlowTrial.ViewModel
                              DeathOrLastContactDateTime = p.DeathOrLastContactDateTime,
                              CauseOfDeath = p.CauseOfDeath,
                              VaccinesAdministered = p.VaccinesAdministered,
-                             UserMarkedFinished = p.UserMarkedFinished
                          };
         }
         #endregion // Events

@@ -34,6 +34,7 @@ namespace BlowTrial.Models
         }
         string ValidateAllocationType()
         {
+            if (IsBackingUpToCloud != true) {return null;}
             return ValidateEnumNotDefault(AllocationType);
         }
         string ValidatePatientsPreviouslyRandomised()

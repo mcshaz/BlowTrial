@@ -48,7 +48,6 @@ namespace BlowTrial.Domain.Tables
         public int OutcomeAt28Id { get; set; }
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
-        public bool UserMarkedFinished { get; set; }
         
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
     }

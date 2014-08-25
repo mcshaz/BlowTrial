@@ -59,8 +59,6 @@ namespace BlowTrial.Infrastructure.Interfaces
             OutcomeAt28DaysOption outcomeAt28Days,
             string notes,
             IEnumerable<VaccineAdministered> vaccinesAdministered=null);
-        void UpdateParticipant(int id,
-            bool userMarkedFinished);
         UpdateParticipantViolationType UpdateParticipant(int id,
             string name,
             bool isMale,

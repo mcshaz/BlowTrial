@@ -62,7 +62,6 @@ namespace BlowTrial.Domain.Tables
         [StringLength(160)]
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
-        public bool UserMarkedFinished { get; set; }
 
         public virtual AllocationBlock Block { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }

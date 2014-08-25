@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.6.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>3.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -214,6 +214,10 @@
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\UtilityClasses.cs" />
     <Compile Include="Infrastructure\ThreadHelpers.cs" />
+    <Compile Include="Migrations\TrialData\201408250841098_RemoveUserMarkedFinished.cs" />
+    <Compile Include="Migrations\TrialData\201408250841098_RemoveUserMarkedFinished.Designer.cs">
+      <DependentUpon>201408250841098_RemoveUserMarkedFinished.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\TrialData\201407280249147_AllocationBlockIdNotNull.cs" />
     <Compile Include="Migrations\TrialData\201407280249147_AllocationBlockIdNotNull.Designer.cs">
       <DependentUpon>201407280249147_AllocationBlockIdNotNull.cs</DependentUpon>
@@ -560,6 +564,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="Migrations\TrialData\201408250841098_RemoveUserMarkedFinished.resx">
+      <DependentUpon>201408250841098_RemoveUserMarkedFinished.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\TrialData\201407280249147_AllocationBlockIdNotNull.resx">
       <DependentUpon>201407280249147_AllocationBlockIdNotNull.cs</DependentUpon>
     </EmbeddedResource>

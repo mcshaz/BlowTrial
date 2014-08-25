@@ -430,12 +430,6 @@ namespace BlowTrial.Domain.Providers
             }
             return returnVar;
         }
-        public void UpdateParticipant(int id, bool userMarkedFinished)
-        {
-            _dbContext.Database.ExecuteSqlCommand("Update Participants Set Participants.UserMarkedFinished = @markedFinished Where Participants.Id = @id",
-                new SqlCeParameter("@markedFinished", userMarkedFinished),
-                new SqlCeParameter("@id", id));
-        }
         /// <summary>
         /// 
         /// </summary>
