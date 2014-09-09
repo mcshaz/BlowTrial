@@ -127,7 +127,8 @@ namespace BlowTrial.Models
             {
                 return Strings.VaccineAdministeredVM_DuplicateVaccine;
             }
-            if (DataContextInitialiser.BcgVaccineIds.Contains(this.VaccineId) && AdministeredTo.VaccineModelsAdministered.Any(v => v.Id != this.Id && DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
+            var firstDual = AdministeredTo.VaccineModelsAdministered.FirstOrDefault(v => DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId));
+            if (firstDual != null && firstDual!=this)
             {
                 return Strings.VaccineAdministeredVM_DualBcg;
             }

@@ -18,6 +18,8 @@ using System.Collections.Specialized;
 //using System.Windows.Threading;
 using System.Windows.Media;
 using StatsForAge.DataSets;
+using log4net;
+using GenericToDataString;
 
 namespace BlowTrial.ViewModel
 {
@@ -27,6 +29,7 @@ namespace BlowTrial.ViewModel
         OutcomeAt28DaysSplitter _outcomeSplitter;
         string _dischargeExplanation;
         ObservableCollection<VaccineViewModel> _allVaccinesAvailable;
+        ILog _log;
         #endregion
 
         #region Constructors
@@ -35,6 +38,7 @@ namespace BlowTrial.ViewModel
             _outcomeSplitter = new OutcomeAt28DaysSplitter(ParticipantProgressModel.OutcomeAt28Days);
             SaveChanges = new RelayCommand(Save, CanSave);
             NewVaccineCmd = new RelayCommand(CreateNewVaccine, CanCreateNewVaccine);
+            _log = LogManager.GetLogger("ParticipantProgressViewModel");
 
             AttachCollections();
         }
@@ -817,22 +821,40 @@ namespace BlowTrial.ViewModel
                         :null;
             if (IsParticipantModelChanged || IsVaccineAdminChanged)
             {
-                _repository.UpdateParticipant(
-                    id : ParticipantProgressModel.Id,
-                    causeOfDeath : ParticipantProgressModel.CauseOfDeath,
-                    otherCauseOfDeathDetail: ParticipantProgressModel.OtherCauseOfDeathDetail,
-                    bcgAdverse : ParticipantProgressModel.BcgAdverse,
-                    bcgAdverseDetail: ParticipantProgressModel.BcgAdverseDetail,
-                    bcgPapuleAtDischarge : ParticipantProgressModel.BcgPapuleAtDischarge,
-                    bcgPapuleAt28days: ParticipantProgressModel.BcgPapuleAt28days,
-                    lastContactWeight : ParticipantProgressModel.LastContactWeight,
-                    lastWeightDate : ParticipantProgressModel.LastWeightDate,
-                    dischargeDateTime : ParticipantProgressModel.DischargeDateTime,
-                    deathOrLastContactDateTime : ParticipantProgressModel.DeathOrLastContactDateTime,
-                    outcomeAt28Days : ParticipantProgressModel.OutcomeAt28Days,
-                    notes : ParticipantProgressModel.Notes,
-                    vaccinesAdministered: vas
-                );
+#if !DEBUG
+                try
+                {
+#endif
+                    _repository.UpdateParticipant(
+                        id : ParticipantProgressModel.Id,
+                        causeOfDeath : ParticipantProgressModel.CauseOfDeath,
+                        otherCauseOfDeathDetail: ParticipantProgressModel.OtherCauseOfDeathDetail,
+                        bcgAdverse : ParticipantProgressModel.BcgAdverse,
+                        bcgAdverseDetail: ParticipantProgressModel.BcgAdverseDetail,
+                        bcgPapuleAtDischarge : ParticipantProgressModel.BcgPapuleAtDischarge,
+                        bcgPapuleAt28days: ParticipantProgressModel.BcgPapuleAt28days,
+                        lastContactWeight : ParticipantProgressModel.LastContactWeight,
+                        lastWeightDate : ParticipantProgressModel.LastWeightDate,
+                        dischargeDateTime : ParticipantProgressModel.DischargeDateTime,
+                        deathOrLastContactDateTime : ParticipantProgressModel.DeathOrLastContactDateTime,
+                        outcomeAt28Days : ParticipantProgressModel.OutcomeAt28Days,
+                        notes : ParticipantProgressModel.Notes,
+                        vaccinesAdministered: vas
+                    );
+#if !DEBUG
+                }
+                catch (Exception)
+                {
+                    _log.ErrorFormat("Error on Save operation - values:{0}ViewModel:{0}{1}{0}ParticipantModel:{0}{2}{0}IsVaccineAdminChanged:{3}{0}IsValid:{4}{0}VaccineModel:{0}{5}",
+                    Environment.NewLine,
+                    ListConverters.ToCSV(new ParticipantProgressViewModel[] { this }, '\t'),
+                    ListConverters.ToCSV(new ParticipantProgressModel[] { ParticipantProgressModel }, '\t'),
+                    IsVaccineAdminChanged,
+                    IsValid(),
+                    ListConverters.ToCSV(ParticipantProgressModel.VaccineModelsAdministered), '\t');
+                    throw;
+                }
+#endif
                 RecalculateDataRequired();
                 if (IsVaccineAdminChanged)
                 {

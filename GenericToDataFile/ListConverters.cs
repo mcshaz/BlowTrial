@@ -194,9 +194,9 @@ namespace GenericToDataString
             PropertyInfo[] allProps = collectionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             List<PropertyDetail> headers = new List<PropertyDetail>(allProps.Length);
             List<Func<object,string>> propertyConverters = new List<Func<object,string>>(allProps.Length);
-
             foreach (PropertyInfo pi in allProps)
             {
+                if (pi.GetIndexParameters().Length > 0) { continue; }
                 if (pi.CanRead
                     && !Attribute.IsDefined(pi, typeof(NotMappedAttribute)))
                 {

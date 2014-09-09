@@ -57,7 +57,6 @@ namespace BlowTrial.Models
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
-        public bool UserMarkedFinished { get; set; }
 
         public DateTime DateTimeBirth 
         { 

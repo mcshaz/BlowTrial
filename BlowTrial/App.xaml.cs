@@ -51,11 +51,8 @@ namespace BlowTrial
         }
         protected override void OnStartup(StartupEventArgs e)
         {
+            _log = LogManager.GetLogger(typeof(App));
 #if !DEBUG
-            if (_log == null)
-            {
-                _log = LogManager.GetLogger(typeof(App));
-            };
             if (CurrentClickOnceVersion != null)
             {
                 ThreadContext.Properties["deploymentVersion"] = CurrentClickOnceVersion;
@@ -148,6 +145,7 @@ namespace BlowTrial
                 }
             };
             mainWindowVm.RequestClose += handler;
+            _log.InfoFormat("Application started {0}", DateTime.Now);
             window.Show();
         }
 

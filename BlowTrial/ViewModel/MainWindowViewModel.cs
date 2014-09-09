@@ -19,6 +19,7 @@ using System.Windows;
 using CloudFileTransfer;
 using BlowTrial.Infrastructure.Extensions;
 using BlowTrial.Domain.Tables;
+using log4net;
 
 
 namespace BlowTrial.ViewModel
@@ -33,7 +34,8 @@ namespace BlowTrial.ViewModel
         ReadOnlyCollection<CommandViewModel> _commands;
         ObservableCollection<WorkspaceViewModel> _workspaces;
         BackupService _backupService;
-        TransferLog _log;
+        TransferLog _transferLog;
+        ILog _log;
 
         #endregion // Fields
 
@@ -48,11 +50,12 @@ namespace BlowTrial.ViewModel
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
-            ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => IsAuthorised);
+            ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => _backupService.IsToBackup);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
             Start3Arm = new RelayCommand(param => Set3Arm(), param => _can3WayRandomise);
             OpenBrowser = new RelayCommand(param => Process.Start(new ProcessStartInfo((string)param)));
             _repository.FailedDbRestore += _repository_FailedDbRestore;
+            _log = LogManager.GetLogger("Mainwindow");
             ShowLogin();
         }
 
@@ -249,6 +252,7 @@ namespace BlowTrial.ViewModel
             {
                 Cleanup();
                 ShowLogin();
+                _log.InfoFormat("logged out at {0}", DateTime.Now);
             }
         }
         void Cleanup()
@@ -265,11 +269,11 @@ namespace BlowTrial.ViewModel
             {
                 allPart.Dispose();
             }
-            _log = null;
+            _transferLog = null;
         }
         bool IsReplaceDbRequest()
         {
-            return _log != null && _log.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck);
+            return _transferLog != null && _transferLog.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck);
         }
         void ReplaceDb()
         {
@@ -282,7 +286,7 @@ namespace BlowTrial.ViewModel
                 _repository = null;
             }
             System.IO.File.Move(currentPath, currentPath.InsertDateStampToFileName());
-            TransferFile.AllowUpdate(_log, fi =>
+            TransferFile.AllowUpdate(_transferLog, fi =>
                 {
                     fi.MoveTo(currentPath);
                 });
@@ -507,7 +511,7 @@ namespace BlowTrial.ViewModel
                         var backDetails = BlowTrialDataService.GetBackupDetails(m);
                         if (backDetails.BackupData.IsBackingUpToCloud)
                         {
-                            _log = new TransferLog(backDetails.CloudDirectories.First() + '\\' + LogFileName);
+                            _transferLog = new TransferLog(backDetails.CloudDirectories.First() + '\\' + LogFileName);
                             _backupService.OnBackup += OnBackupInterval;
                         }
                     }
@@ -521,7 +525,7 @@ namespace BlowTrial.ViewModel
 
         void OnBackupInterval(object sender, EventArgs e)
         {
-            if (_log.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck))
+            if (_transferLog.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck))
             {
                 MessageBox.Show(Strings.BackupService_DBupdateRequestExplanation, Strings.BackupService_DBupdateRequestHeader);
             }
@@ -600,6 +604,7 @@ namespace BlowTrial.ViewModel
         }
         ~MainWindowViewModel()
         {
+            _log.InfoFormat("Main window closed at {0}", DateTime.Now);
             Dispose(false);
         }
         protected virtual void Dispose(bool disposing)

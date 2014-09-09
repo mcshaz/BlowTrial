@@ -1,14 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading;
 using System.Windows.Controls;
 using System.Security;
-using BlowTrial.Domain.Tables;
 using MvvmExtraLite.Helpers;
 using System.Linq;
 using BlowTrial.Security;
 using BlowTrial.Domain.Interfaces;
-using System.Diagnostics;
 //http://blog.magnusmontin.net/2013/03/24/custom-authorization-in-wpf/
 namespace BlowTrial.ViewModel
 {
@@ -80,6 +77,7 @@ namespace BlowTrial.ViewModel
                 passwordBox.Password = string.Empty; //reset
                 Status = string.Empty;
                 Mediator.NotifyColleagues("AuthorisationRequest", true);
+                log4net.LogManager.GetLogger("Authenticaton").InfoFormat("Logged in as {0}", user.Username);
                 CloseCmd.Execute(null);
             }
             catch (UnauthorizedAccessException)

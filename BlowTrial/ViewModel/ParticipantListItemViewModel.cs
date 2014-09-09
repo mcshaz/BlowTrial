@@ -292,20 +292,6 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public bool UserMarkedFinished
-        {
-            get { return this.ParticipantModel.UserMarkedFinished; }
-            set
-            {
-                if (value == this.ParticipantModel.UserMarkedFinished)
-                {
-                    return;
-                }
-                this.ParticipantModel.UserMarkedFinished = value;
-                NotifyPropertyChanged("UserMarkedFinished");
-            }
-        }
-
         public string SearchableString
         {
             get

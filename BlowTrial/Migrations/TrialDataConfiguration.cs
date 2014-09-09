@@ -31,7 +31,7 @@ namespace BlowTrial.Migrations.TrialData
             context.Vaccines.AddOrUpdate(DataContextInitialiser.RussianBcg); //Guid.ParseExact("8eeb3307-445c-475f-b150-a51a66559ae2","D")
             context.Vaccines.AddOrUpdate(DataContextInitialiser.Opv); //Guid.ParseExact("161a6935-3e1d-4362-9b23-eb6f49512fc9", "D") 
             context.Vaccines.AddOrUpdate(DataContextInitialiser.HepB); // Guid.ParseExact("a756168a-2e0b-404b-a903-bc0cfd02f33f", "D")
-            context.Vaccines.AddOrUpdate(v => v.Name, DataContextInitialiser.DanishBcg);
+            context.Vaccines.AddOrUpdate(DataContextInitialiser.DanishBcg);
             context.SaveChanges(true);
 
             /*
