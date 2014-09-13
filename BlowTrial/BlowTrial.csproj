@@ -203,6 +203,7 @@
     <Compile Include="Infrastructure\AgeUpdatingService.cs" />
     <Compile Include="Infrastructure\Converters\EnumToSeperatedWordsConverter.cs" />
     <Compile Include="Infrastructure\CustomSorters.cs" />
+    <Compile Include="Infrastructure\Extensions\ConcatExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\EntityExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\GestAgeExtensions.cs" />
     <Compile Include="Infrastructure\Extensions\IQueryableExtensions.cs" />

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using LinqKit;
 
 namespace BlowTrial.ViewModel
 {
@@ -17,13 +18,23 @@ namespace BlowTrial.ViewModel
         public AllViolationsViewModel(IRepository repository)
             : base(repository) 
         {
-            var allViolModels = Mapper.Map<List<ProtocolViolationModel>>(_repository.ProtocolViolations.ToList());
+            var participantMap = AllParticipantsViewModel.GetParticipantBaseMapExpression();
+            var allViolModels = (from v in _repository.ProtocolViolations.Include("Participant").AsNoTracking().AsExpandable()
+                                 select new ProtocolViolationModel
+                                 {
+                                    Id = v.Id,
+                                    Participant = participantMap.Invoke(v.Participant),
+                                    Details = v.Details,
+                                    ReportingInvestigator = v.ReportingInvestigator,
+                                    ReportingTimeLocal = v.ReportingTimeLocal,
+                                    ViolationType = v.ViolationType
+                                 }).ToList();
             foreach (var v in allViolModels)
             {
                 v.Participant.StudyCentre = _repository.FindStudyCentre(v.Participant.CentreId);
             }
             AllViolations = new ObservableCollection<ProtocolViolationViewModel>(allViolModels.Select(v => new ProtocolViolationViewModel(_repository, v)));
-            _repository.ProtocolViolationAdded += ViolationAdded;
+            _repository.ProtocolViolationAddOrUpdate += ViolationAdded;
             ShowViolationDetails = new RelayCommand(ShowViolationWindow, param => SelectedViolation != null && _violationWindow == null);
         }
 

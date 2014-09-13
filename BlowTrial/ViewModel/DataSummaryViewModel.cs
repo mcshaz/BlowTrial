@@ -11,6 +11,7 @@ using BlowTrial.Properties;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
 using BlowTrial.Domain.Providers;
+using BlowTrial.Domain.Tables;
 
 namespace BlowTrial.ViewModel
 {
@@ -25,9 +26,15 @@ namespace BlowTrial.ViewModel
             _repository.ParticipantAdded += _repository_ParticipantAdded;
             _repository.ParticipantUpdated += _repository_ParticipantUpdated;
             _repository.ScreenedPatientAdded += _repository_ScreenedPatientAdded;
+            _repository.ProtocolViolationAddOrUpdate += _repository_ProtocolViolationAddOrUpdate;
             _ageService = AgeUpdatingMediator.GetService(repository);
             _ageService.OnAgeIncrement += OnNewAge;
 
+        }
+
+        void _repository_ProtocolViolationAddOrUpdate(object sender, ProtocolViolationEventArgs e)
+        {
+            handleParrticipantUpdated(_repository.FindParticipantAndCollections(e.Violation.ParticipantId));
         }
         void OnNewAge(object sender, AgeIncrementingEventArgs e)
         {
@@ -81,14 +88,23 @@ namespace BlowTrial.ViewModel
 
         void _repository_ParticipantUpdated(object sender, ParticipantEventArgs e)
         {
-            var move = _participantData.AlterParticipant(e.Participant.Id, e.Participant.TrialArm, ParticipantBaseModel.DataRequiredFunc(e.Participant));
+            if (e.Participant.ProtocolViolations==null)
+            {
+                e.Participant.ProtocolViolations = _repository.ProtocolViolations.Where(v => v.ParticipantId == e.Participant.Id).ToList();
+            }
+
+            handleParrticipantUpdated(e.Participant);
+        }
+
+        void handleParrticipantUpdated(Participant participant)
+        {
+            var move = _participantData.AlterParticipant(participant.Id, participant.TrialArm, ParticipantBaseModel.DataRequiredFunc(participant));
             if (move.OldRow != move.NewRow)
             {
-                int col = _participantData.ColIndex(e.Participant.TrialArm);
+                int col = _participantData.ColIndex(participant.TrialArm);
                 ParticipantData.Row[move.OldRow].SummaryCells[col].ParticipantIds = _participantData.Participants[move.OldRow][col];
                 ParticipantData.Row[move.NewRow].SummaryCells[col].ParticipantIds = _participantData.Participants[move.NewRow][col];
             }
-
         }
 
         ParticipantsSummary _participantData;

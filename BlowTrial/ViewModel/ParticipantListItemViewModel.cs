@@ -141,6 +141,23 @@ namespace BlowTrial.ViewModel
                 if(ParticipantModel.VaccinesAdministered != value)
                 {
                     ParticipantModel.VaccinesAdministered = value;
+                    RecalculateDataRequired();
+                }
+            }
+        }
+
+        public virtual ICollection<ProtocolViolation> ProtocolViolations
+        {
+            get
+            {
+                return ParticipantModel.ProtocolViolations;
+            }
+            set
+            {
+                if (ParticipantModel.ProtocolViolations != value)
+                {
+                    ParticipantModel.ProtocolViolations = value;
+                    RecalculateDataRequired();
                 }
             }
         }
@@ -309,7 +326,7 @@ namespace BlowTrial.ViewModel
         }
         #endregion
 
-        protected void RecalculateDataRequired()
+        internal void RecalculateDataRequired()
         {
             DataRequiredOption newRequired = ParticipantModel.DataRequired;
             if (_dataRequired == newRequired) { return; }

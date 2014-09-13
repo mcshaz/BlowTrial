@@ -47,6 +47,8 @@ namespace BlowTrial.ViewModel
             SetDisplayName();
             _repository.ParticipantAdded += OnParticipantAdded;
             _repository.ParticipantUpdated += HandleParticipantUpdate;
+            _repository.ProtocolViolationAddOrUpdate += HandleAddOrUpdateViolation;
+            //_repository.ProtocolViolationUpdated += HandleUpdateViolation;
 
             SortGridView = new RelayCommand(SortParticipants);
             ShowUpdateDetails = new RelayCommand(ShowUpdateWindow, param => SelectedParticipant != null && _updateWindow==null);
@@ -67,7 +69,7 @@ namespace BlowTrial.ViewModel
             var now = DateTime.Now;
             int partCount = _repository.Participants.Count();
             List<ParticipantListItemViewModel> participantVMs = new List<ParticipantListItemViewModel>(partCount);
-            foreach (var p in _repository.Participants.Include("VaccinesAdministered").OrderByDescending(dp=>dp.Id) 
+            foreach (var p in _repository.Participants//.Include("VaccinesAdministered").Include("ProtocolViolations").OrderByDescending(dp => dp.Id) 
                          .Select(GetParticipantBaseMapExpression()))
             {
                 p.StudyCentre = _repository.FindStudyCentre(p.CentreId);
@@ -182,7 +184,7 @@ namespace BlowTrial.ViewModel
 
         ParticipantProgressViewModel GetSelectedProgressViewModel(int participantId)
         {
-                var part = Mapper.Map<ParticipantProgressModel>(_repository.FindParticipantAndVaccines(participantId));
+                var part = Mapper.Map<ParticipantProgressModel>(_repository.FindParticipantAndCollections(participantId));
                 return new ParticipantProgressViewModel(_repository, part);
         }
 
@@ -277,7 +279,7 @@ namespace BlowTrial.ViewModel
         void ShowEnrolDetails(object param)
         {
             var window = new PatientDemographicUpdateView();
-            var model =  Mapper.Map<PatientDemographicsModel>(_repository.FindParticipantAndVaccines(SelectedParticipant.Id));
+            var model =  Mapper.Map<PatientDemographicsModel>(_repository.FindParticipantAndCollections(SelectedParticipant.Id));
             model.StudyCentre = SelectedParticipant.StudyCentre;
             var vm = new PatientDemographicsViewModel(_repository, model);
             window.DataContext = vm;
@@ -311,6 +313,27 @@ namespace BlowTrial.ViewModel
                 sp.MothersName = p.MothersName;
                 sp.AdmissionWeight = p.AdmissionWeight;
             }
+        }
+        void HandleAddOrUpdateViolation(object sender, ProtocolViolationEventArgs e)
+        {
+            var assdVM = ((List<ParticipantListItemViewModel>)AllParticipants.SourceCollection)
+                .First(p => p.Id == e.Violation.ParticipantId);
+            AllParticipants.EditItem(assdVM); 
+            if (e.EventType == CRUD.Updated)
+            {
+                assdVM.ProtocolViolations.Remove(assdVM.ProtocolViolations.First(v => v.Id == e.Violation.Id));
+            }
+            assdVM.ProtocolViolations.Add(e.Violation);
+            assdVM.RecalculateDataRequired();
+            AllParticipants.CommitEdit();
+        }
+        void HandleUpdateViolation(object sender, ProtocolViolationEventArgs e)
+        {
+            var assdVM = ((List<ParticipantListItemViewModel>)AllParticipants.SourceCollection)
+                .First(p => p.Id == e.Violation.ParticipantId);
+            AllParticipants.EditItem(assdVM);
+            assdVM.RecalculateDataRequired();
+            AllParticipants.CommitEdit();
         }
         void HandleParticipantUpdate(object sender, ParticipantEventArgs e)
         {
@@ -427,7 +450,7 @@ namespace BlowTrial.ViewModel
                 return _participantBaseMap ?? (_participantBaseMap = GetParticipantBaseMapExpression().Compile());
             }
         }
-        static Expression<Func<Participant, ParticipantBaseModel>> GetParticipantBaseMapExpression()
+        internal static Expression<Func<Participant, ParticipantBaseModel>> GetParticipantBaseMapExpression()
         {
             return p => new ParticipantBaseModel
                          {
@@ -444,6 +467,7 @@ namespace BlowTrial.ViewModel
                              DeathOrLastContactDateTime = p.DeathOrLastContactDateTime,
                              CauseOfDeath = p.CauseOfDeath,
                              VaccinesAdministered = p.VaccinesAdministered,
+                             ProtocolViolations = p.ProtocolViolations
                          };
         }
         #endregion // Events

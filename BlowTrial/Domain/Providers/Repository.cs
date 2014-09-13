@@ -66,7 +66,7 @@ namespace BlowTrial.Domain.Providers
         #region EventHandlers
         public event EventHandler<ParticipantEventArgs> ParticipantAdded;
         public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
-        public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
+        public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAddOrUpdate;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         public event EventHandler<FailedRestoreEvent> FailedDbRestore;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
@@ -156,11 +156,12 @@ namespace BlowTrial.Domain.Providers
         #endregion // Properties
 
         #region Methods
-        public Participant FindParticipantAndVaccines(int participantId)
+        public Participant FindParticipantAndCollections(int participantId)
         {
             var returnVar = _dbContext.Participants.Find(participantId);
             returnVar.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(va => va.ParticipantId == participantId).ToList();
-                return returnVar;
+            returnVar.ProtocolViolations = _dbContext.ProtocolViolations.Where(pv => pv.ParticipantId == participantId).ToList();
+            return returnVar;
         }
         public Participant FindParticipant(int participantId)
         {
@@ -311,7 +312,8 @@ namespace BlowTrial.Domain.Providers
             {
                 throw new ArgumentException("Participant Id must have a value");
             }
-            if (violation.Id==0)
+            bool isToAdd = violation.Id==0;
+            if (isToAdd)
             { 
                 int centreId = (from p in _dbContext.Participants
                                 where p.Id == violation.ParticipantId
@@ -320,16 +322,16 @@ namespace BlowTrial.Domain.Providers
                 violation.ReportingTimeLocal = DateTime.Now;
                 violation.ReportingInvestigator = System.Threading.Thread.CurrentPrincipal.Identity.Name;
                 _dbContext.ProtocolViolations.Add(violation);
-                if (this.ProtocolViolationAdded != null)
-                {
-                    this.ProtocolViolationAdded(this, new ProtocolViolationEventArgs(violation));
-                }
             }
             else
             {
                 ((DbContext)_dbContext).AttachAndMarkModified(violation);
             }
             _dbContext.SaveChanges(true);
+            if (this.ProtocolViolationAddOrUpdate != null)
+            {
+                this.ProtocolViolationAddOrUpdate(this, new ProtocolViolationEventArgs(violation, isToAdd?CRUD.Created:CRUD.Updated));
+            }
         }
         const string BlockRandomisationViolation = "Alteration to data which would have affected randomisation:";
         static string GenderString(bool isMale)
@@ -498,7 +500,7 @@ namespace BlowTrial.Domain.Providers
             _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
-                var part = FindParticipantAndVaccines(participantId);
+                var part = FindParticipantAndCollections(participantId);
                 part.VaccinesAdministered = new List<VaccineAdministered>(vaccinesAdministered);
                 this.ParticipantUpdated(this, new ParticipantEventArgs(part));
             }
@@ -530,16 +532,10 @@ namespace BlowTrial.Domain.Providers
             var includedVaccineAdministeredIds = (from v in givenParticipantVaccines
                                                   where v.Id != 0
                                                   select v.Id);
-            var removeVaccineAdministeredIds = (from v in _dbContext.VaccinesAdministered
-                                                where v.ParticipantId == participantId && !includedVaccineAdministeredIds.Contains(v.Id)
-                                                select v.Id).ToList();
-            if (removeVaccineAdministeredIds.Any())
-            {
-                string sqlString = string.Format("DELETE FROM {0} WHERE Id IN ({1})",
-                    VaccineAdministered.VaccineAdminTableName,
-                    string.Join(",", removeVaccineAdministeredIds));
-                _dbContext.Database.ExecuteSqlCommand(sqlString);
-            }
+            _dbContext.VaccinesAdministered.RemoveRange(from v in _dbContext.VaccinesAdministered
+                                                        where v.ParticipantId == participantId && !includedVaccineAdministeredIds.Contains(v.Id)
+                                                        select v);
+            
 
             var newVaccines = givenParticipantVaccines.ToLookup(va => va.Id == 0);
             if (newVaccines.Contains(false))

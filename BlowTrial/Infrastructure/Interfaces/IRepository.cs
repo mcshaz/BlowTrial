@@ -25,7 +25,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         event EventHandler<ParticipantEventArgs> ParticipantAdded;
         event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         event EventHandler<ParticipantEventArgs> ParticipantUpdated;
-        event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAdded;
+        event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAddOrUpdate;
         event EventHandler<FailedRestoreEvent> FailedDbRestore;
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         Participant AddParticipant(
@@ -83,7 +83,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         DbQuery<VaccineAdministered> VaccinesAdministered { get; }
         IEnumerable<Vaccine> Vaccines { get; }
         DbQuery<ProtocolViolation> ProtocolViolations { get; }
-        Participant FindParticipantAndVaccines(int participantId);
+        Participant FindParticipantAndCollections(int participantId);
         Participant FindParticipant(int participantId);
         ProtocolViolation FindViolation(int violationId);
         IEnumerable<string> CloudDirectories { get; set; }

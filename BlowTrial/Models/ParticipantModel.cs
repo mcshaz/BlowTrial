@@ -29,7 +29,7 @@ namespace BlowTrial.Models
                 ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
-                        : (p.TrialArm != RandomisationArm.Control && !p.VaccinesAdministered.Any(v => DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
+                        : (p.TrialArm != RandomisationArm.Control && !p.ProtocolViolations.Any(pv=>pv.ViolationType == ViolationTypeOption.MajorWrongTreatment) && !p.VaccinesAdministered.Any(v => DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
                                 ? DbFunctions.DiffDays(p.DateTimeBirth, DateTime.Now) < 28
@@ -57,6 +57,7 @@ namespace BlowTrial.Models
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
+        public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }
 
         public DateTime DateTimeBirth 
         { 
@@ -286,8 +287,21 @@ namespace BlowTrial.Models
             }
             set
             {
-                //possibly a mistake - will create stack overflow if already inside automapper method.
-                VaccineModelsAdministered = AutoMapper.Mapper.Map<List<VaccineAdministeredModel>>(value);
+                var errId = value.FirstOrDefault(v => v.ParticipantId != this.Id);
+                if (errId != null)
+                {
+                    throw new ArgumentOutOfRangeException(String.Format(
+                        "The participantModelId is {0}, but VaccineAdministeredId {1} is for ParticipantId {2}",
+                        this.Id, errId.Id, errId.ParticipantId));
+                }
+                VaccineModelsAdministered = value.Select(v => new VaccineAdministeredModel
+                    {
+                        AdministeredAtDateTime = v.AdministeredAt, 
+                        AdministeredTo=this, 
+                        Id=this.Id, 
+                        VaccineGiven = v.VaccineGiven, 
+                        VaccineId=v.VaccineId
+                    }).ToList();
             }
         }
         

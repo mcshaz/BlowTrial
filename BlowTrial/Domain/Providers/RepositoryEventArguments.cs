@@ -34,13 +34,16 @@ namespace BlowTrial.Domain.Providers
 
         public ScreenedPatient ScreenedPatient { get; private set; }
     }
+    public enum CRUD { Created, Updated, Deleted }
     public class ProtocolViolationEventArgs : EventArgs
     {
-        public ProtocolViolationEventArgs(ProtocolViolation violation)
+        public ProtocolViolationEventArgs(ProtocolViolation violation, CRUD eventType)
         {
             this.Violation = violation;
+            this.EventType = eventType;
         }
 
         public ProtocolViolation Violation { get; private set; }
+        public CRUD EventType { get; private set; }
     }
 }

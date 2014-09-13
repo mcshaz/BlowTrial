@@ -58,9 +58,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.SqlServerCompact.6.1.1\lib\net45\EntityFramework.SqlServerCompact.dll</HintPath>
     </Reference>
-    <Reference Include="MathNet.Numerics, Version=3.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MathNet.Numerics.3.2.1\lib\net40\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\packages\MathNet.Numerics.3.2.3\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Mnemosyne">
       <HintPath>..\packages\Mnemosyne.1.0.0.1\lib\Mnemosyne.dll</HintPath>
@@ -105,6 +104,7 @@
     <Compile Include="BirthdayHandlers.cs" />
     <Compile Include="TestOrderedList.cs" />
     <Compile Include="DataRequiredTest.cs" />
+    <Compile Include="DataRequired.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlowTrial\BlowTrial.csproj">

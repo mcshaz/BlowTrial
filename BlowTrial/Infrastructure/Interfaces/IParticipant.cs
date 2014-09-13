@@ -16,5 +16,6 @@ namespace BlowTrial.Infrastructure.Interfaces
         CauseOfDeathOption CauseOfDeath {get;}
         RandomisationArm TrialArm {get;}
         ICollection<VaccineAdministered> VaccinesAdministered {get;}
+        ICollection<ProtocolViolation> ProtocolViolations { get; }
     }
 }

@@ -845,13 +845,11 @@ namespace BlowTrial.ViewModel
                 }
                 catch (Exception)
                 {
-                    _log.ErrorFormat("Error on Save operation - values:{0}ViewModel:{0}{1}{0}ParticipantModel:{0}{2}{0}IsVaccineAdminChanged:{3}{0}IsValid:{4}{0}VaccineModel:{0}{5}",
-                    Environment.NewLine,
-                    ListConverters.ToCSV(new ParticipantProgressViewModel[] { this }, '\t'),
-                    ListConverters.ToCSV(new ParticipantProgressModel[] { ParticipantProgressModel }, '\t'),
-                    IsVaccineAdminChanged,
-                    IsValid(),
-                    ListConverters.ToCSV(ParticipantProgressModel.VaccineModelsAdministered), '\t');
+                    _log.ErrorFormat("Error on Save operation - values:{0}{1}{0}IsVaccineAdminChanged:{2}{0}IsValid:{3}",
+                        Environment.NewLine,
+                        ObjectDumper.Dump(this),
+                        IsVaccineAdminChanged,
+                        IsValid());
                     throw;
                 }
 #endif
