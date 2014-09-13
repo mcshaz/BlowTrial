@@ -34,20 +34,29 @@ namespace BlowTrial.ViewModel
                 v.Participant.StudyCentre = _repository.FindStudyCentre(v.Participant.CentreId);
             }
             AllViolations = new ObservableCollection<ProtocolViolationViewModel>(allViolModels.Select(v => new ProtocolViolationViewModel(_repository, v)));
-            _repository.ProtocolViolationAddOrUpdate += ViolationAdded;
+            _repository.ProtocolViolationAddOrUpdate += ViolationAddOrUpdate;
             ShowViolationDetails = new RelayCommand(ShowViolationWindow, param => SelectedViolation != null && _violationWindow == null);
         }
 
-        private void ViolationAdded(object sender, Domain.Providers.ProtocolViolationEventArgs e)
+        private void ViolationAddOrUpdate(object sender, Domain.Providers.ProtocolViolationEventArgs e)
         {
-            if (e.Violation.Participant == null)
+            if (e.EventType == Domain.Providers.CRUD.Created)
             {
-                e.Violation.Participant = _repository.FindParticipant(e.Violation.ParticipantId);
+                if (e.Violation.Participant == null)
+                {
+                    e.Violation.Participant = _repository.FindParticipant(e.Violation.ParticipantId);
+                }
+                var violModel = Mapper.Map<ProtocolViolationModel>(e.Violation);
+
+                violModel.Participant.StudyCentre = _repository.FindStudyCentre(violModel.Participant.CentreId);
+                AllViolations.Add(new ProtocolViolationViewModel(_repository, violModel));
             }
-            var violModel = Mapper.Map<ProtocolViolationModel>(e.Violation);
-            
-            violModel.Participant.StudyCentre = _repository.FindStudyCentre(violModel.Participant.CentreId);
-            AllViolations.Add(new ProtocolViolationViewModel(_repository,violModel));
+            else
+            {
+                var alteredViol = AllViolations.First(v => v.Id == e.Violation.Id);
+                alteredViol.ViolationType = e.Violation.ViolationType;
+                alteredViol.Details = e.Violation.Details;
+            }
         }
         public ObservableCollection<ProtocolViolationViewModel> AllViolations { get; private set; }
         ProtocolViolationView _violationWindow;

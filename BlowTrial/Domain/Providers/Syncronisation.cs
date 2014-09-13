@@ -79,7 +79,8 @@ namespace BlowTrial.Domain.Providers
             UpdatedParticipantIds = new List<int>();
             AddedScreenPatientIds = new List<int>();
             AddedParticipantIds = new List<int>();
-            UpsertedProtocolViolationIds = new List<int>();
+            UpdatedProtocolViolationIds = new List<int>();
+            AddedProtocolViolationIds = new List<int>();
         }
         //public IEnumerable<StudyCentre> AddedCentres { get; private set; }
         public List<int> UpdatedParticipantIds { get; private set; }
@@ -87,7 +88,8 @@ namespace BlowTrial.Domain.Providers
         public List<int> AddedScreenPatientIds { get; private set; }
         //public IEnumerable<Vaccine> AddedVaccine { get; private set; }
         public List<int> UpsertedVaccineAdministeredIds { get; private set; }
-        public List<int> UpsertedProtocolViolationIds { get; private set; }
+        public List<int> UpdatedProtocolViolationIds { get; private set; }
+        public List<int> AddedProtocolViolationIds { get; private set; }
 
         void Added(Type t, IEnumerable<int> newIds)
         {
@@ -100,7 +102,7 @@ namespace BlowTrial.Domain.Providers
                     AddedScreenPatientIds.AddRange(newIds);
                     break;
                 case "ProtocolViolation":
-                    UpsertedProtocolViolationIds.AddRange(newIds);
+                    AddedProtocolViolationIds.AddRange(newIds);
                     break;
                 case "VaccineAdministered":
                     UpsertedVaccineAdministeredIds.AddRange(newIds);
@@ -115,7 +117,7 @@ namespace BlowTrial.Domain.Providers
                     UpdatedParticipantIds.AddRange(updatedIds);
                     break;
                 case "ProtocolViolation":
-                    UpsertedProtocolViolationIds.AddRange(updatedIds);
+                    UpdatedProtocolViolationIds.AddRange(updatedIds);
                     break;
                 case "VaccineAdministered":
                     UpsertedVaccineAdministeredIds.AddRange(updatedIds);

@@ -38,6 +38,10 @@ namespace BlowTrial.ViewModel
         #endregion
 
         #region Properties
+        public int Id
+        {
+            get { return _violation.Id; }
+        }
         public ViolationTypeOption ViolationType
         {
             get

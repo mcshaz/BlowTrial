@@ -760,11 +760,26 @@ namespace BlowTrial.Domain.Providers
             }
             if (ScreenedPatientAdded != null)
             {
-                foreach (var s in from screen in _dbContext.ScreenedPatients
-                                  where syncResults.AddedScreenPatientIds.Contains(screen.Id)
-                                  select screen)
+                foreach (var s in (from screen in _dbContext.ScreenedPatients
+                                    where syncResults.AddedScreenPatientIds.Contains(screen.Id)
+                                    select screen))
                 {
                     ScreenedPatientAdded(this, new ScreenedPatientEventArgs(s));
+                }
+            }
+            if (ProtocolViolationAddOrUpdate != null)
+            {
+                foreach (var pv in (from v in _dbContext.ProtocolViolations
+                                    where syncResults.AddedProtocolViolationIds.Contains(v.Id)
+                                    select v))
+                {
+                    ProtocolViolationAddOrUpdate(this, new ProtocolViolationEventArgs(pv, CRUD.Created));
+                }
+                foreach (var pv in (from v in _dbContext.ProtocolViolations
+                                    where syncResults.UpdatedProtocolViolationIds.Contains(v.Id)
+                                    select v))
+                {
+                    ProtocolViolationAddOrUpdate(this, new ProtocolViolationEventArgs(pv, CRUD.Updated));
                 }
             }
         }
