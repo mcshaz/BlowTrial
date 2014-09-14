@@ -62,7 +62,11 @@ namespace GenericToDataString
                 {
                     Type objectType = element.GetType();
                     Write("{{{0}(HashCode:{1})}}", objectType.FullName,element.GetHashCode());
-                    if (!AlreadyDumped(element))
+                    if (AlreadyDumped(element))
+                    {
+                        return null;
+                    }
+                    else
                     {
                         _currentIndent++;
                         MemberInfo[] members = objectType.GetMembers(BindingFlags.Public | BindingFlags.Instance);
@@ -134,7 +138,7 @@ namespace GenericToDataString
             _stringBuilder.AppendLine(space + value);
             _currentLine++;
         }
-
+        
         private string FormatValue(object o)
         {
             if (o == null)
