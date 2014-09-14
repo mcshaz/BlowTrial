@@ -53,7 +53,7 @@ namespace BlowTrial.ViewModel
                 if (value == _violation.ViolationType) { return; }
                 _isRecordAltered = true;
                 _violation.ViolationType = value;
-                NotifyPropertyChanged("ViolationType");
+                NotifyPropertyChanged("ViolationType", "SeverityDescription");
             }
         }
 
@@ -73,19 +73,42 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        const int abbrevMaxLength = 25;
+        int _abbrevLength = 25;
+        public int AbbrevLength 
+        { 
+            get { return _abbrevLength; }
+            set 
+            { 
+                if (value == _abbrevLength) { return; }
+                _abbrevLength = value;
+                AbbrevDetails = GetAbbrev();
+            }
+        }
+        string _abbrevDetails;
+        string GetAbbrev()
+        {
+            if (Details.Length <= AbbrevLength)
+            {
+                return Details;
+            }
+            else
+            {
+                return Details.Substring(0, AbbrevLength - 3) + "...";
+            }
+        }
         public string AbbrevDetails
         {
             get
             {
-                if (_violation.Details.Length <= abbrevMaxLength)
-                {
-                    return _violation.Details;
-                }
-                return _violation.Details.Substring(0, abbrevMaxLength - 3) + "...";
+                return _abbrevDetails ?? (_abbrevDetails=GetAbbrev());
+            }
+            private set
+            {
+                if (_abbrevDetails == value) { return; }
+                _abbrevDetails = value;
+                NotifyPropertyChanged("AbbrevDetails");
             }
         }
-
         public string Details
         {
             get
@@ -97,7 +120,8 @@ namespace BlowTrial.ViewModel
                 if (value == _violation.Details) { return; }
                 _isRecordAltered = true;
                 _violation.Details = value;
-                NotifyPropertyChanged("Details", "AbbrevDetails");
+                NotifyPropertyChanged("Details");
+                AbbrevDetails = GetAbbrev();
             }
         }
 

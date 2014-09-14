@@ -39,12 +39,13 @@
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"
           ItemsSource="{Binding Path=AllViolations}"
           SelectedItem="{Binding Path=SelectedViolation}"
+          SizeChanged="ListView_SizeChanged" Loaded="ListView_Loaded"
           >
             <ListView.View>
-                <GridView AllowsColumnReorder="True" >
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=ParticipantId, Mode=OneWay}" Header="Participant ID" />
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=ReportingTimeLocal, Mode=OneWay, StringFormat=d}" Header="Reported" />
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=SeverityDescription, Mode=OneWay}" Header="Severity" />
+                <GridView AllowsColumnReorder="True">
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=ParticipantId, Mode=OneWay}" Header="Participant ID" Width="Auto"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=ReportingTimeLocal, Mode=OneWay, StringFormat=d}" Header="Reported" Width="Auto"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=SeverityDescription, Mode=OneWay}" Header="Severity" Width="Auto"/>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=AbbrevDetails, Mode=OneWay}" Header="Details" />
                 </GridView>
             </ListView.View>

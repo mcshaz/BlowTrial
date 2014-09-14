@@ -845,9 +845,10 @@ namespace BlowTrial.ViewModel
                 }
                 catch (Exception)
                 {
-                    _log.ErrorFormat("Error on Save operation - values:{0}{1}{0}IsVaccineAdminChanged:{2}{0}IsValid:{3}",
+                    _log.ErrorFormat("Error on Save operation - ParticipantProgressModel:{0}{1}{0}vas{0}{2}{0}IsVaccineAdminChanged:{3}{0}IsValid:{4}",
                         Environment.NewLine,
-                        ObjectDumper.Dump(this),
+                        ObjectDumper.Dump(ParticipantProgressModel),
+                        ObjectDumper.Dump(vas),
                         IsVaccineAdminChanged,
                         IsValid());
                     throw;

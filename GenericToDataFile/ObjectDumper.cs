@@ -9,45 +9,38 @@ namespace GenericToDataString
     //http://stackoverflow.com/questions/852181/c-printing-all-properties-of-an-object
     public class ObjectDumper
     {
-        private int _level;
+        private int _currentIndent;
         private readonly int _indentSize;
         private readonly StringBuilder _stringBuilder;
-        private readonly List<int> _hashListOfFoundElements;
+        private readonly Dictionary<object,int> _hashListOfFoundElements;
+        private readonly char _indentChar;
+        private readonly int _depth;
+        private int _currentLine;
 
-        private ObjectDumper(int indentSize)
+        private ObjectDumper(int depth, int indentSize, char indentChar)
         {
+            _depth = depth;
             _indentSize = indentSize;
+            _indentChar = indentChar;
             _stringBuilder = new StringBuilder();
-            _hashListOfFoundElements = new List<int>();
+            _hashListOfFoundElements = new Dictionary<object,int>();
         }
 
-        public static string Dump(object element)
+        public static string Dump(object element, int depth = 4,int indentSize=2,char indentChar=' ')
         {
-            return Dump(element, 2);
-        }
-
-        public static string Dump(object element, int indentSize)
-        {
-            var instance = new ObjectDumper(indentSize);
+            var instance = new ObjectDumper(depth, indentSize, indentChar);
             return instance.DumpElement(element);
         }
 
         private string DumpElement(object element)
         {
+            if (_currentIndent > _depth) { return null; }
             if (element == null || element is ValueType || element is string)
             {
                 Write(FormatValue(element));
             }
             else
             {
-                var objectType = element.GetType();
-                if (!typeof(IEnumerable).IsAssignableFrom(objectType))
-                {
-                    Write("{{{0}}}", objectType.FullName);
-                    _hashListOfFoundElements.Add(element.GetHashCode());
-                    _level++;
-                }
-
                 var enumerableElement = element as IEnumerable;
                 if (enumerableElement != null)
                 {
@@ -55,86 +48,91 @@ namespace GenericToDataString
                     {
                         if (item is IEnumerable && !(item is string))
                         {
-                            _level++;
+                            _currentIndent++;
                             DumpElement(item);
-                            _level--;
+                            _currentIndent--;
                         }
                         else
                         {
-                            if (!AlreadyTouched(item))
-                                DumpElement(item);
-                            else
-                                Write("{{{0}}} <-- bidirectional reference found", item.GetType().FullName);
+                            DumpElement(item);                        
                         }
                     }
                 }
                 else
                 {
-                    MemberInfo[] members = element.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
-                    foreach (var memberInfo in members)
+                    Type objectType = element.GetType();
+                    Write("{{{0}(HashCode:{1})}}", objectType.FullName,element.GetHashCode());
+                    if (!AlreadyDumped(element))
                     {
-                        var fieldInfo = memberInfo as FieldInfo;
-                        var propertyInfo = memberInfo as PropertyInfo;
-
-                        if (fieldInfo == null && propertyInfo == null)
-                            continue;
-
-                        var type = fieldInfo != null ? fieldInfo.FieldType : propertyInfo.PropertyType;
-                        object value = fieldInfo != null
-                                           ? fieldInfo.GetValue(element)
-                                           : propertyInfo.GetValue(element, null);
-
-                        if (type.IsValueType || type == typeof(string))
+                        _currentIndent++;
+                        MemberInfo[] members = objectType.GetMembers(BindingFlags.Public | BindingFlags.Instance);
+                        foreach (var memberInfo in members)
                         {
-                            Write("{0}: {1}", memberInfo.Name, FormatValue(value));
-                        }
-                        else
-                        {
-                            var isEnumerable = typeof(IEnumerable).IsAssignableFrom(type);
-                            Write("{0}: {1}", memberInfo.Name, isEnumerable ? "..." : "{ }");
+                            var fieldInfo = memberInfo as FieldInfo;
+                            var propertyInfo = memberInfo as PropertyInfo;
 
-                            var alreadyTouched = !isEnumerable && AlreadyTouched(value);
-                            _level++;
-                            if (!alreadyTouched)
-                                DumpElement(value);
+                            if (fieldInfo == null && (propertyInfo == null || !propertyInfo.CanRead || propertyInfo.GetIndexParameters().Length > 0))
+                                continue;
+
+                            var type = fieldInfo != null ? fieldInfo.FieldType : propertyInfo.PropertyType;
+                            object value;
+                            try
+                            {
+                                value = fieldInfo != null
+                                                   ? fieldInfo.GetValue(element)
+                                                   : propertyInfo.GetValue(element, null);
+                            }
+                            catch(Exception e)
+                            {
+                                Write("{0} failed with:{1}",memberInfo.Name,(e.GetBaseException() ?? e).Message);
+                                continue;
+                            }
+
+                            if (type.IsValueType || type == typeof(string))
+                            {
+                                Write("{0}: {1}", memberInfo.Name, FormatValue(value));
+                            }
                             else
-                                Write("{{{0}}} <-- bidirectional reference found", value.GetType().FullName);
-                            _level--;
-                        }
-                    }
-                }
+                            {
+                                var isEnumerable = typeof(IEnumerable).IsAssignableFrom(type);
+                                Write("{0}: {1}", memberInfo.Name, isEnumerable ? "..." : "{ }");
 
-                if (!typeof(IEnumerable).IsAssignableFrom(objectType))
-                {
-                    _level--;
+                                _currentIndent++;
+                                DumpElement(value);
+                                _currentIndent--;
+                            }
+                        }
+                        _currentIndent--;
+                    }
                 }
             }
 
             return _stringBuilder.ToString();
         }
 
-        private bool AlreadyTouched(object value)
+        private bool AlreadyDumped(object value)
         {
             if (value == null)
                 return false;
-
-            var hash = value.GetHashCode();
-            for (var i = 0; i < _hashListOfFoundElements.Count; i++)
+            int lineNo;
+            if (_hashListOfFoundElements.TryGetValue(value, out lineNo))
             {
-                if (_hashListOfFoundElements[i] == hash)
-                    return true;
+                Write("(reference already dumped - line:{0})", lineNo);
+                return true;
             }
+            _hashListOfFoundElements.Add(value, _currentLine);
             return false;
         }
 
         private void Write(string value, params object[] args)
         {
-            var space = new string(' ', _level * _indentSize);
+            var space = new string(_indentChar, _currentIndent * _indentSize);
 
             if (args != null)
                 value = string.Format(value, args);
 
             _stringBuilder.AppendLine(space + value);
+            _currentLine++;
         }
 
         private string FormatValue(object o)
@@ -149,7 +147,7 @@ namespace GenericToDataString
                 return string.Format("\"{0}\"", o);
 
             if (o is char && (char)o == '\0') 
-                return string.Empty; 
+                return "\"\""; 
 
             if (o is ValueType)
                 return (o.ToString());
