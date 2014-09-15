@@ -29,15 +29,40 @@ namespace GenericToDataString
         public static string Dump(object element, int depth = 4,int indentSize=2,char indentChar=' ')
         {
             var instance = new ObjectDumper(depth, indentSize, indentChar);
-            return instance.DumpElement(element);
+            return instance.DumpElement(element, true);
         }
 
-        private string DumpElement(object element)
+        private string DumpElement(object element, bool isTopOfTree = false)
         {
             if (_currentIndent > _depth) { return null; }
-            if (element == null || element is ValueType || element is string)
+            if (element == null || element is string)
             {
                 Write(FormatValue(element));
+            }
+            else if (element is ValueType)
+            {
+                Type objectType = element.GetType();
+                bool isWritten = false;
+                if (objectType.IsGenericType)
+                {
+                    Type baseType = objectType.GetGenericTypeDefinition();
+                    if (baseType == typeof(KeyValuePair<,>))
+                    {
+                        isWritten = true;
+                        Write("Key:");
+                        _currentIndent++;
+                        DumpElement(objectType.GetProperty("Key").GetValue(element, null));
+                        _currentIndent--;
+                        Write("Value:");
+                        _currentIndent++;
+                        DumpElement(objectType.GetProperty("Value").GetValue(element, null));
+                        _currentIndent--;
+                    }
+                }
+                if (!isWritten)
+                {
+                    Write(FormatValue(element));
+                }
             }
             else
             {
@@ -62,11 +87,7 @@ namespace GenericToDataString
                 {
                     Type objectType = element.GetType();
                     Write("{{{0}(HashCode:{1})}}", objectType.FullName,element.GetHashCode());
-                    if (AlreadyDumped(element))
-                    {
-                        return null;
-                    }
-                    else
+                    if (!AlreadyDumped(element))
                     {
                         _currentIndent++;
                         MemberInfo[] members = objectType.GetMembers(BindingFlags.Public | BindingFlags.Instance);
@@ -111,7 +132,7 @@ namespace GenericToDataString
                 }
             }
 
-            return _stringBuilder.ToString();
+            return isTopOfTree? _stringBuilder.ToString():null;
         }
 
         private bool AlreadyDumped(object value)

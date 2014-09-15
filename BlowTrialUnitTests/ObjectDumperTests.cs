@@ -35,6 +35,9 @@ namespace BlowTrialUnitTests
             c.Add(1, "one");
             c.Add(2, "two");
             Console.Write(GenericToDataString.ObjectDumper.Dump(c));
+            var d = new Dictionary<int,VaccineAdministeredModel>();
+            d.Add(1, va);
+            Console.Write(GenericToDataString.ObjectDumper.Dump(d));
         }
     }
 }
