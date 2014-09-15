@@ -169,10 +169,19 @@ namespace GenericToDataString
                 return (((DateTime)o).ToShortDateString());
 
             if (o is string)
-                return string.Format("\"{0}\"", o);
+                return "\"" + (string)o + "\"";
 
-            if (o is char && (char)o == '\0') 
-                return "\"\""; 
+            if (o is char)
+            {
+                if (o.Equals('\0'))
+                {
+                    return "''";
+                }
+                else
+                {
+                    return "'" + (char)o + "'";
+                }
+            }
 
             if (o is ValueType)
                 return (o.ToString());
