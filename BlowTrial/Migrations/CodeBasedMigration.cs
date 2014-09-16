@@ -8,6 +8,7 @@ using System.Data.Entity;
 using System.Data.Common;
 using System.Data.SqlServerCe;
 using BlowTrial.Domain.Providers;
+using log4net;
 
 namespace BlowTrial.Migrations
 {
@@ -76,7 +77,14 @@ namespace BlowTrial.Migrations
             var migrator = new DbMigrator(configuration);
             if (migrator.GetPendingMigrations().Any())
             {
-                migrator.Update();
+                try
+                {
+                    migrator.Update();
+                }
+                catch(Exception e)
+                {
+                    LogManager.GetLogger("BlowTrial.Migrations.CodeBasedMigrations").Error("Migration failed",e);
+                }
                 returnVar = true;
             }
             return returnVar;

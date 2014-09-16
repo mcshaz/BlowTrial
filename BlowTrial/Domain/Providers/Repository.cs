@@ -282,6 +282,7 @@ namespace BlowTrial.Domain.Providers
             _dbContext.SaveChanges(true);
             if (this.ParticipantAdded != null)
             {
+                participant.ProtocolViolations = new List<ProtocolViolation>();
                 this.ParticipantAdded(this, new ParticipantEventArgs(participant));
             }
         }
@@ -737,7 +738,7 @@ namespace BlowTrial.Domain.Providers
 
             if (ParticipantAdded != null)
             {
-                foreach(var p in (from part in _dbContext.Participants.Include("VaccinesAdministered")
+                foreach(var p in (from part in _dbContext.Participants.Include("VaccinesAdministered").Include("ProtocolViolations")
                                   where syncResults.AddedParticipantIds.Contains(part.Id)
                                   select part))
                 {
@@ -746,11 +747,11 @@ namespace BlowTrial.Domain.Providers
             }
             if (ParticipantUpdated != null)
             {
-                foreach (var p in (from part in _dbContext.Participants.Include("VaccinesAdministered")
+                foreach (var p in (from part in _dbContext.Participants.Include("VaccinesAdministered").Include("ProtocolViolations")
                                    where syncResults.UpdatedParticipantIds.Contains(part.Id)
                                    select part)
                                    .Concat(
-                                   (from va in _dbContext.VaccinesAdministered.Include("Participant.VaccinesAdministered")
+                                   (from va in _dbContext.VaccinesAdministered.Include("Participant.VaccinesAdministered").Include("Participant.ProtocolViolations")
                                     where !syncResults.AddedParticipantIds.Contains(va.ParticipantId)
                                         && !syncResults.UpdatedParticipantIds.Contains(va.ParticipantId)
                                     select va.AdministeredTo)))
