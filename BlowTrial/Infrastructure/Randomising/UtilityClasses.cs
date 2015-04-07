@@ -73,6 +73,10 @@ namespace BlowTrial.Infrastructure.Randomising
                 ratios.Add(RandomisationArm.Control, 1);
                 ratios.Add(RandomisationArm.MoreauBcg, 1);
                 componentDict.Add(AllocationGroups.Brazil2Arm, new BlockComponent(2, ratios));
+                ratios = new Dictionary<RandomisationArm, int>(2);
+                ratios.Add(RandomisationArm.Control, 1);
+                ratios.Add(RandomisationArm.DanishBcg, 1);
+                componentDict.Add(AllocationGroups.Danish2Arm, new BlockComponent(2, ratios));
                 _allBlocks = new ReadOnlyDictionary<AllocationGroups,BlockComponent>(componentDict);
             }
             return _allBlocks;

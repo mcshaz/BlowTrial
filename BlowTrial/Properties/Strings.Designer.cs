@@ -70,6 +70,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Danish 2 Arm (Control &amp; Danish BCG).
+        /// </summary>
+        public static string AllocationGroups_Danish2Arm {
+            get {
+                return ResourceManager.GetString("AllocationGroups_Danish2Arm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to India 2 arm (Control &amp; BCG India).
         /// </summary>
         public static string AllocationGroups_India2Arm {
@@ -88,29 +97,11 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to India - 3 arm (balanced assignnment).
+        ///   Looks up a localized string similar to India 3 arm (catch up assignnment).
         /// </summary>
-        public static string AllocationGroups_IndiaThreeArmBalanced {
+        public static string AllocationGroups_India3ArmUnbalanced {
             get {
-                return ResourceManager.GetString("AllocationGroups_IndiaThreeArmBalanced", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to India - 3 arm (catch up assignnment).
-        /// </summary>
-        public static string AllocationGroups_IndiaThreeArmUnbalanced {
-            get {
-                return ResourceManager.GetString("AllocationGroups_IndiaThreeArmUnbalanced", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to India - 2 arm.
-        /// </summary>
-        public static string AllocationGroups_IndiaTwoArm {
-            get {
-                return ResourceManager.GetString("AllocationGroups_IndiaTwoArm", resourceCulture);
+                return ResourceManager.GetString("AllocationGroups_India3ArmUnbalanced", resourceCulture);
             }
         }
         
@@ -120,6 +111,15 @@ namespace BlowTrial.Properties {
         public static string AllParticipantsViewModel_DisplayName {
             get {
                 return ResourceManager.GetString("AllParticipantsViewModel_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &amp;.
+        /// </summary>
+        public static string And {
+            get {
+                return ResourceManager.GetString("And", resourceCulture);
             }
         }
         
@@ -1087,7 +1087,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1:n0}..
+        ///   Looks up a localized string similar to {0} has been randomised to the CONTROL arm with an ID of {1}..
         /// </summary>
         public static string NewPatient_ToControl {
             get {
@@ -1096,7 +1096,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm ({1}) with an ID of {2:n0}..
+        ///   Looks up a localized string similar to {0} has been randomised to the INTERVENTION arm with an ID of {1}..
         /// </summary>
         public static string NewPatient_ToIntervention {
             get {
@@ -1762,47 +1762,56 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please only give BCG &amp; OPV once nearing discharge from hospital..
-        /// </summary>
-        public static string RandomisedMessagesViewModel_DefaultControl {
-            get {
-                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultControl", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discharge from Hospital.
-        /// </summary>
-        public static string RandomisedMessagesViewModel_DefaultDischarge_Hospital {
-            get {
-                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultDischarge_Hospital", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discharge from NICU or Level 2 Nursery.
-        /// </summary>
-        public static string RandomisedMessagesViewModel_DefaultDischarge_NICU {
-            get {
-                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultDischarge_NICU", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please give BCG &amp; OPV as soon as possible..
-        /// </summary>
-        public static string RandomisedMessagesViewModel_DefaultIntervention {
-            get {
-                return ResourceManager.GetString("RandomisedMessagesViewModel_DefaultIntervention", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Messages On Randomisation.
         /// </summary>
         public static string RandomisedMessagesViewModel_DisplayName {
             get {
                 return ResourceManager.GetString("RandomisedMessagesViewModel_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please only give BCG &amp; OPV once nearing {0}..
+        /// </summary>
+        public static string RandomisingMessages_DefaultControl {
+            get {
+                return ResourceManager.GetString("RandomisingMessages_DefaultControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please give {0} as soon as possible..
+        /// </summary>
+        public static string RandomisingMessages_DefaultIntervention {
+            get {
+                return ResourceManager.GetString("RandomisingMessages_DefaultIntervention", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to discharge from {0}.
+        /// </summary>
+        public static string RandomisingMessages_DischargeFrom {
+            get {
+                return ResourceManager.GetString("RandomisingMessages_DischargeFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to HOSPITAL.
+        /// </summary>
+        public static string RandomisingMessages_Hospital {
+            get {
+                return ResourceManager.GetString("RandomisingMessages_Hospital", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NICU or Level 2 Nursery.
+        /// </summary>
+        public static string RandomisingMessages_NICU {
+            get {
+                return ResourceManager.GetString("RandomisingMessages_NICU", resourceCulture);
             }
         }
         

@@ -11,6 +11,7 @@ namespace BlowTrial.ViewModel
         #region Fields
         protected readonly IRepository _repository;
          #endregion
+
         #region Constructor
 
         protected DataRepositoryViewModel(IRepository repository)

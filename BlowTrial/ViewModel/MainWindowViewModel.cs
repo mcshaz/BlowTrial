@@ -46,13 +46,12 @@ namespace BlowTrial.ViewModel
         {
             this.Version = BlowTrial.App.CurrentClickOnceVersion ?? ("Development Version: " + App.CurrentAppVersion.ToVersionString());
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
-            ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null && _backupService.IsToBackup);
+            ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null /* && _backupService.IsToBackup */);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
-            ShowRandomisingMessagesCmd = new RelayCommand(param => ShowRandomisingMessages(), param => _backupService.IsToBackup);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
-            Start3Arm = new RelayCommand(param => Set3Arm(), param => _can3WayRandomise);
+
             OpenBrowser = new RelayCommand(param => Process.Start(new ProcessStartInfo((string)param)));
             _repository.FailedDbRestore += _repository_FailedDbRestore;
             _log = LogManager.GetLogger("Mainwindow");
@@ -78,20 +77,6 @@ namespace BlowTrial.ViewModel
         public string ProjectName
         {
             get { return Strings.Blowtrial_ProjectName; }
-        }
-        bool _can3WayRandomise;
-        public bool Can3WayRandomise
-        {
-            get
-            {
-                return _can3WayRandomise;
-            }
-            private set
-            {
-                if (value == _can3WayRandomise) { return; }
-                _can3WayRandomise = value;
-                NotifyPropertyChanged("Can3WayRandomise");
-            }
         }
         bool _isEnvelopeRandomising;
         bool IsEnvelopeRandomising { 
@@ -220,16 +205,7 @@ namespace BlowTrial.ViewModel
         #endregion // Workspaces
 
         #region Private Helpers
-        void Set3Arm()
-        {
-            if (MessageBox.Show(
-                "Are you sure you want to continue - this step cannot be undone. Please only click OK if Danish BCG is available.", "Are you sure?",
-                MessageBoxButton.OKCancel) == MessageBoxResult.OK)
-            {
-                BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.India3ArmUnbalanced);
-                Can3WayRandomise = false;
-            }
-        }
+
         void Logout()
         {
 
@@ -413,26 +389,9 @@ namespace BlowTrial.ViewModel
                 siteSetVM =
                     new StudySitesViewModel
                         (new StudySitesModel(Mapper.Map<IEnumerable<StudySiteItemModel>>(_repository.LocalStudyCentres)), _repository);
-                
                 this.Workspaces.Add(siteSetVM);
             }
             this.SetActiveWorkspace(siteSetVM);
-        }
-
-        void ShowRandomisingMessages()
-        {
-            var messagesVM = (RandomisedMessagesViewModel)Workspaces.FirstOrDefault(w => w is RandomisedMessagesViewModel);
-            if (messagesVM == null)
-            {
-                var messages = BlowTrialDataService.GetRandomisingMessage();
-                RandomisedMessagesModel model = (messages==null)
-                    ? new RandomisedMessagesModel()
-                    : Mapper.Map<RandomisedMessagesModel>(messages);
-                messagesVM = new RandomisedMessagesViewModel(model);
-
-                this.Workspaces.Add(messagesVM);
-            }
-            this.SetActiveWorkspace(messagesVM);
         }
 
         void ShowCloudDirectory()
@@ -506,8 +465,6 @@ namespace BlowTrial.ViewModel
                     {
                         _backupService = new BackupService(_repository, m);
                         //IsEnvelopeRandomising = BlowTrialDataService.IsEnvelopeRandomising(m);
-
-                        Can3WayRandomise = BlowTrialDataService.GetDefaultAllocationGroup(m) == AllocationGroups.India2Arm;
                         var backDetails = BlowTrialDataService.GetBackupDetails(m);
                         if (backDetails.BackupData.IsBackingUpToCloud)
                         {

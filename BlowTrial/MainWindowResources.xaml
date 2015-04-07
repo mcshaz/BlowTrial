@@ -32,10 +32,6 @@ This resource dictionary is used by the MainWindow.
         <vw:BackupView />
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type vm:RandomisedMessagesViewModel}">
-        <vw:RandomisedMessageView />
-    </DataTemplate>
-
     <DataTemplate DataType="{x:Type vm:CreateCsvViewModel}">
         <vw:CreateCsvView />
     </DataTemplate>
@@ -60,14 +56,6 @@ This resource dictionary is used by the MainWindow.
         <vw:SiteSettingsView />
     </DataTemplate>
                   
-    <!--the menu 3 way randomising item-->
-    <Style x:Key="CollapseIf3Way" TargetType="MenuItem">
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding Can3WayRandomise, Mode=OneWay}" Value="false">
-                <Setter Property="Visibility" Value="Collapsed" />
-            </DataTrigger>
-        </Style.Triggers>
-    </Style>
     <!-- 
   This style configures both of the main content areas in the main window.
   -->

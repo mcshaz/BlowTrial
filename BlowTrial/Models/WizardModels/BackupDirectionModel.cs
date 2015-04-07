@@ -19,24 +19,16 @@ namespace BlowTrial.Models
 
         public bool PatientsPreviouslyRandomised { get; set; }
 
-        public AllocationGroups AllocationType { get; set; }
-
         public override string GetValidationError(string propertyName)
         {
            switch (propertyName)
             { 
                 case "PatientsPreviouslyRandomised":
                     return ValidatePatientsPreviouslyRandomised();
-                case "AllocationType":
-                    return ValidateAllocationType();
             }
             return base.GetValidationError(propertyName);
         }
-        string ValidateAllocationType()
-        {
-            if (IsBackingUpToCloud != true) {return null;}
-            return ValidateEnumNotDefault(AllocationType);
-        }
+
         string ValidatePatientsPreviouslyRandomised()
         {
             if (PatientsPreviouslyRandomised && IsBackingUpToCloud != true)

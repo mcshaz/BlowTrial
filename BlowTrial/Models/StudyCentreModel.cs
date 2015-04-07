@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 using BlowTrial.Infrastructure.Extensions;
+using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure;
 
 namespace BlowTrial.Models
 {
@@ -39,5 +41,8 @@ namespace BlowTrial.Models
         public string PhoneMask { get; set; }
         public string HospitalIdentifierMask { get; set; }
         public int MaxIdForSite { get; set; }
+        public bool IsCurrentlyEnrolling { get; set; }
+        public AllocationGroups DefaultAllocation {get; set;}
+        public RandomisingMessages RandomisedMessage { get; set; }
     }
 }

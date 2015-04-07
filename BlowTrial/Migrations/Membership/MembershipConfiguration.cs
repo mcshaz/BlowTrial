@@ -35,28 +35,6 @@ namespace BlowTrial.Migrations.Membership
                 };
                 context.Investigators.Add(usr);
             }
-            var msgs = context.RandomisingMessages.FirstOrDefault();
-            if (msgs==null)
-            {
-                msgs = new RandomisingMessage
-                {
-                    ControlInstructions = Strings.RandomisedMessagesViewModel_DefaultControl,
-                    InterventionInstructions = Strings.RandomisedMessagesViewModel_DefaultIntervention
-                };
-                context.RandomisingMessages.Add(msgs);
-            }
-            if (string.IsNullOrEmpty( msgs.DischargeExplanation)) 
-            {
-                //Danger - could make a circular reference if seed for TrialDataContext had a reference back to here
-                bool isChennai;
-                using (var db = new TrialDataContext())
-                {
-                    isChennai = db.StudyCentres.Any(s => s.Id == 1);
-                }
-                msgs.DischargeExplanation = isChennai
-                    ?Strings.RandomisedMessagesViewModel_DefaultDischarge_Hospital
-                    :Strings.RandomisedMessagesViewModel_DefaultDischarge_NICU;
-            }
             context.SaveChanges();
         }
     }

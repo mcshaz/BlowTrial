@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wpfToolkit="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         xmlns:vw="clr-namespace:BlowTrial.View"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         >
     <UserControl.Resources>
         <ResourceDictionary Source="../WorkspaceResources.xaml" />
@@ -51,11 +52,62 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Maximum Participant Allocations" >
+                <DataGridTemplateColumn Header="Enrolling">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Path=IsCurrentlyEnrolling, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Foreground="{Binding Path=SiteTextBrush, Mode=OneWay}"
+                                Background="{Binding Path=SiteBackgroundBrush, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Polio Vaccine">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Path=IsOpvInIntervention, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Foreground="{Binding Path=SiteTextBrush, Mode=OneWay}"
+                                Background="{Binding Path=SiteBackgroundBrush, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Discharge">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox
+                                x:Name="hospitalDischargeCombo" SelectedValuePath="Tag"
+                                SelectedValue="{Binding Path=IsToHospitalDischarge, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" >
+                                <ComboBoxItem Name="hospital" Content="Hospital" >
+                                    <ComboBoxItem.Tag>
+                                        <sys:Boolean>True</sys:Boolean>
+                                    </ComboBoxItem.Tag>
+                                </ComboBoxItem>
+                                <ComboBoxItem Name="nicu" Content="NICU" >
+                                    <ComboBoxItem.Tag>
+                                        <sys:Boolean>False</sys:Boolean>
+                                    </ComboBoxItem.Tag>
+                                </ComboBoxItem>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Maximum Participants" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBox Text="{Binding Path=MaxParticipantAllocations, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}, ConverterParameter=n0}" 
                                      IsEnabled="{Binding Path=CanAlterId, Mode=OneWay}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                
+                <DataGridTemplateColumn Header="Allocations" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox
+                                x:Name="allocationTypeCombo" 
+                                ItemsSource="{Binding Path=AllocationTypeOptions, Mode=OneTime}"
+                                SelectedValuePath="Key" 
+                                DisplayMemberPath="Value"
+                                SelectedValue="{Binding Path=DefaultAllocation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

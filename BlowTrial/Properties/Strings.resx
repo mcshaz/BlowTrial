@@ -338,11 +338,11 @@
     <comment>Caption on messagebox when succesfully randomised</comment>
   </data>
   <data name="NewPatient_ToControl" xml:space="preserve">
-    <value>{0} has been randomised to the CONTROL arm with an ID of {1:n0}.</value>
+    <value>{0} has been randomised to the CONTROL arm with an ID of {1}.</value>
     <comment>String format display message when randomised to control arm</comment>
   </data>
   <data name="NewPatient_ToIntervention" xml:space="preserve">
-    <value>{0} has been randomised to the INTERVENTION arm ({1}) with an ID of {2:n0}.</value>
+    <value>{0} has been randomised to the INTERVENTION arm with an ID of {1}.</value>
     <comment>String format display message when randomised to intervention arm</comment>
   </data>
   <data name="ParticipantModel_Describe_DateTimeDischarge" xml:space="preserve">
@@ -768,11 +768,11 @@
   <data name="CreateCsvModel_Error_NoDateQuotes" xml:space="preserve">
     <value>If date contains a comma, dates must be in quotes or seperated by another character</value>
   </data>
-  <data name="RandomisedMessagesViewModel_DefaultControl" xml:space="preserve">
-    <value>Please only give BCG &amp; OPV once nearing discharge from hospital.</value>
+  <data name="RandomisingMessages_DefaultControl" xml:space="preserve">
+    <value>Please only give BCG &amp; OPV once nearing {0}.</value>
   </data>
-  <data name="RandomisedMessagesViewModel_DefaultIntervention" xml:space="preserve">
-    <value>Please give BCG &amp; OPV as soon as possible.</value>
+  <data name="RandomisingMessages_DefaultIntervention" xml:space="preserve">
+    <value>Please give {0} as soon as possible.</value>
   </data>
   <data name="RandomisedMessagesViewModel_DisplayName" xml:space="preserve">
     <value>Messages On Randomisation</value>
@@ -792,11 +792,11 @@
   <data name="ParticipantUpdateVM_Option_BcgPapuleNull" xml:space="preserve">
     <value>Unknown or BCG not given</value>
   </data>
-  <data name="RandomisedMessagesViewModel_DefaultDischarge_Hospital" xml:space="preserve">
-    <value>Discharge from Hospital</value>
+  <data name="RandomisingMessages_Hospital" xml:space="preserve">
+    <value>HOSPITAL</value>
   </data>
-  <data name="RandomisedMessagesViewModel_DefaultDischarge_NICU" xml:space="preserve">
-    <value>Discharge from NICU or Level 2 Nursery</value>
+  <data name="RandomisingMessages_NICU" xml:space="preserve">
+    <value>NICU or Level 2 Nursery</value>
   </data>
   <data name="MainWindow_StopComputerRandomisingCaption" xml:space="preserve">
     <value>Enter new envelope randomised patients</value>
@@ -837,14 +837,8 @@
   <data name="Vaccine_DanishBcg" xml:space="preserve">
     <value>BCG-Danish</value>
   </data>
-  <data name="AllocationGroups_IndiaThreeArmBalanced" xml:space="preserve">
-    <value>India - 3 arm (balanced assignnment)</value>
-  </data>
-  <data name="AllocationGroups_IndiaThreeArmUnbalanced" xml:space="preserve">
-    <value>India - 3 arm (catch up assignnment)</value>
-  </data>
-  <data name="AllocationGroups_IndiaTwoArm" xml:space="preserve">
-    <value>India - 2 arm</value>
+  <data name="AllocationGroups_India3ArmUnbalanced" xml:space="preserve">
+    <value>India 3 arm (catch up assignnment)</value>
   </data>
   <data name="ParticipantModel_Error_Bcg28daysDead" xml:space="preserve">
     <value>The patient cannot have a BCG papule at 28 days if he/she died before day 28</value>
@@ -869,5 +863,14 @@
   </data>
   <data name="AllocationGroups_India3ArmBalanced" xml:space="preserve">
     <value>India 3 arm (Control, BCG India &amp; Danish)</value>
+  </data>
+  <data name="AllocationGroups_Danish2Arm" xml:space="preserve">
+    <value>Danish 2 Arm (Control &amp; Danish BCG)</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value>&amp;</value>
+  </data>
+  <data name="RandomisingMessages_DischargeFrom" xml:space="preserve">
+    <value>discharge from {0}</value>
   </data>
 </root>

@@ -54,6 +54,8 @@ namespace BlowTrial.Domain.Providers
                 case AllocationGroups.NotApplicable:
                     throw new ArgumentException("NotApplicatble should never be used as an allocationGroup");
                 case AllocationGroups.India2Arm:
+                    returnList.Add(RussianBcg.Id);
+                    break;
                 case AllocationGroups.India3ArmBalanced:
                 case AllocationGroups.India3ArmUnbalanced:
                     returnList.Add(RussianBcg.Id);
@@ -61,6 +63,9 @@ namespace BlowTrial.Domain.Providers
                     break;
                 case AllocationGroups.Brazil2Arm:
                     returnList.Add(BcgMoreau.Id);
+                    break;
+                case AllocationGroups.Danish2Arm:
+                    returnList.Add(DanishBcg.Id);
                     break;
             }
             var returnVar = new int[returnList.Count];

@@ -13,7 +13,6 @@ namespace BlowTrial.Models
             {
 
                 x.AddProfile<PatientProfiles>();
-                x.AddProfile<AppDataProfiles>();
 
             });
 #if DEBUG

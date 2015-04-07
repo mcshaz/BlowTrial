@@ -29,23 +29,23 @@ namespace BlowTrial.Infrastructure.Randomising
         public const int MaxBirthWeightGrams = 1999;
 #endregion
 
-        static AllocationGroups GetNextAllocationGroup(int studyCentreId, RandomisationStrata strata, ITrialDataContext context = null)
+        static AllocationGroups GetNextAllocationGroup(Participant participant, RandomisationStrata strata, ITrialDataContext context)
         {
-            AllocationGroups returnVar = BlowTrial.Helpers.BlowTrialDataService.GetDefaultAllocationGroup();
+            AllocationGroups returnVar = (participant.Centre ?? (participant.Centre = context.StudyCentres.Find(participant.CentreId))).DefaultAllocation;
             if (returnVar == AllocationGroups.India3ArmUnbalanced)
-            {  
-                var alloc = context.BalancedAllocations.First(a=>a.RandomisationCategory == strata && a.StudyCentreId==studyCentreId);
+            {
+                var alloc = context.BalancedAllocations.First(a => a.RandomisationCategory == strata && a.StudyCentreId == participant.CentreId);
                 if (!alloc.IsEqualised) 
                 {
                     var catQuery = from p in context.Participants
-                                   where p.CentreId == studyCentreId && p.Block.RandomisationCategory == strata
+                                   where p.CentreId == participant.CentreId && p.Block.RandomisationCategory == strata
                                    select p;
                     if ((double)catQuery.Count()/catQuery.Count(p=>p.TrialArm == RandomisationArm.DanishBcg) <= 3){
                         alloc.IsEqualised = true;
                         context.SaveChanges(true);
-                        if (context.BalancedAllocations.All(a=>a.IsEqualised && a.StudyCentreId==studyCentreId))
+                        if (context.BalancedAllocations.All(a => a.IsEqualised && a.StudyCentreId == participant.CentreId))
                         {
-                            BlowTrial.Helpers.BlowTrialDataService.SetDefaultAllocationGroup(AllocationGroups.India3ArmBalanced);
+                            participant.Centre.DefaultAllocation = AllocationGroups.India3ArmBalanced;
                         }
                     }
                 }
@@ -81,7 +81,7 @@ namespace BlowTrial.Infrastructure.Randomising
 
         static AllocationBlock CreateNewAllocationBlock(Participant participant, RandomisationStrata strata, out BlockComponent component,ITrialDataContext context)
         {
-            var block = GetNextAllocationGroup(participant.CentreId, strata, context);
+            var block = GetNextAllocationGroup(participant, strata, context);
             component = ArmData.GetRatio(block);
             if (participant.Centre == null) { participant.Centre = context.StudyCentres.Find(participant.CentreId); }
             var returnVar = new AllocationBlock

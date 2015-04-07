@@ -12,7 +12,6 @@ namespace BlowTrial.Infrastructure.Interfaces
     {
         DbSet<BackupData> BackupDataSet { get; }
         DbSet<CloudDirectory> CloudDirectories { get; }
-        DbSet<RandomisingMessage> RandomisingMessages { get; }
         Database Database { get; }
         //DbEntityEntry<BackupData> Entry<BackupData>(object entity);
         

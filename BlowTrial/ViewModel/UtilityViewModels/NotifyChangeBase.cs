@@ -56,6 +56,7 @@ namespace BlowTrial.ViewModel
         /// <param name="propertyName">The property that has a new value.</param>
         protected virtual void NotifyPropertyChanged(params string[] propertyNames)
         {
+            VerifyNoDuplicatePropertyNames(propertyNames);
             foreach (var propertyName in propertyNames)
             {
                 if (PropertyChanged != null) //on the inside of the loop in case a handler detaches itself
@@ -64,6 +65,20 @@ namespace BlowTrial.ViewModel
                     var e = new PropertyChangedEventArgs(propertyName);
                     PropertyChanged(this, e);
                 }
+            }
+        }
+        [Conditional("DEBUG")]
+        [DebuggerStepThrough]
+        void VerifyNoDuplicatePropertyNames(params string[] propertyNames)
+        {
+            // Verify that the property name are not repeated
+            List<String> duplicates = (from g in propertyNames.GroupBy(x => x)
+                                        where g.Count() > 1
+                                        select g.Key).ToList();
+            if (duplicates.Any())
+            {
+                string msg = "Repeated notify on property :" + string.Join(",", duplicates);
+                Debug.Fail(msg);
             }
         }
 

@@ -45,7 +45,13 @@ namespace BlowTrial.ViewModel
             AddScreenCmd = new RelayCommand(AddScreen, CanScreen);
             CloseWindowCmd = new RelayCommand(param=>OnRequestClose(), param=>true);
             UpdateDemographicsCmd = new RelayCommand(UpdateDemographics, obj => WasValidOnLastNotify);
+            _repository.StudySiteAddOrUpdate += repository_StudySiteAddOrUpdate;
+        }
 
+        void repository_StudySiteAddOrUpdate(object sender, EventArgs e)
+        {
+            _studyCentreOptions = null;
+            NotifyPropertyChanged("StudyCentreOptions");
         }
         #endregion
 
@@ -573,22 +579,6 @@ namespace BlowTrial.ViewModel
             get { return DateTime.Today.AddDays(-PatientDemographicsModel.MaxAgeDaysScreen); }
         }
 
-        RandomisingMessage _randomisingMessage;
-        string ControlArmMessage
-        {
-            get
-            {
-                return (_randomisingMessage ?? (_randomisingMessage = BlowTrialDataService.GetRandomisingMessage())).ControlInstructions;
-            }
-        }
-        string InterventionArmMessage
-        {
-            get
-            {
-                return (_randomisingMessage ?? (_randomisingMessage = BlowTrialDataService.GetRandomisingMessage())).InterventionInstructions;
-            }
-        }
-
         #endregion // Properties
 
         #region Private Methods
@@ -688,10 +678,11 @@ namespace BlowTrial.ViewModel
             {
                 if (_studyCentreOptions==null)
                 {
-                    var studyCentres = _repository.LocalStudyCentres;
                     var returnVar = new List<KeyDisplayNamePair<StudyCentreModel>>(
-                        studyCentres.Select(s => new KeyDisplayNamePair<StudyCentreModel>(s, s.Name)));
-                    if (studyCentres.Skip(1).Any())
+                        from s in _repository.LocalStudyCentres 
+                        where s.IsCurrentlyEnrolling
+                        select new KeyDisplayNamePair<StudyCentreModel>(s, s.Name));
+                    if (returnVar.Skip(1).Any())
                     {
                         returnVar.Insert(0,
                             new KeyDisplayNamePair<StudyCentreModel>(null, Strings.DropDownList_PleaseSelect));
@@ -807,18 +798,17 @@ namespace BlowTrial.ViewModel
                 string userMsg;
                 if (newParticipant.TrialArm == Domain.Outcomes.RandomisationArm.Control)
                 {
-                    userMsg = string.Format(Strings.NewPatient_ToControl + " " + ControlArmMessage, 
+                    userMsg = string.Format(Strings.NewPatient_ToControl + ' ', 
                         newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')', 
                         newParticipant.Id);
                 }
                 else
                 {
-                    userMsg = string.Format(Strings.NewPatient_ToIntervention + " " + InterventionArmMessage, 
+                    userMsg = string.Format(Strings.NewPatient_ToIntervention + ' ', 
                         newParticipant.Name + '(' + newParticipant.HospitalIdentifier + ')',
-                        ParticipantBaseModel.GetTrialArmDescription(newParticipant.TrialArm),
                         newParticipant.Id);
                 }
-                
+                userMsg += Environment.NewLine + StudyCentre.RandomisedMessage.InstructionsFor(newParticipant.TrialArm);
                 MessageBox.Show(userMsg, Strings.NewPatient_SuccesfullyRandomised, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             ClearAllFields();
@@ -914,7 +904,7 @@ namespace BlowTrial.ViewModel
             _hasSiblingEnrolled = false;
 
             _wtForAgeCentile = null;
-            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "DateOfEnrollment", "TimeOfEnrollment", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired", "HasSiblingEnrolled", "MultipleSiblingId", "IsInborn", "HasNoPhone", "AdmissionDiagnosis", "StudyCentre");
+            NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "DateOfEnrollment", "TimeOfEnrollment", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired", "HasSiblingEnrolled", "MultipleSiblingId",  "HasNoPhone", "AdmissionDiagnosis", "StudyCentre",  "BackgroundBrush", "TextBrush", "HospitalIdentifierMask", "PhoneMask", "IsInborn");
             RecordAltered = false;
             _isEnrollmentDateTimeAssigned = false;
         }

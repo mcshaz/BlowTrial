@@ -27,6 +27,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAddOrUpdate;
         event EventHandler<FailedRestoreEvent> FailedDbRestore;
+        event EventHandler StudySiteAddOrUpdate;
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         Participant AddParticipant(
             string name,
@@ -90,6 +91,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         ICollection<StudyCentreModel> LocalStudyCentres { get; }
         ParticipantsSummary GetParticipantSummary();
         ScreenedPatientsSummary GetScreenedPatientSummary();
+        ICollection<StudyCentreModel> GetCentresRequiringData();
         StudyCentreModel FindStudyCentre(int studyCentreId);
         string BackupLimitedDbTo(string directory, params StudyCentreModel[] studyCentres);
         IEnumerable<KeyValuePair<string, IEnumerable<StudyCentreModel>>> GetFilenamesAndCentres();

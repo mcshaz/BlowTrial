@@ -69,6 +69,7 @@ namespace BlowTrial.Domain.Providers
         public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAddOrUpdate;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         public event EventHandler<FailedRestoreEvent> FailedDbRestore;
+        public event EventHandler StudySiteAddOrUpdate;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         #endregion // EventHandlers
 
@@ -126,17 +127,20 @@ namespace BlowTrial.Domain.Providers
             {
                 if (_localStudyCentreDictionary == null)
                 {
-                    _localStudyCentreDictionary = (from s in _dbContext.StudyCentres 
-                                                  select new StudyCentreModel
+                    _localStudyCentreDictionary = (from s in _dbContext.StudyCentres.AsEnumerable() 
+                                                   select new StudyCentreModel
                                                     {
                                                         Id = s.Id,
                                                         Name = s.Name,
+                                                        IsCurrentlyEnrolling = s.IsCurrentlyEnrolling,
                                                         ArgbTextColour = s.ArgbTextColour,
                                                         ArgbBackgroundColour = s.ArgbBackgroundColour,
                                                         HospitalIdentifierMask = s.HospitalIdentifierMask,
                                                         PhoneMask = s.PhoneMask,
                                                         MaxIdForSite = s.MaxIdForSite,
-                                                        DuplicateIdCheck = s.DuplicateIdCheck // needed for backup
+                                                        DuplicateIdCheck = s.DuplicateIdCheck, // needed for backup
+                                                        RandomisedMessage = new RandomisingMessages(s.IsOpvInIntervention,s.IsToHospitalDischarge),
+                                                        DefaultAllocation = s.DefaultAllocation
                                                     }).ToDictionary(scm=>scm.Id);
                 }
                 return _localStudyCentreDictionary;
@@ -306,6 +310,10 @@ namespace BlowTrial.Domain.Providers
             }
             _dbContext.SaveChanges(true);
             _localStudyCentreDictionary = null;
+            if (StudySiteAddOrUpdate != null)
+            {
+                StudySiteAddOrUpdate(this, EventArgs.Empty);
+            }
         }
         public void AddOrUpdate(ProtocolViolation violation)
         {
@@ -793,6 +801,17 @@ namespace BlowTrial.Domain.Providers
                                                Arm = p.TrialArm,
                                                DataRequired = ParticipantBaseModel.DataRequiredExpression.Invoke(p)
                                            });
+        }
+        public ICollection<StudyCentreModel> GetCentresRequiringData()
+        {
+            return new List<StudyCentreModel>((from p in _dbContext.Participants.AsExpandable()
+                                               let dataRequired = ParticipantBaseModel.DataRequiredExpression.Invoke(p)
+                                               where dataRequired != DataRequiredOption.Complete
+                                               select p.CentreId)
+                                                    .GroupBy(c => c)
+                                                    .Select(g=>g.Key)
+                                                    .AsEnumerable()
+                                                    .Select(id => LocalStudyCentreDictionary[id]));
         }
         public ScreenedPatientsSummary GetScreenedPatientSummary()
         {

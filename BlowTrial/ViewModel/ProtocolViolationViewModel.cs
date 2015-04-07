@@ -219,7 +219,7 @@ namespace BlowTrial.ViewModel
         }
         //End legacy */
 
-        IEnumerable<KeyDisplayNamePair<ViolationTypeOption>> _violationTypeOptions;
+        static IEnumerable<KeyDisplayNamePair<ViolationTypeOption>> _violationTypeOptions;
         public IEnumerable<KeyDisplayNamePair<ViolationTypeOption>> ViolationTypeOptions
         {
             get

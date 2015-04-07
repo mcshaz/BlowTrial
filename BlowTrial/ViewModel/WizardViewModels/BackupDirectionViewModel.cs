@@ -56,31 +56,8 @@ namespace BlowTrial.ViewModel
                 if (value != true) { PatientsPreviouslyRandomised = false; }
             }
         }
-        public AllocationGroups AllocationType
-        {
-            get
-            {
-                return _backupModel.AllocationType;
-            }
-            set
-            {
-                if (_backupModel.AllocationType == value) { return; }
-                _backupModel.AllocationType = value;
-                NotifyPropertyChanged("AllocationType");
-            }
-        }
-        #endregion
 
-        #region ListBoxOptions
-        IEnumerable<KeyDisplayNamePair<AllocationGroups>> _allocationTypeOptions;
-        public IEnumerable<KeyDisplayNamePair<AllocationGroups>> AllocationTypeOptions
-        {
-            get
-            {
-                return _allocationTypeOptions ?? (_allocationTypeOptions = EnumToListOptions<AllocationGroups>(default(AllocationGroups), AllocationGroups.India3ArmUnbalanced));
-            }
-        }
-        #endregion // Listbox options
+        #endregion
 
         #region Methods
         public override bool IsValid()

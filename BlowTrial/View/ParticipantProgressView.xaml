@@ -184,7 +184,7 @@
                             <TextBlock TextWrapping="Wrap" >
                                 Outcome at discharge<Run Foreground="Green">*</Run>, or at 28 days of age (whichever is sooner):
                                 <LineBreak />
-                                <Run Foreground="Green">*</Run><Run Foreground="#FF00068B" FontStyle="Italic" Text="{Binding Path=DischargeExplanation, Mode=OneTime}" >
+                                <Run Foreground="Green">*</Run><Run Foreground="#FF00068B" FontStyle="Italic" Text="{Binding Path=DischargeExplanation, Mode=OneWay}" >
 	                            <Run.Background>
 		                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
 			                            <GradientStop Color="White"/>

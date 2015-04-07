@@ -104,7 +104,7 @@
             <ComboBox 
                   x:Name="studyCentreCombo"
                   Grid.Row="0" Grid.Column="2" 
-                  ItemsSource="{Binding Path=StudyCentreOptions, Mode=OneTime}"
+                  ItemsSource="{Binding Path=StudyCentreOptions, Mode=OneWay}"
                   SelectedValuePath="Key" 
                   DisplayMemberPath="Value"
                   SelectedValue="{Binding Path=StudyCentre, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"

@@ -12,6 +12,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using BlowTrial.Infrastructure.Extensions;
+using BlowTrial.Domain.Tables;
 
 namespace BlowTrial.ViewModel
 {
@@ -47,7 +48,7 @@ namespace BlowTrial.ViewModel
                 
         }
 #endregion
-#region Methods
+        #region Methods
         void ExecuteSave(object param)
         {
             _repo.AddOrUpdate(_appModel.StudySitesData.Select(
@@ -55,7 +56,11 @@ namespace BlowTrial.ViewModel
                 {
                     ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
                     ArgbTextColour = s.SiteTextColour.ToInt(),
-                    Id = s.Id.Value,
+                    IsCurrentlyEnrolling = s.IsCurrentlyEnrolling,
+                    IsOpvInIntervention = s.IsOpvInIntervention, 
+                    IsToHospitalDischarge = s.IsToHospitalDischarge,
+                    Id = s.Id.Value, 
+                    DefaultAllocation = s.DefaultAllocation,
                     HospitalIdentifierMask  = s.HospitalIdentifierMask,
                     MaxIdForSite = s.Id.Value + s.MaxParticipantAllocations.Value - (s.Id == 1 ? 2 : 1),
                     Name = s.SiteName,
@@ -138,7 +143,7 @@ namespace BlowTrial.ViewModel
 
     }
 
-    public sealed class StudySiteItemViewModel : NotifyChangeBase, IDataErrorInfo
+    public sealed class StudySiteItemViewModel : ViewModelBase, IDataErrorInfo
     {
         public StudySiteItemViewModel(StudySiteItemModel siteModel)
         {
@@ -159,6 +164,19 @@ namespace BlowTrial.ViewModel
                 if (SiteModel.SiteName == value) { return; }
                 SiteModel.SiteName = value;
                 NotifyPropertyChanged("SiteName", "SiteBackgroundColour", "SiteTextColour");
+            }
+        }
+        public AllocationGroups DefaultAllocation
+        {
+            get
+            {
+                return SiteModel.DefaultAllocation;
+            }
+            set
+            {
+                if (SiteModel.DefaultAllocation == value) { return; }
+                SiteModel.DefaultAllocation = value;
+                NotifyPropertyChanged("DefaultAllocation");
             }
         }
         public Color SiteBackgroundColour 
@@ -209,6 +227,45 @@ namespace BlowTrial.ViewModel
                 if (SiteModel.Id == value) { return; }
                 SiteModel.Id = value;
                 NotifyPropertyChanged("Id");
+            }
+        }
+        public bool IsCurrentlyEnrolling
+        {
+            get
+            {
+                return SiteModel.IsCurrentlyEnrolling;
+            }
+            set
+            {
+                if (SiteModel.IsCurrentlyEnrolling == value) { return; }
+                SiteModel.IsCurrentlyEnrolling = value;
+                NotifyPropertyChanged("IsCurrentlyEnrolling");
+            }
+        }
+        public bool IsOpvInIntervention
+        {
+            get
+            {
+                return SiteModel.IsOpvInIntervention;
+            }
+            set
+            {
+                if (SiteModel.IsOpvInIntervention == value) { return; }
+                SiteModel.IsOpvInIntervention = value;
+                NotifyPropertyChanged("IsOpvInIntervention");
+            }
+        }
+        public bool IsToHospitalDischarge
+        {
+            get
+            {
+                return SiteModel.IsToHospitalDischarge;
+            }
+            set
+            {
+                if (SiteModel.IsToHospitalDischarge == value) { return; }
+                SiteModel.IsToHospitalDischarge = value;
+                NotifyPropertyChanged("IsToHospitalDischarge");
             }
         }
         public string HospitalIdentifierMask
@@ -264,6 +321,17 @@ namespace BlowTrial.ViewModel
         {
             return SiteModel.IsValid();
         }
+
+        #region ListBoxOptions
+        static IEnumerable<KeyDisplayNamePair<AllocationGroups>> _allocationTypeOptions;
+        public IEnumerable<KeyDisplayNamePair<AllocationGroups>> AllocationTypeOptions
+        {
+            get
+            {
+                return _allocationTypeOptions ?? (_allocationTypeOptions = EnumToListOptions<AllocationGroups>(default(AllocationGroups)));
+            }
+        }
+        #endregion // Listbox options
 
         internal bool AllPropertiesNull()
         {

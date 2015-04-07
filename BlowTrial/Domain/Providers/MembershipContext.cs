@@ -25,7 +25,6 @@ namespace BlowTrial.Domain.Providers
         public DbSet<Role> Roles { get; set; }
         public DbSet<BackupData> BackupDataSet { get; set; }
         public DbSet<CloudDirectory> CloudDirectories { get; set; }
-        public DbSet<RandomisingMessage> RandomisingMessages { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

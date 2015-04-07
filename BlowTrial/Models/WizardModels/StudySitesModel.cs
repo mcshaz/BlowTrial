@@ -1,4 +1,5 @@
-﻿using BlowTrial.Infrastructure;
+﻿using BlowTrial.Domain.Tables;
+using BlowTrial.Infrastructure;
 using BlowTrial.Properties;
 using ColorMine.ColorSpaces;
 using ColorMine.ColorSpaces.Comparisons;
@@ -74,6 +75,7 @@ namespace BlowTrial.Models
             SiteTextColour = DefaultTextColor;
         }
         #endregion
+
         #region fields
         static readonly Rgb ErrorColour = new Rgb() { R = 255, G = 0, B = 0 };
         static IColorSpaceComparison _colourSpacecomparison;
@@ -83,6 +85,7 @@ namespace BlowTrial.Models
         const double minContrastDif = 25;
         public static readonly Color DefaultTextColor = new Color() { R = 0, G = 0, B = 0, A = 255 };
         #endregion
+
         IColorSpaceComparison ColourSpacecomparison
         {
             get
@@ -92,6 +95,9 @@ namespace BlowTrial.Models
         }
         public virtual StudySitesModel AllLocalSites { get; set; }
         public int? Id { get; set; }
+        public bool IsCurrentlyEnrolling { get; set; }
+        public bool IsOpvInIntervention { get; set; }
+        public bool IsToHospitalDischarge { get; set; }
         public string SiteName { get; set; }
         public Guid DuplicateIdCheck { get; set; }
         public Color? SiteBackgroundColour { 
@@ -120,6 +126,7 @@ namespace BlowTrial.Models
                 SiteTextRgb = new Rgb() { R = _siteTextColour.R, G = _siteTextColour.G, B = _siteTextColour.B };
             }
         }
+        public AllocationGroups DefaultAllocation { get; set; }
         internal Rgb SiteBackgroundRgb { get; set; }
         internal Rgb SiteTextRgb { get; set; }
         public int? MaxParticipantAllocations { get; set; }
@@ -167,11 +174,18 @@ namespace BlowTrial.Models
                 case "MaxParticipantAllocations":
                     error = ValidateMaxParticipantAllocations();
                     break;
+                case "AllocationType":
+                    error = ValidateAllocationType();
+                    break;
                 default:
                     Debug.Fail("Unexpected property being validated on StudySiteDataModel: " + propertyName);
                     break;
             }
             return error;
+        }
+        string ValidateAllocationType()
+        {
+            return ValidateEnumNotDefault(DefaultAllocation);
         }
         string ValidateMaxParticipantAllocations()
         {

@@ -22,6 +22,13 @@ namespace BlowTrial.Domain.Tables
         [StringLength(16)]
         public string HospitalIdentifierMask { get; set; }
         public int MaxIdForSite { get; set; }
+        public bool IsCurrentlyEnrolling { get; set; }
+        public AllocationGroups DefaultAllocation { get; set; }
+        public bool IsOpvInIntervention {get; set;}
+        /// <summary>
+        /// If false then will be to discharge from NICU
+        /// </summary>
+        public bool IsToHospitalDischarge {get;set;}
 
         public DateTime RecordLastModified { get; set; }
 

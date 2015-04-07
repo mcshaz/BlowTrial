@@ -41,17 +41,7 @@ namespace BlowTrial.Helpers
             data.IsEnvelopeRandomising = newVal;
             appData.SaveChanges();
         }
-        public static RandomisingMessage GetRandomisingMessage()
-        {
-            using (var a = new MembershipContext())
-            {
-                return GetRandomisingMessage(a);
-            }
-        }
-        public static RandomisingMessage GetRandomisingMessage(IAppData appData)
-        {
-            return appData.RandomisingMessages.FirstOrDefault();
-        }
+
         public static bool IsEnvelopeRandomising()
         {
             using (var a = new MembershipContext())
@@ -64,43 +54,7 @@ namespace BlowTrial.Helpers
             return (from a in appData.BackupDataSet
                     select a.IsEnvelopeRandomising).First();
         }
-        public static AllocationGroups GetDefaultAllocationGroup()
-        {
-            using (var a = new MembershipContext())
-            {
-                return GetDefaultAllocationGroup(a);
-            }
-        }
-        public static AllocationGroups GetDefaultAllocationGroup(IAppData appData)
-        {
-            return (from a in appData.BackupDataSet
-                    select a.DefaultAllocation).First();
-        }
-        public static void SetDefaultAllocationGroup(AllocationGroups group)
-        {
-            using (var a = new MembershipContext())
-            {
-                SetDefaultAllocationGroup(group, a);
-            }
-        }
-        public static void SetDefaultAllocationGroup(AllocationGroups group, IAppData appData)
-        {
-            var a = appData.BackupDataSet.First();
-            a.DefaultAllocation = group;
-            appData.SaveChanges();
-        }
-        public static AllocationGroups DefaultAllocationGroup()
-        {
-            using (var a = new MembershipContext())
-            {
-                return DefaultAllocationGroup(a);
-            }
-        }
-        public static AllocationGroups DefaultAllocationGroup(IAppData appData)
-        {
-            return (from a in appData.BackupDataSet
-                    select a.DefaultAllocation).First();
-        }
+
         public static BackupDataSet GetBackupDetails()
         {
             using (var a = new MembershipContext())
@@ -117,35 +71,13 @@ namespace BlowTrial.Helpers
                 CloudDirectories = appData.CloudDirectories.Select(c=>c.Path).ToList()
             };
         }
-        public static void SetRandomisingMessages(string interventionMessage, string controlMessage, string dischargeExplanation)
-        {
-            using (var a = new MembershipContext())
-            {
-                SetRandomisingMessages(interventionMessage, controlMessage, dischargeExplanation, a);
-            }
-        }
-        internal static void SetRandomisingMessages(string interventionMessage, string controlMessage, string dischargeExplanation, IAppData appDataProvider)
-        {
-            try
-            {
-                appDataProvider.Database.ExecuteSqlCommand("Delete from RandomisingMessages");
-            }
-            catch (System.Data.SqlClient.SqlException) { }
-            appDataProvider.RandomisingMessages.Add(new RandomisingMessage
-                {
-                    InterventionInstructions = interventionMessage,
-                    ControlInstructions = controlMessage,
-                    DischargeExplanation = dischargeExplanation
-                });
-            appDataProvider.SaveChanges();
-        }
-        public static void SetAppData(string interventionMessage, string controlMessage, string dischargeExplanation, IEnumerable<string> cloudDirectories, int intervalMins, AllocationGroups defaultAllocation, bool isToBackupToCloud, bool isEnvelopeRandomising)
+
+        public static void SetAppData(IEnumerable<string> cloudDirectories, int intervalMins, bool isToBackupToCloud, bool isEnvelopeRandomising)
         {
             using (var a = new MembershipContext())
             {
                 SetBackupPaths(cloudDirectories, a);
-                SetBackupDetails(a, intervalMins, isToBackupToCloud, isEnvelopeRandomising, defaultAllocation);
-                SetRandomisingMessages(interventionMessage, controlMessage, dischargeExplanation,a);
+                SetBackupDetails(a, intervalMins, isToBackupToCloud, isEnvelopeRandomising);
             }
         }
         public static void SetBackupDetails(IEnumerable<string> cloudDirectories, int intervalMins)
@@ -165,7 +97,7 @@ namespace BlowTrial.Helpers
                 SetBackupDetails(a, intervalMins, isToBackupToCloud, isEnvelopeRandomising);
             }
         }
-        internal static void SetBackupDetails(IAppData appDataProvider, int intervalMins, bool isTobackupToCloud, bool isEnvelopeRandomising, AllocationGroups defaultAllocation = AllocationGroups.India2Arm)
+        internal static void SetBackupDetails(IAppData appDataProvider, int intervalMins, bool isTobackupToCloud, bool isEnvelopeRandomising)
         {
             var data = GetBackupDetails(appDataProvider);
             if (data.BackupData == null)
@@ -175,7 +107,6 @@ namespace BlowTrial.Helpers
                     BackupIntervalMinutes = intervalMins,
                     IsBackingUpToCloud = isTobackupToCloud,
                     IsEnvelopeRandomising = isEnvelopeRandomising,
-                    DefaultAllocation = defaultAllocation
                 });
             }
             else

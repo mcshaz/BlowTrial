@@ -106,11 +106,13 @@ label values outcomeat28days outcomeAt28DaysOption
 label values centreid centreNames
 label values trialarm trialarms
 
-stset deathorlastcontactdatetime, id(id) failure(outcome==2,5) origin(time datetimebirth) enter(time registeredat ) scale(`=msofhours(24)')
+gen double censortime = cond(inlist(outcome,1,4), datetimebirth +msofhours(24*28),deathorlastcontact)
+format censortime %tc
+stset censortime, id(id) failure(outcome==2 5 7) origin(time datetimebirth) enter(time registeredat) scale(`=msofhours(24)')
 
 save """);
             
-            #line 44 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 46 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.StataFilename));
             
             #line default

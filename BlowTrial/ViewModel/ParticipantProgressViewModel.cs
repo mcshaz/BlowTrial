@@ -27,7 +27,6 @@ namespace BlowTrial.ViewModel
     {
         #region Fields
         OutcomeAt28DaysSplitter _outcomeSplitter;
-        string _dischargeExplanation;
         ObservableCollection<VaccineViewModel> _allVaccinesAvailable;
         ILog _log;
         #endregion
@@ -61,19 +60,19 @@ namespace BlowTrial.ViewModel
 
         public bool IsVaccineAdminChanged { get; internal set; }
 
+        public string DischargeExplanation
+        {
+            get
+            {
+                return ParticipantProgressModel.StudyCentre.RandomisedMessage.DischargeExplanation;
+            }
+        }
+
         public override string DisplayName
         {
             get
             {
                 return string.Format(Strings.ParticipantUpdateVM_DisplayName, ParticipantProgressModel.Id);
-            }
-        }
-
-        public string DischargeExplanation
-        {
-            get
-            {
-                return _dischargeExplanation ?? (_dischargeExplanation = BlowTrialDataService.GetRandomisingMessage().DischargeExplanation);
             }
         }
 

@@ -235,7 +235,7 @@ namespace BlowTrial.Models
             OutcomeAt28DaysOption.DischargedAndKnownToHaveDied
         };
 
-        internal readonly static Expression<Func<IParticipant, DataRequiredOption>> DataRequiredExpression;
+        public readonly static Expression<Func<IParticipant, DataRequiredOption>> DataRequiredExpression;
         internal readonly static Func<IParticipant, DataRequiredOption> DataRequiredFunc;
 
         #endregion //Static Methds

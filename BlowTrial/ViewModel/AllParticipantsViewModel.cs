@@ -86,12 +86,15 @@ namespace BlowTrial.ViewModel
 
             AllParticipants = new ListCollectionView(participantVMs);
             AllParticipants.CustomSort = new ParticipantIdSortDesc();
-            //put in reverse to speed things up, this will merely put new entries at the top
 
-
+            _groupByDataRequired = true;
+            _selectedDataRequired = new DataRequiredOption[] { DataRequiredOption.AwaitingOutcomeOr28, DataRequiredOption.BcgDataRequired, DataRequiredOption.DetailsMissing, DataRequiredOption.OutcomeRequired };
+            _selectedCentres = _repository.GetCentresRequiringData();
+            SetGrouping();
             //creating dispatchertimer so that screen is rendered before setting up the birthtime updating algorithms
 
         }
+
         #endregion // Constructor
 
         #region Properties
@@ -258,22 +261,29 @@ namespace BlowTrial.ViewModel
                     }
                     _selectedDataRequired = vm.SelectedDataRequired.ToList();
                     _selectedCentres = vm.SelectedCentres.ToList();
-                    if (_selectedDataRequired.Any())
-                    {
-                        AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
-                    }
-                    if (_repository.LocalStudyCentres.Skip(1).Any())
-                    {
-                        AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentre", new StudyCentreModelToNameConverter()));
-                    }
                 }
-                else
-                {
-                    AllParticipants.GroupDescriptions.Clear();
-                }
-                SetFilter();
+                SetGrouping();
                 NotifyPropertyChanged("GroupByDataRequired");
             } 
+        }
+        void SetGrouping()
+        {
+            if (_groupByDataRequired)
+            {
+                if (_selectedDataRequired.Any())
+                {
+                    AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("DataRequiredString"));
+                }
+                if (_repository.LocalStudyCentres.Skip(1).Any())
+                {
+                    AllParticipants.GroupDescriptions.Add(new PropertyGroupDescription("StudyCentre", new StudyCentreModelToNameConverter()));
+                }
+            }
+            else
+            {
+                AllParticipants.GroupDescriptions.Clear();
+            }
+            SetFilter();
         }
         public RelayCommand ShowUpdateEnrolment { get; private set; }
         void ShowEnrolDetails(object param)

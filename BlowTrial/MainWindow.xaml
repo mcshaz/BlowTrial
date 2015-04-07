@@ -25,16 +25,14 @@
                     <MenuItem Header="_Cloud Directory" Command="{Binding Path=ShowCloudDirectoryCmd}" />
                     <MenuItem Header="Study Site Data" Command="{Binding Path=ShowSiteSettingsCmd}" ToolTip="Alter with caution" />
                     <MenuItem Header="_Export as CSV" Command="{Binding Path=ShowCreateCsvCmd}" />
-                    <MenuItem Header="Edit _Randomising Messages" Command="{Binding Path=ShowRandomisingMessagesCmd}" />
                     <MenuItem Header="Create _New User" Command="{Binding Path=CreateNewUserCmd}" />
                     <MenuItem Header="Change _Password" IsEnabled="False" />
                     <MenuItem Header="Manage _Users" IsEnabled="False"/>
-                    <MenuItem Header="Start 3 Arm Randomising" Command="{Binding Path=Start3Arm}" Style="{StaticResource CollapseIf3Way}"/>
                     <MenuItem Header="Update Trial Site Database" Command="{Binding Path=RequestReverseUpdateCmd}" />
                 </MenuItem>
                 <MenuItem Header="_Help" >
                     <MenuItem Header="{Binding Path=Version, Mode=OneWay}" IsEnabled="False" />
-                    <MenuItem Header="Update Site" Command="{Binding Path=OpenBrowser, Mode=OneWay}" CommandParameter="http://www.blowtrial.dabtrial.com/publish.htm">
+                    <MenuItem Header="Blowtrial App Update Website" Command="{Binding Path=OpenBrowser, Mode=OneWay}" CommandParameter="http://www.blowtrial.dabtrial.com/publish.htm">
                     </MenuItem>
                 </MenuItem>
             </Menu>

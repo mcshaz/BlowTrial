@@ -114,7 +114,7 @@ namespace StatsForAge
             lookupTotalAge = (daysOfAge + totalWeeksGestAtBirth - TermGestation)/DaysPerMonth;
             lookupAge = (int)(lookupTotalAge + roundingFactor);
             maxVal = (isMale ? AgeMonthsRange.MaleRange.Max : AgeMonthsRange.FemaleRange.Max);
-            if (lookupAge > maxVal) 
+            if (lookupAge >= maxVal) 
             {
                 return LMSForAgeMonths(maxVal, isMale); 
             }
