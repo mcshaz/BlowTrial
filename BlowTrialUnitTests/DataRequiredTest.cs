@@ -5,6 +5,7 @@ using BlowTrial.Domain.Outcomes;
 using BlowTrial.Infrastructure.Interfaces;
 using System.Linq;
 using BlowTrial.Domain.Providers;
+using System.Data.Entity;
 
 namespace BlowTrialUnitTests
 {
@@ -21,6 +22,34 @@ namespace BlowTrialUnitTests
             };
             DateTime twentyEightPrior = DateTime.Now.AddDays(-28);
 
+            var a = new Func<IParticipant, DataRequiredOption> (p=>
+                ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
+                            || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
+                        ? DataRequiredOption.DetailsMissing
+                        : (p.TrialArm != RandomisationArm.Control && !p.ProtocolViolations.Any(pv => pv.ViolationType == ViolationTypeOption.MajorWrongTreatment) && !p.VaccinesAdministered.Any(v => v.VaccineGiven.IsBcg))
+                            ? DataRequiredOption.BcgDataRequired
+                            : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
+                                ? DbFunctions.DiffDays(p.DateTimeBirth, DateTime.Now) < 28
+                                    ? DataRequiredOption.AwaitingOutcomeOr28
+                                    : DataRequiredOption.OutcomeRequired
+                                : KnownDeadOutcomes.Contains(p.OutcomeAt28Days)
+                                    ? p.MaternalBCGScar == MaternalBCGScarStatus.Missing
+                                        ? DataRequiredOption.MaternalBCGScarDetails
+                                        : DataRequiredOption.Complete
+                                    : DbFunctions.DiffDays(p.VaccinesAdministered.Any(
+                                                v => v.VaccineGiven.IsBcg)
+                                                    ? p.VaccinesAdministered.First(v => v.VaccineGiven.IsBcg).AdministeredAt : p.DischargeDateTime ?? p.DeathOrLastContactDateTime ?? p.RegisteredAt, DateTime.Now) < 42
+                                        ? DataRequiredOption.Awaiting6WeeksToElapse
+                                        : p.FollowUpBabyBCGReaction == FollowUpBabyBCGReactionStatus.Missing
+                                            ? p.PermanentlyUncontactable
+                                                ? DataRequiredOption.Complete
+                                                : p.UnsuccesfulFollowUps.Any()
+                                                    ? p.UnsuccesfulFollowUps.Count > BlowTrial.Models.ParticipantBaseModel.MaxFollowUpAttempts
+                                                        ? DataRequiredOption.Complete
+                                                        : DataRequiredOption.FailedInitialContact
+                                                    : DataRequiredOption.AwaitingInfantScarDetails
+                                            : DataRequiredOption.Complete);
+            /*
             var a = new Func<IParticipant, DataRequiredOption>(p => ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
@@ -31,6 +60,7 @@ namespace BlowTrialUnitTests
                                     ? DataRequiredOption.AwaitingOutcomeOr28
                                     : DataRequiredOption.OutcomeRequired
                                 : DataRequiredOption.Complete);
+            */
 
             Assert.AreNotEqual(DataRequiredOption.BcgDataRequired, a(testP));
         }

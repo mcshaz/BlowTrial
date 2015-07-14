@@ -13,14 +13,14 @@ namespace BlowTrial.Migrations.TrialData
     using System.Text;
     using BlowTrial.Infrastructure.Extensions;
 
-    public class TrialDataConfiguration : DbMigrationsConfiguration<BlowTrial.Domain.Providers.TrialDataContext>
+    public class TrialDataConfiguration : DbMigrationsConfiguration<TrialDataContext>
     {
         public TrialDataConfiguration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(BlowTrial.Domain.Providers.TrialDataContext context)
+        protected override void Seed(TrialDataContext context)
         {
             /*
             if (!(from v in context.Vaccines
@@ -32,6 +32,8 @@ namespace BlowTrial.Migrations.TrialData
             context.Vaccines.AddOrUpdate(DataContextInitialiser.Opv); //Guid.ParseExact("161a6935-3e1d-4362-9b23-eb6f49512fc9", "D") 
             context.Vaccines.AddOrUpdate(DataContextInitialiser.HepB); // Guid.ParseExact("a756168a-2e0b-404b-a903-bc0cfd02f33f", "D")
             context.Vaccines.AddOrUpdate(DataContextInitialiser.DanishBcg);
+            context.Vaccines.AddOrUpdate(DataContextInitialiser.BcgGreenSignal);
+            context.Vaccines.AddOrUpdate(DataContextInitialiser.BcgJapan);
             context.SaveChanges(true);
 
             /*
@@ -77,6 +79,11 @@ namespace BlowTrial.Migrations.TrialData
                 vaIds.RemoveRange(vaIds.Count - 2, 2);
                 context.Database.ExecuteSqlCommand(string.Format("delete from VaccinesAdministered where Id in ({0})", string.Join(",", vaIds)));
             }
+
+            if(!context.Participants.Any(p=>p.FollowUpBabyBCGReaction != Domain.Outcomes.FollowUpBabyBCGReactionStatus.Missing))
+            {
+                UpdatePapuleData(context);
+            }
         }
         class OldParticipant 
         {
@@ -87,7 +94,7 @@ namespace BlowTrial.Migrations.TrialData
             public int BlockSize { get; set; }
             public int Strata { get; set; }
         }
-        static void CreateAllocationBlocks(BlowTrial.Domain.Providers.TrialDataContext context)
+        static void CreateAllocationBlocks(TrialDataContext context)
         {
             var participants = context.Database.SqlQuery(typeof(OldParticipant), string.Format(
                 "select Id,CentreId,WasEnvelopeRandomised,BlockNumber,BlockSize, case when IsMale = 1 then case when AdmissionWeight< {0} then {2} when AdmissionWeight >={1} then {3} else {4} end else case when AdmissionWeight< {0} then {5} when AdmissionWeight >={1} then {6} else {7} end end as Strata from Participants order by CentreId, BlockNumber, Id",
@@ -242,6 +249,24 @@ namespace BlowTrial.Migrations.TrialData
                 {
                     db.ExecuteSqlCommand(s);
                 }
+            }
+        }
+        static void UpdatePapuleData(TrialDataContext context)
+        {
+            var sb = new StringBuilder();
+            string now = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ff");
+            foreach (PapuleData p in PapuleData.GetSeedData())
+            {
+                sb.AppendFormat("UPDATE Participants SET FollowUpBabyBCGReaction = {0}, RecordLastModified='{1}'", p.Scar, now);
+                if (p.WeeksPost.HasValue)
+                {
+                    DateTime vaccineGiven = context.Database.SqlQuery<DateTime>("Select AdministeredAt From VaccinesAdministered Where VaccineId=1").FirstOrDefault();
+                    DateTime contact = (vaccineGiven + p.WeeksPost.Value);
+                    sb.AppendFormat(", FollowUpContactMade = '{0:yyyy-MM-dd}'",contact);
+                }
+                sb.Append(" Where Id=" + p.Id);
+                context.Database.ExecuteSqlCommand(sb.ToString());
+                sb.Clear();
             }
         }
     }

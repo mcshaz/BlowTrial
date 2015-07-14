@@ -107,7 +107,8 @@ namespace BlowTrial.ViewModel
                 if (value == ParticipantModel.AgeDays) { return; }
                 ParticipantModel.AgeDays = value;
                 NotifyPropertyChanged("AgeDays");
-                if (DataRequired== DataRequiredOption.AwaitingOutcomeOr28 && ParticipantModel.AgeDays>=28)
+                if ((DataRequired== DataRequiredOption.AwaitingOutcomeOr28 && ParticipantModel.AgeDays>=28)
+                        || (DataRequired == DataRequiredOption.Awaiting6WeeksToElapse && ParticipantModel.AgeDays>=42))
                 {
                     RecalculateDataRequired();
                 }
@@ -178,9 +179,9 @@ namespace BlowTrial.ViewModel
                 {
                     return Strings.NotApplicable;
                 }
-                if (AgeDays > 28)
+                if (AgeDays > ParticipantBaseModel.FollowToAge)
                 {
-                    return ">28"; //≥
+                    return '>' + ParticipantBaseModel.FollowToAge.ToString(); //≥
                 }
                 return AgeDays.ToString();
             }

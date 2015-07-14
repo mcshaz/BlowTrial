@@ -79,13 +79,6 @@ namespace BlowTrial.Models
         }
         public int VaccineId{ get; set; }
         public ParticipantProgressModel AdministeredTo { get; set; }
-        public bool IsBcg
-        {
-            get
-            {
-                return DataContextInitialiser.BcgVaccineIds.Contains(VaccineId);
-            }
-        }
 
         #endregion
 
@@ -127,10 +120,9 @@ namespace BlowTrial.Models
             {
                 return Strings.VaccineAdministeredVM_DuplicateVaccine;
             }
-            if (DataContextInitialiser.BcgVaccineIds.Contains(VaccineId))
+            if (VaccineGiven.IsBcg)
             {
-                var firstDual = AdministeredTo.VaccineModelsAdministered.FirstOrDefault(v => DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId));
-                if (firstDual != null && firstDual != this)
+                if (AdministeredTo.VaccineModelsAdministered.Any(v => v != this && v.VaccineGiven.IsBcg))
                 {
                     return Strings.VaccineAdministeredVM_DualBcg;
                 }
@@ -140,7 +132,7 @@ namespace BlowTrial.Models
         DateTimeErrorString ValidateAdministrationDateTime(DateTime? now=null)
         {
             var error = _administeredAtDateTime.ValidateNotEmpty();
-            if (VaccineGiven!=null && IsBcg)
+            if (VaccineGiven!=null && VaccineGiven.IsBcg)
             {
                 _administeredAtDateTime.ValidateIsAfter(Strings.ParticipantModel_Error_RegistrationDateTime, AdministeredTo.RegisteredAt, ref error);
             }

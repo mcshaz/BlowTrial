@@ -873,4 +873,37 @@
   <data name="RandomisingMessages_DischargeFrom" xml:space="preserve">
     <value>discharge from {0}</value>
   </data>
+  <data name="FollowUpBabyBCGReactionStatus_NoReaction" xml:space="preserve">
+    <value>No Reaction</value>
+  </data>
+  <data name="FollowUpBabyBCGReactionStatus_PapuleOnly" xml:space="preserve">
+    <value>Papule Only</value>
+  </data>
+  <data name="FollowUpBabyBCGReactionStatus_PustuleOrScar" xml:space="preserve">
+    <value>Pustule or Scar</value>
+  </data>
+  <data name="MaternalBCGScarStatus_NoScar" xml:space="preserve">
+    <value>No Scar</value>
+  </data>
+  <data name="MaternalBCGScarStatus_ScarPresent" xml:space="preserve">
+    <value>Scar Present</value>
+  </data>
+  <data name="Vaccine_BcgJapan" xml:space="preserve">
+    <value>BCG-Japan</value>
+  </data>
+  <data name="Vaccine_GreenSignalBcg" xml:space="preserve">
+    <value>BCG-Green Signal</value>
+  </data>
+  <data name="DataRequiredOption_Awaiting6WeeksToElapse" xml:space="preserve">
+    <value>Waiting 6 weeks for BCG scar follow up</value>
+  </data>
+  <data name="DataRequiredOption_AwaitingInfantScarDetails" xml:space="preserve">
+    <value>BCG Scar follow up due</value>
+  </data>
+  <data name="DataRequiredOption_FailedInitialContact" xml:space="preserve">
+    <value>Initial follow up unsuccesful - retry awaited</value>
+  </data>
+  <data name="DataRequiredOption_MaternalBCGScarDetails" xml:space="preserve">
+    <value>Mother's BCG scar details required</value>
+  </data>
 </root>

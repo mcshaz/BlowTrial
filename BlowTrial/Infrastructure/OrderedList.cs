@@ -54,7 +54,8 @@ namespace BlowTrial.Infrastructure
         public int Count { get { return _list.Count; } }
         object IList.this[int index] { get { return _list[index]; } set { _list[index] = (T)value; } }
         public T this[int index] { get { return _list[index]; } set { _list[index] = value; } }
-        bool ICollection.IsSynchronized { get { return false; } }
+        bool IsSynchronized { get { return false; } }
+        bool ICollection.IsSynchronized { get { return IsSynchronized; } }
         object ICollection.SyncRoot { get { return _list; } } //? should return this 
         bool IList.IsFixedSize { get { return false; } }
         bool IList.IsReadOnly { get { return false; } }

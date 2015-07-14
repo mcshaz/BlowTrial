@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
 
 namespace BlowTrial.Domain.Tables
 {
@@ -62,10 +60,18 @@ namespace BlowTrial.Domain.Tables
         [StringLength(160)]
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
+        //[Column(TypeName = "Date")] NA in compact
+        public DateTime? FollowUpContactMade { get; set; }
+        [StringLength(512)]
+        public String FollowUpComment { get; set; }
+        public bool PermanentlyUncontactable { get; set; }
+        public MaternalBCGScarStatus MaternalBCGScar {get;set;}
+        public FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction { get; set; }
 
         public virtual AllocationBlock Block { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
         public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }
+        public virtual ICollection<UnsuccessfulFollowUp> UnsuccesfulFollowUps { get; set; }
     }
     public class ScreenedPatient : Patient
     {

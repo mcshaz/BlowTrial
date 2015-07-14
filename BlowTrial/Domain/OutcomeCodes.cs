@@ -28,6 +28,20 @@ namespace BlowTrial.Domain.Outcomes
         DischargedAndLikelyToHaveDied = 7,
         DischargedAndOutcomeCompletelyUnknown = 8
     }
+    public enum MaternalBCGScarStatus
+    {
+        Missing=0,
+        NoScar= 1,
+        ScarPresent =2
+    }
+
+    public enum FollowUpBabyBCGReactionStatus{
+        Missing=0,
+        NoReaction=1,
+        PapuleOnly=2,
+        PustuleOrScar=3,
+        Uncontactable=4
+    }
     public enum DataRequiredOption
     {
         NotSet = 0,
@@ -35,7 +49,13 @@ namespace BlowTrial.Domain.Outcomes
         OutcomeRequired = 2,
         BcgDataRequired = 3,
         AwaitingOutcomeOr28 =4,
-        Complete = 5
+
+        MaternalBCGScarDetails = 6,
+        Awaiting6WeeksToElapse = 7,
+        AwaitingInfantScarDetails=8,
+        FailedInitialContact=9,
+
+        Complete = 20
     }
     public enum RandomisationArm
     {

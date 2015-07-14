@@ -18,7 +18,6 @@ using BlowTrial.Infrastructure;
 using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Migrations;
 using BlowTrial.Infrastructure.Extensions;
-using System.Data.SqlServerCe;
 using BlowTrial.Helpers;
 using System.Threading;
 

@@ -16,30 +16,49 @@ namespace BlowTrial.Domain.Providers
             new Vaccine
             {
                 Id = 1,
-                Name = Strings.Vaccine_RussianBcg
+                Name = Strings.Vaccine_RussianBcg,
+                IsBcg = true
             };
         public static readonly Vaccine Opv =
             new Vaccine
             {
                 Id = 2,
-                Name = Strings.Vaccine_Opv
+                Name = Strings.Vaccine_Opv,
+                IsBcg = false
             };
         public static readonly Vaccine HepB =
             new Vaccine
             {
                 Id = 3,
-                Name = Strings.Vaccine_HepB
+                Name = Strings.Vaccine_HepB,
+                IsBcg = false
             };
         public static readonly Vaccine DanishBcg =
             new Vaccine{
                 Id = 5,
-                Name=Strings.Vaccine_DanishBcg
+                Name=Strings.Vaccine_DanishBcg,
+                IsBcg=true
             };
         public static readonly Vaccine BcgMoreau =
             new Vaccine
             {
                 Id = 6,
-                Name = Strings.Vaccine_BcgBrazil
+                Name = Strings.Vaccine_BcgBrazil,
+                IsBcg =true
+            };
+        public static readonly Vaccine BcgGreenSignal =
+            new Vaccine
+            {
+                Id = 7,
+                Name = Strings.Vaccine_GreenSignalBcg,
+                IsBcg = true
+            };
+        public static readonly Vaccine BcgJapan =
+            new Vaccine
+            {
+                Id = 8,
+                Name = Strings.Vaccine_BcgJapan,
+                IsBcg = true
             };
 
         public const int MaxReservedVaccineId = 20;
@@ -73,11 +92,5 @@ namespace BlowTrial.Domain.Providers
             return returnVar;
         }
 
-        public static int[] BcgVaccineIds = new int[] {RussianBcg.Id,DanishBcg.Id,BcgMoreau.Id };
-
-        public static bool IsBcg(int vaccineId)
-        {
-            return BcgVaccineIds.Contains(vaccineId);
-        }
     }
 }

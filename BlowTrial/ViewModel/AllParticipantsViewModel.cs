@@ -79,7 +79,7 @@ namespace BlowTrial.ViewModel
             }
 
             _ageUpdater = AgeUpdatingMediator.GetService(participants: (from p in participantVMs
-                                                                        where p.IsKnownDead != true && p.AgeDays <=28
+                                                                        where p.IsKnownDead != true && p.AgeDays <=ParticipantBaseModel.FollowToAge
                                                                         select (IBirthday)p),
                                                            capacity:partCount);
             _ageUpdater.OnAgeIncrement += OnNewAge;
@@ -88,7 +88,7 @@ namespace BlowTrial.ViewModel
             AllParticipants.CustomSort = new ParticipantIdSortDesc();
 
             _groupByDataRequired = true;
-            _selectedDataRequired = new DataRequiredOption[] { DataRequiredOption.AwaitingOutcomeOr28, DataRequiredOption.BcgDataRequired, DataRequiredOption.DetailsMissing, DataRequiredOption.OutcomeRequired };
+            _selectedDataRequired = (DataRequiredOption[])Enum.GetValues(typeof(DataRequiredOption));
             _selectedCentres = _repository.GetCentresRequiringData();
             SetGrouping();
             //creating dispatchertimer so that screen is rendered before setting up the birthtime updating algorithms
@@ -477,8 +477,9 @@ namespace BlowTrial.ViewModel
                              DeathOrLastContactDateTime = p.DeathOrLastContactDateTime,
                              CauseOfDeath = p.CauseOfDeath,
                              VaccinesAdministered = p.VaccinesAdministered,
-                             ProtocolViolations = p.ProtocolViolations
-                         };
+                             ProtocolViolations = p.ProtocolViolations,
+                             UnsuccesfulFollowUps = p.UnsuccesfulFollowUps
+            };
         }
         #endregion // Events
 

@@ -98,7 +98,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return VaccineAdministeredModel.IsBcg;
+                return VaccineAdministeredModel.VaccineGiven.IsBcg;
             }
         }
 

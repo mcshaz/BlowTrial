@@ -15,7 +15,13 @@ namespace BlowTrial.Infrastructure.Interfaces
         DateTime? DeathOrLastContactDateTime {get;}
         CauseOfDeathOption CauseOfDeath {get;}
         RandomisationArm TrialArm {get;}
+        MaternalBCGScarStatus MaternalBCGScar { get; }
+        FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction { get; }
+        bool PermanentlyUncontactable { get; }
+        DateTime RegisteredAt { get; }
+
         ICollection<VaccineAdministered> VaccinesAdministered {get;}
         ICollection<ProtocolViolation> ProtocolViolations { get; }
+        ICollection<UnsuccessfulFollowUp> UnsuccesfulFollowUps { get; }
     }
 }

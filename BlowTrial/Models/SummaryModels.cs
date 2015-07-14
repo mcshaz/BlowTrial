@@ -60,9 +60,9 @@ namespace BlowTrial.Models
             return returnVar;
         }
 
-        static int RowIndex(DataRequiredOption dataRqd)
+        int RowIndex(DataRequiredOption dataRqd)
         {
-            return (int)dataRqd - 1;
+            return Array.IndexOf(RowHeaders,dataRqd);
         }
         public int ColIndex(RandomisationArm arm)
         {

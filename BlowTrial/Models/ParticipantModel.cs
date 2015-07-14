@@ -20,22 +20,41 @@ namespace BlowTrial.Models
     {
         #region Fields
         DateTime _dateTimeBirth;
+        public const int MaxFollowUpAttempts = 3;
+        public const int FollowToAge = 42;
         #endregion
 
         #region Static Constructor
         static ParticipantBaseModel()
         {
-            DataRequiredExpression = p => 
+            DataRequiredExpression = p =>
                 ((p.OutcomeAt28Days >= OutcomeAt28DaysOption.DischargedBefore28Days && !p.DischargeDateTime.HasValue)
                             || (DeathOrLastContactRequiredIf.Contains(p.OutcomeAt28Days) && (p.DeathOrLastContactDateTime == null || (KnownDeadOutcomes.Contains(p.OutcomeAt28Days) && p.CauseOfDeath == CauseOfDeathOption.Missing))))
                         ? DataRequiredOption.DetailsMissing
-                        : (p.TrialArm != RandomisationArm.Control && !p.ProtocolViolations.Any(pv=>pv.ViolationType == ViolationTypeOption.MajorWrongTreatment) && !p.VaccinesAdministered.Any(v => DataContextInitialiser.BcgVaccineIds.Contains(v.VaccineId)))
+                        : (p.TrialArm != RandomisationArm.Control && !p.ProtocolViolations.Any(pv => pv.ViolationType == ViolationTypeOption.MajorWrongTreatment) && !p.VaccinesAdministered.Any(v => v.VaccineGiven.IsBcg))
                             ? DataRequiredOption.BcgDataRequired
                             : (p.OutcomeAt28Days == OutcomeAt28DaysOption.Missing)
-                                ? DbFunctions.DiffDays(p.DateTimeBirth, DateTime.Now) < 28
+                                ? (DbFunctions.DiffDays(p.DateTimeBirth, DateTime.Now) < 28)
                                     ? DataRequiredOption.AwaitingOutcomeOr28
                                     : DataRequiredOption.OutcomeRequired
-                                : DataRequiredOption.Complete;
+                                : KnownDeadOutcomes.Contains(p.OutcomeAt28Days)
+                                    ?(p.MaternalBCGScar == MaternalBCGScarStatus.Missing)
+                                        ?DataRequiredOption.MaternalBCGScarDetails
+                                        :DataRequiredOption.Complete
+                                    : (DbFunctions.DiffDays(p.VaccinesAdministered.Any(v=> v.VaccineGiven.IsBcg)
+                                                    ?p.VaccinesAdministered.FirstOrDefault(v=> v.VaccineGiven.IsBcg).AdministeredAt 
+                                                    : (p.DischargeDateTime ?? p.DeathOrLastContactDateTime ??p.RegisteredAt), DateTime.Now) 
+                                                < ParticipantBaseModel.FollowToAge)
+                                        ?DataRequiredOption.Awaiting6WeeksToElapse
+                                        :(p.FollowUpBabyBCGReaction == FollowUpBabyBCGReactionStatus.Missing)
+                                            ?p.PermanentlyUncontactable
+                                                ?DataRequiredOption.Complete
+                                                :p.UnsuccesfulFollowUps.Any()
+                                                    ? (p.UnsuccesfulFollowUps.Count > MaxFollowUpAttempts)
+                                                        ?DataRequiredOption.Complete
+                                                        :DataRequiredOption.FailedInitialContact
+                                                    : DataRequiredOption.AwaitingInfantScarDetails
+                                            : DataRequiredOption.Complete;
             var visitor = new ReplaceMethodCallVisitor(
                 typeof(DbFunctions).GetMethod("DiffDays", BindingFlags.Static | BindingFlags.Public, null, new Type[]{ typeof(DateTime?), typeof(DateTime?)},null),
                 args => 
@@ -56,8 +75,12 @@ namespace BlowTrial.Models
         public StudyCentreModel StudyCentre { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
+        public MaternalBCGScarStatus MaternalBCGScar { get; set; }
+        public bool PermanentlyUncontactable { get; set; }
+        public FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
         public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }
+        public virtual ICollection<UnsuccessfulFollowUp> UnsuccesfulFollowUps { get; set; }
 
         public DateTime DateTimeBirth 
         { 
@@ -116,7 +139,10 @@ namespace BlowTrial.Models
 
         public DataRequiredOption DataRequired
         {
-            get { return DataRequiredFunc(this); }
+            get
+            { 
+                return DataRequiredFunc(this);
+            }
         }
 
         internal DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();
@@ -626,7 +652,7 @@ namespace BlowTrial.Models
         }
         public bool HasBcgRecorded()
         {
-            return VaccineModelsAdministered.Any(vm => vm.IsBcg);
+            return VaccineModelsAdministered.Any(vm => vm.VaccineGiven.IsBcg);
         }
         #endregion
 

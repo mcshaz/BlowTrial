@@ -40,7 +40,7 @@ namespace BlowTrial.ViewModel
         {
             _repository_ParticipantUpdated(null, new ParticipantEventArgs(_repository.FindParticipant(e.Participant.Id)));
         }
-        void _repository_ScreenedPatientAdded(object sender, Domain.Providers.ScreenedPatientEventArgs e)
+        void _repository_ScreenedPatientAdded(object sender, ScreenedPatientEventArgs e)
         {
             ScreenedPatientData.TotalCount++;
             if (e.ScreenedPatient.BadInfectnImmune)

@@ -53,7 +53,7 @@ namespace StatsForAge.DataSets
                     case 42:
                         return new LMS { L = 0.739, M = 3.8702, S = 0.12085 };
                     case 43:
-                        return new LMS { L = 244.2, M = 4.0603, S = 138.07 };
+                        return new LMS { L = 0.2442, M = 4.0603, S = 0.13807 };
                     default:
                         throw new ArgumentOutOfRangeException("gestAgeWeeks");
                 }

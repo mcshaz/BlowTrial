@@ -123,6 +123,15 @@ namespace StatsForAge
                 .LinearInterpolate(LMSForAgeMonths(nextAge, isMale), lookupTotalAge - (double)lookupAge);
         }
 
+        public string DescribeAgeRange()
+        {
+            if (GestAgeRange.MaleRange == GestAgeRange.FemaleRange && AgeMonthsRange.MaleRange == AgeMonthsRange.FemaleRange)
+            {
+                return String.Format("Values will be interpolated between {0} weeks gestation and {1} years of age", GestAgeRange.MaleRange.Min, AgeMonthsRange.MaleRange.Max / 12);
+            }
+            return String.Format("Values will be interpolated between {0} weeks gestation and {1} years of age (Males) & {2} weeks gestation and {3} years of age(females)", 
+                GestAgeRange.MaleRange.Min, AgeMonthsRange.MaleRange.Max / 12, GestAgeRange.FemaleRange.Min, AgeMonthsRange.FemaleRange.Max /12);
+        }
         #endregion
     }
     public class GenderRange
@@ -142,10 +151,58 @@ namespace StatsForAge
         {
             if (min < 0) { throw new ArgumentOutOfRangeException("min", min, "must be >=0"); }
             if (max < min) { throw new ArgumentOutOfRangeException("max", max, "must be >= min"); }
-            Min = min;
-            Max = max;
+            _min = min;
+            _max = max;
         }
-        public int Min { get; private set; }
-        public int Max { get; private set; }
+        readonly int _min;
+        readonly int _max;
+        public int Min { get { return _min; } }
+        public int Max { get { return _max; } }
+
+        public override bool Equals(object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            // If parameter cannot be cast to Point return false.
+            AgeRange p = obj as AgeRange;
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            return Min == p.Min && Max == p.Max;
+        }
+
+        public override int GetHashCode()
+        {
+            return Min & (Max << 16);
+        }
+
+        public static bool operator ==(AgeRange a, AgeRange b)
+        {
+            // If both are null, or both are same instance, return true.
+            if (object.ReferenceEquals(a, b))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return a.Min == b.Min && a.Max == b.Max;
+        }
+
+        public static bool operator !=(AgeRange a, AgeRange b)
+        {
+            return !(a == b);
+        }
     }
 }

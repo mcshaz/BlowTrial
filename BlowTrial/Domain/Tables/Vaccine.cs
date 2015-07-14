@@ -15,6 +15,7 @@ namespace BlowTrial.Domain.Tables
         [StringLength(16)]
         public string Name { get; set; }
         public DateTime RecordLastModified { get; set; }
+        public bool IsBcg { get; set; }
     }
     [Table(VaccineAdminTableName)]
     public class VaccineAdministered : ISharedRecord

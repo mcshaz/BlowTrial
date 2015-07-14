@@ -753,7 +753,7 @@ namespace BlowTrial.ViewModel
                         if (item.VaccineGiven != null)
                         {
                             AllVaccinesAvailable.First(a => a.Vaccine == item.VaccineGiven).IsGivenToThisPatient = false;
-                            if (item.IsBcg)
+                            if (item.VaccineGiven.IsBcg)
                             {
                                 NotifyPropertyChanged("DisplayBcgAdverse", "BcgAdverse");
                             }
