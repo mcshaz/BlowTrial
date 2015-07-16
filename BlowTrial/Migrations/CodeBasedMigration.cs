@@ -26,7 +26,6 @@ namespace BlowTrial.Migrations
                     SqlCeCommand cmd = new SqlCeCommand(q, conn);
                     returnVar += cmd.ExecuteNonQuery();
                 }
-                conn.Close();
             }
             return returnVar;
         }

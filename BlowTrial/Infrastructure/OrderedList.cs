@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace BlowTrial.Infrastructure
 {
-    public class OrderedList<T> : IList<T>, ICollection<T>, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+    public sealed class OrderedList<T> : IList<T>, ICollection<T>, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
     {
         #region Fields
         readonly List<T> _list;
@@ -54,8 +54,9 @@ namespace BlowTrial.Infrastructure
         public int Count { get { return _list.Count; } }
         object IList.this[int index] { get { return _list[index]; } set { _list[index] = (T)value; } }
         public T this[int index] { get { return _list[index]; } set { _list[index] = value; } }
-        bool IsSynchronized { get { return false; } }
-        bool ICollection.IsSynchronized { get { return IsSynchronized; } }
+        //public bool IsSynchronized { get { return false; } }
+        bool ICollection.IsSynchronized { get { return false; } }
+        //public object SyncRoot { get { return _list; } }
         object ICollection.SyncRoot { get { return _list; } } //? should return this 
         bool IList.IsFixedSize { get { return false; } }
         bool IList.IsReadOnly { get { return false; } }

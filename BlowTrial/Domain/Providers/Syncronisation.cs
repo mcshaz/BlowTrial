@@ -344,7 +344,7 @@ namespace BlowTrial.Domain.Providers
             string queryForNewRecords = string.Format("select * from {0} where ({1})", tableName, WhereRange(destDbRemainingAllocations, tableName));
             if (IdsToUpdate.Any())
             {
-                string updatedRecordWhereClause = string.Format("Id in ({1})", tableName, string.Join(",", IdsToUpdate));
+                string updatedRecordWhereClause = string.Format("Id in ({0})", string.Join(",", IdsToUpdate));
                 using (SqlCeCommand cmd = new SqlCeCommand(string.Format("delete from {0} where {1}", tableName, updatedRecordWhereClause), destConn))
                 {
                     cmd.ExecuteNonQuery();

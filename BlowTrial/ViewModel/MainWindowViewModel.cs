@@ -561,13 +561,13 @@ namespace BlowTrial.ViewModel
         }
         ~MainWindowViewModel()
         {
-            _log.InfoFormat("Main window closed at {0}", DateTime.Now);
             Dispose(false);
         }
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
             {
+                _log.InfoFormat("Main window closed at {0} with disposing set to {1}", DateTime.Now,disposing);
                 Cleanup();
                 if (disposing)
                 {

@@ -11,7 +11,7 @@ namespace BlowTrial.Infrastructure.ThreadHelpers
     /// <summary>
     /// Represents a timer which performs an action on the UI thread when time elapses.  Rescheduling is supported.
     /// </summary>
-    public class DeferredAction : IDisposable
+    public sealed class DeferredAction : IDisposable
     {
         private Timer timer;
 

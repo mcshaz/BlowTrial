@@ -18,6 +18,7 @@ using System.Collections.Specialized;
 //using System.Windows.Threading;
 using StatsForAge.DataSets;
 using log4net;
+using GenericToDataString;
 
 namespace BlowTrial.ViewModel
 {

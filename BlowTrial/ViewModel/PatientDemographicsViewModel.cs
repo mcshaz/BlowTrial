@@ -945,9 +945,9 @@ namespace BlowTrial.ViewModel
 
         #region IDataErrorInfo Members
 
-        string IDataErrorInfo.Error { get { return null; } }
+        public string Error { get { return null; } }
 
-        string IDataErrorInfo.this[string propertyName]
+        public string this[string propertyName]
         {
             get 
             { 
