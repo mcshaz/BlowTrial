@@ -28,5 +28,10 @@ namespace BlowTrial.View
                 Closing += ((ParticipantProgressViewModel)e.NewValue).OnClosingWindow;
             }
         }
+
+        private void outcomeCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

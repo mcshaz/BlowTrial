@@ -18,6 +18,7 @@ namespace BlowTrial.Domain.Interfaces
         DbSet<StudyCentre> StudyCentres { get; set; }
         DbSet<BalancedAllocation> BalancedAllocations { get; set; }
         DbSet<AllocationBlock> AllocationBlocks { get; set; }
+        DbSet<UnsuccessfulFollowUp> UnsuccessfulFollowUps { get; set; }
         Database Database { get; }
         DbEntityEntry Entry(object entity);
         DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

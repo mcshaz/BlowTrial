@@ -1,13 +1,9 @@
 ﻿using BlowTrial.Domain.Tables;
 using BlowTrial.Models;
-using BlowTrial.Properties;
-using MvvmExtraLite.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 
 namespace BlowTrial.ViewModel
@@ -18,7 +14,7 @@ namespace BlowTrial.ViewModel
         public VaccineAdministeredViewModel(VaccineAdministeredModel vaccineModel, IEnumerable<VaccineViewModel> vaccineList)
         {
             VaccineList = vaccineList;
-            this.VaccineAdministeredModel = vaccineModel;
+            VaccineAdministeredModel = vaccineModel;
             SelectedVaccine = VaccineList.First(l => l.VaccineId == vaccineModel.VaccineId);
         }
         #endregion
@@ -49,7 +45,7 @@ namespace BlowTrial.ViewModel
                 }
                 _selectedVaccine = value;
                 this.VaccineAdministeredModel.VaccineGiven = _selectedVaccine.Vaccine;
-                NotifyPropertyChanged("SelectedVaccine", "AdministeredAtDate", "AdministeredAtTime","EarliestDate");
+                NotifyPropertyChanged("SelectedVaccine", "AdministeredAtDate", "AdministeredAtTime","EarliestOutcomeDate");
             }
         }
 
@@ -102,7 +98,7 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public DateTime EarliestDate
+        public DateTime EarliestOutcomeDate
         {
             get
             {

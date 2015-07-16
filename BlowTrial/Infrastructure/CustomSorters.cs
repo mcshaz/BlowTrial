@@ -137,4 +137,44 @@ namespace BlowTrial.Infrastructure.CustomSorters
             return -partX.DataRequired.CompareTo(partY.DataRequired);
         }
     }
+
+    class ContactAttemptsSorter : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return partX.ContactAttempts.CompareTo(partY.ContactAttempts);
+        }
+    }
+
+    class ContactAttemptsSortDesc : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return -partX.ContactAttempts.CompareTo(partY.ContactAttempts);
+        }
+    }
+
+    class LastAttemptedContactSorter : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return Nullable.Compare<DateTime>(partX.LastAttemptedContact, partY.LastAttemptedContact);
+        }
+    }
+
+    class LastAttemptedContactSortDesc : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            var partX = (ParticipantListItemViewModel)x;
+            var partY = (ParticipantListItemViewModel)y;
+            return -Nullable.Compare<DateTime>(partX.LastAttemptedContact, partY.LastAttemptedContact);
+        }
+    }
 }

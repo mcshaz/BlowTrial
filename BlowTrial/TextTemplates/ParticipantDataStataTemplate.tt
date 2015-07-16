@@ -23,19 +23,25 @@ rename opvoralpolio opv
 
 capture confirm string variable lastweightdate
 if (!_rc) {
-	gen int `a' = date( lastweightdate, "YMD#")
-	drop lastweightdate
-	rename `a' lastweightdate
-	format lastweightdate %td
+	foreach v of varlist lastweightdate followupcontactmade {
+		gen int `a' = date( `v', "YMD#")
+		drop `v'
+		rename `a' `v'
+		format `v' %td
+	}
 }
 
 label define causeOfDeathOption <#= StataData.GetStataLabel<CauseOfDeathOption>() #>
 label define outcomeAt28DaysOption <#= StataData.GetStataLabel<OutcomeAt28DaysOption>() #>
+label define followUpBabyBCGReactionStatus <#= StataData.GetStataLabel<FollowUpBabyBCGReactionStatus>() #>
+label define maternalBCGScarStatus <#= StataData.GetStataLabel<MaternalBCGScarStatus>() #>
 label define trialarms <#= StataData.GetStataLabel<RandomisationArm>() #>
 label define centreNames <#= _data.CentresLabel #>
 
 label values causeofdeath causeOfDeathOption
 label values outcomeat28days outcomeAt28DaysOption
+label values followupbabybcgreaction followUpBabyBCGReactionStatus
+label values maternalbcgscar maternalBCGScarStatus
 label values centreid centreNames
 label values trialarm trialarms
 

@@ -79,6 +79,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Green Signal (Control &amp; Green Signal BCG).
+        /// </summary>
+        public static string AllocationGroups_GreenSignal2Arm {
+            get {
+                return ResourceManager.GetString("AllocationGroups_GreenSignal2Arm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to India 2 arm (Control &amp; BCG India).
         /// </summary>
         public static string AllocationGroups_India2Arm {
@@ -102,6 +111,15 @@ namespace BlowTrial.Properties {
         public static string AllocationGroups_India3ArmUnbalanced {
             get {
                 return ResourceManager.GetString("AllocationGroups_India3ArmUnbalanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Japan (Control &amp; BCG-Japan).
+        /// </summary>
+        public static string AllocationGroups_Japan2Arm {
+            get {
+                return ResourceManager.GetString("AllocationGroups_Japan2Arm", resourceCulture);
             }
         }
         
@@ -603,9 +621,9 @@ namespace BlowTrial.Properties {
         /// <summary>
         ///   Looks up a localized string similar to days.
         /// </summary>
-        public static string DaysOld {
+        public static string Days {
             get {
-                return ResourceManager.GetString("DaysOld", resourceCulture);
+                return ResourceManager.GetString("Days", resourceCulture);
             }
         }
         
@@ -903,6 +921,15 @@ namespace BlowTrial.Properties {
         public static string MaternalBCGScarStatus_ScarPresent {
             get {
                 return ResourceManager.GetString("MaternalBCGScarStatus_ScarPresent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unascertainable.
+        /// </summary>
+        public static string MaternalBCGScarStatus_Unascertainable {
+            get {
+                return ResourceManager.GetString("MaternalBCGScarStatus_Unascertainable", resourceCulture);
             }
         }
         
@@ -1357,6 +1384,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Missing.
+        /// </summary>
+        public static string OptionMissing {
+            get {
+                return ResourceManager.GetString("OptionMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Died in hospital before 28 days.
         /// </summary>
         public static string OutcomeAt28DaysOption_DiedInHospitalBefore28Days {
@@ -1429,6 +1465,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Baby must be 6 weeks post BCG to enter scar details.
+        /// </summary>
+        public static string ParticipantModel_Error_BabyBCGScarPre6Weeks {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_BabyBCGScarPre6Weeks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The patient cannot have a BCG papule at 28 days if he/she died before day 28.
         /// </summary>
         public static string ParticipantModel_Error_Bcg28daysDead {
@@ -1474,6 +1519,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The baby&apos;s BCG reaction at follow up is required.
+        /// </summary>
+        public static string ParticipantModel_Error_BCGReactionRequired {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_BCGReactionRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please enter the details of when the BCG was given.
         /// </summary>
         public static string ParticipantModel_Error_BcgRequiredForAdverse {
@@ -1501,11 +1555,29 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please also enter the date the BCG vaccine was given.
+        /// </summary>
+        public static string ParticipantModel_Error_FollowUpWIthoutBCGDate {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_FollowUpWIthoutBCGDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The weight has changed too dramatically from birth ({0}g).
         /// </summary>
         public static string ParticipantModel_Error_LastWeightChange {
             get {
                 return ResourceManager.GetString("ParticipantModel_Error_LastWeightChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Mother&apos;s BCG scar status is required.
+        /// </summary>
+        public static string ParticipantModel_Error_MaternalBcgRequired {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_MaternalBcgRequired", resourceCulture);
             }
         }
         
@@ -1524,6 +1596,15 @@ namespace BlowTrial.Properties {
         public static string ParticipantModel_Error_RegistrationDateTime {
             get {
                 return ResourceManager.GetString("ParticipantModel_Error_RegistrationDateTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter a date of attempted contact.
+        /// </summary>
+        public static string ParticipantModel_Error_UncontactableWithoutAttempt {
+            get {
+                return ResourceManager.GetString("ParticipantModel_Error_UncontactableWithoutAttempt", resourceCulture);
             }
         }
         
@@ -2005,6 +2086,15 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please enter the date contact was attempted.
+        /// </summary>
+        public static string UnsuccessfulFollowUpModel_Error_AttemptedDateRequired {
+            get {
+                return ResourceManager.GetString("UnsuccessfulFollowUpModel_Error_AttemptedDateRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BCG-Moreau(Brazil).
         /// </summary>
         public static string Vaccine_BcgBrazil {
@@ -2142,9 +2232,9 @@ namespace BlowTrial.Properties {
         /// <summary>
         ///   Looks up a localized string similar to weeks.
         /// </summary>
-        public static string WeeksOld {
+        public static string Weeks {
             get {
-                return ResourceManager.GetString("WeeksOld", resourceCulture);
+                return ResourceManager.GetString("Weeks", resourceCulture);
             }
         }
         

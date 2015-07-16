@@ -143,6 +143,16 @@
                             Arm
                         </GridViewColumnHeader>
                     </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=ContactAttempts, Mode=OneWay}">
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="ContactAttempts" >
+                             Contact Attempts
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=LastAttemptedContact, Mode=OneWay, StringFormat={}{0:dd-MM-yyyy}, TargetNullValue=N/A }">
+                        <GridViewColumnHeader Command="{Binding Path=SortGridView}"  CommandParameter="LastAttemptedContact" >
+                            Attempted Contact
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

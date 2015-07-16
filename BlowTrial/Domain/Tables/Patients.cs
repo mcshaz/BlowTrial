@@ -57,13 +57,12 @@ namespace BlowTrial.Domain.Tables
         public int? MultipleSiblingId { get; set; }
         public CauseOfDeathOption CauseOfDeath { get; set; }
         public OutcomeAt28DaysOption OutcomeAt28Days { get; set; }
-        [StringLength(160)]
+        public const int NoteLength = 512;
+        [StringLength(NoteLength)]
         public string Notes { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
         //[Column(TypeName = "Date")] NA in compact
         public DateTime? FollowUpContactMade { get; set; }
-        [StringLength(512)]
-        public String FollowUpComment { get; set; }
         public bool PermanentlyUncontactable { get; set; }
         public MaternalBCGScarStatus MaternalBCGScar {get;set;}
         public FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction { get; set; }
@@ -71,7 +70,7 @@ namespace BlowTrial.Domain.Tables
         public virtual AllocationBlock Block { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
         public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }
-        public virtual ICollection<UnsuccessfulFollowUp> UnsuccesfulFollowUps { get; set; }
+        public virtual ICollection<UnsuccessfulFollowUp> UnsuccessfulFollowUps { get; set; }
     }
     public class ScreenedPatient : Patient
     {

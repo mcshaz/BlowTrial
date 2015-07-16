@@ -63,14 +63,6 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public ParticipantBaseModel Participant
-        {
-            get
-            {
-                return ParticipantModel;
-            }
-        }
-
         public int Id
         {
             get
@@ -95,7 +87,7 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public int AgeDays
+        public virtual int AgeDays
         {
             get
             {
@@ -107,8 +99,8 @@ namespace BlowTrial.ViewModel
                 if (value == ParticipantModel.AgeDays) { return; }
                 ParticipantModel.AgeDays = value;
                 NotifyPropertyChanged("AgeDays");
-                if ((DataRequired== DataRequiredOption.AwaitingOutcomeOr28 && ParticipantModel.AgeDays>=28)
-                        || (DataRequired == DataRequiredOption.Awaiting6WeeksToElapse && ParticipantModel.AgeDays>=42))
+                if ((_dataRequired== DataRequiredOption.AwaitingOutcomeOr28 && ParticipantModel.AgeDays>=28)
+                        || (_dataRequired == DataRequiredOption.Awaiting6WeeksToElapse && ParticipantModel.AgeDays>=42))
                 {
                     RecalculateDataRequired();
                 }
@@ -131,6 +123,110 @@ namespace BlowTrial.ViewModel
             }
         }
 
+        public MaternalBCGScarStatus MaternalBCGScar
+        {
+            get
+            {
+                return ParticipantModel.MaternalBCGScar;
+            }
+            set
+            {
+                if (ParticipantModel.MaternalBCGScar != value)
+                {
+                    ParticipantModel.MaternalBCGScar = value;
+                    NotifyPropertyChanged("MaternalBCGScar");
+                    if (_dataRequired == DataRequiredOption.MaternalBCGScarDetails || _dataRequired == DataRequiredOption.FailedInitialContact)
+                    {
+                        RecalculateDataRequired();
+                    }
+                }
+            }
+        }
+
+        public FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction
+        {
+            get
+            {
+                return ParticipantModel.FollowUpBabyBCGReaction;
+            }
+            set
+            {
+                if (ParticipantModel.FollowUpBabyBCGReaction != value)
+                {
+                    ParticipantModel.FollowUpBabyBCGReaction = value;
+                    NotifyPropertyChanged("FollowUpBabyBCGReaction");
+                    if (_dataRequired == DataRequiredOption.AwaitingInfantScarDetails || _dataRequired == DataRequiredOption.FailedInitialContact)
+                    {
+                        RecalculateDataRequired();
+                    }
+                }
+            }
+        }
+
+        public bool PermanentlyUncontactable
+        {
+            get
+            {
+                return ParticipantModel.PermanentlyUncontactable;
+            }
+            set
+            {
+                if (ParticipantModel.PermanentlyUncontactable != value)
+                {
+                    ParticipantModel.PermanentlyUncontactable = value;
+                    NotifyPropertyChanged("PermanentlyUncontactable");
+                    if (_dataRequired == DataRequiredOption.AwaitingInfantScarDetails || _dataRequired == DataRequiredOption.FailedInitialContact)
+                    {
+                        RecalculateDataRequired();
+                    }
+
+                }
+            }
+        }
+
+        public int ContactAttempts
+        {
+            get
+            {
+                return ParticipantModel.UnsuccessfulFollowUps.Count;
+            }
+        }
+
+        public DateTime? LastAttemptedContact
+        {
+            get
+            {
+                return GetLastDate(ParticipantModel.UnsuccessfulFollowUps);
+            }
+        }
+        static DateTime? GetLastDate(IEnumerable<UnsuccessfulFollowUp> ufs)
+        {
+            return ufs.Select(u => (DateTime?)u.AttemptedContact).Max();
+        }
+
+        public virtual ICollection<UnsuccessfulFollowUp> UnsuccessfulFollowUps
+        {
+            get
+            {
+                return ParticipantModel.UnsuccessfulFollowUps;
+            }
+            set
+            {
+                if (ParticipantModel.UnsuccessfulFollowUps != value)
+                {
+                    bool contactChanged = (LastAttemptedContact != GetLastDate(value));
+                    bool countChanged = (ContactAttempts != value.Count);
+                    ParticipantModel.UnsuccessfulFollowUps = value;
+                    if (_dataRequired == DataRequiredOption.AwaitingInfantScarDetails )
+                    {
+                        RecalculateDataRequired();
+                    }
+                    if (countChanged) { NotifyPropertyChanged("ContactAttempts"); }
+                    if (contactChanged) { NotifyPropertyChanged("LastAttemptedContact"); }
+                }
+            }
+        }
+
         public virtual ICollection<VaccineAdministered> VaccinesAdministered
         {
             get
@@ -143,6 +239,7 @@ namespace BlowTrial.ViewModel
                 {
                     ParticipantModel.VaccinesAdministered = value;
                     RecalculateDataRequired();
+
                 }
             }
         }

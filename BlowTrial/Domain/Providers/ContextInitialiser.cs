@@ -86,6 +86,12 @@ namespace BlowTrial.Domain.Providers
                 case AllocationGroups.Danish2Arm:
                     returnList.Add(DanishBcg.Id);
                     break;
+                case AllocationGroups.GreenSignal2Arm:
+                    returnList.Add(BcgGreenSignal.Id);
+                    break;
+                case AllocationGroups.Japan2Arm:
+                    returnList.Add(BcgJapan.Id);
+                    break;
             }
             var returnVar = new int[returnList.Count];
             returnList.CopyTo(returnVar);

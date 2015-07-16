@@ -66,7 +66,7 @@
                 </Run>
                 <Run Foreground="Chocolate" Text="{Binding Path=PhoneNumber, Mode=OneWay}"/>
             </TextBlock>
-            <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.Row="1" Margin="0,10,0,0" >
+            <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.Row="1"  >
                 <StackPanel>
                     <Grid Margin="0,0,5,0" Background="{Binding Path=BackgroundColour, Mode=OneWay}">
                         <Grid.Resources>
@@ -111,7 +111,23 @@
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                            
+
+                            <Style x:Key="ShowIfTimePostBcgNotNull" TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TimePostBcg, Mode=OneWay}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style> 
+
+                            <Style x:Key="ShowIfFollowUp" TargetType="{x:Type ex:RowDefinitionExtended}" >
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FollowUpContactMade, Mode=OneWay}" Value="{x:Null}">
+                                        <Setter Property="Visible" Value="false" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+
                             <Style x:Key="ShowIf28dAndAlive" TargetType="{x:Type ex:RowDefinitionExtended}" >
                                 <Setter Property="Visible" Value="False" />
                                 <Style.Triggers>
@@ -145,6 +161,9 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid.RowDefinitions>
+                            <!--MaternalBCGScar-->
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="30" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="30" />
                             <ex:RowDefinitionExtended Style="{StaticResource ShowIfDischarged}" Height="Auto"/>
@@ -170,36 +189,67 @@
                             <ex:RowDefinitionExtended Style="{StaticResource HideIfOutcomeMissing}" Height="Auto" />
                             <!-- Visible="{Binding Path=LastContactWeight, Mode=OneWay, Converter={StaticResource isNotNullConvert}}"-->
                             <ex:RowDefinitionExtended Style="{StaticResource HideIfOutcomeMissing}" Height="30" />
+                            <!--Notes-->
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="30" />
+                            <!--VaccinesAdministeredDataGrid-->
+                            <RowDefinition Height="Auto" />
+                            <!--UnsuccessfulFollowUpDataGrid-->
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="30" />
+                            <!--FollowUpContactMade or PermanentlyUncontactable-->
+                            <ex:RowDefinitionExtended Visible="{Binding Path=FollowUpDataDue, Mode=OneWay}" Height="Auto" />
+                            <ex:RowDefinitionExtended Visible="{Binding Path=FollowUpDataDue, Mode=OneWay}" Height="30" />
+                            <!--FollowUpBabyBCGReaction-->
+                            <ex:RowDefinitionExtended Style="{StaticResource ShowIfFollowUp}" Height="Auto" />
+                            <ex:RowDefinitionExtended Style="{StaticResource ShowIfFollowUp}" Height="30" />
                         </Grid.RowDefinitions>
-                        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="26" 
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Grid.RowSpan="33" 
                                   VerticalAlignment="Stretch" Width="6" />
-                        
+
+                        <!--MaternalBCGScar-->
+                        <Label 
+                          Grid.Row="0" Grid.Column="0"
+                          Content="Mother's BCG scar:" 
+                          HorizontalAlignment="Right"
+                          Target="{Binding ElementName=MaternalBCGScarCombo}" 
+                          />
+                        <ComboBox Grid.Row="0" Grid.Column="2" Name="MaternalBCGScarCombo"
+                            VerticalAlignment="Center" HorizontalAlignment="Stretch" 
+                            ItemsSource="{Binding Path=MaternalBCGScarOptions, Mode=OneWay}"
+                            SelectedValuePath="Key"  
+                            DisplayMemberPath="Value"
+                            SelectedValue="{Binding Path=MaternalBCGScar, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" >
+                        </ComboBox>
+                        <ContentPresenter 
+                          Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Content="{Binding ElementName=MaternalBCGScarCombo, Path=(Validation.Errors).CurrentItem}"
+                          />
+
                         <!-- OutcomeAt28Days - options 1-3 -->
                         <Label Target="{Binding ElementName=outcomeCombo}"
-                            Grid.Row="0" Grid.Column="0" 
+                            Grid.Row="2" Grid.Column="0" 
                             HorizontalAlignment="Right"
                         >
                             <TextBlock TextWrapping="Wrap" >
                                 Outcome at discharge<Run Foreground="Green">*</Run>, or at 28 days of age (whichever is sooner):
                                 <LineBreak />
-                                <Run Foreground="Green">*</Run><Run Foreground="#FF00068B" FontStyle="Italic" Text="{Binding Path=DischargeExplanation, Mode=OneWay}" >
-	                            <Run.Background>
-		                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-			                            <GradientStop Color="White"/>
-			                            <GradientStop Color="#FFCDCD53" Offset="1"/>
-		                            </LinearGradientBrush>
-	                            </Run.Background>
-</Run>
+                                <Run Foreground="#FF00068B" FontStyle="Italic" Text="{Binding Path=DischargeExplanation, Mode=OneWay}" >
+	                                <Run.Background>
+		                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+			                                <GradientStop Color="White"/>
+			                                <GradientStop Color="#FFCDCD53" Offset="1"/>
+		                                </LinearGradientBrush>
+	                                </Run.Background>
+                                </Run>
                             </TextBlock>
                         </Label>
-                        <ComboBox Grid.Row="0" Grid.Column="2" Name="outcomeCombo"
+                        <ComboBox Grid.Row="2" Grid.Column="2" x:Name="outcomeCombo"
                             VerticalAlignment="Center" HorizontalAlignment="Stretch" 
                             ItemsSource="{Binding Path=OutcomeAt28orDischargeOptions, Mode=OneWay}"
                             SelectedValuePath="Key"  
                             DisplayMemberPath="DisplayName"
-                            SelectedValue="{Binding Path=OutcomeAt28orDischarge, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" >
+                            SelectedValue="{Binding Path=OutcomeAt28orDischarge, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" SelectionChanged="outcomeCombo_SelectionChanged" >
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem">
                                     <Setter Property="IsEnabled" Value="{Binding IsEnabled}"/>
@@ -207,18 +257,18 @@
                             </ComboBox.ItemContainerStyle>
                         </ComboBox>
 
-                        <ContentPresenter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                       Content="{Binding ElementName=outcomeCombo, Path=(Validation.Errors).CurrentItem}" 
                       />
 
                         <!-- DischargeDateTime -->
                         <Label 
-                          Grid.Row="2" Grid.Column="0"
+                          Grid.Row="4" Grid.Column="0"
                           Content="Date/time of discharge:" 
                           HorizontalAlignment="Right"
                           Target="{Binding ElementName=dischargeDatePicker}" 
                           />
-                        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" >
+                        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Stretch" >
                             <DatePicker x:Name="dischargeDatePicker" Width="120" SelectedDate="{Binding Path=DischargeDate, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding RegisteredAt, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactTodayOr28,Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="dischargeTimeTxt" 
@@ -226,9 +276,9 @@
                                                       IncludeLiteralsInValue="True"
                                                       IncludePromptInValue="False"
                                                       ValueDataType="{x:Type s:String}"
-                                                      Grid.Row="5" Grid.Column="1" Margin="10,0" Mask="90:00" Width="50" TextAlignment="Center"/>
+                                                      Margin="10,0" Mask="90:00" Width="50" TextAlignment="Center"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"  HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3"  HorizontalAlignment="Right">
                             <ContentPresenter 
                           Content="{Binding ElementName=dischargeDatePicker, Path=(Validation.Errors).CurrentItem}"/>
                             <ContentPresenter 
@@ -236,53 +286,53 @@
                         </StackPanel>
                         <!-- 28 day Outcome -->
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5">
+                        <TextBlock Grid.Row="6" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5">
                             28 day outcome (after discharge):
                         </TextBlock>
-                        <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="4">
+                        <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="6">
                             <RadioButton Content="Completely Unknown" GroupName="KnownOptions" Name="isCompletelyUnknownRadio"  Validation.ErrorTemplate="{x:Null}"
                                     IsChecked="{Binding Path=PostDischargeCompletelyUnknown, Mode=TwoWay, ValidatesOnDataErrors=True, 
                                     UpdateSourceTrigger=PropertyChanged}" Margin="4" HorizontalAlignment="left"/>
                             <TextBlock Margin="20,0,0,4">Or</TextBlock>
                             <Border BorderThickness="2" BorderBrush="Aqua">
-                            <StackPanel Orientation="Horizontal" >
-                                <StackPanel Orientation="Vertical">
-                                    <RadioButton Content="Known" GroupName="KnownOptions" Name="isKnownRadio"  Validation.ErrorTemplate="{x:Null}"
+                                <StackPanel Orientation="Horizontal" >
+                                    <StackPanel Orientation="Vertical">
+                                        <RadioButton Content="Known" GroupName="KnownOptions" Name="isKnownRadio"  Validation.ErrorTemplate="{x:Null}"
                                     IsChecked="{Binding Path=PostDischargeOutcomeKnown, Mode=TwoWay, ValidatesOnDataErrors=True, 
                                     Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
-                                    <RadioButton Content="Likely" GroupName="KnownOptions" 
+                                        <RadioButton Content="Likely" GroupName="KnownOptions" 
                                     IsChecked="{Binding Path=PostDischargeOutcomeKnown, Mode=TwoWay,
                                      Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
-                                </StackPanel>
-                                <TextBlock VerticalAlignment="Center">to have</TextBlock>
-                                <StackPanel Orientation="Vertical">
-                                    <RadioButton Content="survived to 28 days " GroupName="DiedOptions" Name="isDeadRadio" Validation.ErrorTemplate="{x:Null}"
+                                    </StackPanel>
+                                    <TextBlock VerticalAlignment="Center">to have</TextBlock>
+                                    <StackPanel Orientation="Vertical">
+                                        <RadioButton Content="survived to 28 days " GroupName="DiedOptions" Name="isDeadRadio" Validation.ErrorTemplate="{x:Null}"
                                     IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, ValidatesOnDataErrors=True, 
                                     Converter={StaticResource boolInvertConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" Style="{StaticResource DisableIfLess28dAndKnown}"/>
-                                    <RadioButton Content="died before 28 days " GroupName="DiedOptions" 
+                                        <RadioButton Content="died before 28 days " GroupName="DiedOptions" 
                                     IsChecked="{Binding Path=DiedAfterDischarge, Mode=TwoWay, 
                                     Converter={StaticResource nullBoolConvert}, UpdateSourceTrigger=PropertyChanged}" Margin="4" />
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
                             </Border>
                         </StackPanel>
                         <ContentPresenter 
-                          Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=isKnownRadio, Path=(Validation.Errors).CurrentItem}"
                         />
                         <ContentPresenter 
-                          Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=isDeadRadio, Path=(Validation.Errors).CurrentItem}"
                           />
 
                         <!-- DeathOrLastContactDateTime -->
                         <Label 
-                      Grid.Row="6" Grid.Column="0"
+                      Grid.Row="8" Grid.Column="0"
                       Content="{Binding Path=DeathOrLastContactLabel, Mode=OneWay}" 
                       HorizontalAlignment="Right"
                       Target="{Binding ElementName=deathOrContactDatePicker}" 
                       />
-                        <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Stretch" >
+                        <StackPanel Orientation="Horizontal" Grid.Row="8" Grid.Column="2" HorizontalAlignment="Stretch" >
                             <DatePicker x:Name="deathOrContactDatePicker" Width="120" SelectedDate="{Binding Path=DeathOrLastContactDate, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}"  DisplayDateStart="{Binding DischargeOrEnrolment, Mode=OneWay}" DisplayDateEnd="{Binding TodayOr28, Mode=OneWay}"/>
                             <wpfToolkit:MaskedTextBox x:Name="deathOrContactTimeTxt" 
@@ -290,9 +340,9 @@
                                                       IncludeLiteralsInValue="True"
                                                       IncludePromptInValue="False"
                                                       ValueDataType="{x:Type s:String}"
-                                                      Grid.Row="5" Grid.Column="1" Margin="10,0" Mask="90:00" Width="50" TextAlignment="Center" />
+                                                      Margin="10,0" Mask="90:00" Width="50" TextAlignment="Center" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3"  HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3"  HorizontalAlignment="Right">
                             <ContentPresenter 
                               Content="{Binding ElementName=deathOrContactDatePicker, Path=(Validation.Errors).CurrentItem}"
                               />
@@ -303,107 +353,107 @@
 
                         <!-- CauseOfDeath -->
                         <Label Target="{Binding ElementName=causeOfDeathCombo}"
-                            Grid.Row="8" Grid.Column="0" Content="Cause of death:"
+                            Grid.Row="10" Grid.Column="0" Content="Cause of death:"
                             HorizontalAlignment="Right"
                             >
                         </Label>
-                        <ComboBox Grid.Row="8" Grid.Column="2" Name="causeOfDeathCombo" 
+                        <ComboBox Grid.Row="10" Grid.Column="2" Name="causeOfDeathCombo" 
                           ItemsSource="{Binding Path=CauseOfDeathOptions, Mode=OneTime}"
                           SelectedValuePath="Key" 
                           DisplayMemberPath="Value"
                           SelectedValue="{Binding Path=CauseOfDeath, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
 
-                        <ContentPresenter Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                       Content="{Binding ElementName=causeOfDeathCombo, Path=(Validation.Errors).CurrentItem}" />
 
                         <!--OtherCauseOfDeathDetail-->
                         <Label Target="{Binding ElementName=otherCauseOfDeathTxt}"
-                            Grid.Row="10" Grid.Column="0" Content="Details of cause of death:"
+                            Grid.Row="12" Grid.Column="0" Content="Details of cause of death:"
                             HorizontalAlignment="Right" >
                         </Label>
-                        <TextBox Grid.Row="10" Grid.Column="2" Name="otherCauseOfDeathTxt" 
+                        <TextBox Grid.Row="12" Grid.Column="2" Name="otherCauseOfDeathTxt" 
                             HorizontalAlignment="Stretch"  
                             Text="{Binding Path=OtherCauseOfDeathDetail, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <ContentPresenter Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=otherCauseOfDeathTxt, Path=(Validation.Errors).CurrentItem}"
                           />
 
                         <!--BcgAdverse-->
                         <Label Target="{Binding ElementName=bcgAdverseCombo}"
-                            Grid.Row="12" Grid.Column="0"
+                            Grid.Row="14" Grid.Column="0"
                             HorizontalAlignment="Right" Content="Severe side effects from BCG vaccine"
                             />
-                        <ComboBox Grid.Row="12" Grid.Column="2" Name="bcgAdverseCombo" 
+                        <ComboBox Grid.Row="14" Grid.Column="2" Name="bcgAdverseCombo" 
                           ItemsSource="{Binding Path=RequiredBoolOptions, Mode=OneTime}"
                           SelectedValuePath="Key" 
                           DisplayMemberPath="Value"
                           SelectedValue="{Binding Path=BcgAdverse, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
 
-                        <ContentPresenter Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=bcgAdverseCombo, Path=(Validation.Errors).CurrentItem}"
                           />
 
                         <!--BcgAdverseDetail-->
                         <Label Target="{Binding ElementName=bcgAdverseDetailTxt}"
-                            Grid.Row="14" Grid.Column="0" Content="Details of BCG side effects:"
+                            Grid.Row="16" Grid.Column="0" Content="Details of BCG side effects:"
                             HorizontalAlignment="Right"
                             >
                         </Label>
-                        <TextBox Grid.Row="14" Grid.Column="2" Name="bcgAdverseDetailTxt" 
+                        <TextBox Grid.Row="16" Grid.Column="2" Name="bcgAdverseDetailTxt" 
                              HorizontalAlignment="Stretch"  
                              Text="{Binding Path=BcgAdverseDetail, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <ContentPresenter Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                               Content="{Binding ElementName=bcgAdverseDetailTxt, Path=(Validation.Errors).CurrentItem}"
                               />
 
                         <!--BcgPapuleAtDischarge-->
                         <Label Target="{Binding ElementName=bcgPapuleAtDischargeCombo}"
-                            Grid.Row="16" Grid.Column="0"
+                            Grid.Row="18" Grid.Column="0"
                             HorizontalAlignment="Right" Content="{Binding Path=BcgPapuleLabel}"
                             />
-                        <ComboBox Grid.Row="16" Grid.Column="2" Name="bcgPapuleAtDischargeCombo" 
+                        <ComboBox Grid.Row="18" Grid.Column="2" Name="bcgPapuleAtDischargeCombo" 
                           ItemsSource="{Binding Path=BcgPapuleOptions, Mode=OneTime}"
                           SelectedValuePath="Key" 
                           DisplayMemberPath="Value"
                           SelectedValue="{Binding Path=BcgPapuleAtDischarge, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
 
-                        <ContentPresenter Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=bcgPapuleAtDischargeCombo, Path=(Validation.Errors).CurrentItem}"
                           />
 
                         <!--BcgPapuleAt28d-->
                         <Label Target="{Binding ElementName=bcgPapuleAt28dCombo}"
-                            Grid.Row="18" Grid.Column="0"
+                            Grid.Row="20" Grid.Column="0"
                             HorizontalAlignment="Right" >
                             <TextBlock TextWrapping="Wrap" >
                                 BCG induration/papule/scar at 28 days of age
                             </TextBlock>
                         </Label>
-                        <ComboBox Grid.Row="18" Grid.Column="2" Name="bcgPapuleAt28dCombo" 
+                        <ComboBox Grid.Row="20" Grid.Column="2" Name="bcgPapuleAt28dCombo" 
                           ItemsSource="{Binding Path=BcgPapuleOptions, Mode=OneTime}"
                           SelectedValuePath="Key" 
                           DisplayMemberPath="Value"
                           SelectedValue="{Binding Path=BcgPapuleAt28days, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
 
-                        <ContentPresenter Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                        <ContentPresenter Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=bcgPapuleAt28dCombo, Path=(Validation.Errors).CurrentItem}"
                           />
 
                         <!--LastContactWeight-->
                         <Label Target="{Binding ElementName=lastContactWeightTxt}"
-                            Grid.Row="20" Grid.Column="0"
+                            Grid.Row="22" Grid.Column="0"
                             HorizontalAlignment="Right" Content="{Binding Path=WeightLabel}"
                             />
-                        <TextBox Grid.Row="20" Grid.Column="2" Name="lastContactWeightTxt" 
+                        <TextBox Grid.Row="22" Grid.Column="2" Name="lastContactWeightTxt" 
                             HorizontalAlignment="Stretch"  
                             Text="{Binding Path=LastContactWeight, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}"/>
-                        <StackPanel Orientation="Horizontal" Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal" Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
                             <TextBlock Text="{Binding Path=WtForAgeCentile}" />
                             <ContentPresenter 
                             Content="{Binding ElementName=lastContactWeightTxt, Path=(Validation.Errors).CurrentItem}"
@@ -412,117 +462,200 @@
 
                         <!-- LastWeightDate -->
                         <Label 
-                          Grid.Row="22" Grid.Column="0"
+                          Grid.Row="24" Grid.Column="0"
                           Content="Date of weight:" 
                           HorizontalAlignment="Right"
                           Target="{Binding ElementName=lastWeightDatePicker}" 
                           />
-                        <DatePicker Grid.Row="22" Grid.Column="2" x:Name="lastWeightDatePicker" Width="120" 
+                        <DatePicker Grid.Row="24" Grid.Column="2" x:Name="lastWeightDatePicker" Width="120" 
                             HorizontalAlignment="Left"
                             SelectedDate="{Binding Path=LastWeightDate, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding RegisteredAt, Mode=OneWay}" DisplayDateEnd="{Binding DeathLastContactTodayOr28, Mode=OneWay}" />
                         <ContentPresenter 
-                          Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Grid.Row="25" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=lastWeightDatePicker, Path=(Validation.Errors).CurrentItem}"
                           />
 
                         <!-- Notes -->
-                        <Label 
-                          Grid.Row="24" Grid.Column="0"
-                          Content="Notes:" 
-                          HorizontalAlignment="Right"
-                          Target="{Binding ElementName=noteTxt}" 
-                          />
-                        <TextBox Grid.Row="24" Grid.Column="2" x:Name="noteTxt"  
-                            HorizontalAlignment="Stretch" TextWrapping="Wrap" MaxWidth="300"
+                        <DockPanel Grid.Row="26" Grid.Column="0" Grid.ColumnSpan="3">
+                            <Label DockPanel.Dock="Left"
+                                  Content="Notes:" 
+                                  HorizontalAlignment="Right"
+                                  Target="{Binding ElementName=noteTxt}" 
+                                  />
+                            <TextBox x:Name="noteTxt"  DockPanel.Dock="Right"
+                            HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch"
                                  Text="{Binding Path=Notes, ValidatesOnDataErrors=True,UpdateSourceTrigger=PropertyChanged}"
                                  />
+
+                        </DockPanel>
+                        <GridSplitter Grid.Row="26" Grid.Column="0" Grid.ColumnSpan="3" ResizeDirection="Rows" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="6"/>
+
+
                         <ContentPresenter 
-                          Grid.Row="25" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Grid.Row="27" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                           Content="{Binding ElementName=noteTxt, Path=(Validation.Errors).CurrentItem}"
                           />
 
-                    </Grid>
-                    <DockPanel  Margin="10">
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Stretch">
-                            <TextBlock  Text="Vaccines:" 
+
+                        <!--VaccinesAdministeredDataGrid-->
+                        <DockPanel Margin="10" Grid.Row="28" Grid.ColumnSpan="3">
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Stretch">
+                                <TextBlock  Text="Vaccines:" 
                                HorizontalAlignment="Left" Margin="5,5,15,5">
-                            </TextBlock>
-                            <TextBlock 
+                                </TextBlock>
+                                <TextBlock 
                                 Margin="5">
                                 <Hyperlink Command="{Binding Path=NewVaccineCmd}">
                                     Add New Type of Vaccine:
                                 </Hyperlink>
-                            </TextBlock>
-                            <TextBox Name="newVaccineNameTextBox" 
+                                </TextBlock>
+                                <TextBox Name="newVaccineNameTextBox" 
                                 HorizontalAlignment="Stretch"  
                                  Text="{Binding Path=NewVaccineName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
-                        </StackPanel>
-                        <DataGrid DockPanel.Dock="Bottom" Grid.Row="24" Grid.Column="2" ItemsSource="{Binding Path=VaccineVMsAdministered}"
+                            </StackPanel>
+                            <DataGrid DockPanel.Dock="Bottom" ItemsSource="{Binding Path=VaccineVMsAdministered}"
                               AutoGenerateColumns="False"  CanUserDeleteRows="True">
 
-                        <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Vaccine" >
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <DataTemplate.Resources>
-                                                <Style TargetType="ComboBoxItem" >
-                                                    <Style.Triggers>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding IsGivenToThisPatient, Mode=OneWay}" Value="true" />
-                                                                <Condition  Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected, Mode=OneWay}" Value="false" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="IsEnabled" Value="false" />
-                                                        </MultiDataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </DataTemplate.Resources>
-                                            <ComboBox ItemsSource="{Binding Path=VaccineList}"
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Vaccine" >
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <DataTemplate.Resources>
+                                                    <Style TargetType="ComboBoxItem" >
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding IsGivenToThisPatient, Mode=OneWay}" Value="true" />
+                                                                    <Condition  Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected, Mode=OneWay}" Value="false" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsEnabled" Value="false" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DataTemplate.Resources>
+                                                <ComboBox ItemsSource="{Binding Path=VaccineList}"
                                                 DisplayMemberPath="DisplayName" 
                                                 SelectedItem="{Binding Path=SelectedVaccine,ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                                             />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Date Given" >
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <DatePicker SelectedDate="{Binding Path=AdministeredAtDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-                                                    DisplayDateStart="{Binding Path=EarliestDate, Mode=OneWay}" 
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Date Given" >
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <DatePicker SelectedDate="{Binding Path=AdministeredAtDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                                    DisplayDateStart="{Binding Path=EarliestOutcomeDate, Mode=OneWay}" 
                                                     DisplayDateEnd="{Binding RelativeSource={RelativeSource FindAncestor, 
                                                         AncestorType={x:Type Window}}, Path=DataContext.DeathLastContactTodayOr28, Mode=OneWay}" />
-                                        
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Time Given" >
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <wpfToolkit:MaskedTextBox 
+
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Time Given" >
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <wpfToolkit:MaskedTextBox 
                                                     Value="{Binding Path=AdministeredAtTime, Converter={StaticResource ResourceKey=nullTimeConvert}, ConverterParameter=hh\\:mm, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" 
                                                     IncludeLiteralsInValue="True"
                                                     IncludePromptInValue="False"
                                                     ValueDataType="{x:Type s:String}"
                                                     Mask="90:00" Width="50" TextAlignment="Center" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Width="*" >
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                            <TextBlock 
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="*" >
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock 
                                               VerticalAlignment="Center" Style="{StaticResource errorStyle}"
                                             Text="{Binding RelativeSource={RelativeSource
                                                     FindAncestor, AncestorType={x:Type DataGridRow}},
                                                     Path=(Validation.Errors).CurrentItem.ErrorContent}" 
                                           />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    </DockPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+
+                        <!--UnsuccessfulFollowUpDataGrid-->
+                        <Label 
+                          Grid.Row="29" Grid.Column="0"
+                          HorizontalAlignment="Right">
+                            <TextBlock TextWrapping="Wrap">
+                                Follow up
+                                <Run>
+                                    (unsuccessful and scheduled)
+                                </Run>:
+                            </TextBlock>
+                        </Label>
+                        <DataGrid Grid.Row="29" Grid.Column="2" ItemsSource="{Binding Path=UnsuccessfulFollowUpVMs}"
+                              AutoGenerateColumns="False"  CanUserDeleteRows="True">
+
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Date" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <DatePicker SelectedDate="{Binding Path=AttemptedContact, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                                    DisplayDateStart="{Binding RelativeSource={RelativeSource FindAncestor, 
+                                                        AncestorType={x:Type Window}}, Path=DataContext.DischargeOrEnrolment, Mode=OneWay}" />
+
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!--FollowUpContactMade or PermanentlyUncontactable-->
+                        <Label 
+                          Grid.Row="31" Grid.Column="0"
+                          Content="Followed up baby's BCG on:" 
+                          HorizontalAlignment="Right" VerticalAlignment="Center"
+                          Target="{Binding ElementName=FollowUpDP}" 
+                          />
+                        <StackPanel Orientation="Vertical" Grid.Row="31" Grid.Column="2">
+                            <StackPanel Orientation="Horizontal" >
+                            <DatePicker x:Name="FollowUpDP" Width="120" HorizontalAlignment="Left"
+                                        IsEnabled="{Binding Path=PermanentlyUncontactable, Converter={StaticResource boolInvertConvert}}"
+                                        SelectedDate="{Binding Path=FollowUpContactMade, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                                        DisplayDateStart="{Binding Path=EarliestFollowUp, Mode=OneWay}" 
+                                                        DisplayDateEnd="{x:Static s:DateTime.Today}" />
+                                <TextBlock Style="{StaticResource ShowIfTimePostBcgNotNull}">
+                                    (<Run Text="{Binding Path=TimePostBcg, Mode=OneWay, Converter={StaticResource timeSpanToWeeksConvert}}" />)
+                                </TextBlock>
+                            </StackPanel>
+                        <TextBlock Margin="20,0,0,4">Or</TextBlock>
+                            <CheckBox x:Name="UncontactableCB" IsChecked="{Binding Path=PermanentlyUncontactable}" Content="Permanently Uncontactable" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Grid.Row="32" Grid.Column="0" Grid.ColumnSpan="3" >
+                            <ContentPresenter 
+                              HorizontalAlignment="Right"
+                              Content="{Binding ElementName=FollowUpDP, Path=(Validation.Errors).CurrentItem}" />
+                            <ContentPresenter 
+                              HorizontalAlignment="Right"
+                              Content="{Binding ElementName=UncontactableCB, Path=(Validation.Errors).CurrentItem}" />
+                        </StackPanel>
+                            
+                        <!--FollowUpBabyBCGReaction-->
+                        <Label 
+                          Grid.Row="33" Grid.Column="0"
+                          Content="Baby's BCG reaction after 6+ weeks:" 
+                          HorizontalAlignment="Right"
+                          Target="{Binding ElementName=followUpBabyBcgCombo}" />
+                        <ComboBox Grid.Row="33" Grid.Column="2" x:Name="followUpBabyBcgCombo"
+                            VerticalAlignment="Center" HorizontalAlignment="Stretch" 
+                            ItemsSource="{Binding Path=FollowUpBabyBCGOptions, Mode=OneWay}"
+                            SelectedValuePath="Key"  
+                            DisplayMemberPath="Value"
+                            SelectedValue="{Binding Path=FollowUpBabyBCGReaction, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" >
+                        </ComboBox>
+                        <ContentPresenter 
+                          Grid.Row="34" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                          Content="{Binding ElementName=followUpBabyBcgCombo, Path=(Validation.Errors).CurrentItem}" />
+                        
+                    </Grid>
                 </StackPanel>
             </ScrollViewer>
         <Line Grid.Row="1" 
@@ -533,7 +666,7 @@
             X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />
             <!-- BUTTON -->
 
-                <Button Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+        <Button Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center"
               Command="{Binding Path=SaveChanges}"
               Content="_Save Changes"
               Padding="4,0,4,2" Margin="4"/>

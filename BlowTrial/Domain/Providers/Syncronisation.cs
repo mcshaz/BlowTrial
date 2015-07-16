@@ -5,13 +5,11 @@ using BlowTrial.Infrastructure.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data.Entity.Migrations;
 using System.Data.Entity;
 using BlowTrial.Infrastructure.Interfaces;
 using ErikEJ.SqlCe;
 using System.Data.SqlServerCe;
 using BlowTrial.Infrastructure.Extensions;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Data;
 
@@ -76,6 +74,7 @@ namespace BlowTrial.Domain.Providers
         {
             UpdatedParticipantIds = new List<int>();
             UpsertedVaccineAdministeredIds = new List<int>();
+            UpsertedUnsuccessfulFollowUpIds = new List<int>();
             UpdatedParticipantIds = new List<int>();
             AddedScreenPatientIds = new List<int>();
             AddedParticipantIds = new List<int>();
@@ -88,6 +87,7 @@ namespace BlowTrial.Domain.Providers
         public List<int> AddedScreenPatientIds { get; private set; }
         //public IEnumerable<Vaccine> AddedVaccine { get; private set; }
         public List<int> UpsertedVaccineAdministeredIds { get; private set; }
+        public List<int> UpsertedUnsuccessfulFollowUpIds { get; private set; }
         public List<int> UpdatedProtocolViolationIds { get; private set; }
         public List<int> AddedProtocolViolationIds { get; private set; }
 
@@ -107,6 +107,9 @@ namespace BlowTrial.Domain.Providers
                 case "VaccineAdministered":
                     UpsertedVaccineAdministeredIds.AddRange(newIds);
                     break;
+                case "UnsuccessfulFollowUp":
+                    UpsertedUnsuccessfulFollowUpIds.AddRange(newIds);
+                    break;
             }
         }
         void Updated(Type t, IEnumerable<int> updatedIds)
@@ -121,6 +124,9 @@ namespace BlowTrial.Domain.Providers
                     break;
                 case "VaccineAdministered":
                     UpsertedVaccineAdministeredIds.AddRange(updatedIds);
+                    break;
+                case "UnsuccessfulFollowUp":
+                    UpsertedUnsuccessfulFollowUpIds.AddRange(updatedIds);
                     break;
             }
         }
@@ -158,7 +164,7 @@ namespace BlowTrial.Domain.Providers
 
                     var sourceCentreIdRanges = sourceSites.Select(k => new IntegerRange(k.Id, k.MaxIdForSite)).ToList();
                     var dbDestContext = (DbContext)destContext;
-                    foreach (Type t in new Type[] { typeof(Vaccine), typeof(BalancedAllocation), typeof(AllocationBlock), typeof(ScreenedPatient), typeof(Participant), typeof(VaccineAdministered), typeof(ProtocolViolation) })
+                    foreach (Type t in new Type[] { typeof(Vaccine), typeof(BalancedAllocation), typeof(AllocationBlock), typeof(ScreenedPatient), typeof(Participant), typeof(VaccineAdministered), typeof(ProtocolViolation), typeof(UnsuccessfulFollowUp) })
                     {
                         WriteTime(t, null);
                         var destAllocations = RemainingAllocationsByCentre(t, destContext.Database, sourceCentreIdRanges);

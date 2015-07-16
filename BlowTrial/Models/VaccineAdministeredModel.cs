@@ -1,14 +1,10 @@
-﻿using BlowTrial.Domain.Providers;
-using BlowTrial.Domain.Tables;
+﻿using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
-using BlowTrial.Infrastructure.Interfaces;
 using BlowTrial.Properties;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace BlowTrial.Models
 {

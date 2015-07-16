@@ -1,14 +1,10 @@
-﻿using BlowTrial.Domain.Tables;
+﻿using BlowTrial.Domain.Outcomes;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure;
 using BlowTrial.Properties;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace BlowTrial.Models
 {
@@ -51,7 +47,8 @@ namespace BlowTrial.Models
                 "RefusedConsent",
                 "PhoneNumber",
                 "AdmissionDiagnosis",
-                "EnvelopeNumber"
+                "EnvelopeNumber",
+                "MaternalBCGScar"
             };
             AppVersionAtEnrollment = App.CurrentAppVersion;
         }
@@ -148,6 +145,7 @@ namespace BlowTrial.Models
         public int? MultipleSiblingId { get; set; }
         public bool WasEnvelopeRandomised { get; set; }
         public int AppVersionAtEnrollment { get; set; }
+        public MaternalBCGScarStatus MaternalBCGScar { get; set; }
         #endregion
 
         #region Methods
@@ -281,6 +279,9 @@ namespace BlowTrial.Models
                 case "EnvelopeNumber":
                     error = ValidateEnvelopeNumber(hardErrorsOnly);
                     break;
+                case "MaternalBCGScar":
+                    error = ValidateMaternalBCGScar();
+                    break;
                 default:
                     Debug.Fail("Unexpected property being validated on NewPatient: " + propertyName);
                     break;
@@ -288,6 +289,19 @@ namespace BlowTrial.Models
 
             return error;
         }
+        public const int MaternalScarAppVersion = 4 << 24;
+        private string ValidateMaternalBCGScar()
+        {
+            /*
+            //change on advice of Rani
+            if (RefusedConsent == false && AppVersionAtEnrollment >= MaternalScarAppVersion  && MaternalBCGScar == MaternalBCGScarStatus.Missing)
+            {
+                return Strings.ParticipantModel_Error_MaternalBcgRequired;
+            }
+            */
+            return null;
+        }
+
         string ValidateName()
         {
             if (RefusedConsent==false) //changed from oktorandmise

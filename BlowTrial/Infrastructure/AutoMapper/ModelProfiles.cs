@@ -30,6 +30,8 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.AdministeredAtTime, o => o.Ignore())
                 .ForMember(d => d.AdministeredAtDate, o => o.Ignore());
 
+            Mapper.CreateMap<UnsuccessfulFollowUp, UnsuccessfulFollowUpModel>();
+
             Mapper.CreateMap<Participant, ParticipantBaseModel>()
                 .Include<Participant, ParticipantProgressModel>()
                 .ForMember(d => d.DeathOrLastContactDate, o => o.Ignore())
@@ -44,6 +46,8 @@ namespace BlowTrial.Infrastructure.Automapper
             Mapper.CreateMap<Participant, ParticipantProgressModel>()
                 .ForMember(d=>d.VaccineModelsAdministered, o=>o.MapFrom(s=>s.VaccinesAdministered))
                 .ForMember(d=>d.VaccinesAdministered, o=>o.Ignore())
+                .ForMember(d=>d.UnsuccessfulFollowUpModels,o=>o.MapFrom(s=>s.UnsuccessfulFollowUps))
+                .ForMember(d=>d.UnsuccessfulFollowUps,o=>o.Ignore())
                 .AfterMap((s,d) => {
                     foreach (var v in d.VaccineModelsAdministered)
                     {

@@ -50,6 +50,12 @@ namespace BlowTrial.Infrastructure
                 case RandomisationArm.RussianBCG:
                     vaccineName = Strings.Vaccine_RussianBcg;
                     break;
+                case RandomisationArm.GreenSignalBcg:
+                    vaccineName = Strings.Vaccine_GreenSignalBcg;
+                    break;
+                case RandomisationArm.JapanBcg:
+                    vaccineName = Strings.Vaccine_BcgJapan;
+                    break;
                 default:
                     throw new ArgumentException("invalid value for enum RandomisationArm");
             }

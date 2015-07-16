@@ -192,7 +192,7 @@
     <Compile Include="Domain\Providers\Syncronisation.cs" />
     <Compile Include="Domain\Tables\AllocationBlock.cs" />
     <Compile Include="Domain\Tables\BalancedAllocation.cs" />
-    <Compile Include="Domain\Tables\FollowUpCall.cs" />
+    <Compile Include="Domain\Tables\UnsuccessfulFollowUp.cs" />
     <Compile Include="Helpers\AgeUpdatingMediator.cs" />
     <Compile Include="Helpers\Attached.cs" />
     <Compile Include="Helpers\BackupHelper.cs" />
@@ -207,6 +207,7 @@
     <Compile Include="Helpers\ReplaceMethodCallVisitor.cs" />
     <Compile Include="Helpers\SelectableItem.cs" />
     <Compile Include="Infrastructure\AgeUpdatingService.cs" />
+    <Compile Include="Infrastructure\Converters\TimeSpanToWeeksConverter.cs" />
     <Compile Include="Infrastructure\Converters\EnumToSeperatedWordsConverter.cs" />
     <Compile Include="Infrastructure\CustomSorters.cs" />
     <Compile Include="Infrastructure\Extensions\ConcatExtensions.cs" />
@@ -222,15 +223,11 @@
     <Compile Include="Infrastructure\Randomising\RandomisingExtensions.cs" />
     <Compile Include="Infrastructure\Randomising\UtilityClasses.cs" />
     <Compile Include="Infrastructure\ThreadHelpers.cs" />
-    <Compile Include="Migrations\201507130322171_BcgScarFollowUp.cs" />
-    <Compile Include="Migrations\201507130322171_BcgScarFollowUp.Designer.cs">
-      <DependentUpon>201507130322171_BcgScarFollowUp.cs</DependentUpon>
+    <Compile Include="Migrations\TrialData\201507152234125_FollowUpScars.cs" />
+    <Compile Include="Migrations\TrialData\201507152234125_FollowUpScars.Designer.cs">
+      <DependentUpon>201507152234125_FollowUpScars.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\PapuleDataUpdate.cs" />
-    <Compile Include="Migrations\TrialData\201501112221341_CurrentlyEnrolling.cs" />
-    <Compile Include="Migrations\TrialData\201501112221341_CurrentlyEnrolling.Designer.cs">
-      <DependentUpon>201501112221341_CurrentlyEnrolling.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Migrations\TrialData\PapuleDataUpdate.cs" />
     <Compile Include="Migrations\Membership\201501120424330_RemoveMembershipDefaultAllocation.cs" />
     <Compile Include="Migrations\Membership\201501120424330_RemoveMembershipDefaultAllocation.Designer.cs">
       <DependentUpon>201501120424330_RemoveMembershipDefaultAllocation.cs</DependentUpon>
@@ -276,6 +273,7 @@
       <DependentUpon>201403100345554_TrialDataV2.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\TrialDataConfiguration.cs" />
+    <Compile Include="Models\UnsuccessfulFollowUpModel.cs" />
     <Compile Include="Properties\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -321,6 +319,7 @@
     <Compile Include="ViewModel\UtilityViewModels\SelectDataRequiredOptionsViewModel.cs" />
     <Compile Include="ViewModel\UtilityViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModel\UtilityViewModels\WorkspaceViewModel.cs" />
+    <Compile Include="ViewModel\UnsuccessfulFollowUpViewModel.cs" />
     <Compile Include="ViewModel\VaccineAdministeredViewModel.cs" />
     <Compile Include="ViewModel\VaccineViewModels.cs" />
     <Compile Include="ViewModel\WizardViewModels\BackupDirectionViewModel.cs" />
@@ -576,11 +575,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\201507130322171_BcgScarFollowUp.resx">
-      <DependentUpon>201507130322171_BcgScarFollowUp.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\TrialData\201501112221341_CurrentlyEnrolling.resx">
-      <DependentUpon>201501112221341_CurrentlyEnrolling.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\TrialData\201507152234125_FollowUpScars.resx">
+      <DependentUpon>201507152234125_FollowUpScars.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Membership\201501120424330_RemoveMembershipDefaultAllocation.resx">
       <DependentUpon>201501120424330_RemoveMembershipDefaultAllocation.cs</DependentUpon>

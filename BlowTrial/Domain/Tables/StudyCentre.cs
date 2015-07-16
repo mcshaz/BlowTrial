@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Windows.Media;
 
 namespace BlowTrial.Domain.Tables
 {
@@ -29,6 +28,7 @@ namespace BlowTrial.Domain.Tables
         /// If false then will be to discharge from NICU
         /// </summary>
         public bool IsToHospitalDischarge {get;set;}
+        //public DateTime TrialCommenced { get; set; }
 
         public DateTime RecordLastModified { get; set; }
 

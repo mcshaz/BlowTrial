@@ -1,7 +1,6 @@
 namespace BlowTrial.Migrations.TrialData
 {
-    using BlowTrial.Domain.Tables;
-    using System;
+    using Domain.Tables;
     using System.Data.Entity.Migrations;
     
     public partial class CurrentlyEnrolling : DbMigration

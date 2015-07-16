@@ -55,7 +55,7 @@ namespace BlowTrial.ViewModel
             CreateProtocolViolation = new RelayCommand(ShowProtocolViolation, param => SelectedParticipant != null);
             ShowUpdateEnrolment = new RelayCommand(ShowEnrolDetails, param => SelectedParticipant != null);
 
-            SearchDelay = TimeSpan.FromMilliseconds(400);
+            SearchDelay = TimeSpan.FromMilliseconds(200);
 
             Mediator.Register("MainWindowClosing", OnMainWindowClosing);
         }
@@ -226,6 +226,12 @@ namespace BlowTrial.ViewModel
                 case "TrialArm":
                     AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new TrialArmSorter() : new TrialArmSortDesc();
                     break;
+                case "ContactAttempts":
+                    AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new ContactAttemptsSorter() : new ContactAttemptsSortDesc();
+                    break;
+                case "LastAttemptedContact":
+                    AllParticipants.CustomSort = (isAscendingCol) ? (IComparer)new LastAttemptedContactSorter() : new LastAttemptedContactSortDesc();
+                    break;
 
             }
         }
@@ -352,11 +358,15 @@ namespace BlowTrial.ViewModel
             AllParticipants.EditItem(assdVM);
             UpdateDemographics(e.Participant, assdVM);
             assdVM.VaccinesAdministered = e.Participant.VaccinesAdministered;
+            assdVM.UnsuccessfulFollowUps = e.Participant.UnsuccessfulFollowUps;
             assdVM.OutcomeAt28Days = e.Participant.OutcomeAt28Days;
             assdVM.DischargeDateTime = e.Participant.DischargeDateTime;
             assdVM.DeathOrLastContactDateTime = e.Participant.DeathOrLastContactDateTime;
             assdVM.CauseOfDeath = e.Participant.CauseOfDeath;
-            
+            assdVM.FollowUpBabyBCGReaction = e.Participant.FollowUpBabyBCGReaction;
+            assdVM.PermanentlyUncontactable = e.Participant.PermanentlyUncontactable;
+            assdVM.MaternalBCGScar = e.Participant.MaternalBCGScar;
+
             if (_updateWindow != null && ((ParticipantProgressViewModel)_updateWindow.DataContext).Id == assdVM.Id)
             {
                 //this is here for data oversite, when update comes without having entered the data. For data collection sites, values should be the same and so updates will not be notified
@@ -384,7 +394,7 @@ namespace BlowTrial.ViewModel
         {
             var viol = new ProtocolViolationModel
             {
-                Participant = SelectedParticipant.Participant
+                Participant = SelectedParticipant.ParticipantModel
             };
             var violVM = new ProtocolViolationViewModel(_repository, viol);
             var violView = new ProtocolViolationView(violVM);
@@ -476,9 +486,12 @@ namespace BlowTrial.ViewModel
                              DischargeDateTime = p.DischargeDateTime,
                              DeathOrLastContactDateTime = p.DeathOrLastContactDateTime,
                              CauseOfDeath = p.CauseOfDeath,
+                             PermanentlyUncontactable = p.PermanentlyUncontactable,
+                             FollowUpBabyBCGReaction = p.FollowUpBabyBCGReaction,
+                             MaternalBCGScar = p.MaternalBCGScar,
                              VaccinesAdministered = p.VaccinesAdministered,
                              ProtocolViolations = p.ProtocolViolations,
-                             UnsuccesfulFollowUps = p.UnsuccesfulFollowUps
+                             UnsuccessfulFollowUps = p.UnsuccessfulFollowUps
             };
         }
         #endregion // Events

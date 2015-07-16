@@ -533,7 +533,7 @@
   <data name="Vaccine_Opv" xml:space="preserve">
     <value>OPV (oral polio)</value>
   </data>
-  <data name="DaysOld" xml:space="preserve">
+  <data name="Days" xml:space="preserve">
     <value>days</value>
   </data>
   <data name="DataRequiredOption_AwaitingOutcomeOr28" xml:space="preserve">
@@ -551,7 +551,7 @@
   <data name="DataRequiredOption_OutcomeRequired" xml:space="preserve">
     <value>Participants over 28 days requiring outcome data</value>
   </data>
-  <data name="WeeksOld" xml:space="preserve">
+  <data name="Weeks" xml:space="preserve">
     <value>weeks</value>
   </data>
   <data name="CreateCsvModel_Error_DirectoryExists" xml:space="preserve">
@@ -905,5 +905,35 @@
   </data>
   <data name="DataRequiredOption_MaternalBCGScarDetails" xml:space="preserve">
     <value>Mother's BCG scar details required</value>
+  </data>
+  <data name="ParticipantModel_Error_BabyBCGScarPre6Weeks" xml:space="preserve">
+    <value>Baby must be 6 weeks post BCG to enter scar details</value>
+  </data>
+  <data name="ParticipantModel_Error_FollowUpWIthoutBCGDate" xml:space="preserve">
+    <value>Please also enter the date the BCG vaccine was given</value>
+  </data>
+  <data name="ParticipantModel_Error_MaternalBcgRequired" xml:space="preserve">
+    <value>The Mother's BCG scar status is required</value>
+  </data>
+  <data name="ParticipantModel_Error_UncontactableWithoutAttempt" xml:space="preserve">
+    <value>Please enter a date of attempted contact</value>
+  </data>
+  <data name="UnsuccessfulFollowUpModel_Error_AttemptedDateRequired" xml:space="preserve">
+    <value>Please enter the date contact was attempted</value>
+  </data>
+  <data name="AllocationGroups_GreenSignal2Arm" xml:space="preserve">
+    <value>Green Signal (Control &amp; Green Signal BCG)</value>
+  </data>
+  <data name="AllocationGroups_Japan2Arm" xml:space="preserve">
+    <value>Japan (Control &amp; BCG-Japan)</value>
+  </data>
+  <data name="MaternalBCGScarStatus_Unascertainable" xml:space="preserve">
+    <value>Unascertainable</value>
+  </data>
+  <data name="OptionMissing" xml:space="preserve">
+    <value>Missing</value>
+  </data>
+  <data name="ParticipantModel_Error_BCGReactionRequired" xml:space="preserve">
+    <value>The baby's BCG reaction at follow up is required</value>
   </data>
 </root>

@@ -7,13 +7,13 @@ namespace BlowTrial.Migrations.TrialData
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.2-31219")]
-    public sealed partial class BcgScarFollowUp : IMigrationMetadata
+    public sealed partial class FollowUpScars : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(BcgScarFollowUp));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(FollowUpScars));
         
         string IMigrationMetadata.Id
         {
-            get { return "201507130322171_BcgScarFollowUp"; }
+            get { return "201507152234125_FollowUpScars"; }
         }
         
         string IMigrationMetadata.Source

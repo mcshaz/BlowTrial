@@ -80,7 +80,7 @@ namespace BlowTrial.Migrations.TrialData
                 context.Database.ExecuteSqlCommand(string.Format("delete from VaccinesAdministered where Id in ({0})", string.Join(",", vaIds)));
             }
 
-            if(!context.Participants.Any(p=>p.FollowUpBabyBCGReaction != Domain.Outcomes.FollowUpBabyBCGReactionStatus.Missing))
+            if(!context.Participants.Any(p=>p.FollowUpBabyBCGReaction != Domain.Outcomes.FollowUpBabyBCGReactionStatus.Missing) && context.StudyCentres.Any(s=>s.Id==20000))
             {
                 UpdatePapuleData(context);
             }
@@ -255,19 +255,35 @@ namespace BlowTrial.Migrations.TrialData
         {
             var sb = new StringBuilder();
             string now = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ff");
-            foreach (PapuleData p in PapuleData.GetSeedData())
+            var papuleData = PapuleData.GetSeedData();
+            //System.Diagnostics.Debug.Assert(papuleData.Length == 344, "Required number of papule data records not correct");
+            foreach (PapuleData p in papuleData)
             {
                 sb.AppendFormat("UPDATE Participants SET FollowUpBabyBCGReaction = {0}, RecordLastModified='{1}'", p.Scar, now);
                 if (p.WeeksPost.HasValue)
                 {
-                    DateTime vaccineGiven = context.Database.SqlQuery<DateTime>("Select AdministeredAt From VaccinesAdministered Where VaccineId=1").FirstOrDefault();
+                    DateTime vaccineGiven = context.Database.SqlQuery<DateTime>("Select AdministeredAt From VaccinesAdministered Where VaccineId=1 AND ParticipantId=" + p.Id).FirstOrDefault();
                     DateTime contact = (vaccineGiven + p.WeeksPost.Value);
-                    sb.AppendFormat(", FollowUpContactMade = '{0:yyyy-MM-dd}'",contact);
+                    if (p.Scar==0)
+                    {
+                        context.UnsuccessfulFollowUps.Add(new UnsuccessfulFollowUp { AttemptedContact = contact.Date, RecordLastModified = DateTime.Now, ParticipantId = p.Id });
+                        sb.Clear();
+                        continue;
+                    }
+                    else
+                    {
+                        sb.AppendFormat(", FollowUpContactMade = '{0:yyyy-MM-dd}'", contact);
+                    }
+                    
                 }
                 sb.Append(" Where Id=" + p.Id);
-                context.Database.ExecuteSqlCommand(sb.ToString());
+
+                int r = context.Database.ExecuteSqlCommand(sb.ToString());
+                //System.Diagnostics.Debug.Assert(r==1,"Assertion that 1 record changed failed");
                 sb.Clear();
             }
+            context.SaveChanges();
+            //System.Diagnostics.Debug.Assert(context.Participants.Count(pt => pt.FollowUpBabyBCGReaction != 0) == papuleData.Length,"database updated records");
         }
     }
 }

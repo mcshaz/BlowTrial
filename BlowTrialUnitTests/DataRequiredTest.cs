@@ -43,8 +43,8 @@ namespace BlowTrialUnitTests
                                         : p.FollowUpBabyBCGReaction == FollowUpBabyBCGReactionStatus.Missing
                                             ? p.PermanentlyUncontactable
                                                 ? DataRequiredOption.Complete
-                                                : p.UnsuccesfulFollowUps.Any()
-                                                    ? p.UnsuccesfulFollowUps.Count > BlowTrial.Models.ParticipantBaseModel.MaxFollowUpAttempts
+                                                : p.UnsuccessfulFollowUps.Any()
+                                                    ? p.UnsuccessfulFollowUps.Count > BlowTrial.Models.ParticipantBaseModel.MaxFollowUpAttempts
                                                         ? DataRequiredOption.Complete
                                                         : DataRequiredOption.FailedInitialContact
                                                     : DataRequiredOption.AwaitingInfantScarDetails

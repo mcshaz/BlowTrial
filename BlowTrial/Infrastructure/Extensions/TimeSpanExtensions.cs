@@ -1,8 +1,5 @@
 ﻿using BlowTrial.Properties;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace BlowTrial.Infrastructure.Extensions
 {
@@ -13,9 +10,9 @@ namespace BlowTrial.Infrastructure.Extensions
             int daysAge = age.Days;
             if (daysAge < 14)
             {
-                return daysAge.ToString() + ' ' + Strings.DaysOld;
+                return daysAge.ToString() + ' ' + Strings.Days;
             }
-            return string.Format("{0}.{1} {2}",(daysAge/7),(daysAge%7),Strings.WeeksOld);
+            return string.Format("{0}.{1} {2}",(daysAge/7),(daysAge%7),Strings.Weeks);
         }
     }
 }

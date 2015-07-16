@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace BlowTrial.Domain.Outcomes
+﻿namespace BlowTrial.Domain.Outcomes
 {
     public enum CauseOfDeathOption
     {
@@ -31,8 +26,9 @@ namespace BlowTrial.Domain.Outcomes
     public enum MaternalBCGScarStatus
     {
         Missing=0,
-        NoScar= 1,
-        ScarPresent =2
+        NoScar=1,
+        ScarPresent=2,
+        Unascertainable =3
     }
 
     public enum FollowUpBabyBCGReactionStatus{
@@ -40,8 +36,8 @@ namespace BlowTrial.Domain.Outcomes
         NoReaction=1,
         PapuleOnly=2,
         PustuleOrScar=3,
-        Uncontactable=4
     }
+
     public enum DataRequiredOption
     {
         NotSet = 0,
@@ -63,6 +59,8 @@ namespace BlowTrial.Domain.Outcomes
         Control,
         RussianBCG,
         DanishBcg,
-        MoreauBcg
+        MoreauBcg,
+        JapanBcg,
+        GreenSignalBcg
     }
 }

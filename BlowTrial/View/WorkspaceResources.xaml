@@ -8,6 +8,7 @@
     <BooleanToVisibilityConverter x:Key="boolToVisConverter" />
     <myCon:NullableTimeSpanConverter x:Key="nullTimeConvert" />
     <myCon:NullableIntConverter x:Key="nullIntConvert" />
+    <myCon:TimeSpanToWeeksConverter x:Key="timeSpanToWeeksConvert" />
 
     <Style x:Key="errorStyle" TargetType="TextBlock">
         <Setter Property="FontStyle" Value="Italic" />

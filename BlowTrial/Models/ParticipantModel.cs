@@ -1,5 +1,4 @@
 ﻿using BlowTrial.Domain.Outcomes;
-using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
 using BlowTrial.Helpers;
 using BlowTrial.Infrastructure.Interfaces;
@@ -49,8 +48,8 @@ namespace BlowTrial.Models
                                         :(p.FollowUpBabyBCGReaction == FollowUpBabyBCGReactionStatus.Missing)
                                             ?p.PermanentlyUncontactable
                                                 ?DataRequiredOption.Complete
-                                                :p.UnsuccesfulFollowUps.Any()
-                                                    ? (p.UnsuccesfulFollowUps.Count > MaxFollowUpAttempts)
+                                                :p.UnsuccessfulFollowUps.Any()
+                                                    ? (p.UnsuccessfulFollowUps.Count > MaxFollowUpAttempts)
                                                         ?DataRequiredOption.Complete
                                                         :DataRequiredOption.FailedInitialContact
                                                     : DataRequiredOption.AwaitingInfantScarDetails
@@ -80,7 +79,7 @@ namespace BlowTrial.Models
         public FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction { get; set; }
         public virtual ICollection<VaccineAdministered> VaccinesAdministered { get; set; }
         public virtual ICollection<ProtocolViolation> ProtocolViolations { get; set; }
-        public virtual ICollection<UnsuccessfulFollowUp> UnsuccesfulFollowUps { get; set; }
+        public virtual ICollection<UnsuccessfulFollowUp> UnsuccessfulFollowUps { get; set; }
 
         public DateTime DateTimeBirth 
         { 
@@ -284,11 +283,9 @@ namespace BlowTrial.Models
 
         public string MothersName { get; set; }
         public string PhoneNumber { get; set; }
-
         public int AdmissionWeight { get; set; }
         public double GestAgeBirth { get; set; }
         public string AdmissionDiagnosis { get; set; }
-        
         public string RegisteringInvestigator { get; set; }
         public bool? BcgAdverse { get; set; }
         public string BcgAdverseDetail { get; set; }
@@ -297,11 +294,12 @@ namespace BlowTrial.Models
         public int? LastContactWeight { get; set; }
         public DateTime? LastWeightDate { get; set; }
         public string OtherCauseOfDeathDetail { get; set; }
+        public DateTime? FollowUpContactMade { get; set; }
+        public int AppVersionAtEnrollment { get; set; }
         public string Notes { get; set; }
 
         public ICollection<VaccineAdministeredModel> VaccineModelsAdministered { get; set; }
-        
-
+        public ICollection<UnsuccessfulFollowUpModel> UnsuccessfulFollowUpModels { get; set; }
         //purely to implement Ipatient
         public override ICollection<VaccineAdministered> VaccinesAdministered 
         {
@@ -309,11 +307,11 @@ namespace BlowTrial.Models
             {
                 return (VaccineModelsAdministered==null)
                     ?null
-                    :VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineId }).ToList();
+                    :VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineId, VaccineGiven = v.VaccineGiven }).ToList();
             }
             set
             {
-                var errId = value.FirstOrDefault(v => v.ParticipantId != this.Id);
+                var errId = value.FirstOrDefault(v => v.ParticipantId != Id);
                 if (errId != null)
                 {
                     throw new ArgumentOutOfRangeException(String.Format(
@@ -324,13 +322,40 @@ namespace BlowTrial.Models
                     {
                         AdministeredAtDateTime = v.AdministeredAt, 
                         AdministeredTo=this, 
-                        Id=this.Id, 
+                        Id=v.Id, 
                         VaccineGiven = v.VaccineGiven, 
                         VaccineId=v.VaccineId
                     }).ToList();
             }
         }
-        
+        public override ICollection<UnsuccessfulFollowUp> UnsuccessfulFollowUps
+        {
+            get
+            {
+                return (UnsuccessfulFollowUpModels == null)
+                    ? null
+                    : (from u in UnsuccessfulFollowUpModels
+                       where u.AttemptedContact.HasValue
+                       select new UnsuccessfulFollowUp { AttemptedContact = u.AttemptedContact.Value, Id = u.Id }).ToList();
+            }
+            set
+            {
+                var errId = value.FirstOrDefault(v => v.ParticipantId != Id);
+                if (errId != null)
+                {
+                    throw new ArgumentOutOfRangeException(String.Format(
+                        "The participantModelId is {0}, but UnsuccessfulFollowUpId {1} is for ParticipantId {2}",
+                        Id, errId.Id, errId.ParticipantId));
+                }
+                UnsuccessfulFollowUpModels = value.Select(u => new UnsuccessfulFollowUpModel
+                {
+                    Id = u.Id,
+                    AttemptedContact = u.AttemptedContact,
+                    ParticipantId = Id
+                }).ToList();
+            }
+        }
+
 
         /// <summary>
         /// To implement IParticipant - mapping Id only at this point
@@ -388,9 +413,14 @@ namespace BlowTrial.Models
             "BcgAdverseDetail",
             "Notes",
             "BcgPapuleAt28days",
+            "FollowUpContactMade",
+            "PermanentlyUncontactable",
+            "MaternalBCGScar",
+            "FollowUpBabyBCGReaction"
         };
         public string GetValidationError(string propertyName, DateTime? now=null)
         {
+            
             if (!ValidatedProperties.Contains(propertyName))
             { return null; }
             string error = null;
@@ -441,11 +471,72 @@ namespace BlowTrial.Models
                     error = ValidateBcgPapuleAtDischarge();
                     break; 
                  */
+                case "FollowUpContactMade":
+                    error = ValidateFollowUpContactMade(now);
+                    break;
+                case "PermanentlyUncontactable":
+                    error = ValidatePermanentlyUncontactable();
+                    break; 
+                case "MaternalBCGScar":
+                    error = ValidateMaternalBCGScar();
+                    break; 
+                case "FollowUpBabyBCGReaction":
+                    error = ValidateFollowUpBabyBCGReaction(now);
+                    break;
                 default:
                     Debug.Fail("Unexpected property being validated on ParticipantUpdateModel: " + propertyName);
                     break;
             }
             return error;
+        }
+
+        private string ValidateFollowUpBabyBCGReaction(DateTime? now=null)
+        {
+            var bcgDate = (from v in VaccineModelsAdministered
+                           where v.VaccineGiven.IsBcg
+                           select v.AdministeredAtDateTime).FirstOrDefault();
+            if (!bcgDate.HasValue)
+            {
+                return Strings.ParticipantModel_Error_FollowUpWIthoutBCGDate;
+            }
+            if (FollowUpBabyBCGReaction == FollowUpBabyBCGReactionStatus.Missing)
+            {
+                if (FollowUpContactMade.HasValue)
+                {
+                    return Strings.ParticipantModel_Error_BCGReactionRequired;
+                }
+            }
+            else if (((now ?? DateTime.Now) - bcgDate.Value).Days < FollowToAge)
+            {
+                return Strings.ParticipantModel_Error_BabyBCGScarPre6Weeks;
+            }
+
+            return null;
+        }
+
+        private string ValidateMaternalBCGScar()
+        {
+            return null;
+        }
+
+        private string ValidatePermanentlyUncontactable()
+        {
+            /*
+            if (PermanentlyUncontactable && !base.UnsuccessfulFollowUps.Any())
+            {
+                return Strings.ParticipantModel_Error_UncontactableWithoutAttempt;
+            }
+            */
+            return null;
+        }
+
+        private string ValidateFollowUpContactMade(DateTime? now=null)
+        {
+            if (FollowUpContactMade.HasValue && FollowUpContactMade.Value > (now ?? DateTime.Today))
+            {
+                return string.Format(Strings.DateTime_Error_Date_MustComeBefore, Strings.DateTime_Today);
+            }
+            return null;
         }
 
         string ValidateOutcomeAt28Days()
@@ -570,12 +661,12 @@ namespace BlowTrial.Models
             }
             return null;
         }
-        const int noteLength = 160;
+        
         string ValidateNotes()
         {
-            if (Notes!=null && Notes.Length > noteLength)
+            if (Notes!=null && Notes.Length > Participant.NoteLength)
             {
-                return string.Format(Strings.Field_Error_TooLong, noteLength);
+                return string.Format(Strings.Field_Error_TooLong, Participant.NoteLength);
             }
             return null;
         }

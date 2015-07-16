@@ -1,14 +1,11 @@
 ﻿using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Providers;
 using BlowTrial.Domain.Tables;
-using BlowTrial.Infrastructure.Randomising;
 using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Text;
 
 namespace BlowTrial.Infrastructure.Interfaces
 {
@@ -42,6 +39,7 @@ namespace BlowTrial.Infrastructure.Interfaces
             bool? inborn,
             DateTime registeredAt,
             int centreId,
+            MaternalBCGScarStatus maternalBCGScar,
             int? multipleSiblingId,
             int? envelopeNumber = null);
         void Add(ScreenedPatient patient);
@@ -58,8 +56,13 @@ namespace BlowTrial.Infrastructure.Interfaces
             DateTime? dischargeDateTime,
             DateTime? deathOrLastContactDateTime,
             OutcomeAt28DaysOption outcomeAt28Days,
+            MaternalBCGScarStatus maternalBCGScar,
+            FollowUpBabyBCGReactionStatus followUpBabyBCGReaction,
+            DateTime? followUpContactMade,
+            bool permanentlyUncontactable,
             string notes,
-            IEnumerable<VaccineAdministered> vaccinesAdministered=null);
+            IEnumerable<VaccineAdministered> vaccinesAdministered=null,
+            IEnumerable<UnsuccessfulFollowUp> unsuccesfulFollowUps=null);
         UpdateParticipantViolationType UpdateParticipant(int id,
             string name,
             bool isMale,
@@ -71,9 +74,10 @@ namespace BlowTrial.Infrastructure.Interfaces
             string hospitalIdentifier,
             bool? isInborn,
             int? multipleSibblingId,
+            MaternalBCGScarStatus maternalBCGScar,
             DateTime registeredAt,
             bool isEnvelopeRandomising);
-        void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
+        //void AddOrUpdateVaccinesFor(int participantId, IEnumerable<VaccineAdministered> vaccinesAdministered);
         void Update(IEnumerable<Participant> patients);
         void Update(Participant patient);
         void Update(ScreenedPatient patient);
@@ -82,6 +86,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         DbQuery<Participant> Participants { get; }
         DbQuery<ScreenedPatient> ScreenedPatients { get; }
         DbQuery<VaccineAdministered> VaccinesAdministered { get; }
+        DbQuery<UnsuccessfulFollowUp> UnsuccessfulFollowUps { get; }
         IEnumerable<Vaccine> Vaccines { get; }
         DbQuery<ProtocolViolation> ProtocolViolations { get; }
         Participant FindParticipantAndCollections(int participantId);

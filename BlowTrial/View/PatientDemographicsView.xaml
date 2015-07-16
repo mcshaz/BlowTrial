@@ -30,6 +30,14 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
+                <Style TargetType="ComboBox" x:Key="participantDemographicsCombo">
+                    <Setter Property="IsEnabled" Value="False" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=RefusedConsent, Mode=OneWay}" Value="False">
+                            <Setter Property="IsEnabled" Value="True" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
                 <Style TargetType="TextBox" x:Key="phoneNumberActive" BasedOn="{StaticResource participantDemographics}">
                     <Setter Property="IsEnabled" Value="False" />
                     <Style.Triggers>
@@ -79,6 +87,8 @@
                 <ex:RowDefinitionExtended Visible="{Binding Path=IsNewRecord, Mode=OneTime}" Height="30" />
                 <ex:RowDefinitionExtended Visible="{Binding Path=IsNewRecord, Mode=OneTime}" Height="Auto" />
                 <ex:RowDefinitionExtended Visible="{Binding Path=IsNewRecord, Mode=OneTime}" Height="30" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="30" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="30" />
                 <RowDefinition Height="Auto" />
@@ -424,14 +434,38 @@
                   Content="{Binding ElementName=mothersNameTxt, Path=(Validation.Errors).CurrentItem}"
                   />
 
-            <!-- PhoneNumber-->
+            <!-- MaternalBCGScar-->
             <Label 
                   Grid.Row="30" Grid.Column="0" 
+                  HorizontalAlignment="Right"
+                  Target="{Binding ElementName=maternalBCGScarCombo}" >
+                <TextBlock TextWrapping="Wrap">
+                    BCG Scar on Mother:
+                    <Run Foreground="Blue">(if available)</Run>
+                    :
+                </TextBlock>
+            </Label>
+            <ComboBox
+                  x:Name="maternalBCGScarCombo"
+                  Grid.Row="30" Grid.Column="2" 
+                  ItemsSource="{Binding Path=MaternalBCGScarOptions, Mode=OneTime}"
+                  SelectedValuePath="Key" 
+                  DisplayMemberPath="Value" Style="{StaticResource participantDemographicsCombo}"
+                  SelectedValue="{Binding Path=MaternalBCGScar, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                   >
+            </ComboBox>
+            <ContentPresenter 
+                  Grid.Row="31" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Content="{Binding ElementName=maternalBCGScarCombo, Path=(Validation.Errors).CurrentItem}" />
+
+            <!-- PhoneNumber-->
+            <Label 
+                  Grid.Row="32" Grid.Column="0" 
                   Content="Phone Number:" 
                   HorizontalAlignment="Right" VerticalAlignment="Center"
                   Target="{Binding ElementName=phoneNumberTxt}" 
                   />
-            <StackPanel Orientation="Vertical" Grid.Row="30" Grid.Column="2">
+            <StackPanel Orientation="Vertical" Grid.Row="32" Grid.Column="2">
                 <CheckBox Content="Has No Phone" IsChecked="{Binding Path=HasNoPhone, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"
                           Style="{StaticResource participantDemographicsCB}"/>
                 <TextBlock HorizontalAlignment="Center">OR (enter value)</TextBlock>
@@ -446,23 +480,24 @@
                       />
             </StackPanel>
             <ContentPresenter 
-                  Grid.Row="31" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Grid.Row="33" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                   Content="{Binding ElementName=phoneNumberTxt, Path=(Validation.Errors).CurrentItem}"
                   />
 
+
             <!--MultipleSiblingId-->
             <Label 
-                  Grid.Row="32" Grid.Column="0" 
+                  Grid.Row="34" Grid.Column="0" 
                   HorizontalAlignment="Right"
                   Target="{Binding ElementName=hasSiblingEnrolledChk}" >
                 <TextBlock TextWrapping="Wrap">
                         Does the baby have a twin or triplet already enrolled in the trial:
                 </TextBlock>
             </Label>
-            <CheckBox Grid.Row="32" Grid.Column="2" x:Name="hasSiblingEnrolledChk" Margin="6,1,0,0" VerticalAlignment="Center"
+            <CheckBox Grid.Row="34" Grid.Column="2" x:Name="hasSiblingEnrolledChk" Margin="6,1,0,0" VerticalAlignment="Center"
                           IsChecked="{Binding Path=HasSiblingEnrolled}" Style="{StaticResource participantDemographicsCB}" >
             </CheckBox>
-            <TextBox Grid.Row="32" Grid.Column="2" x:Name="multipleSiblingIdTxt" Margin="40,0,0,0" Height="26"
+            <TextBox Grid.Row="34" Grid.Column="2" x:Name="multipleSiblingIdTxt" Margin="40,0,0,0" Height="26"
                          Text="{Binding Path=MultipleSiblingId, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}"
                          >
                 <TextBox.Style>
@@ -475,7 +510,7 @@
                     </Style>
                 </TextBox.Style>
             </TextBox>
-            <StackPanel Orientation="Horizontal" Grid.Row="33" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right" >
+            <StackPanel Orientation="Horizontal" Grid.Row="35" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right" >
                 <TextBlock Text="{Binding Path=SiblingNote, Mode=OneWay}"  Style="{StaticResource siteColour}"/>
                 <ContentPresenter 
                         Content="{Binding ElementName=multipleSiblingIdTxt, Path=(Validation.Errors).CurrentItem}" />
@@ -483,14 +518,14 @@
 
             <!-- EnvelopeNumber -->
             <Label 
-                  Grid.Row="34" Grid.Column="0" 
+                  Grid.Row="36" Grid.Column="0" 
                   Content="Envelope Number:" 
                   HorizontalAlignment="Right"
                   Target="{Binding ElementName=envelopeNumberTxt}" 
                   />
             <TextBox
                   x:Name="envelopeNumberTxt"
-                  Grid.Row="34" Grid.Column="2" 
+                  Grid.Row="36" Grid.Column="2" 
                   Text="{Binding Path=EnvelopeNumber, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource nullIntConvert}}" 
                   >
                 <TextBox.Style>
@@ -507,17 +542,17 @@
                 </TextBox.Style>
             </TextBox>
             <ContentPresenter 
-                  Grid.Row="35" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                  Grid.Row="37" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                   Content="{Binding ElementName=envelopeNumberTxt, Path=(Validation.Errors).CurrentItem}"
                   />
             <!-- DateTime Enrolment-->
             <Label 
-                  Grid.Row="36" Grid.Column="0" 
+                  Grid.Row="38" Grid.Column="0" 
                   Content="Date/Time of Enrolment:" 
                   HorizontalAlignment="Right"
                   Target="{Binding ElementName=dateOfEnrollmentDatePicker}" 
                   />
-            <StackPanel Orientation="Horizontal" Grid.Row="36" Grid.Column="2" HorizontalAlignment="Stretch" >
+            <StackPanel Orientation="Horizontal" Grid.Row="38" Grid.Column="2" HorizontalAlignment="Stretch" >
                 <DatePicker
                       x:Name="dateOfEnrollmentDatePicker" Width="120" SelectedDate="{Binding Path=DateOfEnrollment, ValidatesOnDataErrors=True, 
                             UpdateSourceTrigger=PropertyChanged}"  
@@ -532,7 +567,7 @@
                             Mask="90:00" Width="50" TextAlignment="Center"
                             IsEnabled="{Binding Path=OkToRandomise, Mode=OneWay}" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="37" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal" Grid.Row="39" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Right">
                 <ContentPresenter 
                             Content="{Binding ElementName=dateOfEnrollmentDatePicker, Path=(Validation.Errors).CurrentItem}"/>
                 <ContentPresenter 

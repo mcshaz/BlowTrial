@@ -65,36 +65,52 @@ rename opvoralpolio opv
 
 capture confirm string variable lastweightdate
 if (!_rc) {
-	gen int `a' = date( lastweightdate, ""YMD#"")
-	drop lastweightdate
-	rename `a' lastweightdate
-	format lastweightdate %td
+	foreach v of varlist lastweightdate followupcontactmade {
+		gen int `a' = date( `v', ""YMD#"")
+		drop `v'
+		rename `a' `v'
+		format `v' %td
+	}
 }
 
 label define causeOfDeathOption ");
             
-            #line 32 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 34 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<CauseOfDeathOption>()));
             
             #line default
             #line hidden
             this.Write("\r\nlabel define outcomeAt28DaysOption ");
             
-            #line 33 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 35 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<OutcomeAt28DaysOption>()));
+            
+            #line default
+            #line hidden
+            this.Write("\r\nlabel define followUpBabyBCGReactionStatus ");
+            
+            #line 36 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<FollowUpBabyBCGReactionStatus>()));
+            
+            #line default
+            #line hidden
+            this.Write("\r\nlabel define maternalBCGScarStatus ");
+            
+            #line 37 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<MaternalBCGScarStatus>()));
             
             #line default
             #line hidden
             this.Write("\r\nlabel define trialarms ");
             
-            #line 34 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 38 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StataData.GetStataLabel<RandomisationArm>()));
             
             #line default
             #line hidden
             this.Write("\r\nlabel define centreNames ");
             
-            #line 35 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 39 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.CentresLabel));
             
             #line default
@@ -103,6 +119,8 @@ label define causeOfDeathOption ");
 
 label values causeofdeath causeOfDeathOption
 label values outcomeat28days outcomeAt28DaysOption
+label values followupbabybcgreaction followUpBabyBCGReactionStatus
+label values maternalbcgscar maternalBCGScarStatus
 label values centreid centreNames
 label values trialarm trialarms
 
@@ -112,7 +130,7 @@ stset censortime, id(id) failure(outcome==2 5 7) origin(time datetimebirth) ente
 
 save """);
             
-            #line 46 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
+            #line 52 "C:\Users\OEM\Documents\Visual Studio 2013\Projects\BlowTrial\BlowTrial\TextTemplates\ParticipantDataStataTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(_data.StataFilename));
             
             #line default

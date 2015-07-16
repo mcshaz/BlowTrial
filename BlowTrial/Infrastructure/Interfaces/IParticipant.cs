@@ -22,6 +22,6 @@ namespace BlowTrial.Infrastructure.Interfaces
 
         ICollection<VaccineAdministered> VaccinesAdministered {get;}
         ICollection<ProtocolViolation> ProtocolViolations { get; }
-        ICollection<UnsuccessfulFollowUp> UnsuccesfulFollowUps { get; }
+        ICollection<UnsuccessfulFollowUp> UnsuccessfulFollowUps { get; }
     }
 }

@@ -16,10 +16,8 @@ using AutoMapper;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 //using System.Windows.Threading;
-using System.Windows.Media;
 using StatsForAge.DataSets;
 using log4net;
-using GenericToDataString;
 
 namespace BlowTrial.ViewModel
 {
@@ -40,6 +38,7 @@ namespace BlowTrial.ViewModel
             _log = LogManager.GetLogger("ParticipantProgressViewModel");
 
             AttachCollections();
+            SetBCGRelatedDates();
         }
 
         #endregion
@@ -55,10 +54,12 @@ namespace BlowTrial.ViewModel
         }
 
         public ObservableCollection<VaccineAdministeredViewModel> VaccineVMsAdministered { get; private set; }
+        public ObservableCollection<UnsuccessfulFollowUpViewModel> UnsuccessfulFollowUpVMs { get; private set; }
 
         public bool IsParticipantModelChanged { get; internal set; }
 
         public bool IsVaccineAdminChanged { get; internal set; }
+        public bool IsUnsuccessfulFUsChanged { get; internal set; }
 
         public string DischargeExplanation
         {
@@ -112,7 +113,7 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        public new int AgeDays
+        public override int AgeDays
         {
             get
             {
@@ -123,9 +124,70 @@ namespace BlowTrial.ViewModel
                 if (base.AgeDays != value)
                 {
                     base.AgeDays = value;
-                    NotifyPropertyChanged("CGA", "TodayOr28", "DeathLastContactTodayOr28");
+                    NotifyPropertyChanged("CGA", "TodayOr28", "DeathLastContactTodayOr28", "AgeDays");
                     OutcomeAt28orDischargeOptions.First(o => o.Key == OutcomeAt28DaysOption.InpatientAt28Days).IsEnabled = base.AgeDays >= 28;
+                    SetFollowUpDataDue();
                 }
+            }
+        }
+        void SetFollowUpDataDue()
+        {
+            FollowUpDataDue = DateTime.Today >= EarliestFollowUp;
+        }
+
+        bool _followUpDataDue;
+        public bool FollowUpDataDue
+        {
+            get { return _followUpDataDue; }
+            private set
+            {
+                if (_followUpDataDue==value) { return; }
+                _followUpDataDue = value;
+                NotifyPropertyChanged("FollowUpDataDue");
+            }
+        }
+        TimeSpan? _timePostBcg;
+        public TimeSpan? TimePostBcg
+        {
+            get
+            {
+                return _timePostBcg;
+            }
+            set
+            {
+                if (_timePostBcg==value) { return; }
+                _timePostBcg = value;
+                NotifyPropertyChanged("TimePostBcg");
+            }
+        }
+        void SetBCGRelatedDates()
+        {
+            var bcg = VaccineVMsAdministered.FirstOrDefault(v => v.VaccineGiven != null && v.VaccineGiven.IsBcg);
+            if (bcg == null || !bcg.VaccineAdministeredModel.AdministeredAtDate.HasValue)
+            {
+                EarliestFollowUp = null;
+                TimePostBcg = null;
+            }
+            else
+            {
+                EarliestFollowUp = bcg.VaccineAdministeredModel.AdministeredAtDate.Value.AddDays(ParticipantBaseModel.FollowToAge);
+                TimePostBcg = FollowUpContactMade - bcg.AdministeredAtDate;
+            }
+            SetFollowUpDataDue();
+
+        }
+        DateTime? _earliestFollowUp;
+        public DateTime? EarliestFollowUp
+        {
+            get
+            {
+                return _earliestFollowUp;
+            }
+            set
+            {
+                if (_earliestFollowUp == value) { return; }
+                _earliestFollowUp = value;
+                NotifyPropertyChanged("EarliestFollowUp");
             }
         }
 
@@ -473,6 +535,65 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("OutcomeAt28Days", "DischargedBy28Days", "IsKnownDead", "CauseOfDeath", "DeathOrLastContactLabel", "WeightLabel", "IsDeathOrLastContactRequired", "DeathOrLastContactDate", "DeathOrLastContactTime");
             } 
         }
+
+        public new bool PermanentlyUncontactable
+        {
+            get
+            {
+                return base.PermanentlyUncontactable;
+            }
+            set
+            {
+                if (value == ParticipantProgressModel.PermanentlyUncontactable) { return; }
+                base.PermanentlyUncontactable = true ;
+                NotifyPropertyChanged("PermanentlyUncontactable");
+            }
+        }
+
+        public DateTime? FollowUpContactMade
+        {
+            get
+            {
+                return ParticipantProgressModel.FollowUpContactMade;
+            }
+            set
+            {
+                if (value == ParticipantProgressModel.FollowUpContactMade) { return; }
+                ParticipantProgressModel.FollowUpContactMade = value;
+                IsParticipantModelChanged = true;
+                NotifyPropertyChanged("FollowUpContactMade", "FollowUpBabyBCGReaction");
+                SetBCGRelatedDates();
+            }
+        }
+
+        public new MaternalBCGScarStatus MaternalBCGScar
+        {
+            get
+            {
+                return base.MaternalBCGScar;
+            }
+            set
+            {
+                if (value == base.MaternalBCGScar) { return; }
+                base.MaternalBCGScar = value;
+                IsParticipantModelChanged = true;
+            }
+        }
+
+        public new FollowUpBabyBCGReactionStatus FollowUpBabyBCGReaction
+        {
+            get
+            {
+                return base.FollowUpBabyBCGReaction;
+            }
+            set
+            {
+                if (value == base.FollowUpBabyBCGReaction) { return; }
+                base.FollowUpBabyBCGReaction = value;
+                IsParticipantModelChanged = true;
+            }
+        }
+
         public bool PostDischargeCompletelyUnknown
         {
             get 
@@ -612,6 +733,27 @@ namespace BlowTrial.ViewModel
                     ?? (_CauseOfDeathOptions = EnumToListOptions<CauseOfDeathOption>());
             }
         }
+
+        IEnumerable<KeyDisplayNamePair<MaternalBCGScarStatus>> _maternalBCGScarOptions;
+        public IEnumerable<KeyDisplayNamePair<MaternalBCGScarStatus>> MaternalBCGScarOptions
+        {
+            get
+            {
+                return _maternalBCGScarOptions
+                    ?? (_maternalBCGScarOptions = EnumToListOptions<MaternalBCGScarStatus>());
+            }
+        }
+
+        IEnumerable<KeyDisplayNamePair<FollowUpBabyBCGReactionStatus>> _followUpBabyBCGOptions;
+        public IEnumerable<KeyDisplayNamePair<FollowUpBabyBCGReactionStatus>> FollowUpBabyBCGOptions
+        {
+            get
+            {
+                return _followUpBabyBCGOptions
+                    ?? (_followUpBabyBCGOptions = EnumToListOptions<FollowUpBabyBCGReactionStatus>());
+            }
+        }
+
         IEnumerable<SelectableItem<OutcomeAt28DaysOption>> _outcomeAt28orDischargeOptions;
         public IEnumerable<SelectableItem<OutcomeAt28DaysOption>> OutcomeAt28orDischargeOptions
         {
@@ -700,15 +842,24 @@ namespace BlowTrial.ViewModel
         {
             if (ParticipantProgressModel.VaccineModelsAdministered == null)
             {
-                ParticipantProgressModel.VaccineModelsAdministered = Mapper.Map<List<VaccineAdministeredModel>>((from r in _repository.VaccinesAdministered
-                         where r.ParticipantId == ParticipantProgressModel.Id
-                         select r).ToList());
+                ParticipantProgressModel.VaccineModelsAdministered = Mapper.Map<List<VaccineAdministeredModel>>(
+                        _repository.VaccinesAdministered.Where(r=>r.ParticipantId == ParticipantProgressModel.Id).ToList());
                 
+            }
+            if (ParticipantProgressModel.UnsuccessfulFollowUpModels == null)
+            {
+                ParticipantProgressModel.UnsuccessfulFollowUpModels = (from u in _repository.UnsuccessfulFollowUps
+                                                                       where u.ParticipantId == ParticipantProgressModel.Id
+                                                                       select new UnsuccessfulFollowUpModel
+                                                                       {
+                                                                           Id = u.Id, ParticipantId = ParticipantProgressModel.Id, AttemptedContact=u.AttemptedContact
+                                                                       }).ToList();
             }
             if (ParticipantProgressModel.StudyCentre == null)
             {
                 ParticipantProgressModel.StudyCentre = _repository.FindStudyCentre(ParticipantProgressModel.CentreId);
             }
+            //VaccineVMsAdministered
             if (VaccineVMsAdministered != null)
             {
                 VaccineVMsAdministered.Clear(); // remove event handlers
@@ -725,7 +876,27 @@ namespace BlowTrial.ViewModel
                 VaccineVMsAdministered.Add(vm);
             }
             VaccineVMsAdministered.Add(NewVaccineAdministeredViewModel());
+
+            //UnsuccessfulFollowUpVMs
+            if (UnsuccessfulFollowUpVMs != null)
+            {
+                UnsuccessfulFollowUpVMs.Clear(); // remove event handlers
+            }
+            else
+            {
+                UnsuccessfulFollowUpVMs = new ObservableCollection<UnsuccessfulFollowUpViewModel>();
+                UnsuccessfulFollowUpVMs.CollectionChanged += UnsuccessfulFollowUps_CollectionChanged;
+            }
+
+            foreach (UnsuccessfulFollowUpModel um in ParticipantProgressModel.UnsuccessfulFollowUpModels)
+            {
+                UnsuccessfulFollowUpViewModel uvm = new UnsuccessfulFollowUpViewModel(um);
+                UnsuccessfulFollowUpVMs.Add(uvm);
+            }
+            UnsuccessfulFollowUpVMs.Add(NewUnsuccessfulFollowUpViewModel());
         }
+
+        #region VaccineAdministeredVm Change Handlers
         VaccineAdministeredViewModel NewVaccineAdministeredViewModel()
         {
             var returnVar = new VaccineAdministeredViewModel(
@@ -759,6 +930,8 @@ namespace BlowTrial.ViewModel
                             }
                         }
                         IsVaccineAdminChanged = true;
+
+                        if (item.VaccineGiven.IsBcg) { SetBCGRelatedDates(); }
                     }
                 }
             }
@@ -779,6 +952,7 @@ namespace BlowTrial.ViewModel
                 {
                     NotifyPropertyChanged("DisplayBcgAdverse", "BcgAdverse");
                 }
+                SetBCGRelatedDates(); 
             }
         }
         private void NewVaccineAdminVm_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -796,7 +970,67 @@ namespace BlowTrial.ViewModel
                 }
             }
         }
+        #endregion // VaccineAdministeredVm Change Handlers
+        #region UnsuccessfulFollowUpVm ChangeHandlers
+        UnsuccessfulFollowUpViewModel NewUnsuccessfulFollowUpViewModel()
+        {
+            var returnVar = new UnsuccessfulFollowUpViewModel(
+                new UnsuccessfulFollowUpModel
+                {
+                    ParticipantId = ParticipantProgressModel.Id
+                }){ AllowEmptyRecord = true };
+            returnVar.PropertyChanged += NewUnsuccessfulFUVM_PropertyChanged;
+            return returnVar;
+        }
+        private void UnsuccessfulFollowUps_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (UnsuccessfulFollowUpViewModel u in e.OldItems)
+                {
+                    u.PropertyChanged -= NewUnsuccessfulFUVM_PropertyChanged;
+                    u.PropertyChanged -= UnsuccessfulFUVM_PropertyChanged;
 
+                    var item = ParticipantProgressModel.UnsuccessfulFollowUpModels.FirstOrDefault(um => um == u.UnsuccessfulFollowUpMod);
+                    if (item != null)
+                    {
+                        ParticipantProgressModel.UnsuccessfulFollowUpModels.Remove(item);
+                        IsUnsuccessfulFUsChanged = true;
+                    }
+                }
+            }
+            if (e.NewItems != null)
+            {
+                foreach (UnsuccessfulFollowUpViewModel u in e.NewItems)
+                {
+                    u.PropertyChanged += UnsuccessfulFUVM_PropertyChanged;
+                }
+            }
+        }
+        void UnsuccessfulFUVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "AttemptedContact")
+            {
+                IsUnsuccessfulFUsChanged = true;
+                NotifyPropertyChanged("PermanentlyUncontactable"); //note - figure out visibility and CHANGE THIS
+            }
+        }
+        private void NewUnsuccessfulFUVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "AttemptedContact")
+            {
+                var newAttemptedContactVm = (UnsuccessfulFollowUpViewModel)sender;
+                newAttemptedContactVm.AllowEmptyRecord = newAttemptedContactVm.IsEmpty;
+                if (!newAttemptedContactVm.IsEmpty && newAttemptedContactVm.IsValid())
+                {
+                    newAttemptedContactVm.AllowEmptyRecord = false;
+                    ParticipantProgressModel.UnsuccessfulFollowUpModels.Add(newAttemptedContactVm.UnsuccessfulFollowUpMod);
+                    newAttemptedContactVm.PropertyChanged -= NewUnsuccessfulFUVM_PropertyChanged;
+                    UnsuccessfulFollowUpVMs.Add(NewUnsuccessfulFollowUpViewModel());
+                }
+            }
+        }
+        #endregion UnsuccessfulContactVm ChangeHandlers
         #endregion
 
         #region ICommands
@@ -804,7 +1038,7 @@ namespace BlowTrial.ViewModel
         public EventHandler OnSave;
         bool CanSave(object param)
         {
-            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && VaccineVMsAdministered.All(v => v.IsValid()));
+            return (IsParticipantModelChanged && WasValidOnLastNotify) || (IsVaccineAdminChanged  && VaccineVMsAdministered.All(v => v.IsValid()) || IsUnsuccessfulFUsChanged && UnsuccessfulFollowUpVMs.All(u=>u.IsValid()));
         }
         void Save(object param)
         {
@@ -816,9 +1050,18 @@ namespace BlowTrial.ViewModel
                                 AdministeredAt = v.AdministeredAtDateTime.Value,
                                 VaccineId = v.VaccineId,
                                 ParticipantId = Id
-                            })
+                            }).ToList()
                         :null;
-            if (IsParticipantModelChanged || IsVaccineAdminChanged)
+            IEnumerable<UnsuccessfulFollowUp> ufs = IsUnsuccessfulFUsChanged
+                        ?ParticipantProgressModel.UnsuccessfulFollowUpModels.Select
+                        (u=>new UnsuccessfulFollowUp
+                        {
+                            Id = u.Id,
+                            ParticipantId = Id,
+                            AttemptedContact =u.AttemptedContact.Value
+                        }).ToList()
+                        : null;
+            if (IsParticipantModelChanged || IsVaccineAdminChanged || IsUnsuccessfulFUsChanged)
             {
 #if !DEBUG
                 try
@@ -837,8 +1080,15 @@ namespace BlowTrial.ViewModel
                         dischargeDateTime : ParticipantProgressModel.DischargeDateTime,
                         deathOrLastContactDateTime : ParticipantProgressModel.DeathOrLastContactDateTime,
                         outcomeAt28Days : ParticipantProgressModel.OutcomeAt28Days,
+                        maternalBCGScar: ParticipantProgressModel.MaternalBCGScar,
+                        followUpBabyBCGReaction: ParticipantProgressModel.FollowUpBabyBCGReaction,
+                        followUpContactMade: ParticipantProgressModel.PermanentlyUncontactable
+                            ?null
+                            :ParticipantProgressModel.FollowUpContactMade,
+                        permanentlyUncontactable: PermanentlyUncontactable,
                         notes : ParticipantProgressModel.Notes,
-                        vaccinesAdministered: vas
+                        vaccinesAdministered: vas,
+                        unsuccesfulFollowUps:ufs
                     );
 #if !DEBUG
                 }
@@ -864,8 +1114,20 @@ namespace BlowTrial.ViewModel
                         }
                     }
                 }
+                if (IsUnsuccessfulFUsChanged)
+                {
+                    foreach (var um in ParticipantProgressModel.UnsuccessfulFollowUpModels)
+                    {
+                        if (um.Id == 0)
+                        {
+                            var nv = ufs.First(u => um.Id == 0 && u.AttemptedContact == um.AttemptedContact);
+                            um.Id = nv.Id;
+                        }
+                    }
+                }
                 IsParticipantModelChanged = false;
                 IsVaccineAdminChanged = false;
+                IsUnsuccessfulFUsChanged = false;
             }
             if (OnSave != null)
             {

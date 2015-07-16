@@ -44,6 +44,7 @@ namespace BlowTrial.Domain.Providers
         public DbSet<StudyCentre> StudyCentres { get; set; }
         public DbSet<BalancedAllocation> BalancedAllocations { get; set; }
         public DbSet<AllocationBlock> AllocationBlocks { get; set; }
+        public DbSet<UnsuccessfulFollowUp> UnsuccessfulFollowUps { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.Configuration.LazyLoadingEnabled = false;

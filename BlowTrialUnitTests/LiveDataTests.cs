@@ -119,7 +119,7 @@ namespace BlowTrialUnitTests
                     else if (i < midWtCount) { weight = rnd.Next(1001,1499); }
                     else { weight = rnd.Next(1501,1999); }
                     var p = repo.AddParticipant(dummyInfo, dummyInfo, dummyInfo, weight, 32, yesterday,
-                        "", "1111111", isMale, true, now, 1, null, null);
+                        "", "1111111", isMale, true, now, 1, MaternalBCGScarStatus.NoScar, null, null);
                     Assert.AreNotEqual(RandomisationArm.NotSet,p.TrialArm);
                     RandomisationStrata cat;
                     if (weight<1000)
