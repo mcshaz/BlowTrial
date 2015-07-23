@@ -214,7 +214,7 @@
                           HorizontalAlignment="Right"
                           Target="{Binding ElementName=MaternalBCGScarCombo}" 
                           />
-                        <ComboBox Grid.Row="0" Grid.Column="2" Name="MaternalBCGScarCombo"
+                        <ComboBox Grid.Row="0" Grid.Column="2" Name="MaternalBCGScarCombo" 
                             VerticalAlignment="Center" HorizontalAlignment="Stretch" 
                             ItemsSource="{Binding Path=MaternalBCGScarOptions, Mode=OneWay}"
                             SelectedValuePath="Key"  

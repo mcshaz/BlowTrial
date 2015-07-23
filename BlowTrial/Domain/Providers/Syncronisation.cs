@@ -12,6 +12,7 @@ using System.Data.SqlServerCe;
 using BlowTrial.Infrastructure.Extensions;
 using System.Diagnostics;
 using System.Data;
+using log4net;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -167,19 +168,23 @@ namespace BlowTrial.Domain.Providers
                     foreach (Type t in new Type[] { typeof(Vaccine), typeof(BalancedAllocation), typeof(AllocationBlock), typeof(ScreenedPatient), typeof(Participant), typeof(VaccineAdministered), typeof(ProtocolViolation), typeof(UnsuccessfulFollowUp) })
                     {
                         WriteTime(t, null);
-                        var destAllocations = RemainingAllocationsByCentre(t, destContext.Database, sourceCentreIdRanges);
-                        WriteTime(t, "RemainingAllocationsByCentre");
-                        var modifiedIds = ModifiedIds(t, destContext.Database, sourceContext.Database, destAllocations.UsedAllocations);
+                        //var destAllocations = RemainingAllocationsByCentre(t, destContext.Database, sourceCentreIdRanges);
+                        //WriteTime(t, "RemainingAllocationsByCentre");
+                        var upserts = AddOrUpdate(t, (SqlCeConnection)sourceContext.Database.Connection, (SqlCeConnection)destContext.Database.Connection, sourceCentreIdRanges);
+                        WriteTime(t, "AddOrUpdate");
+                        /*
+                        var modifiedIds = ModifiedIdsFromMaxModifiedTime(t, destContext.Database, sourceContext.Database, destAllocations.UsedAllocations);
                         WriteTime(t, "ModifiedIds");
                         InsertISharedRecord(t, (SqlCeConnection)sourceContext.Database.Connection, (SqlCeConnection)destContext.Database.Connection, destAllocations.RemainingAllocations, modifiedIds);
                         WriteTime(t, "InsertISharedRecord");
                         //UpdateISharedRecord(t, sourceContext.Database, dbDestContext, modifiedIds);
                         //WriteTime(t, "UpdateISharedRecord");
+                        */
                         if (updateResults)
                         {
-                            returnVar.Updated(t, modifiedIds);
+                            returnVar.Updated(t, upserts.Updated);
                             WriteTime(t, "returnVar.Updated");
-                            returnVar.Added(t, GetNewRecordIds(t, destContext.Database, destAllocations.RemainingAllocations));
+                            returnVar.Added(t, upserts.Inserted);
                             WriteTime(t, "GetNewRecordIds & returnVar.Added");
                         }
                         StopTimer();
@@ -322,7 +327,7 @@ namespace BlowTrial.Domain.Providers
             
             bool wasSourceClosed;
             bool wasDestClosed;
-            if (sourceConn.State == System.Data.ConnectionState.Closed)
+            if (sourceConn.State == ConnectionState.Closed)
             {
                 wasSourceClosed = true;
                 sourceConn.Open();
@@ -332,7 +337,7 @@ namespace BlowTrial.Domain.Providers
                 wasSourceClosed = false;
             }
 
-            if (destConn.State == System.Data.ConnectionState.Closed)
+            if (destConn.State == ConnectionState.Closed)
             {
                 wasDestClosed = true;
                 destConn.Open();
@@ -374,7 +379,142 @@ namespace BlowTrial.Domain.Providers
             return string.Join(" or ", ranges.Select(a => string.Format("({0}.Id >= {1} and {0}.Id <= {2})", tableName, a.Min, a.Max)));
         }
 
-        static IEnumerable<int> ModifiedIds(Type tableType, Database destDb, Database sourceDb, IEnumerable<IntegerRange> destDbUsedAllocations)
+        static Upserts AddOrUpdate(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> srcDbIdRanges)
+        {
+            using (var srcCmd = new SqlCeCommand())
+            {
+                using (var destCmd = new SqlCeCommand())
+                {
+                    srcCmd.CommandType = destCmd.CommandType = CommandType.TableDirect;
+                    srcCmd.CommandText = destCmd.CommandText = TableName(tableType);
+                    srcCmd.Connection = sourceConn;
+                    destCmd.Connection = destConn;
+                    srcCmd.IndexName = destCmd.IndexName = "PK_dbo." + srcCmd.CommandText;
+
+                    bool wasSourceClosed;
+                    bool wasDestClosed;
+                    if (sourceConn.State == ConnectionState.Closed)
+                    {
+                        wasSourceClosed = true;
+                        sourceConn.Open();
+                    }
+                    else
+                    {
+                        wasSourceClosed = false;
+                    }
+
+                    if (destConn.State == ConnectionState.Closed)
+                    {
+                        wasDestClosed = true;
+                        destConn.Open();
+                    }
+                    else
+                    {
+                        wasDestClosed = false;
+                    }
+                    var returnUpdates = new List<int>();
+                    var returnInserts = new List<int>();
+
+                    foreach (var rng in srcDbIdRanges)
+                    {
+                        object[] startRng = new object[] { rng.Min };
+                        object[] endRng = new object[] { rng.Max };
+                        srcCmd.SetRange(DbRangeOptions.InclusiveStart | DbRangeOptions.InclusiveEnd, startRng, endRng);
+                        destCmd.SetRange(DbRangeOptions.InclusiveStart | DbRangeOptions.InclusiveEnd, startRng, endRng);
+
+                        using (var srcResult = srcCmd.ExecuteResultSet(ResultSetOptions.None))
+                        {
+                            using (var destResult = destCmd.ExecuteResultSet(ResultSetOptions.Updatable))
+                            {
+                                if (!srcResult.HasRows)
+                                {
+                                    continue;
+                                }
+                                int idOrdinal = destResult.GetOrdinal("Id");
+                                int updateOrdinal = destResult.GetOrdinal("RecordLastModified");
+                                Debug.Assert(idOrdinal == srcResult.GetOrdinal("Id"), "different ordinals on Id");
+                                Debug.Assert(updateOrdinal == srcResult.GetOrdinal("RecordLastModified"), "different ordinals on RecordLastModified");
+                                object[] srcVals = new object[srcResult.FieldCount];
+
+                                while (destResult.Read() && srcResult.Read())
+                                {
+                                    int srcId = srcResult.GetInt32(idOrdinal);
+                                    int destId = destResult.GetInt32(idOrdinal);
+                                    if (srcId == destId)
+                                    {
+                                        DateTime srcLastUpdate = srcResult.GetDateTime(updateOrdinal);
+                                        DateTime destLastUpdate = destResult.GetDateTime(updateOrdinal);
+
+                                        if (srcLastUpdate == destLastUpdate)
+                                        {
+                                            continue;
+                                        }
+
+                                        srcResult.GetValues(srcVals);
+                                        if (srcLastUpdate < destLastUpdate)
+                                        {
+                                            object[] destVals = new object[srcVals.Length];
+                                            destResult.GetValues(destVals);
+                                            LogManager.GetLogger("Mainwindow").Warn("lastModified on destination later than src: \r\n" + AsSqlUpdate(srcResult, srcCmd.CommandText) 
+                                                + "\r\ndest:\r\n"
+                                                + AsSqlUpdate(destResult, destCmd.CommandText) );
+                                        }
+                                        else //  src > dest
+                                        {
+                                            destResult.SetValues(srcVals);
+                                            destResult.Update();
+                                            returnUpdates.Add(srcId);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        LogManager.GetLogger("Mainwindow").WarnFormat("database IDs not in sync - source Id:{0}, destination Id:{1} ",
+                                            srcId, destId);
+                                    }
+                                } 
+                                while (srcResult.Read())
+                                {
+                                    srcResult.GetValues(srcVals);
+                                    var record = destResult.CreateRecord();
+                                    record.SetValues(srcVals);
+                                    destResult.Insert(record);
+                                    returnInserts.Add((int)srcVals[idOrdinal]);
+                                }
+
+                            } // destResult
+                        }//srcResult
+                    }//foreach srcRng
+                    if (wasDestClosed) { destConn.Close(); }
+                    if (wasSourceClosed) { sourceConn.Close(); }
+                    return new Upserts { Inserted = returnInserts, Updated = returnUpdates };
+                }
+            }
+        }
+
+        static string AsSqlUpdate(System.Data.Common.DbDataReader result, string tableName)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendFormat("UPDATE {0} SET", tableName);
+            int id=0;
+            for (int i=0; i < result.FieldCount; i++)
+            {
+                string name = result.GetName(i);
+                if (name=="Id")
+                {
+                    id = result.GetInt32(i);
+                }
+                else
+                {
+                    sb.AppendFormat("\r\n\t{0} = {1},", name, result.GetValue(i));
+                }
+                
+            }
+            sb.Length -= 1; // remove last comma
+            sb.AppendFormat("\r\nWHERE Id = {0}\r\nGO\r\n", id);
+            return sb.ToString();
+        } 
+
+        static IEnumerable<int> ModifiedIdsFromMaxModifiedTime(Type tableType, Database destDb, Database sourceDb, IEnumerable<IntegerRange> destDbUsedAllocations)
         {
             string tableName = TableName(tableType);
             DateTime mostRecentDestAllocation = destDb.SqlQuery<DateTime?>(string.Format("select max({0}.RecordLastModified) from {0}", tableName)).FirstOrDefault()
@@ -387,6 +527,11 @@ namespace BlowTrial.Domain.Providers
             return sourceDb.SqlQuery<int>(string.Format("select {0}.Id from {0} where {0}.RecordLastModified > @modified {1}",
                 tableName, 
                 whereRange), modifiedDateParam).ToList();
+        }
+        class Upserts
+        {
+            public IEnumerable<int> Updated { get; set; }
+            public IEnumerable<int> Inserted { get; set; }
         }
         class AllocationRanges
         {

@@ -445,7 +445,7 @@
                     :
                 </TextBlock>
             </Label>
-            <ComboBox
+            <ComboBox Height="26"
                   x:Name="maternalBCGScarCombo"
                   Grid.Row="30" Grid.Column="2" 
                   ItemsSource="{Binding Path=MaternalBCGScarOptions, Mode=OneTime}"
