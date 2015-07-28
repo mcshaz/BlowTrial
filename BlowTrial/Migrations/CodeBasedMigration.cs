@@ -14,6 +14,7 @@ namespace BlowTrial.Migrations
 {
     public static class CodeBasedMigration
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         static int ApplySqlCeCommands(string ceConnectionString, string sqlCommand)
         {
             int returnVar = 0;

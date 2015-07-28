@@ -24,10 +24,13 @@ rename opvoralpolio opv
 capture confirm string variable lastweightdate
 if (!_rc) {
 	foreach v of varlist lastweightdate followupcontactmade {
-		gen long `a' = date( `v', "YMD#")
-		drop `v'
-		rename `a' `v'
-		format `v' %td
+		capture confirm string variable `v'
+		if (!_rc) {
+			gen long `a' = date( `v', "YMD#")
+			drop `v'
+			rename `a' `v'
+			format `v' %td
+		}
 	}
 }
 

@@ -321,6 +321,7 @@ namespace BlowTrial.Domain.Providers
             destContext.SaveChanges();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         static void InsertISharedRecord(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> destDbRemainingAllocations, IEnumerable<int> IdsToUpdate) 
         {
             string tableName = TableName(tableType);
@@ -379,6 +380,7 @@ namespace BlowTrial.Domain.Providers
             return string.Join(" or ", ranges.Select(a => string.Format("({0}.Id >= {1} and {0}.Id <= {2})", tableName, a.Min, a.Max)));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         static Upserts AddOrUpdate(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> srcDbIdRanges)
         {
             using (var srcCmd = new SqlCeCommand())
@@ -450,17 +452,20 @@ namespace BlowTrial.Domain.Providers
                                             continue;
                                         }
 
-                                        srcResult.GetValues(srcVals);
+                                        
                                         if (srcLastUpdate < destLastUpdate)
                                         {
-                                            object[] destVals = new object[srcVals.Length];
-                                            destResult.GetValues(destVals);
+                                            LogManager.GetLogger("Mainwindow").Warn(string.Format("lastModified on destination later than src on table:{0}\r\n",
+                                                destCmd.CommandText) + AsCSVDif(srcResult, destResult, idOrdinal));
+                                            /*
                                             LogManager.GetLogger("Mainwindow").Warn("lastModified on destination later than src: \r\n" + AsSqlUpdate(srcResult, srcCmd.CommandText) 
                                                 + "\r\ndest:\r\n"
                                                 + AsSqlUpdate(destResult, destCmd.CommandText) );
+                                            */
                                         }
                                         else //  src > dest
                                         {
+                                            srcResult.GetValues(srcVals);
                                             destResult.SetValues(srcVals);
                                             destResult.Update();
                                             returnUpdates.Add(srcId);
@@ -490,7 +495,21 @@ namespace BlowTrial.Domain.Providers
                 }
             }
         }
+        static string AsCSVDif(System.Data.Common.DbDataReader srcVals, System.Data.Common.DbDataReader destVals, int idOrdinal)
+        {
+            var sb = new System.Text.StringBuilder("Field\tSource\tDestination");
+            for (int i = 0; i < srcVals.FieldCount; i++)
+            {
+                object oldRes = srcVals.GetValue(i);
+                object newRes = destVals.GetValue(i);
+                if (i == idOrdinal || oldRes != newRes)
+                {
+                    sb.AppendFormat("{0}\t{1}\t{2}\r\n",srcVals.GetName(i), oldRes,newRes);
+                }
 
+            }
+            return sb.ToString();
+        }
         static string AsSqlUpdate(System.Data.Common.DbDataReader result, string tableName)
         {
             var sb = new System.Text.StringBuilder();
