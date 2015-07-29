@@ -19,7 +19,6 @@ namespace BlowTrial.ViewModel
         #region Fields
         string _searchableString;
         DataRequiredOption? _dataRequired;
-        string _dataRequiredString;
         #endregion
 
         #region Constructors
@@ -99,11 +98,7 @@ namespace BlowTrial.ViewModel
                 if (value == ParticipantModel.AgeDays) { return; }
                 ParticipantModel.AgeDays = value;
                 NotifyPropertyChanged("AgeDays");
-                if ((_dataRequired== DataRequiredOption.AwaitingOutcomeOr28 && ParticipantModel.AgeDays>=28)
-                        || (_dataRequired == DataRequiredOption.Awaiting6WeeksToElapse && ParticipantModel.AgeDays>=42))
-                {
-                    RecalculateDataRequired();
-                }
+                RecalculateDataRequired();
             }
         }
 
@@ -155,10 +150,7 @@ namespace BlowTrial.ViewModel
                 {
                     ParticipantModel.FollowUpBabyBCGReaction = value;
                     NotifyPropertyChanged("FollowUpBabyBCGReaction");
-                    if (_dataRequired == DataRequiredOption.AwaitingInfantScarDetails || _dataRequired == DataRequiredOption.FailedInitialContact)
-                    {
-                        RecalculateDataRequired();
-                    }
+                    RecalculateDataRequired();
                 }
             }
         }
@@ -175,11 +167,7 @@ namespace BlowTrial.ViewModel
                 {
                     ParticipantModel.PermanentlyUncontactable = value;
                     NotifyPropertyChanged("PermanentlyUncontactable");
-                    if (_dataRequired == DataRequiredOption.AwaitingInfantScarDetails || _dataRequired == DataRequiredOption.FailedInitialContact)
-                    {
-                        RecalculateDataRequired();
-                    }
-
+                    RecalculateDataRequired();
                 }
             }
         }
@@ -347,14 +335,24 @@ namespace BlowTrial.ViewModel
         {
             get 
             {
-                return (_dataRequired = ParticipantModel.DataRequired).Value; 
+                if (!_dataRequired.HasValue)
+                {
+                    _dataRequired = ParticipantModel.GetDataRequired();
+                }
+                return _dataRequired.Value; 
+            }
+            set
+            {
+                if (value==_dataRequired) { return; }
+                _dataRequired = value;
+                NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
             }
         }
         public string DataRequiredString
         {
             get
             {
-                return _dataRequiredString ?? (_dataRequiredString = DataRequiredStrings.GetDetails(_dataRequired ?? DataRequired));
+                return DataRequiredStrings.GetDetails(DataRequired);
             }
         }
 
@@ -362,7 +360,7 @@ namespace BlowTrial.ViewModel
         {
             get
             {
-                return (int)(_dataRequired ?? DataRequired);
+                return (int)DataRequired;
             }
         }
 
@@ -426,11 +424,7 @@ namespace BlowTrial.ViewModel
 
         internal void RecalculateDataRequired()
         {
-            DataRequiredOption newRequired = ParticipantModel.DataRequired;
-            if (_dataRequired == newRequired) { return; }
-            _dataRequired = newRequired;
-            _dataRequiredString = null;
-            NotifyPropertyChanged("DataRequired", "DataRequiredString", "DataRequiredSortOrder");
+            DataRequired = ParticipantModel.GetDataRequired();
         }
     }
 }

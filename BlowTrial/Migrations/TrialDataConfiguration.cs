@@ -254,7 +254,7 @@ namespace BlowTrial.Migrations.TrialData
         static void UpdatePapuleData(TrialDataContext context)
         {
             var sb = new StringBuilder();
-            string now = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ff");
+            string now = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ff");
             var papuleData = PapuleData.GetSeedData();
             //System.Diagnostics.Debug.Assert(papuleData.Length == 344, "Required number of papule data records not correct");
             foreach (PapuleData p in papuleData)

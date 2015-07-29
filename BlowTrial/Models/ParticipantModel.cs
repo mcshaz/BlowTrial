@@ -136,12 +136,9 @@ namespace BlowTrial.Models
             return null;
         }
 
-        public DataRequiredOption DataRequired
+        public DataRequiredOption GetDataRequired()
         {
-            get
-            { 
-                return DataRequiredFunc(this);
-            }
+            return DataRequiredFunc(this);
         }
 
         internal DateTimeSplitter _deathOrLastContactDateTime = new DateTimeSplitter();

@@ -44,20 +44,27 @@
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-
             <Border 
                 Grid.Column="0" 
                 Style="{StaticResource MainBorderStyle}"
                 Width="170"
-                >   
-                <HeaderedContentControl
-                  Content="{Binding Path=Commands}"
-                  ContentTemplate="{StaticResource CommandsTemplate}"
-                  Header="Control Panel"
-                  Style="{StaticResource MainHCCStyle}"
-                  />    
-            </Border>
+                >
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Bottom" Text="{Binding Path=ParticipantLastCreateModifyLocal, Mode=OneWay, TargetNullValue=N/A, StringFormat={}(local time {0:h:mm tt})}" />
+                    <TextBlock TextWrapping="Wrap" DockPanel.Dock="Bottom" Text="{Binding Path=ParticipantLastCreateModifyUTC, Mode=OneWay, TargetNullValue=N/A, StringFormat={}{0:d/MM/yyyy HH:mm} UTC}" />
+                    <Label DockPanel.Dock="Bottom" Content="Last Modified:" />
+                    
 
+                    <HeaderedContentControl DockPanel.Dock="Top"
+                          Content="{Binding Path=Commands}"
+                          ContentTemplate="{StaticResource CommandsTemplate}"
+                          Header="Control Panel"
+                          Style="{StaticResource MainHCCStyle}"
+                          />
+
+                </DockPanel>
+            </Border>
+            
             <Border
         Grid.Column="2" 
         Style="{StaticResource MainBorderStyle}"

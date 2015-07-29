@@ -657,6 +657,14 @@ namespace BlowTrial.Domain.Providers
             }
             _dbContext.SaveChanges(true);
         }
+        public DateTime? LastCreateModifyParticipant()
+        {
+            var returnVar = (new DateTime?[] { _dbContext.Participants.Max(p => (DateTime?)p.RecordLastModified),
+                                        _dbContext.VaccinesAdministered.Max(va=>(DateTime?)va.RecordLastModified),
+                                        _dbContext.UnsuccessfulFollowUps.Max(uf=>(DateTime?)uf.RecordLastModified)}).Max();
+            if (returnVar.HasValue) { DateTime.SpecifyKind(returnVar.Value, DateTimeKind.Utc); }
+            return returnVar;
+        }
         public void Update(ScreenedPatient patient)
         {
             ((DbContext)_dbContext).AttachAndMarkModified(patient);

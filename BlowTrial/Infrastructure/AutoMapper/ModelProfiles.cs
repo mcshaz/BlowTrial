@@ -40,7 +40,6 @@ namespace BlowTrial.Infrastructure.Automapper
                 .ForMember(d => d.DischargeTime, o => o.Ignore())
                 .ForMember(d => d.StudyCentre, o => o.Ignore())
                 .ForMember(d => d.Becomes28On, o => o.Ignore())
-                .ForMember(d => d.DataRequired, o => o.Ignore())
                 .ForMember(d=>d.AgeDays, o=>o.MapFrom(s=> (DateTime.Now - s.DateTimeBirth).Days));
 
             Mapper.CreateMap<Participant, ParticipantProgressModel>()

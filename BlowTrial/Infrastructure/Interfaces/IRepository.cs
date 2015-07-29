@@ -98,6 +98,7 @@ namespace BlowTrial.Infrastructure.Interfaces
         ScreenedPatientsSummary GetScreenedPatientSummary();
         ICollection<StudyCentreModel> GetCentresRequiringData();
         StudyCentreModel FindStudyCentre(int studyCentreId);
+        DateTime? LastCreateModifyParticipant();
         string BackupLimitedDbTo(string directory, params StudyCentreModel[] studyCentres);
         IEnumerable<KeyValuePair<string, IEnumerable<StudyCentreModel>>> GetFilenamesAndCentres();
         Database Database { get; }

@@ -438,52 +438,76 @@ namespace BlowTrial.Domain.Providers
                                 Debug.Assert(updateOrdinal == srcResult.GetOrdinal("RecordLastModified"), "different ordinals on RecordLastModified");
                                 object[] srcVals = new object[srcResult.FieldCount];
 
-                                while (destResult.Read() && srcResult.Read())
-                                {
-                                    int srcId = srcResult.GetInt32(idOrdinal);
-                                    int destId = destResult.GetInt32(idOrdinal);
-                                    if (srcId == destId)
-                                    {
-                                        DateTime srcLastUpdate = srcResult.GetDateTime(updateOrdinal);
-                                        DateTime destLastUpdate = destResult.GetDateTime(updateOrdinal);
-
-                                        if (srcLastUpdate == destLastUpdate)
-                                        {
-                                            continue;
-                                        }
-
-                                        
-                                        if (srcLastUpdate < destLastUpdate)
-                                        {
-                                            LogManager.GetLogger("Mainwindow").Warn(string.Format("lastModified on destination later than src on table:{0}\r\n",
-                                                destCmd.CommandText) + AsCSVDif(srcResult, destResult, idOrdinal));
-                                            /*
-                                            LogManager.GetLogger("Mainwindow").Warn("lastModified on destination later than src: \r\n" + AsSqlUpdate(srcResult, srcCmd.CommandText) 
-                                                + "\r\ndest:\r\n"
-                                                + AsSqlUpdate(destResult, destCmd.CommandText) );
-                                            */
-                                        }
-                                        else //  src > dest
-                                        {
-                                            srcResult.GetValues(srcVals);
-                                            destResult.SetValues(srcVals);
-                                            destResult.Update();
-                                            returnUpdates.Add(srcId);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        LogManager.GetLogger("Mainwindow").WarnFormat("database IDs not in sync - source Id:{0}, destination Id:{1} ",
-                                            srcId, destId);
-                                    }
-                                } 
-                                while (srcResult.Read())
+                                Action createRecord = new Action(() =>
                                 {
                                     srcResult.GetValues(srcVals);
                                     var record = destResult.CreateRecord();
                                     record.SetValues(srcVals);
                                     destResult.Insert(record);
                                     returnInserts.Add((int)srcVals[idOrdinal]);
+                                });
+
+                                while (destResult.Read() && srcResult.Read())
+                                {
+                                    int srcId = srcResult.GetInt32(idOrdinal);
+                                    int destId = destResult.GetInt32(idOrdinal);
+                                    if (srcId != destId)
+                                    {
+                                        while (srcId > destId)
+                                        {
+                                            LogManager.GetLogger("Mainwindow").WarnFormat("database IDs not in sync missing from data collection site Id:{0}\r\n{1}", destId,
+                                                AsSqlInsert(destResult, destCmd.CommandText)
+                                                );
+                                            if (!destResult.Read())
+                                            {
+                                                destId = 0;
+                                                break;
+                                            }
+                                            destId = destResult.GetInt32(idOrdinal);
+                                        }
+                                        while (srcId < destId)
+                                        {
+                                            createRecord();
+                                            if (!srcResult.Read())
+                                            {
+                                                srcId = 0;
+                                                break;
+                                            }
+                                            srcId = srcResult.GetInt32(idOrdinal);
+                                        }
+                                        if (srcId != destId) { break; }
+                                    }
+                                    DateTime srcLastUpdate = srcResult.GetDateTime(updateOrdinal);
+                                    DateTime destLastUpdate = destResult.GetDateTime(updateOrdinal);
+
+                                    if (srcLastUpdate == destLastUpdate)
+                                    {
+                                        continue;
+                                    }
+
+                                        
+                                    if (srcLastUpdate < destLastUpdate)
+                                    {
+                                        LogManager.GetLogger("Mainwindow").Warn(string.Format("lastModified on destination later than src on table:{0}\r\n",
+                                            destCmd.CommandText) + AsCSVDif(srcResult, destResult, idOrdinal));
+                                        /*
+                                        LogManager.GetLogger("Mainwindow").Warn("lastModified on destination later than src: \r\n" + AsSqlUpdate(srcResult, srcCmd.CommandText) 
+                                            + "\r\ndest:\r\n"
+                                            + AsSqlUpdate(destResult, destCmd.CommandText) );
+                                        */
+                                    }
+                                    else //  src > dest
+                                    {
+                                        srcResult.GetValues(srcVals);
+                                        destResult.SetValues(srcVals);
+                                        destResult.Update();
+                                        returnUpdates.Add(srcId);
+                                    }
+                                    
+                                } 
+                                while (srcResult.Read())
+                                {
+                                    createRecord();
                                 }
 
                             } // destResult
@@ -531,7 +555,38 @@ namespace BlowTrial.Domain.Providers
             sb.Length -= 1; // remove last comma
             sb.AppendFormat("\r\nWHERE Id = {0}\r\nGO\r\n", id);
             return sb.ToString();
-        } 
+        }
+
+        static string AsSqlInsert(System.Data.Common.DbDataReader result, string tableName)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendFormat ("INSERT INTO {0} (",tableName);
+
+            for (int i = 0; i < result.FieldCount; i++)
+            {
+                sb.Append('\t' + result.GetName(i) + ",\r\n");
+            }
+            sb.Length -= 3; // remove last comma
+            sb.Append(") VALUES (\r\n\t");
+            object[] vals = new object[result.FieldCount];
+            result.GetValues(vals);
+            sb.Append(string.Join(",\r\n\t", vals.Map(v =>
+            {
+                switch (GetBasicType(v))
+                {
+                    case BasicTypes.Null:
+                        return "null";
+                    case BasicTypes.Numeric:
+                        return v.ToString();
+                    case BasicTypes.Date:
+                        return string.Format("{0:s}", v);
+                    default:
+                        return '\'' + v.ToString() + '\'';
+                }
+            })));
+            sb.Append(')');
+            return sb.ToString();
+        }
 
         static IEnumerable<int> ModifiedIdsFromMaxModifiedTime(Type tableType, Database destDb, Database sourceDb, IEnumerable<IntegerRange> destDbUsedAllocations)
         {
@@ -546,6 +601,39 @@ namespace BlowTrial.Domain.Providers
             return sourceDb.SqlQuery<int>(string.Format("select {0}.Id from {0} where {0}.RecordLastModified > @modified {1}",
                 tableName, 
                 whereRange), modifiedDateParam).ToList();
+        }
+        enum BasicTypes { Numeric, Date, Null, Other}
+        static BasicTypes GetBasicType(object o)
+        {
+            if (o == null) { return BasicTypes.Null; }
+            Type ty = o.GetType();
+            if (ty.IsGenericType
+                && (ty.GetGenericTypeDefinition() == typeof(Nullable<>)))
+            {
+                // source is a Nullable type so return its underlying type
+                ty = Nullable.GetUnderlyingType(ty);
+            }
+
+            // source isn't a Nullable type so just return the original type
+            switch (Type.GetTypeCode(ty))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return BasicTypes.Numeric;
+                case TypeCode.DateTime:
+                    return BasicTypes.Date;
+                default:
+                    return BasicTypes.Other;
+            }
         }
         class Upserts
         {

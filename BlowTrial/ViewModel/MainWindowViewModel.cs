@@ -44,18 +44,28 @@ namespace BlowTrial.ViewModel
         public MainWindowViewModel() : this(new Repository(()=>new TrialDataContext())) { }
         public MainWindowViewModel(IRepository repository) : base(repository)
         {
-            this.Version = BlowTrial.App.CurrentClickOnceVersion ?? ("Development Version: " + App.CurrentAppVersion.ToVersionString());
+            //set properties
+            Version = App.CurrentClickOnceVersion ?? ("Development Version: " + App.CurrentAppVersion.ToVersionString());
+            ParticipantLastCreateModifyUTC = _repository.LastCreateModifyParticipant();
+            _repository.ParticipantAdded += _repository_ParticipantCreateModify;
+            _repository.ParticipantUpdated += _repository_ParticipantCreateModify;
+            //set RelayCommands
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
             ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null /* && _backupService.IsToBackup */);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
             ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
-
             OpenBrowser = new RelayCommand(param => Process.Start(new ProcessStartInfo((string)param)));
+
             _repository.FailedDbRestore += _repository_FailedDbRestore;
             _log = LogManager.GetLogger("Mainwindow");
             ShowLogin();
+        }
+
+        private void _repository_ParticipantCreateModify(object sender, ParticipantEventArgs e)
+        {
+            ParticipantLastCreateModifyUTC = _repository.LastCreateModifyParticipant();
         }
 
         void _repository_FailedDbRestore(object sender, FailedRestoreEvent args)
@@ -90,6 +100,27 @@ namespace BlowTrial.ViewModel
                 _isEnvelopeRandomising = value;
                 NotifyPropertyChanged("ToggleEnvelopeString");
             }
+        }
+        DateTime? _participantLastCreateModifyUTC;
+        public DateTime? ParticipantLastCreateModifyUTC
+        {
+            get
+            {
+                return _participantLastCreateModifyUTC;
+            }
+            set
+            {
+                if (_participantLastCreateModifyUTC==value) { return; }
+                 _participantLastCreateModifyUTC = value;
+                 ParticipantLastCreateModifyLocal = _participantLastCreateModifyUTC.HasValue
+                    ?_participantLastCreateModifyUTC.Value.ToLocalTime()
+                    :(DateTime?)null;
+                NotifyPropertyChanged("ParticipantLastCreateModifyUTC", "ParticipantLastCreateModifyLocal");
+            }
+        }
+        public DateTime? ParticipantLastCreateModifyLocal
+        {
+            get; private set;
         }
         public string Version { get; private set; }
         public string ToggleEnvelopeString
