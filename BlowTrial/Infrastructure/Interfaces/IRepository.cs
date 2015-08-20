@@ -4,6 +4,7 @@ using BlowTrial.Domain.Tables;
 using BlowTrial.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 
@@ -24,6 +25,9 @@ namespace BlowTrial.Infrastructure.Interfaces
         event EventHandler<ParticipantEventArgs> ParticipantUpdated;
         event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAddOrUpdate;
         event EventHandler<FailedRestoreEvent> FailedDbRestore;
+        event EventHandler<LastUpdatedChangedEventAgs> AnyParticipantChange;
+        event EventHandler<DatabaseUpdatingEventAgs> DatabaseUpdating;
+        event ProgressChangedEventHandler UpdateProgress;
         event EventHandler StudySiteAddOrUpdate;
         //event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         Participant AddParticipant(

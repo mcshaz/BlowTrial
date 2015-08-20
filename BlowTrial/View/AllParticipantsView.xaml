@@ -83,7 +83,7 @@
         <ListView 
           AlternationCount="2" DockPanel.Dock="Top"
           ItemContainerStyle="{StaticResource ParticipantItemStyle}"
-          ItemsSource="{Binding Path=AllParticipants}"
+          ItemsSource="{Binding Path=AllParticipants, Mode=OneWay}"
             SelectedItem="{Binding Path=SelectedParticipant}"
             VirtualizingStackPanel.IsVirtualizing="True"
             VirtualizingPanel.IsVirtualizingWhenGrouping ="True"

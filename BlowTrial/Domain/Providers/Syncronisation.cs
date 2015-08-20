@@ -13,6 +13,7 @@ using BlowTrial.Infrastructure.Extensions;
 using System.Diagnostics;
 using System.Data;
 using log4net;
+using System.ComponentModel;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -132,15 +133,29 @@ namespace BlowTrial.Domain.Providers
             }
         }
 
-        public static SyncronisationResult Sync(ITrialDataContext destContext, IEnumerable<string> dbFileNames, bool updateResults)
+        public class SyncArgs {
+            public ITrialDataContext DestContext { get; set; }
+            public IEnumerable<string> DbFileNames { get; set; }
+            public bool UpdateResults { get; set; }
+        }
+
+        public static void Sync(object sender, DoWorkEventArgs e)
         {
-            List<StudyCentre> knownSites = destContext.StudyCentres.ToList();
-            var returnVar = updateResults?new SyncronisationResult():null;
-            IEnumerable<Constraint> fk_constraints = DropFKConstraints(destContext.Database);
-            foreach (string f in dbFileNames)
+
+            var worker = (BackgroundWorker)sender;
+
+            var args = (SyncArgs)e.Argument;
+            var tableTypes = new Type[] { typeof(Vaccine), typeof(BalancedAllocation), typeof(AllocationBlock), typeof(ScreenedPatient), typeof(Participant), typeof(VaccineAdministered), typeof(ProtocolViolation), typeof(UnsuccessfulFollowUp) };
+            int totalUpdates = args.DbFileNames.Count() * tableTypes.Length;
+            int workerCount = 0;
+
+            List<StudyCentre> knownSites = args.DestContext.StudyCentres.ToList();
+            var returnVar = args.UpdateResults ? new SyncronisationResult():null;
+            IEnumerable<Constraint> fk_constraints = DropFKConstraints(args.DestContext.Database);
+            foreach (string f in args.DbFileNames)
             {
                 IEnumerable<Guid> knownSiteIds = knownSites.Select(s => s.DuplicateIdCheck);
-                using (var sourceContext = destContext.AttachDb(f))
+                using (var sourceContext = args.DestContext.AttachDb(f))
                 {
                     var sourceSites = sourceContext.StudyCentres.AsNoTracking().ToList();
                     foreach (StudyCentre s in sourceSites)
@@ -158,20 +173,21 @@ namespace BlowTrial.Domain.Providers
                                 overlappingSite.Id, overlappingSite.MaxIdForSite,
                                 s.Id, s.MaxIdForSite));
                         }
-                        destContext.StudyCentres.Add(s); //because context will have been renewed, this should not cause a duplicate key exception
+                        args.DestContext.StudyCentres.Add(s); //because context will have been renewed, this should not cause a duplicate key exception
                         knownSites.Add(s);
                     }
-                    destContext.SaveChanges(false);
+                    args.DestContext.SaveChanges(false);
 
                     var sourceCentreIdRanges = sourceSites.Select(k => new IntegerRange(k.Id, k.MaxIdForSite)).ToList();
-                    var dbDestContext = (DbContext)destContext;
-                    foreach (Type t in new Type[] { typeof(Vaccine), typeof(BalancedAllocation), typeof(AllocationBlock), typeof(ScreenedPatient), typeof(Participant), typeof(VaccineAdministered), typeof(ProtocolViolation), typeof(UnsuccessfulFollowUp) })
+                    var dbDestContext = (DbContext)args.DestContext;
+                    foreach (Type t in tableTypes)
                     {
                         WriteTime(t, null);
                         //var destAllocations = RemainingAllocationsByCentre(t, destContext.Database, sourceCentreIdRanges);
                         //WriteTime(t, "RemainingAllocationsByCentre");
-                        var upserts = AddOrUpdate(t, (SqlCeConnection)sourceContext.Database.Connection, (SqlCeConnection)destContext.Database.Connection, sourceCentreIdRanges);
+                        var upserts = AddOrUpdate(t, (SqlCeConnection)sourceContext.Database.Connection, (SqlCeConnection)args.DestContext.Database.Connection, sourceCentreIdRanges);
                         WriteTime(t, "AddOrUpdate");
+                        worker.ReportProgress(100*(++workerCount)/totalUpdates);
                         /*
                         var modifiedIds = ModifiedIdsFromMaxModifiedTime(t, destContext.Database, sourceContext.Database, destAllocations.UsedAllocations);
                         WriteTime(t, "ModifiedIds");
@@ -180,7 +196,7 @@ namespace BlowTrial.Domain.Providers
                         //UpdateISharedRecord(t, sourceContext.Database, dbDestContext, modifiedIds);
                         //WriteTime(t, "UpdateISharedRecord");
                         */
-                        if (updateResults)
+                        if (args.UpdateResults)
                         {
                             returnVar.Updated(t, upserts.Updated);
                             WriteTime(t, "returnVar.Updated");
@@ -191,8 +207,8 @@ namespace BlowTrial.Domain.Providers
                     }
                 }
             }
-            ReinstateConstraints((SqlCeConnection)destContext.Database.Connection, fk_constraints);
-            return returnVar;
+            ReinstateConstraints((SqlCeConnection)args.DestContext.Database.Connection, fk_constraints);
+            e.Result = returnVar;
         }
 #if DEBUG
         static Stopwatch watch = new Stopwatch();
@@ -451,6 +467,7 @@ namespace BlowTrial.Domain.Providers
                                 {
                                     int srcId = srcResult.GetInt32(idOrdinal);
                                     int destId = destResult.GetInt32(idOrdinal);
+                                    Debug.WriteLine(srcId + '\t' + destId);
                                     if (srcId != destId)
                                     {
                                         while (srcId > destId)
@@ -521,7 +538,7 @@ namespace BlowTrial.Domain.Providers
         }
         static string AsCSVDif(System.Data.Common.DbDataReader srcVals, System.Data.Common.DbDataReader destVals, int idOrdinal)
         {
-            var sb = new System.Text.StringBuilder("Field\tSource\tDestination");
+            var sb = new System.Text.StringBuilder("Field\tSource\tDestination\r\n");
             for (int i = 0; i < srcVals.FieldCount; i++)
             {
                 object oldRes = srcVals.GetValue(i);
@@ -548,7 +565,7 @@ namespace BlowTrial.Domain.Providers
                 }
                 else
                 {
-                    sb.AppendFormat("\r\n\t{0} = {1},", name, result.GetValue(i));
+                    sb.AppendFormat("\r\n\t{0} = {1},", name, ValueToSqlString(result.GetValue(i)));
                 }
                 
             }
@@ -570,24 +587,24 @@ namespace BlowTrial.Domain.Providers
             sb.Append(") VALUES (\r\n\t");
             object[] vals = new object[result.FieldCount];
             result.GetValues(vals);
-            sb.Append(string.Join(",\r\n\t", vals.Map(v =>
-            {
-                switch (GetBasicType(v))
-                {
-                    case BasicTypes.Null:
-                        return "null";
-                    case BasicTypes.Numeric:
-                        return v.ToString();
-                    case BasicTypes.Date:
-                        return string.Format("{0:s}", v);
-                    default:
-                        return '\'' + v.ToString() + '\'';
-                }
-            })));
+            sb.Append(string.Join(",\r\n\t", vals.Select(ValueToSqlString)));
             sb.Append(')');
             return sb.ToString();
         }
-
+        static Func<object, string> ValueToSqlString = v =>
+        {
+            switch (GetBasicType(v))
+            {
+                case BasicTypes.Null:
+                    return "null";
+                case BasicTypes.Numeric:
+                    return v.ToString();
+                case BasicTypes.Date:
+                    return string.Format("'{0:s}'", v);
+                default:
+                    return '\'' + v.ToString() + '\'';
+            }
+        };
         static IEnumerable<int> ModifiedIdsFromMaxModifiedTime(Type tableType, Database destDb, Database sourceDb, IEnumerable<IntegerRange> destDbUsedAllocations)
         {
             string tableName = TableName(tableType);

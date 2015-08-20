@@ -489,6 +489,7 @@ namespace BlowTrial.Models
 
         private string ValidateFollowUpBabyBCGReaction(DateTime? now=null)
         {
+            if (!FollowUpContactMade.HasValue) { return null; }
             var bcgDate = (from v in VaccineModelsAdministered
                            where v.VaccineGiven.IsBcg
                            select v.AdministeredAtDateTime).FirstOrDefault();
@@ -498,10 +499,7 @@ namespace BlowTrial.Models
             }
             if (FollowUpBabyBCGReaction == FollowUpBabyBCGReactionStatus.Missing)
             {
-                if (FollowUpContactMade.HasValue)
-                {
-                    return Strings.ParticipantModel_Error_BCGReactionRequired;
-                }
+                return Strings.ParticipantModel_Error_BCGReactionRequired;
             }
             else if (((now ?? DateTime.Now) - bcgDate.Value).Days < FollowToAge)
             {

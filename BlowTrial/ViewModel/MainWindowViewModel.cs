@@ -18,7 +18,6 @@ using AutoMapper;
 using System.Windows;
 using CloudFileTransfer;
 using BlowTrial.Infrastructure.Extensions;
-using BlowTrial.Domain.Tables;
 using log4net;
 
 
@@ -44,11 +43,12 @@ namespace BlowTrial.ViewModel
         public MainWindowViewModel() : this(new Repository(()=>new TrialDataContext())) { }
         public MainWindowViewModel(IRepository repository) : base(repository)
         {
+            _repository.UpdateProgress += worker_ProgressChanged;
+            _repository.DatabaseUpdating += _repository_DatabaseUpdating;
             //set properties
             Version = App.CurrentClickOnceVersion ?? ("Development Version: " + App.CurrentAppVersion.ToVersionString());
             ParticipantLastCreateModifyUTC = _repository.LastCreateModifyParticipant();
-            _repository.ParticipantAdded += _repository_ParticipantCreateModify;
-            _repository.ParticipantUpdated += _repository_ParticipantCreateModify;
+            _repository.AnyParticipantChange += _repository_ParticipantCreateModify;
             //set RelayCommands
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
             ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null /* && _backupService.IsToBackup */);
@@ -63,9 +63,14 @@ namespace BlowTrial.ViewModel
             ShowLogin();
         }
 
-        private void _repository_ParticipantCreateModify(object sender, ParticipantEventArgs e)
+        private void _repository_DatabaseUpdating(object sender, DatabaseUpdatingEventAgs e)
         {
-            ParticipantLastCreateModifyUTC = _repository.LastCreateModifyParticipant();
+            DbUpdating = e.Commencing;
+        }
+
+        private void _repository_ParticipantCreateModify(object sender, LastUpdatedChangedEventAgs e)
+        {
+            ParticipantLastCreateModifyUTC = e.LastUpdated;
         }
 
         void _repository_FailedDbRestore(object sender, FailedRestoreEvent args)
@@ -157,23 +162,23 @@ namespace BlowTrial.ViewModel
             {
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_ViewParticipants,
-                    new RelayCommand(param => this.ShowAllParticipants(), param => IsAuthorised)),
+                    new RelayCommand(param => this.ShowAllParticipants(), param => IsAuthorised && !DbUpdating)),
 
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_RegisterNewPatient,
-                    new RelayCommand(param => this.RegisterNewPatient(), param => IsAuthorised)),
+                    new RelayCommand(param => this.RegisterNewPatient(), param => IsAuthorised && !DbUpdating)),
 
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_ViewScreenedPatients,
-                    new RelayCommand(param => this.ShowScreenedPatients(), param => IsAuthorised)),
+                    new RelayCommand(param => this.ShowScreenedPatients(), param => IsAuthorised && !DbUpdating)),
 
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_ViewSummary,
-                    new RelayCommand(param => this.ShowSummaryData(), param => IsAuthorised)),
+                    new RelayCommand(param => this.ShowSummaryData(), param => IsAuthorised && !DbUpdating)),
 
                 new CommandViewModel(
                     Strings.MainWindowViewModel_Command_ViewProtocolViolations,
-                    new RelayCommand(param => this.ShowViolations(), param => IsAuthorised))
+                    new RelayCommand(param => this.ShowViolations(), param => IsAuthorised && !DbUpdating))
             };
         }
         public RelayCommand ShowCloudDirectoryCmd {get; private set;}
@@ -342,7 +347,8 @@ namespace BlowTrial.ViewModel
             AllParticipantsViewModel allParticipantsVM = (AllParticipantsViewModel)Workspaces.FirstOrDefault(w => w is AllParticipantsViewModel);
             if (allParticipantsVM == null)
             {
-                allParticipantsVM = new AllParticipantsViewModel(_repository);
+                allParticipantsVM = new AllParticipantsViewModel(_repository
+                    );
                 this.Workspaces.Add(allParticipantsVM);
             }
             this.SetActiveWorkspace(allParticipantsVM);
@@ -468,7 +474,17 @@ namespace BlowTrial.ViewModel
             }
             base.DisplayName = workspace.DisplayName;
         }
-
+        private bool _dbUpdating;
+        public bool DbUpdating
+        {
+            get { return _dbUpdating; }
+            set
+            {
+                if (value == _dbUpdating) { return; }
+                _dbUpdating = value;
+                NotifyPropertyChanged("DbUpdating");
+            }
+        }
         private bool _isAuthorised;
         public bool IsAuthorised { 
             get { return _isAuthorised; }
@@ -479,6 +495,22 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("IsAuthorised");
             }
         }
+        private int _progress = 100;
+        public int Progress
+        {
+            get { return _progress; }
+            set
+            {
+                if (value == _progress) { return; }
+                _progress = value;
+                NotifyPropertyChanged("Progress");
+            }
+        }
+        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            Progress = e.ProgressPercentage;
+        }
+
         internal const string LogFileName = "SyncRequestLog.csv";
         void HandleAuthorisationClose()
         {

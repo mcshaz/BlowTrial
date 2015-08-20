@@ -6,11 +6,27 @@ using System.Text;
 
 namespace BlowTrial.Domain.Providers
 {
+    public class DatabaseUpdatingEventAgs : EventArgs
+    {
+        public DatabaseUpdatingEventAgs(bool commencing)
+        {
+            Commencing = commencing;
+        }
+        public bool Commencing { get; private set; }
+    }
+    public class LastUpdatedChangedEventAgs : EventArgs
+    {
+        public LastUpdatedChangedEventAgs(DateTime? lastUpdated)
+        {
+            LastUpdated = lastUpdated;
+        }
+        public DateTime? LastUpdated { get; private set; }
+    }
     public class ParticipantEventArgs : EventArgs
     {
         public ParticipantEventArgs(Participant participant)
         {
-            this.Participant = participant;
+            Participant = participant;
         }
 
         public Participant Participant { get; private set; }

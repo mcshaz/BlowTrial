@@ -20,6 +20,7 @@ using BlowTrial.Migrations;
 using BlowTrial.Infrastructure.Extensions;
 using BlowTrial.Helpers;
 using System.Threading;
+using System.ComponentModel;
 
 namespace BlowTrial.Domain.Providers
 {
@@ -67,8 +68,11 @@ namespace BlowTrial.Domain.Providers
         public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientAdded;
         public event EventHandler<ProtocolViolationEventArgs> ProtocolViolationAddOrUpdate;
         public event EventHandler<ParticipantEventArgs> ParticipantUpdated;
+        public event EventHandler<LastUpdatedChangedEventAgs> AnyParticipantChange;
         public event EventHandler<FailedRestoreEvent> FailedDbRestore;
+        public event EventHandler<DatabaseUpdatingEventAgs> DatabaseUpdating;
         public event EventHandler StudySiteAddOrUpdate;
+        public event ProgressChangedEventHandler UpdateProgress;
         //public event EventHandler<ScreenedPatientEventArgs> ScreenedPatientUpdated;
         #endregion // EventHandlers
 
@@ -288,7 +292,14 @@ namespace BlowTrial.Domain.Providers
             {
                 throw new DataKeyOutOfRangeException("participant id greater than maximum allocations for site");
             }
-
+            if (participant.VaccinesAdministered == null)
+            {
+                participant.VaccinesAdministered = new List<VaccineAdministered>();
+            }
+            if (participant.UnsuccessfulFollowUps==null)
+            {
+                participant.UnsuccessfulFollowUps = new List<UnsuccessfulFollowUp>();
+            }
             _dbContext.Participants.Add(participant);
 
             _dbContext.SaveChanges(true);
@@ -518,6 +529,21 @@ namespace BlowTrial.Domain.Providers
             _dbContext.SaveChanges(true);
             if (this.ParticipantUpdated != null)
             {
+                if (participant.VaccinesAdministered == null)
+                {
+                    participant.VaccinesAdministered = _dbContext.VaccinesAdministered.Where(v => v.ParticipantId == participant.Id).ToList();
+                }
+                else
+                {
+                    foreach (var v in participant.VaccinesAdministered)
+                    {
+                        if (v.VaccineGiven== null) { v.VaccineGiven = _dbContext.Vaccines.Find(v.VaccineId); }
+                    }
+                }
+                if (participant.UnsuccessfulFollowUps == null)
+                {
+                    participant.UnsuccessfulFollowUps = _dbContext.UnsuccessfulFollowUps.Where(u => u.ParticipantId == participant.Id).ToList();
+                }
                 this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
             }
         }
@@ -807,18 +833,44 @@ namespace BlowTrial.Domain.Providers
                 MigrateIfRequired(f);
             }
 
-            if (ParticipantAdded == null && ParticipantUpdated == null && ScreenedPatientAdded==null)
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = true;
+            worker.DoWork += SyncronisationResult.Sync;
+
+            if (UpdateProgress != null)
             {
-                SyncronisationResult.Sync(_dbContext, bakupFilePaths, false);
-                return;
+                worker.ProgressChanged += UpdateProgress;
             }
-            SyncronisationResult syncResults = SyncronisationResult.Sync(_dbContext, bakupFilePaths, true);
+            bool isForUpdate = ParticipantAdded != null || ParticipantUpdated != null || ScreenedPatientAdded != null;
+            if (isForUpdate)
+            {
+                worker.RunWorkerCompleted += WhenSyncronisationResultsAvailable;
+            }
+            if (AnyParticipantChange != null)
+            {
+                worker.RunWorkerCompleted += (o, e) => AnyParticipantChange(this, new LastUpdatedChangedEventAgs(LastCreateModifyParticipant()));
+            }
+            if (DatabaseUpdating != null)
+            {
+                DatabaseUpdating(this, new DatabaseUpdatingEventAgs(true));
+                worker.RunWorkerCompleted += (o, e) => DatabaseUpdating(this, new DatabaseUpdatingEventAgs(false));
+            }
+            worker.RunWorkerAsync(new SyncronisationResult.SyncArgs
+                {   DestContext = _dbContext,
+                    DbFileNames = bakupFilePaths.ToList(),
+                    UpdateResults = isForUpdate
+            });
+        }
+
+        private void WhenSyncronisationResultsAvailable(object sender, RunWorkerCompletedEventArgs e)
+        {
+            SyncronisationResult syncResults = (SyncronisationResult)e.Result;
 
             if (ParticipantAdded != null)
             {
-                foreach(var p in (from part in _dbContext.Participants.Include("VaccinesAdministered").Include("ProtocolViolations").Include("UnsuccessfulFollowUps")
-                                  where syncResults.AddedParticipantIds.Contains(part.Id)
-                                  select part))
+                foreach (var p in (from part in _dbContext.Participants.Include("VaccinesAdministered").Include("ProtocolViolations").Include("UnsuccessfulFollowUps")
+                                   where syncResults.AddedParticipantIds.Contains(part.Id)
+                                   select part))
                 {
                     ParticipantAdded(this, new ParticipantEventArgs(p));
                 }
@@ -827,8 +879,8 @@ namespace BlowTrial.Domain.Providers
             {
                 foreach (var p in (from part in _dbContext.Participants.Include("VaccinesAdministered").Include("ProtocolViolations").Include("UnsuccessfulFollowUps")
                                    where syncResults.UpdatedParticipantIds.Contains(part.Id)
-                                        || (    (part.VaccinesAdministered.Any(v=>syncResults.UpsertedVaccineAdministeredIds.Contains(v.Id))
-                                                || part.UnsuccessfulFollowUps.Any(v=>syncResults.UpsertedUnsuccessfulFollowUpIds.Contains(v.Id))
+                                        || ((part.VaccinesAdministered.Any(v => syncResults.UpsertedVaccineAdministeredIds.Contains(v.Id))
+                                                || part.UnsuccessfulFollowUps.Any(v => syncResults.UpsertedUnsuccessfulFollowUpIds.Contains(v.Id))
                                             && !syncResults.AddedParticipantIds.Contains(part.Id)))
                                    select part))
                 {
@@ -838,8 +890,8 @@ namespace BlowTrial.Domain.Providers
             if (ScreenedPatientAdded != null)
             {
                 foreach (var s in (from screen in _dbContext.ScreenedPatients
-                                    where syncResults.AddedScreenPatientIds.Contains(screen.Id)
-                                    select screen))
+                                   where syncResults.AddedScreenPatientIds.Contains(screen.Id)
+                                   select screen))
                 {
                     ScreenedPatientAdded(this, new ScreenedPatientEventArgs(s));
                 }
@@ -860,6 +912,7 @@ namespace BlowTrial.Domain.Providers
                 }
             }
         }
+
         public ParticipantsSummary GetParticipantSummary()
         {
             return new ParticipantsSummary(from p in _dbContext.Participants.AsExpandable()

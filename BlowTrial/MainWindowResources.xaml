@@ -107,7 +107,15 @@ This resource dictionary is used by the MainWindow.
     </Setter>
   </Style>
 
-  <!--
+    <Style x:Key="ShowIfProgress" TargetType="{x:Type Grid}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Progress, Mode=OneWay}" Value="100">
+                <Setter Property="Visibility" Value="Hidden" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
   This style ensures that the borders in the main window are consistent.
   -->
   <Style x:Key="MainBorderStyle" TargetType="{x:Type Border}">

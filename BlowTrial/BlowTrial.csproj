@@ -30,7 +30,7 @@
     <MinimumRequiredVersion>2.6.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>4.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -598,6 +598,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Membership\201404111106531_InitialMembership.resx">
       <DependentUpon>201404111106531_InitialMembership.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Membership\201404111113506_MembershipV2.resx">
       <DependentUpon>201404111113506_MembershipV2.cs</DependentUpon>
