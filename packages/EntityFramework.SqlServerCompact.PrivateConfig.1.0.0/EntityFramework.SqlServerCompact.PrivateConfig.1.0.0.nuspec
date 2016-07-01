@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>EntityFramework.SqlServerCompact.PrivateConfig</id>
+    <version>1.0.0</version>
+    <title>EntityFramework.SqlServerCompact.PrivateConfig</title>
+    <authors>ErikEJ</authors>
+    <owners>ErikEJ</owners>
+    <projectUrl>http://sqlcetoolbox.codeplex.com/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Adds SQL Server Compact 4.0 DbProvider configuration</description>
+    <copyright>Copyright 2013</copyright>
+    <language />
+    <dependencies>
+      <dependency id="EntityFramework.SqlServerCompact" version="6.0.1" />
+    </dependencies>
+  </metadata>
+</package>
