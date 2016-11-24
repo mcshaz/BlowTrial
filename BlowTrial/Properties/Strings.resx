@@ -769,7 +769,7 @@
     <value>If date contains a comma, dates must be in quotes or seperated by another character</value>
   </data>
   <data name="RandomisingMessages_DefaultControl" xml:space="preserve">
-    <value>Please only give BCG &amp; OPV once nearing {0}.</value>
+    <value>Please NO BCG while in NICU.</value>
   </data>
   <data name="RandomisingMessages_DefaultIntervention" xml:space="preserve">
     <value>Please give {0} as soon as possible.</value>

@@ -1933,7 +1933,7 @@ namespace BlowTrial.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please only give BCG &amp; OPV once nearing {0}..
+        ///   Looks up a localized string similar to Please NO BCG while in NICU..
         /// </summary>
         public static string RandomisingMessages_DefaultControl {
             get {

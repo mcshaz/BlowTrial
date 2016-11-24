@@ -31,7 +31,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Publish.htm</WebPage>
     <ApplicationRevision>13</ApplicationRevision>
-    <ApplicationVersion>4.0.1.%2a</ApplicationVersion>
+    <ApplicationVersion>4.0.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>

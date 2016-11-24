@@ -25,7 +25,7 @@ namespace BlowTrial.Infrastructure
             IsToHospitalDischarge = isToHospitalDischarge;
             DischargeExplanation = string.Format(Strings.RandomisingMessages_DischargeFrom, 
                 isToHospitalDischarge?Strings.RandomisingMessages_Hospital:Strings.RandomisingMessages_NICU);
-            _controlInstructions = string.Format(Strings.RandomisingMessages_DefaultControl, DischargeExplanation);
+            _controlInstructions = Strings.RandomisingMessages_DefaultControl;
             _interventionInstructions = isOpvInIntervention
                 ?string.Format(Strings.RandomisingMessages_DefaultIntervention, "{0} " + Strings.And + ' ' + Strings.Vaccine_Opv)
                 :Strings.RandomisingMessages_DefaultIntervention;
