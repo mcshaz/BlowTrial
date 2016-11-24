@@ -85,12 +85,12 @@ namespace BlowTrial.Infrastructure.Automapper
             Mapper.CreateMap<ProtocolViolation, ProtocolViolationModel>();
 
             Mapper.CreateMap<StudyCentreModel, StudySiteItemModel>()
-                .ForMember(d=>d.SiteBackgroundColour, o=>o.MapFrom(s=>((SolidColorBrush)s.BackgroundColour).Color))
+                .ForMember(d => d.SiteBackgroundColour, o => o.MapFrom(s => ((SolidColorBrush)s.BackgroundColour).Color))
                 .ForMember(d => d.SiteTextColour, o => o.MapFrom(s => ((SolidColorBrush)s.TextColour).Color))
-                .ForMember(d=>d.AllLocalSites, o=>o.Ignore())
-                .ForMember(d=>d.SiteName, o=>o.MapFrom(s=>s.Name))
+                .ForMember(d => d.AllLocalSites, o => o.Ignore())
+                .ForMember(d => d.SiteName, o => o.MapFrom(s => s.Name))
                 .ForMember(d => d.MaxParticipantAllocations, o => o.MapFrom(s => s.MaxIdForSite - s.Id + (s.Id == 1 ? 2 : 1)))
-                .ForMember(d=>d.IsToHospitalDischarge, o=>o.MapFrom(s=>s.RandomisedMessage.IsToHospitalDischarge))
+                .ForMember(d => d.IsToHospitalDischarge, o => o.MapFrom(s => s.RandomisedMessage.IsToHospitalDischarge))
                 .ForMember(d => d.IsOpvInIntervention, o => o.MapFrom(s => s.RandomisedMessage.IsOpvInIntervention));
         }
     }

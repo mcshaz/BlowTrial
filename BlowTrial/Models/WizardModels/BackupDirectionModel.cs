@@ -14,7 +14,7 @@ namespace BlowTrial.Models
     public class BackupDirectionModel :CloudDirectoryModel
     {
         public BackupDirectionModel()
-            : base(new string[] { "PatientsPreviouslyRandomised", "AllocationType" })
+            : base(new string[] { "PatientsPreviouslyRandomised" })
         { }
 
         public bool PatientsPreviouslyRandomised { get; set; }

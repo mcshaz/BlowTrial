@@ -139,6 +139,15 @@ namespace BlowTrial.Domain.Providers
             public bool UpdateResults { get; set; }
         }
 
+        public static void RepairDb(string fileName)
+        {
+            SqlCeEngine engine = new SqlCeEngine(TrialDataContext.GetConnectionString(fileName));
+            if (!engine.Verify())
+            {
+                engine.Repair(null, RepairOption.RecoverAllOrFail);
+            }
+        }
+
         public static void Sync(object sender, DoWorkEventArgs e)
         {
 
@@ -456,6 +465,7 @@ namespace BlowTrial.Domain.Providers
 
                                 Action createRecord = new Action(() =>
                                 {
+                                    Debug.WriteLine(tableType.Name);
                                     srcResult.GetValues(srcVals);
                                     var record = destResult.CreateRecord();
                                     record.SetValues(srcVals);
@@ -484,6 +494,7 @@ namespace BlowTrial.Domain.Providers
                                         }
                                         while (srcId < destId)
                                         {
+                                            //Debug.WriteLine($"srcId:{srcId} destId:{destId}");
                                             createRecord();
                                             if (!srcResult.Read())
                                             {

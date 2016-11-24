@@ -49,24 +49,27 @@ namespace BlowTrial.ViewModel
         }
 #endregion
         #region Methods
+        public static BlowTrial.Domain.Tables.StudyCentre MapToStudySite(StudySiteItemModel s)
+        {
+            return new BlowTrial.Domain.Tables.StudyCentre
+            {
+                ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
+                ArgbTextColour = s.SiteTextColour.ToInt(),
+                IsCurrentlyEnrolling = s.IsCurrentlyEnrolling,
+                IsOpvInIntervention = s.IsOpvInIntervention,
+                IsToHospitalDischarge = s.IsToHospitalDischarge,
+                Id = s.Id.Value,
+                DefaultAllocation = s.DefaultAllocation,
+                HospitalIdentifierMask = s.HospitalIdentifierMask,
+                MaxIdForSite = s.Id.Value + s.MaxParticipantAllocations.Value - (s.Id == 1 ? 2 : 1),
+                Name = s.SiteName,
+                PhoneMask = s.PhoneMask,
+                DuplicateIdCheck = (s.DuplicateIdCheck == Guid.Empty) ? Guid.NewGuid() : s.DuplicateIdCheck
+            };
+        }
         void ExecuteSave(object param)
         {
-            _repo.AddOrUpdate(_appModel.StudySitesData.Select(
-                s=>new BlowTrial.Domain.Tables.StudyCentre
-                {
-                    ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
-                    ArgbTextColour = s.SiteTextColour.ToInt(),
-                    IsCurrentlyEnrolling = s.IsCurrentlyEnrolling,
-                    IsOpvInIntervention = s.IsOpvInIntervention, 
-                    IsToHospitalDischarge = s.IsToHospitalDischarge,
-                    Id = s.Id.Value, 
-                    DefaultAllocation = s.DefaultAllocation,
-                    HospitalIdentifierMask  = s.HospitalIdentifierMask,
-                    MaxIdForSite = s.Id.Value + s.MaxParticipantAllocations.Value - (s.Id == 1 ? 2 : 1),
-                    Name = s.SiteName,
-                    PhoneMask = s.PhoneMask,
-                    DuplicateIdCheck = (s.DuplicateIdCheck==Guid.Empty)?Guid.NewGuid():s.DuplicateIdCheck
-                }));
+            _repo.AddOrUpdate(_appModel.StudySitesData.Select(s=> MapToStudySite(s)));
             OnRequestClose();
         }
         void StudySitesData_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

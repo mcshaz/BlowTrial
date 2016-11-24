@@ -8,6 +8,7 @@ namespace BlowTrial.Domain.Tables
     public class UnsuccessfulFollowUp : ISharedRecord
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
         public DateTime AttemptedContact { get; set; }
         [ForeignKey("TrialParticipant")]

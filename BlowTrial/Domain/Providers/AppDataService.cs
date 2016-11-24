@@ -148,17 +148,7 @@ namespace BlowTrial.Helpers
                 if (t.StudyCentres.Any()) { throw new InvalidOperationException("Study Centres cannot be modified after creation"); }
                 foreach (StudySiteItemModel s in newStudyCentres)
                 {
-                    t.StudyCentres.Add(new Domain.Tables.StudyCentre
-                    {
-                        Id = s.Id.Value,
-                        DuplicateIdCheck = Guid.NewGuid(),
-                        ArgbBackgroundColour = s.SiteBackgroundColour.Value.ToInt(),
-                        ArgbTextColour = s.SiteTextColour.ToInt(),
-                        Name = s.SiteName,
-                        HospitalIdentifierMask = s.HospitalIdentifierMask,
-                        PhoneMask = s.PhoneMask,
-                        MaxIdForSite = s.MaxIdForSite().Value
-                    });
+                    t.StudyCentres.Add(ViewModel.StudySitesViewModel.MapToStudySite(s));
                 }
                 t.SaveChanges(true);
             }

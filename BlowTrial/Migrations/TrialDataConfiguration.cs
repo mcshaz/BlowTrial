@@ -84,6 +84,8 @@ namespace BlowTrial.Migrations.TrialData
             {
                 UpdatePapuleData(context);
             }
+
+            ReIdUnsuccesfulFollowUps.Process(context);
         }
         class OldParticipant 
         {

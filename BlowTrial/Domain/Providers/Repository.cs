@@ -60,6 +60,7 @@ namespace BlowTrial.Domain.Providers
         private readonly Func<ITrialDataContext> _createContext;
         private ITrialDataContext _dbContext;
         private const string BakExtension = ".sdf"; //obviously change if using non-compact
+        private bool _isBackingUp;
         private List<string> _baksForgoingMigration;
         #endregion // Members
 
@@ -644,7 +645,7 @@ namespace BlowTrial.Domain.Providers
                 int studyCentreId = (from p in _dbContext.Participants
                                      where p.Id == participantId
                                      select p.CentreId).First();
-                int nextId = GetNextId(_dbContext.VaccinesAdministered, studyCentreId);
+                int nextId = GetNextId(_dbContext.UnsuccessfulFollowUps, studyCentreId);
                 foreach (var u in newFollowUps[true])
                 {
                     u.Id = nextId++;
@@ -722,6 +723,7 @@ namespace BlowTrial.Domain.Providers
                 }
             }
             _dbContext.Dispose(); // only necessary for ce
+            SyncronisationResult.RepairDb(bakFileName);
             int dotPos = bakFileName.LastIndexOf('.');
             string copiedFileName = bakFileName.Insert(dotPos, uniqueFileNameSuffix);
             File.Copy(bakFileName, copiedFileName, true);
@@ -796,14 +798,14 @@ namespace BlowTrial.Domain.Providers
             }
             return returnVar;
         }
-
+        const string _bakExtension = ".sdf";
         public string BackupLimitedDbTo(string directory, params StudyCentreModel[] studyCentres)
         {
-            const string bakExtension = ".sdf";
+            
             //this is a hack, and will not work if moving to a full sql server instance
             Restore();
-            string destination = Path.Combine(directory, _dbContext.DbName + '_' + studyCentres.First().DuplicateIdCheck.ToString("N")) + bakExtension;
-            File.Copy(App.DataDirectory + '\\' + _dbContext.DbName + bakExtension, destination, true);
+            string destination = Path.Combine(directory, _dbContext.DbName + '_' + studyCentres.First().DuplicateIdCheck.ToString("N")) + _bakExtension;
+            File.Copy(App.DataDirectory + '\\' + _dbContext.DbName + _bakExtension, destination, true);
             string whereString = "WHERE NOT (" + studyCentres.Select(s => string.Format("(Id BETWEEN '{0}' AND '{1}')", s.Id, s.MaxIdForSite)).Aggregate((c, n) => c + " OR " + n) + ')';
             using (var db = _dbContext.AttachDb(destination))
             {
@@ -825,9 +827,11 @@ namespace BlowTrial.Domain.Providers
                 }
             }
         }
+
         void AddOrUpdateBaks(IEnumerable<string> bakupFilePaths)
         {
-
+            if (_isBackingUp) { return; }
+            _isBackingUp = true;
             foreach (var f in bakupFilePaths)
             {
                 MigrateIfRequired(f);
@@ -855,6 +859,14 @@ namespace BlowTrial.Domain.Providers
                 DatabaseUpdating(this, new DatabaseUpdatingEventAgs(true));
                 worker.RunWorkerCompleted += (o, e) => DatabaseUpdating(this, new DatabaseUpdatingEventAgs(false));
             }
+            worker.RunWorkerCompleted += (o, e) => _isBackingUp = false;
+            worker.RunWorkerCompleted += (o, e) =>
+            {
+                string fn = App.DataDirectory + '\\' + _dbContext.DbName + _bakExtension;
+                _dbContext.Dispose();
+                SyncronisationResult.RepairDb(fn);
+                _dbContext = _createContext.Invoke();
+            };
             worker.RunWorkerAsync(new SyncronisationResult.SyncArgs
                 {   DestContext = _dbContext,
                     DbFileNames = bakupFilePaths.ToList(),
