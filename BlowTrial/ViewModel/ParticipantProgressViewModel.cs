@@ -1130,10 +1130,7 @@ namespace BlowTrial.ViewModel
                 IsVaccineAdminChanged = false;
                 IsUnsuccessfulFUsChanged = false;
             }
-            if (OnSave != null)
-            {
-                OnSave(this, new EventArgs());
-            }
+            OnSave?.Invoke(this, new EventArgs());
         }
         public ICommand NewVaccineCmd { get; private set; }
         bool CanCreateNewVaccine(object param)

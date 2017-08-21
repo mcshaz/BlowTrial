@@ -18,8 +18,7 @@ namespace BlowTrial.Infrastructure.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            int returnVar;
-            if (int.TryParse((string)value, out returnVar))
+            if (int.TryParse((string)value, out int returnVar))
             {
                 return returnVar;
             }

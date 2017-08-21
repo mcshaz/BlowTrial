@@ -121,15 +121,13 @@ namespace BlowTrial.Infrastructure.Extensions
 
         public static DateTime? ToDateTime(this string val)
         {
-            DateTime temp;
-            if (DateTime.TryParse(val, out temp)) { return temp; }
+            if (DateTime.TryParse(val, out DateTime temp)) { return temp; }
             else { return null; }
         }
 
         public static int? ToInt(this string val)
         {
-            int temp;
-            if (int.TryParse(val, out temp)) { return temp; }
+            if (int.TryParse(val, out int temp)) { return temp; }
             else { return null; }
         }
     }

@@ -200,26 +200,26 @@ namespace GenericToDataString
                 if (pi.CanRead
                     && !Attribute.IsDefined(pi, typeof(NotMappedAttribute)))
                 {
-                    DataTypeOption dto;
-                    if (customTypeDictionary.TryGetValue(pi.PropertyType, out dto) || dataTypeSet.Contains(pi.PropertyType) || pi.PropertyType.IsEnum)
+                    if (customTypeDictionary.TryGetValue(pi.PropertyType, out DataTypeOption dto) || dataTypeSet.Contains(pi.PropertyType) || pi.PropertyType.IsEnum)
                     {
                         object[] atts = pi.GetCustomAttributes(false);
-                        if (dto==null)
+                        if (dto == null)
                         {
                             if (pi.PropertyType.IsEnum)
                             {
-                                propertyConverters.Add(new Func<object, string>(o => {
+                                propertyConverters.Add(new Func<object, string>(o =>
+                                {
                                     var convert = pi.GetValue(o, null);
-                                    if (convert==null) {return "";}
+                                    if (convert == null) { return ""; }
                                     return Convert.ToInt32(convert).ToString();
                                 }));
                             }
                             else if (pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                             {
-                                propertyConverters.Add(new Func<object, string>(o => 
+                                propertyConverters.Add(new Func<object, string>(o =>
                                 {
                                     object val = pi.GetValue(o, null);
-                                    if (val==null) {return "";} 
+                                    if (val == null) { return ""; }
                                     return val.ToString();
                                 }));
                             }
@@ -232,7 +232,7 @@ namespace GenericToDataString
                         {
                             propertyConverters.Add(new Func<object, string>(o => dto.GetString(pi.GetValue(o, null), atts)));
                         }
-                        DisplayAttribute attr = (DisplayAttribute)atts.FirstOrDefault(a=>a.GetType() == typeof(DisplayAttribute));
+                        DisplayAttribute attr = (DisplayAttribute)atts.FirstOrDefault(a => a.GetType() == typeof(DisplayAttribute));
                         headers.Add(new PropertyDetail { Name = pi.Name, BaseType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType, Attributes = atts });
                     }
                 }
@@ -326,8 +326,7 @@ namespace GenericToDataString
 
         public static int GetCount(IEnumerable e)
         {
-            ICollection ic = e as ICollection;
-            if (ic != null)
+            if (e is ICollection ic)
             {
                 return ic.Count;
             }

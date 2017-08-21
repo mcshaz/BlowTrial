@@ -624,8 +624,10 @@ namespace BlowTrial.Domain.Providers
             string whereRange = destDbUsedAllocations.Any()
                 ? ("and ("  + WhereRange(destDbUsedAllocations, tableName) +')')
                 : "";
-            var modifiedDateParam = new SqlCeParameter("@modified", System.Data.SqlDbType.DateTime);
-            modifiedDateParam.Value = mostRecentDestAllocation;
+            var modifiedDateParam = new SqlCeParameter("@modified", System.Data.SqlDbType.DateTime)
+            {
+                Value = mostRecentDestAllocation
+            };
             return sourceDb.SqlQuery<int>(string.Format("select {0}.Id from {0} where {0}.RecordLastModified > @modified {1}",
                 tableName, 
                 whereRange), modifiedDateParam).ToList();
@@ -690,8 +692,7 @@ namespace BlowTrial.Domain.Providers
                 UsedAllocations = usedAllocations,
                 RemainingAllocations = sourceCentreRanges.Select(sourceRng =>
                 {
-                    IntegerRange returnVar;
-                    if (usedAllocationDictionary.TryGetValue(sourceRng.Min, out returnVar))
+                    if (usedAllocationDictionary.TryGetValue(sourceRng.Min, out IntegerRange returnVar))
                     {
                         return new IntegerRange(returnVar.Max + 1, sourceRng.Max);
                     }

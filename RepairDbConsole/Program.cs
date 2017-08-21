@@ -144,9 +144,11 @@ namespace RepairDbConsole
                                 where centres1.Contains(p.CentreId)
                                 select p.Id).ToArray();
             }
-            var returnVar = new Dictionary<bool, int[]>();
-            returnVar.Add(true, participants1.Where(p => !participants2.Contains(p)).ToArray());
-            returnVar.Add(false, participants2.Where(p => !participants1.Contains(p)).ToArray());
+            var returnVar = new Dictionary<bool, int[]>
+            {
+                { true, participants1.Where(p => !participants2.Contains(p)).ToArray() },
+                { false, participants2.Where(p => !participants1.Contains(p)).ToArray() }
+            };
             return returnVar;
 
         }

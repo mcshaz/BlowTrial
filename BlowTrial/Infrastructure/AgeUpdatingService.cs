@@ -1,12 +1,9 @@
 ﻿using BlowTrial.Infrastructure.Interfaces;
-using BlowTrial.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Threading;
-using System.Collections.Specialized;
+using BlowTrial.Utilities;
 
 namespace BlowTrial.Infrastructure
 {

@@ -17,10 +17,14 @@ namespace RepairDbConsole
         }
         internal static void CompareDb(string path1, string path2)
         {
-            var connection1 = new SqlCeConnectionStringBuilder();
-            connection1.DataSource = path1;
-            var connection2 = new SqlCeConnectionStringBuilder();
-            connection2.DataSource = path2;
+            var connection1 = new SqlCeConnectionStringBuilder()
+            {
+                DataSource = path1
+            };
+            var connection2 = new SqlCeConnectionStringBuilder()
+            {
+                DataSource = path2
+            };
             connection1.Password = connection2.Password = "yu8wV6076HN";
             using (SqlCeConnection con1 = new SqlCeConnection(connection1.ToString()),
                 con2 = new SqlCeConnection(connection2.ToString()))

@@ -3,14 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace BlowTrial.Infrastructure
+namespace BlowTrial.Utilities
 {
-    public sealed class OrderedList<T> : IList<T>, ICollection<T>, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+    public class OrderedList<T> : IList<T>, ICollection<T>, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
     {
         #region Fields
         readonly List<T> _list;
         readonly IComparer<T> _comparer;
         #endregion
+
         #region Constructors
         OrderedList(List<T> list, IComparer<T> comparer)
         {
@@ -62,7 +63,6 @@ namespace BlowTrial.Infrastructure
         bool IList.IsReadOnly { get { return false; } }
         bool ICollection<T>.IsReadOnly { get { return false; } }
         #endregion
-
 
         #region Methods
         void ICollection<T>.Add(T item)
@@ -194,31 +194,102 @@ namespace BlowTrial.Infrastructure
         {
             int index = BinarySearch(item);
             if (index < 0) return -1;
-            while(_list[--index].Equals(item)){}
+            while(--index >= 0 && _list[index].Equals(item)){}
             return index+1;
         }
+
         int IList.IndexOf(object item)
         {
             return IndexOf((T)item);
         }
+        /// <summary>
+        /// Find the last index of the given item
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public int LastIndexOf(T item)
         {
             int index = BinarySearch(item);
             if (index < 0) return -1;
-            while (_list[++index].Equals(item)) { }
+            while (++index < _list.Count && _list[index].Equals(item)) { }
             return index-1;
         }
+
+        /// <summary>
+        /// Return all values within bounds specified
+        /// </summary>
+        /// <param name="min">Minimum Bound</param>
+        /// <param name="max">Maximum Bound</param>
+        /// <returns>subset of list with values within or equal to bounds specified</returns>
+        public T[] WithinRange(T min, T max)
+        {
+            if (_comparer.Compare(min,max) > 0)
+            {
+                throw new ArgumentException("min must be <= max");
+            }
+            int minSearchLength;
+            int maxIndex = _list.BinarySearch(max, _comparer);
+            if (maxIndex >= 0)
+            {
+                minSearchLength = maxIndex + 1;
+                while (++maxIndex < _list.Count && _comparer.Compare(max, _list[maxIndex]) == 0) { }
+                --maxIndex;
+            }
+            else
+            {
+                minSearchLength = ~maxIndex;
+                if (minSearchLength <= 0)
+                {
+                    return new T[0];
+                }
+                maxIndex = minSearchLength - 1;
+            }
+
+            int minIndex = _list.BinarySearch(0, minSearchLength, min, _comparer);
+            if (minIndex >= 0)
+            {
+                while (--minIndex >= 0 && _comparer.Compare(max, _list[minIndex]) == 0) { }
+                ++minIndex;
+            }
+            else
+            {
+                minIndex = ~minIndex;
+                if (minIndex > maxIndex)
+                {
+                    return new T[0];
+                }
+            }
+            int length = maxIndex - minIndex + 1;
+            var returnVar = new T[length];
+            _list.CopyTo(minIndex, returnVar, 0, length);
+            return returnVar;
+            
+        }
         #endregion
+
         #region NotImplemented
-        const string InsertExceptionMsg = "SortedList detemines position to insert automatically - use add method without an index";
+        const string _insertExceptionMsg = "SortedList detemines position to insert automatically - use add method without an index";
         void IList.Insert(int index, object item)
         {
-            throw new NotImplementedException(InsertExceptionMsg);
+            throw new NotImplementedException(_insertExceptionMsg);
         }
         void IList<T>.Insert(int index, T item)
         {
-            throw new NotImplementedException(InsertExceptionMsg);
+            throw new NotImplementedException(_insertExceptionMsg);
         }
         #endregion
+    }
+
+    public static class OrderedListExtensions
+    {
+        public static OrderedList<T> ToOrderedList<T>(this IEnumerable<T> values)
+        {
+            return new OrderedList<T>(values);
+        }
+
+        public static OrderedList<T> ToOrderedList<T>(this IEnumerable<T> values, IComparer<T> comparer)
+        {
+            return new OrderedList<T>(values, comparer);
+        }
     }
 }

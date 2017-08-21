@@ -98,8 +98,7 @@ namespace BlowTrial.ViewModel
 
         private void Logout(object parameter)
         {
-            CustomPrincipal customPrincipal = Thread.CurrentPrincipal as CustomPrincipal;
-            if (customPrincipal != null)
+            if (Thread.CurrentPrincipal is CustomPrincipal customPrincipal)
             {
                 customPrincipal.Identity = new AnonymousIdentity();
                 NotifyPropertyChanged("AuthenticatedUser");

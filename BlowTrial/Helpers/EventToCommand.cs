@@ -58,15 +58,13 @@ namespace MvvmExtraLite.Helpers
 
         static void EventChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var ele = sender as UIElement;
-            if (ele != null)
+            if (sender is UIElement ele)
                 ele.AddHandler((RoutedEvent)e.NewValue, new RoutedEventHandler(DoCommand));
         }
 
         static void DoCommand(object sender, RoutedEventArgs e)
         {
-            var ele = sender as FrameworkElement;
-            if (ele != null)
+            if (sender is FrameworkElement ele)
             {
                 var command = (ICommand)ele.GetValue(EventToCommand.CommandProperty);
                 if (command != null)

@@ -19,8 +19,10 @@ namespace BlowTrial.Infrastructure
             var backupDetails = BlowTrialDataService.GetBackupDetails(backupData);
             _repo.CloudDirectories = backupDetails.CloudDirectories;
             //use DispatcherTimer rather than dispatcher as CE does not handle multiple connections inevitable with multi threading
-            _timer = new DispatcherTimer(DispatcherPriority.Normal);
-            _timer.Interval = new TimeSpan(0, backupDetails.BackupData.BackupIntervalMinutes, 0);
+            _timer = new DispatcherTimer(DispatcherPriority.Normal)
+            {
+                Interval = new TimeSpan(0, backupDetails.BackupData.BackupIntervalMinutes, 0)
+            };
             if (backupDetails.BackupData.IsBackingUpToCloud)
             {
                 _handler = new EventHandler(Backup);

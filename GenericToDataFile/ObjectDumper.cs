@@ -66,8 +66,7 @@ namespace GenericToDataString
             }
             else
             {
-                var enumerableElement = element as IEnumerable;
-                if (enumerableElement != null)
+                if (element is IEnumerable enumerableElement)
                 {
                     foreach (object item in enumerableElement)
                     {
@@ -79,14 +78,14 @@ namespace GenericToDataString
                         }
                         else
                         {
-                            DumpElement(item);                        
+                            DumpElement(item);
                         }
                     }
                 }
                 else
                 {
                     Type objectType = element.GetType();
-                    Write("{{{0}(HashCode:{1})}}", objectType.FullName,element.GetHashCode());
+                    Write("{{{0}(HashCode:{1})}}", objectType.FullName, element.GetHashCode());
                     if (!AlreadyDumped(element))
                     {
                         _currentIndent++;
@@ -107,9 +106,9 @@ namespace GenericToDataString
                                                    ? fieldInfo.GetValue(element)
                                                    : propertyInfo.GetValue(element, null);
                             }
-                            catch(Exception e)
+                            catch (Exception e)
                             {
-                                Write("{0} failed with:{1}",memberInfo.Name,(e.GetBaseException() ?? e).Message);
+                                Write("{0} failed with:{1}", memberInfo.Name, (e.GetBaseException() ?? e).Message);
                                 continue;
                             }
 
@@ -139,8 +138,7 @@ namespace GenericToDataString
         {
             if (value == null)
                 return false;
-            int lineNo;
-            if (_hashListOfFoundElements.TryGetValue(value, out lineNo))
+            if (_hashListOfFoundElements.TryGetValue(value, out int lineNo))
             {
                 Write("(reference already dumped - line:{0})", lineNo);
                 return true;

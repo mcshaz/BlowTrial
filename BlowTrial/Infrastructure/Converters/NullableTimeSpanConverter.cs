@@ -20,8 +20,7 @@ namespace BlowTrial.Infrastructure.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            TimeSpan dt;
-            if (TimeSpan.TryParse((string)value, out dt))
+            if (TimeSpan.TryParse((string)value, out TimeSpan dt))
             {
                 return dt;
             }

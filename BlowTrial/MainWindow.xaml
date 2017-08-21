@@ -32,7 +32,7 @@
                 </MenuItem>
                 <MenuItem Header="_Help" >
                     <MenuItem Header="{Binding Path=Version, Mode=OneWay}" IsEnabled="False" />
-                    <MenuItem Header="Blowtrial App Update Website" Command="{Binding Path=OpenBrowser, Mode=OneWay}" CommandParameter="http://www.blowtrial.dabtrial.com/publish.htm">
+                    <MenuItem Header="Blowtrial App Update Website" Command="{Binding Path=OpenBrowser, Mode=OneWay}" CommandParameter="http://www.blowtrial.sim-planner.com/publish.htm">
                     </MenuItem>
                 </MenuItem>
             </Menu>

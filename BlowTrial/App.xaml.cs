@@ -15,6 +15,7 @@ using log4net.Appender;
 using System.Deployment.Application;
 using BlowTrial.Infrastructure.Extensions;
 using BlowTrial.Migrations;
+using System.Net.NetworkInformation;
 
 namespace BlowTrial
 {
@@ -208,19 +209,32 @@ namespace BlowTrial
                     // if environment.machinename not working due to duplicate names, could try
                     //var searcher = new System.Management.ManagementObjectSearcher("select * from " + Key);
                     // key = Win32_DiskDrive or Win32_Processor
-                    return Path.Combine(dir, StringExtensions.GetSafeFilename(string.Format("log_{0}.txt", Environment.MachineName)));
+                    return Path.Combine(dir, StringExtensions.GetSafeFilename($"log_{Environment.MachineName}_{Environment.UserName}_{MAC()}.txt"));
                 }
             }
             return null;
+        }
+        static string SafeFilename(string instr)
+        {
+            foreach (var c in Path.GetInvalidFileNameChars())
+            {
+                instr = instr.Replace(c, '-');
+            }
+            return instr;
+        }
+        static string MAC()
+        {
+            return (from nic in NetworkInterface.GetAllNetworkInterfaces()
+                    where nic.OperationalStatus == OperationalStatus.Up
+                    select nic.GetPhysicalAddress().ToString()).FirstOrDefault();
         }
         static bool MoveLogFileToCloud(string cloudFileName)
         {
             foreach (var appender in LogManager.GetRepository().GetAppenders())
             {
-                var fileAppender = appender as FileAppender;
-                if (fileAppender != null)
+                if (appender is FileAppender fileAppender)
                 {
-                    try 
+                    try
                     {
                         FileInfo log = new FileInfo(fileAppender.File);
                         if (!log.Exists) { return true; }

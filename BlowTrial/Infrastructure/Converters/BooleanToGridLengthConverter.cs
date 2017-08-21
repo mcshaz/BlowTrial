@@ -16,8 +16,7 @@ namespace BlowTrial.Infrastructure.Converters
 
             if (value == null || parameter == null) return Binding.DoNothing;
 
-            bool shouldCollapse;
-            Boolean.TryParse(value.ToString(), out shouldCollapse);
+            Boolean.TryParse(value.ToString(), out bool shouldCollapse);
             return shouldCollapse 
                 ? new GridLength(0) 
                 : (GridLength) parameter;

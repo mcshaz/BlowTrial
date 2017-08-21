@@ -71,9 +71,11 @@ namespace BlowTrial.Migrations
             {
                 returnVar = MoveFromAutoToExplicitMigrations(typeof(T), connectionString);
             }
-            
-            var configuration = new T();
-            configuration.TargetDatabase = new DbConnectionInfo(connectionString, providerInvariantName);
+
+            var configuration = new T()
+            {
+                TargetDatabase = new DbConnectionInfo(connectionString, providerInvariantName)
+            };
             var migrator = new DbMigrator(configuration);
             if (migrator.GetPendingMigrations().Any())
             {

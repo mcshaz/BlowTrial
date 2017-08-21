@@ -65,10 +65,7 @@ namespace BlowTrial.ViewModel
         public event EventHandler RequestClose;
         protected void OnRequestClose()
         {
-            if (RequestClose != null)
-            {
-                RequestClose(this, EventArgs.Empty);
-            }
+            RequestClose?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion // RequestClose [event]

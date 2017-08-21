@@ -317,10 +317,7 @@ namespace BlowTrial.Domain.Providers
             patient.AppVersionAtEnrollment = App.CurrentAppVersion;
 
             _dbContext.SaveChanges(true);
-            if (this.ScreenedPatientAdded != null)
-            {
-                this.ScreenedPatientAdded(this, new ScreenedPatientEventArgs(patient));
-            }
+            ScreenedPatientAdded?.Invoke(this, new ScreenedPatientEventArgs(patient));
         }
         public void AddOrUpdate(IEnumerable<StudyCentre> centres)
         {
@@ -330,10 +327,7 @@ namespace BlowTrial.Domain.Providers
             }
             _dbContext.SaveChanges(true);
             _localStudyCentreDictionary = null;
-            if (StudySiteAddOrUpdate != null)
-            {
-                StudySiteAddOrUpdate(this, EventArgs.Empty);
-            }
+            StudySiteAddOrUpdate?.Invoke(this, EventArgs.Empty);
         }
         public void AddOrUpdate(ProtocolViolation violation)
         {
@@ -357,10 +351,7 @@ namespace BlowTrial.Domain.Providers
                 ((DbContext)_dbContext).AttachAndMarkModified(violation);
             }
             _dbContext.SaveChanges(true);
-            if (this.ProtocolViolationAddOrUpdate != null)
-            {
-                this.ProtocolViolationAddOrUpdate(this, new ProtocolViolationEventArgs(violation, isToAdd?CRUD.Created:CRUD.Updated));
-            }
+            this.ProtocolViolationAddOrUpdate?.Invoke(this, new ProtocolViolationEventArgs(violation, isToAdd ? CRUD.Created : CRUD.Updated));
         }
         const string BlockRandomisationViolation = "Alteration to data which would have affected randomisation:";
         static string GenderString(bool isMale)
@@ -457,10 +448,7 @@ namespace BlowTrial.Domain.Providers
                 Engine.ForceAllocationToArm(participant, _dbContext);
             }
             _dbContext.SaveChanges(true);
-            if (this.ParticipantUpdated != null)
-            {
-                this.ParticipantUpdated(this, new ParticipantEventArgs(participant));
-            }
+            this.ParticipantUpdated?.Invoke(this, new ParticipantEventArgs(participant));
             return returnVar;
         }
         /// <summary>
@@ -757,10 +745,7 @@ namespace BlowTrial.Domain.Providers
                     }
                     catch(Exception e)
                     {
-                        if (FailedDbRestore!=null)
-                        {
-                            FailedDbRestore(this, new FailedRestoreEvent(fp.Zip.FullName, e));
-                        }
+                        FailedDbRestore?.Invoke(this, new FailedRestoreEvent(fp.Zip.FullName, e));
                     }
                 }
                 BakFileDetails newBak = new BakFileDetails();
@@ -837,8 +822,10 @@ namespace BlowTrial.Domain.Providers
                 MigrateIfRequired(f);
             }
 
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = true;
+            BackgroundWorker worker = new BackgroundWorker()
+            {
+                WorkerReportsProgress = true
+            };
             worker.DoWork += SyncronisationResult.Sync;
 
             if (UpdateProgress != null)

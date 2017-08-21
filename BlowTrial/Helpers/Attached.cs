@@ -19,8 +19,7 @@ namespace MvvmExtraLite.Helpers
 
         static void CloseDialogFlagChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var window = sender as Window;
-            if (window != null && e.NewValue != null)
+            if (sender is Window window && e.NewValue != null)
                 window.Close();
         }
     }

@@ -65,10 +65,12 @@ namespace BlowTrial.Domain.Providers
 
         public static int[] SeedVaccineIds(AllocationGroups group)
         {
-            var returnList = new List<int>(5);
-            returnList.Add(Opv.Id);
-            returnList.Add(HepB.Id);
-            switch(group)
+            var returnList = new List<int>(5)
+            {
+                Opv.Id,
+                HepB.Id
+            };
+            switch (group)
             {
                 case AllocationGroups.NotApplicable:
                     throw new ArgumentException("NotApplicatble should never be used as an allocationGroup");

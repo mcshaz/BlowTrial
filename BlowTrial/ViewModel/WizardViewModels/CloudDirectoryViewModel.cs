@@ -145,8 +145,7 @@ namespace BlowTrial.ViewModel
             BlowTrialDataService.SetBackupDetails(
                 CloudModel.CloudDirectoryItems.Select(c=>c.DirectoryPath), 
                 CloudModel.BackupIntervalMinutes.Value);
-            if (OnSave != null) { OnSave(this, new EventArgs()); }
-            CloseCmd.Execute(null);
+            OnSave?.Invoke(this, new EventArgs()); CloseCmd.Execute(null);
         }
         public EventHandler OnSave;
         public ICommand CancelCmd { get; private set; }

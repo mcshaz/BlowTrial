@@ -11,8 +11,10 @@ namespace MvvmExtraLite.Helpers
         {
             if (!pl_dict.ContainsKey(token))
             {
-                var list = new List<Action<object>>();
-                list.Add(callback);
+                var list = new List<Action<object>>
+                {
+                    callback
+                };
                 pl_dict.Add(token, list);
             }
             else

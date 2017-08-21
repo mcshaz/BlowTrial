@@ -26,8 +26,7 @@ namespace BlowTrial.Infrastructure.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            int intVal;
-            if (int.TryParse(((string)value).Replace(NumberGroupSeperator,""), out intVal))
+            if (int.TryParse(((string)value).Replace(NumberGroupSeperator, ""), out int intVal))
             {
                 return intVal;
             }

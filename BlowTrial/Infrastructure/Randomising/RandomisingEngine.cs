@@ -65,8 +65,7 @@ namespace BlowTrial.Infrastructure.Randomising
             {
                 throw new InvalidOperationException("participant.TrialArm must have a value of NotSet - use forceallocation if the allocation is pre-set");
             }
-            RandomisationStrata strata;
-            var currentBlock = Get1stUnfilledBlock(participant, out strata,context);
+            var currentBlock = Get1stUnfilledBlock(participant, out RandomisationStrata strata, context);
             BlockComponent component = (currentBlock == null)?null:currentBlock.GetComponents();
             if (currentBlock==null || context.Participants.Count(p=>p.AllocationBlockId == currentBlock.Id) == component.TotalBlockSize())
             {
@@ -165,16 +164,14 @@ namespace BlowTrial.Infrastructure.Randomising
             {
                 throw new InvalidOperationException("participant.TrialArm must be set before calling this method");
             }
-            RandomisationStrata strata;
-            var currentBlock = Get1stBlockWithSpaceForSpecificAllocation(participant, out strata, context);
-                
+            var currentBlock = Get1stBlockWithSpaceForSpecificAllocation(participant, out RandomisationStrata strata, context);
+
             if (currentBlock==null)
             {
                 currentBlock = GetDescendingBlocks(participant.Centre ?? (participant.Centre = context.StudyCentres.Find(participant.CentreId)), strata, context).FirstOrDefault();
                 if (currentBlock == null)
                 {
-                    BlockComponent component;
-                    currentBlock = CreateNewAllocationBlock(participant, strata, out component, context);
+                    currentBlock = CreateNewAllocationBlock(participant, strata, out BlockComponent component, context);
                 }
                 else
                 {
@@ -225,8 +222,7 @@ namespace BlowTrial.Infrastructure.Randomising
             var returnVar = new List<KeyValuePair<AllocationGroups, int>>(allBlocks.Count);
             foreach (var a in allBlocks)
             {
-                int v;
-                if (a.Value.Ratios.TryGetValue(arm, out v))
+                if (a.Value.Ratios.TryGetValue(arm, out int v))
                 {
                     returnVar.Add(new KeyValuePair<AllocationGroups, int>(a.Key, v));
                 }
@@ -336,9 +332,8 @@ namespace BlowTrial.Infrastructure.Randomising
 
             foreach (var g in ratios)
             {
-                int usedInGroup;
                 int remainingAllocationsInGroup = g.Value;
-                if (usedAllocations.TryGetValue(g.Key, out usedInGroup))
+                if (usedAllocations.TryGetValue(g.Key, out int usedInGroup))
                 {
                     remainingAllocationsInGroup -= usedInGroup;
                 }

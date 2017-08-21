@@ -47,8 +47,7 @@ namespace BlowTrialUnitTests
         {
             get
             {
-                int returnVar;
-                _counts.TryGetValue(val, out returnVar);
+                _counts.TryGetValue(val, out int returnVar);
                 return returnVar;
             }
             set

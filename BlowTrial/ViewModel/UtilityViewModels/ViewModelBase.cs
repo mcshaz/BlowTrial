@@ -77,8 +77,10 @@ namespace BlowTrial.ViewModel
 
         protected static IList<KeyDisplayNamePair<T?>> NullableEnumToListOptions<T>() where T : struct, IConvertible
         {
-            List<KeyDisplayNamePair<T?>> returnVar = new List<KeyDisplayNamePair<T?>>();
-            returnVar.Add(new KeyDisplayNamePair<T?>((T?)null, Strings.DropDownList_PleaseSelect));
+            List<KeyDisplayNamePair<T?>> returnVar = new List<KeyDisplayNamePair<T?>>
+            {
+                new KeyDisplayNamePair<T?>((T?)null, Strings.DropDownList_PleaseSelect)
+            };
             returnVar.AddRange(EnumToListOptions((T?)null).Select(o=>new KeyDisplayNamePair<T?>((T?)o.Key,o.Value)));
             return returnVar;
         }

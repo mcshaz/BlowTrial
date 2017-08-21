@@ -39,9 +39,8 @@ namespace BlowTrial.Helpers
 
         private static Expression StripNullable(Expression e)
         {
-            var unaryExpression = e as UnaryExpression;
 
-            if (unaryExpression != null && e.NodeType == ExpressionType.Convert
+            if (e is UnaryExpression unaryExpression && e.NodeType == ExpressionType.Convert
                 && unaryExpression.Operand.Type == Nullable.GetUnderlyingType(e.Type))
             {
                 return unaryExpression.Operand;

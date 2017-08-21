@@ -31,10 +31,7 @@ namespace CloudFileTransfer
                             Thread.Sleep(millisecondsBetweenChecks);
                         }
 
-                        if (onComplete != null)
-                        {
-                            onComplete();
-                        }
+                        onComplete?.Invoke();
                     }
                 };
             dt.Start();

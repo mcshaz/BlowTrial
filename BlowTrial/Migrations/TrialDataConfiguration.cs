@@ -146,8 +146,7 @@ namespace BlowTrial.Migrations.TrialData
 
                     if (g.Any(p => p.WasEnvelopeRandomised))
                     {
-                        RandomisationStrata definedStrata;
-                        (blockNumberLookup ?? (blockNumberLookup = EnvelopeDetails.GetStrataByBlockNumber())).TryGetValue(g.Key.BlockNumber.Value, out definedStrata);
+                        (blockNumberLookup ?? (blockNumberLookup = EnvelopeDetails.GetStrataByBlockNumber())).TryGetValue(g.Key.BlockNumber.Value, out RandomisationStrata definedStrata);
                         int strataVal = (int)definedStrata;
                         var correctlyAssigned = forReallocation.FirstOrDefault(r=>r.Key == strataVal);
                         if (correctlyAssigned==null)

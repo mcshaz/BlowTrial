@@ -13,8 +13,7 @@ namespace BlowTrialUnitTests
     {
         public static void AreEqual(string expected, double actual)
         {
-            double exp;
-            if (!double.TryParse(expected, out exp))
+            if (!double.TryParse(expected, out double exp))
             {
                 throw new ArgumentException("Expected must be able to be parsed as a double");
             }

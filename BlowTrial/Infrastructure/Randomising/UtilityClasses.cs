@@ -59,31 +59,45 @@ namespace BlowTrial.Infrastructure.Randomising
             if (_allBlocks == null)
             {
                 var componentDict = new Dictionary<AllocationGroups,BlockComponent>(3);
-                var ratios = new Dictionary<RandomisationArm, int>(3);
-                ratios.Add(RandomisationArm.Control, 1);
-                ratios.Add(RandomisationArm.RussianBCG, 1);
+                var ratios = new Dictionary<RandomisationArm, int>(3)
+                {
+                    { RandomisationArm.Control, 1 },
+                    { RandomisationArm.RussianBCG, 1 }
+                };
                 componentDict.Add(AllocationGroups.India2Arm, new BlockComponent(2, ratios));
-                ratios = new Dictionary<RandomisationArm, int>(ratios);
-                ratios.Add(RandomisationArm.DanishBcg, 1);
+                ratios = new Dictionary<RandomisationArm, int>(ratios)
+                {
+                    { RandomisationArm.DanishBcg, 1 }
+                };
                 componentDict.Add(AllocationGroups.India3ArmBalanced, new BlockComponent(2, ratios));
-                ratios = new Dictionary<RandomisationArm, int>(ratios);
-                ratios[RandomisationArm.DanishBcg] = 2;
+                ratios = new Dictionary<RandomisationArm, int>(ratios)
+                {
+                    [RandomisationArm.DanishBcg] = 2
+                };
                 componentDict.Add(AllocationGroups.India3ArmUnbalanced, new BlockComponent(1, ratios));
-                ratios = new Dictionary<RandomisationArm, int>(2);
-                ratios.Add(RandomisationArm.Control, 1);
-                ratios.Add(RandomisationArm.MoreauBcg, 1);
+                ratios = new Dictionary<RandomisationArm, int>(2)
+                {
+                    { RandomisationArm.Control, 1 },
+                    { RandomisationArm.MoreauBcg, 1 }
+                };
                 componentDict.Add(AllocationGroups.Brazil2Arm, new BlockComponent(2, ratios));
-                ratios = new Dictionary<RandomisationArm, int>(2);
-                ratios.Add(RandomisationArm.Control, 1);
-                ratios.Add(RandomisationArm.DanishBcg, 1);
+                ratios = new Dictionary<RandomisationArm, int>(2)
+                {
+                    { RandomisationArm.Control, 1 },
+                    { RandomisationArm.DanishBcg, 1 }
+                };
                 componentDict.Add(AllocationGroups.Danish2Arm, new BlockComponent(2, ratios));
-                ratios = new Dictionary<RandomisationArm, int>(2);
-                ratios.Add(RandomisationArm.Control, 1);
-                ratios.Add(RandomisationArm.JapanBcg, 1);
+                ratios = new Dictionary<RandomisationArm, int>(2)
+                {
+                    { RandomisationArm.Control, 1 },
+                    { RandomisationArm.JapanBcg, 1 }
+                };
                 componentDict.Add(AllocationGroups.Japan2Arm, new BlockComponent(2, ratios));
-                ratios = new Dictionary<RandomisationArm, int>(2);
-                ratios.Add(RandomisationArm.Control, 1);
-                ratios.Add(RandomisationArm.GreenSignalBcg, 1);
+                ratios = new Dictionary<RandomisationArm, int>(2)
+                {
+                    { RandomisationArm.Control, 1 },
+                    { RandomisationArm.GreenSignalBcg, 1 }
+                };
                 componentDict.Add(AllocationGroups.GreenSignal2Arm, new BlockComponent(2, ratios));
                 _allBlocks = new ReadOnlyDictionary<AllocationGroups,BlockComponent>(componentDict);
             }

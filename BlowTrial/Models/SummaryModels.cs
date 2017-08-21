@@ -1,11 +1,8 @@
 ﻿using BlowTrial.Domain.Outcomes;
-using BlowTrial.Domain.Tables;
-using BlowTrial.Infrastructure;
-using BlowTrial.Infrastructure.Randomising;
+using BlowTrial.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace BlowTrial.Models
 {

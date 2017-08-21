@@ -43,7 +43,7 @@ namespace BlowTrial.ViewModel
         public MainWindowViewModel() : this(new Repository(()=>new TrialDataContext())) { }
         public MainWindowViewModel(IRepository repository) : base(repository)
         {
-            _repository.UpdateProgress += worker_ProgressChanged;
+            _repository.UpdateProgress += Worker_ProgressChanged;
             _repository.DatabaseUpdating += _repository_DatabaseUpdating;
             //set properties
             Version = App.CurrentClickOnceVersion ?? ("Development Version: " + App.CurrentAppVersion.ToVersionString());
@@ -53,7 +53,7 @@ namespace BlowTrial.ViewModel
             ShowCloudDirectoryCmd = new RelayCommand(param => ShowCloudDirectory(), param => IsAuthorised);
             ShowSiteSettingsCmd = new RelayCommand(param => ShowSiteSettings(), param => _backupService != null /* && _backupService.IsToBackup */);
             LogoutCmd = new RelayCommand(param => Logout(), Param => IsAuthorised);
-            ShowCreateCsvCmd = new RelayCommand(param => showCreateCsv(), param => IsAuthorised);
+            ShowCreateCsvCmd = new RelayCommand(param => ShowCreateCsv(), param => IsAuthorised);
             CreateNewUserCmd = new RelayCommand(param => ShowCreateNewUser(), param=>IsAuthorised);
             RequestReverseUpdateCmd = new RelayCommand(param => ShowRequestReverseUpdate(), param => _backupService != null && !_backupService.IsToBackup);
             OpenBrowser = new RelayCommand(param => Process.Start(new ProcessStartInfo((string)param)));
@@ -285,7 +285,8 @@ namespace BlowTrial.ViewModel
         }
         bool IsReplaceDbRequest()
         {
-            return _transferLog != null && _transferLog.UpdateIsRequested(_repository.LocalStudyCentres.First().DuplicateIdCheck);
+            var centre = _repository.LocalStudyCentres.FirstOrDefault();
+            return _transferLog != null && centre != null && _transferLog.UpdateIsRequested(centre.DuplicateIdCheck);
         }
         void ReplaceDb()
         {
@@ -321,8 +322,10 @@ namespace BlowTrial.ViewModel
         void ShowCreateNewUser()
         {
             IsAuthorised = false;
-            var allParticipantsVM = new CreateNewUserViewModel(new MembershipContext());
-            allParticipantsVM.ChangeToThisUserOnSave = GetCurrentPrincipal().Identity.Name == "Admin";
+            var allParticipantsVM = new CreateNewUserViewModel(new MembershipContext())
+            {
+                ChangeToThisUserOnSave = GetCurrentPrincipal().Identity.Name == "Admin"
+            };
             this.Workspaces.Add(allParticipantsVM);
             this.SetActiveWorkspace(allParticipantsVM);
         }
@@ -352,17 +355,17 @@ namespace BlowTrial.ViewModel
                 this.Workspaces.Add(allParticipantsVM);
             }
             this.SetActiveWorkspace(allParticipantsVM);
-            allParticipantsVM.PropertyChanged += allParticipantsVM_PropertyChanged;
+            allParticipantsVM.PropertyChanged += AllParticipantsVM_PropertyChanged;
             EventHandler onRequestClose = null;
             allParticipantsVM.RequestClose += onRequestClose = (o, e) =>
                 {
-                    allParticipantsVM.PropertyChanged -= allParticipantsVM_PropertyChanged;
+                    allParticipantsVM.PropertyChanged -= AllParticipantsVM_PropertyChanged;
                     allParticipantsVM.RequestClose -= onRequestClose;
                     onRequestClose = null;
                 };
         }
 
-        void allParticipantsVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        void AllParticipantsVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "DisplayName")
             {
@@ -403,7 +406,7 @@ namespace BlowTrial.ViewModel
             this.SetActiveWorkspace(violVM);
         }
 
-        void showCreateCsv()
+        void ShowCreateCsv()
         {
             var csvVM = (CreateCsvViewModel)Workspaces.FirstOrDefault(w => w is CreateCsvViewModel);
             if (csvVM == null)
@@ -506,7 +509,7 @@ namespace BlowTrial.ViewModel
                 NotifyPropertyChanged("Progress");
             }
         }
-        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             Progress = e.ProgressPercentage;
         }

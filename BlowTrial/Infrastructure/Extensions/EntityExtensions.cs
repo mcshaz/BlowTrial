@@ -47,8 +47,7 @@ namespace BlowTrial.Infrastructure.Extensions
 
             foreach (ISharedRecord v in newVals)
             {
-                ISharedRecord existingEntity;
-                if (getVal(v.Id, out existingEntity))
+                if (getVal(v.Id, out ISharedRecord existingEntity))
                 {
                     var ent = context.Entry(existingEntity);
                     ent.CurrentValues.SetValues(v);

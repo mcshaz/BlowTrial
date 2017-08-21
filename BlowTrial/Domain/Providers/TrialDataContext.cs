@@ -81,8 +81,7 @@ namespace BlowTrial.Domain.Providers
                 foreach (DbEntityEntry ent in this.ChangeTracker.Entries())
                 {
                     {
-                        var sr = ent.Entity as ISharedRecord;
-                        if (sr != null)
+                        if (ent.Entity is ISharedRecord sr)
                         {
                             if (ent.State == EntityState.Added || ent.State == EntityState.Modified)
                             {

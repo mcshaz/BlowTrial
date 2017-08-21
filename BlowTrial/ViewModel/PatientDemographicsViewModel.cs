@@ -397,8 +397,10 @@ namespace BlowTrial.ViewModel
                 {
                     if (age.Ticks >= 0)
                     {
-                        var timer = new DispatcherTimer(DispatcherPriority.Normal);
-                        timer.Interval = new TimeSpan(_patient.DateTimeBirth.Value.Ticks + PatientDemographicsModel.MinEnrolAgeTicks - now.Ticks);
+                        var timer = new DispatcherTimer(DispatcherPriority.Normal)
+                        {
+                            Interval = new TimeSpan(_patient.DateTimeBirth.Value.Ticks + PatientDemographicsModel.MinEnrolAgeTicks - now.Ticks)
+                        };
                         timer.Tick += timer_Tick;
                         timer.Start();
                         return true;

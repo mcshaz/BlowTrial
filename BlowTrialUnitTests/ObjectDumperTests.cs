@@ -31,12 +31,16 @@ namespace BlowTrialUnitTests
             Console.Write(GenericToDataString.ObjectDumper.Dump(vas));
             vas = new VaccineAdministered[] { new VaccineAdministered { Id = 1, ParticipantId = 3 } };
             Console.Write(GenericToDataString.ObjectDumper.Dump(vas));
-            var c = new Dictionary<int, string>();
-            c.Add(1, "one");
-            c.Add(2, "two");
+            var c = new Dictionary<int, string>
+            {
+                { 1, "one" },
+                { 2, "two" }
+            };
             Console.Write(GenericToDataString.ObjectDumper.Dump(c));
-            var d = new Dictionary<int,VaccineAdministeredModel>();
-            d.Add(1, va);
+            var d = new Dictionary<int, VaccineAdministeredModel>
+            {
+                { 1, va }
+            };
             Console.Write(GenericToDataString.ObjectDumper.Dump(d));
         }
     }

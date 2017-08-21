@@ -68,8 +68,7 @@ namespace BlowTrialUnitTests
                     if (part.TrialArm != RandomisationArm.NotSet)
                     {
 
-                        RandomisationStrata strata;
-                        var nextBlock = Engine.Get1stBlockWithSpaceForSpecificAllocation(part, out strata, context);
+                        var nextBlock = Engine.Get1stBlockWithSpaceForSpecificAllocation(part, out RandomisationStrata strata, context);
                         if (nextBlock == null)
                         {
                             Console.WriteLine("no spare allocations found for male:{0}, wt:{1}, arm:{2}",
@@ -175,8 +174,7 @@ namespace BlowTrialUnitTests
                 {
                     part.TrialArm = RandomisationArm.NotSet;
 
-                    RandomisationStrata strata;
-                    var nextBlock = Engine.Get1stUnfilledBlock(part, out strata, context);
+                    var nextBlock = Engine.Get1stUnfilledBlock(part, out RandomisationStrata strata, context);
                     if (nextBlock == null)
                     {
                         Console.WriteLine("no spare allocations found for male:{0}, wt:{1}",

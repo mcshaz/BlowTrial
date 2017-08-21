@@ -84,9 +84,10 @@ namespace BlowTrial.ViewModel
                                                            capacity:partCount);
             _ageUpdater.OnAgeIncrement += OnNewAge;
 
-            AllParticipants = new ListCollectionView(participantVMs);
-            AllParticipants.CustomSort = new ParticipantIdSortDesc();
-
+            AllParticipants = new ListCollectionView(participantVMs)
+            {
+                CustomSort = new ParticipantIdSortDesc()
+            };
             _groupByDataRequired = true;
             _selectedDataRequired = (DataRequiredOption[])Enum.GetValues(typeof(DataRequiredOption));
             _selectedCentres = _repository.GetCentresRequiringData();
@@ -196,8 +197,7 @@ namespace BlowTrial.ViewModel
         void SortParticipants(object param)
         {
             string propertyName = (string)param;
-            bool isAscendingCol;
-            if (_isAscending.TryGetValue(propertyName, out isAscendingCol))
+            if (_isAscending.TryGetValue(propertyName, out bool isAscendingCol))
             {
                 isAscendingCol = _isAscending[propertyName] = !isAscendingCol;
             }
@@ -206,7 +206,7 @@ namespace BlowTrial.ViewModel
                 isAscendingCol = true;
                 _isAscending.Add(propertyName, true);
             }
-            switch(propertyName)
+            switch (propertyName)
             {
                 case "Id":
                     AllParticipants.CustomSort = (isAscendingCol)?(IComparer)new ParticipantIdSorter(): new ParticipantIdSortDesc();
@@ -250,8 +250,10 @@ namespace BlowTrial.ViewModel
                 if (_groupByDataRequired)
                 {
                     var vm = new SelectDataRequiredOptionsViewModel(_repository, _selectedDataRequired, _selectedCentres);
-                    var win = new SelectDataRequiredOptionsView();
-                    win.DataContext = vm;
+                    var win = new SelectDataRequiredOptionsView()
+                    {
+                        DataContext = vm
+                    };
                     EventHandler handler = null;
                     handler = delegate
                     {
@@ -322,8 +324,7 @@ namespace BlowTrial.ViewModel
             vm.HospitalIdentifier = p.HospitalIdentifier;
             vm.RegisteredAt = p.RegisteredAt;
 
-            var sp = vm as ParticipantProgressViewModel;
-            if (sp != null)
+            if (vm is ParticipantProgressViewModel sp)
             {
                 sp.PhoneNumber = p.PhoneNumber;
                 sp.MothersName = p.MothersName;

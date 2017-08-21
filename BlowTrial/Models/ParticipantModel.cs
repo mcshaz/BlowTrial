@@ -106,7 +106,9 @@ namespace BlowTrial.Models
                         return Strings.Vaccine_RussianBcg;
                     case RandomisationArm.Control:
                         return Strings.ParticipantUpdateVM_ControlArm;
-
+                    case RandomisationArm.GreenSignalBcg:
+                        return Strings.Vaccine_GreenSignalBcg;
+                    
                 }
                 throw new InvalidEnumArgumentException(arm.ToString());
         }
@@ -302,9 +304,7 @@ namespace BlowTrial.Models
         {
             get
             {
-                return (VaccineModelsAdministered==null)
-                    ?null
-                    :VaccineModelsAdministered.Select(v => new VaccineAdministered { VaccineId = v.VaccineId, VaccineGiven = v.VaccineGiven }).ToList();
+                return VaccineModelsAdministered?.Select(v => new VaccineAdministered { VaccineId = v.VaccineId, VaccineGiven = v.VaccineGiven }).ToList();
             }
             set
             {
@@ -614,12 +614,12 @@ namespace BlowTrial.Models
                 if (weightChange < 0.8 || 
                     weightChange > 1.6 ||
                     (weightCat == RandomisationStrata.MidWeightMale && weightChange >1.5) ||
-                    (weightCat == RandomisationStrata.SmallestWeightMale && weightChange > 1.4) ||
+                    (weightCat == RandomisationStrata.SmallestWeightMale && weightChange > 1.5) ||
                     (daysOldAtWeight.HasValue && 
                     (daysOldAtWeight<21 && (weightChange > 1.4 ||
-                    (weightCat == RandomisationStrata.MidWeightMale && weightChange > 1.35) ||
-                    (weightCat == RandomisationStrata.SmallestWeightMale && weightChange > 1.3))) ||
-                    (daysOldAtWeight<14 && weightChange >1.25)))
+                    (weightCat == RandomisationStrata.MidWeightMale && weightChange > 1.4) ||
+                    (weightCat == RandomisationStrata.SmallestWeightMale && weightChange > 1.4))) ||
+                    (daysOldAtWeight<14 && weightChange >1.3)))
                 {
                     return string.Format(Strings.ParticipantModel_Error_LastWeightChange, AdmissionWeight);
                 }
