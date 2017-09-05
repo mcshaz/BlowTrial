@@ -8,5 +8,6 @@ namespace BlowTrial.View
             InitializeComponent();
         }
 
+        
     }
 }

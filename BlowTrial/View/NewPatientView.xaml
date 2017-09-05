@@ -18,7 +18,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
-        <vw:PatientDemographicsView DataContext="{Binding Path=.}" Grid.Row="0" />
+        <vw:PatientDemographicsView DataContext="{Binding}" Grid.Row="0" />
         <Line Grid.Row="1" Grid.RowSpan="2" 
             VerticalAlignment="Top" Stroke="Gray" StrokeThickness="1"
             X2="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" />

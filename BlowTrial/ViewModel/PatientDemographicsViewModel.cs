@@ -34,22 +34,17 @@ namespace BlowTrial.ViewModel
         public PatientDemographicsViewModel(IRepository repository, PatientDemographicsModel patient) : base(repository)
         {
             base.DisplayName = Strings.NewPatientVM_DisplayName;
-            if (patient == null)
-            {
-                throw new ArgumentNullException("patient");
-            }
-
-            _patient = patient;
+            _patient = patient ?? throw new ArgumentNullException("patient");
             HasSiblingEnrolled = patient.MultipleSiblingId.HasValue;
             RandomiseCmd = new RelayCommand(Randomise, CanRandomise);
             ClearAllCmd = new RelayCommand(ClearAllFields, CanClear);
             AddScreenCmd = new RelayCommand(AddScreen, CanScreen);
             CloseWindowCmd = new RelayCommand(param=>OnRequestClose(), param=>true);
             UpdateDemographicsCmd = new RelayCommand(UpdateDemographics, obj => WasValidOnLastNotify);
-            _repository.StudySiteAddOrUpdate += repository_StudySiteAddOrUpdate;
+            _repository.StudySiteAddOrUpdate += Repository_StudySiteAddOrUpdate;
         }
 
-        void repository_StudySiteAddOrUpdate(object sender, EventArgs e)
+        void Repository_StudySiteAddOrUpdate(object sender, EventArgs e)
         {
             _studyCentreOptions = null;
             NotifyPropertyChanged("StudyCentreOptions");
@@ -100,11 +95,21 @@ namespace BlowTrial.ViewModel
         }
         public string HospitalIdentifierMask
         {
-            get { return (StudyCentre==null)?string.Empty:StudyCentre.HospitalIdentifierMask; }
+            //this is added in 2017 as the current WPF toolkit does not like empty strings for this value
+            get {
+                //return StudyCentre?.HospitalIdentifierMask ?? string.Empty;
+                //if (StudyCentreOptions == null) { return string.Empty; }
+                return (StudyCentre ?? StudyCentreOptions.Select(o=>o.Key).First(k=>k!=null)).HospitalIdentifierMask;
+            }
         }
         public string PhoneMask
         {
-            get { return (StudyCentre==null)?string.Empty:StudyCentre.PhoneMask; }
+            //see comment above
+            get {
+                //return StudyCentre?.PhoneMask ?? string.Empty;
+                //if (StudyCentreOptions == null) { return string.Empty; }
+                return (StudyCentre ?? StudyCentreOptions.Select(o => o.Key).First(k => k != null)).PhoneMask;
+            }
         }
         static readonly Brush _defaultBackground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
         static readonly Brush _defaultText = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
@@ -401,7 +406,7 @@ namespace BlowTrial.ViewModel
                         {
                             Interval = new TimeSpan(_patient.DateTimeBirth.Value.Ticks + PatientDemographicsModel.MinEnrolAgeTicks - now.Ticks)
                         };
-                        timer.Tick += timer_Tick;
+                        timer.Tick += Timer_Tick;
                         timer.Start();
                         return true;
                     }
@@ -410,7 +415,7 @@ namespace BlowTrial.ViewModel
             }
         }
 
-        void timer_Tick(object sender, EventArgs e)
+        void Timer_Tick(object sender, EventArgs e)
         {
             ((DispatcherTimer)sender).Stop();
             NotifyPropertyChanged("IsYoungerThanMinEnrolTime");

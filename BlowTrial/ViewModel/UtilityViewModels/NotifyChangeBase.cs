@@ -61,7 +61,7 @@ namespace BlowTrial.ViewModel
             {
                 if (PropertyChanged != null) //on the inside of the loop in case a handler detaches itself
                 {
-                    this.VerifyPropertyName(propertyName);
+                    VerifyPropertyName(propertyName);
                     var e = new PropertyChangedEventArgs(propertyName);
                     PropertyChanged(this, e);
                 }

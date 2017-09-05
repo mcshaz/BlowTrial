@@ -132,8 +132,9 @@
                   HorizontalAlignment="Right"
                   Target="{Binding ElementName=hospitalIdentifierTxt}" 
                   />
+            <!--{Binding Path=HospitalIdentifierMask, Mode=OneWay}-->
             <wpfToolkit:MaskedTextBox
-                  Mask="{Binding Path=HospitalIdentifierMask, Mode=OneWay}"
+                  Mask=">L000000"
                   IncludeLiteralsInValue="True"
                   IncludePromptInValue="False"
                   x:Name="hospitalIdentifierTxt"
@@ -469,10 +470,11 @@
                 <CheckBox Content="Has No Phone" IsChecked="{Binding Path=HasNoPhone, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"
                           Style="{StaticResource participantDemographicsCB}"/>
                 <TextBlock HorizontalAlignment="Center">OR (enter value)</TextBlock>
+                <!--{Binding Path=PhoneMask}-->
                 <wpfToolkit:MaskedTextBox
                       Style="{StaticResource phoneNumberActive}"
                       x:Name="phoneNumberTxt"
-                      Mask="{Binding Path=PhoneMask}"
+                      Mask="(999) 9000-0000"
                       IncludeLiteralsInValue="False"
                       IncludePromptInValue="False"
                       ValueDataType="{x:Type s:String}"
