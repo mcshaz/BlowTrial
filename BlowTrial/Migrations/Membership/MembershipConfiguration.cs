@@ -1,10 +1,7 @@
 namespace BlowTrial.Migrations.Membership
 {
-    using BlowTrial.Domain.Providers;
     using BlowTrial.Domain.Tables;
-    using BlowTrial.Properties;
     using System;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 

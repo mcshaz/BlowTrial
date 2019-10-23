@@ -419,8 +419,7 @@ namespace BlowTrial.ViewModel
         #region Events
         void OnNewAge(object sender, AgeIncrementingEventArgs e)
         {
-            var participant = e.Participant as ParticipantListItemViewModel;
-            if (participant==null)
+            if (!(e.Participant is ParticipantListItemViewModel participant))
             {
                 participant = ((List<ParticipantListItemViewModel>)AllParticipants.SourceCollection).First(p => p.Id == e.Participant.Id);
                 participant.AgeDays = e.Participant.AgeDays;

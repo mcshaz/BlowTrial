@@ -24,12 +24,15 @@ namespace BlowTrial.Migrations
                 conn.Open();
                 foreach (string q in cmds)
                 {
-                    SqlCeCommand cmd = new SqlCeCommand(q, conn);
-                    returnVar += cmd.ExecuteNonQuery();
+                    using (SqlCeCommand cmd = new SqlCeCommand(q, conn))
+                    {
+                        returnVar += cmd.ExecuteNonQuery();
+                    }
                 }
             }
             return returnVar;
         }
+       /*
         static int MoveTrialDataToExplicitMigrations(string connectionString)
         {
             return ApplySqlCeCommands(connectionString,
@@ -40,6 +43,7 @@ namespace BlowTrial.Migrations
             return ApplySqlCeCommands(connectionString,
                 "UPDATE [__MigrationHistory] SET [MigrationId] = '201403062252244_InitialMembership',[ContextKey] = 'BlowTrial.Migrations.Membership.MembershipConfiguration' WHERE ContextKey = 'BlowTrial.Migrations.MembershipConfiguration';");
         }
+        */
         static int RepairSqlMigrationHashError(string connectionString)
         {
             return ApplySqlCeCommands(connectionString,
@@ -126,7 +130,7 @@ namespace BlowTrial.Migrations
              * */
             return false;
         }
-
+        /*
         //namespacing changed to facilitate migrations - this returns to prior namespacing
         static string GetConfigurationKey(Type T)
         {
@@ -140,5 +144,6 @@ namespace BlowTrial.Migrations
             }
             return T.ToString();
         }
+        */
     }
 }

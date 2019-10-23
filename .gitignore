@@ -157,3 +157,13 @@ $RECYCLE.BIN/
 
 packages/
 !packages/repositories.config
+.vs/BlowTrial/DesignTimeBuild/.dtbcache
+.vs/BlowTrial/v15/Server/sqlite3/db.lock
+.vs/BlowTrial/v15/Server/sqlite3/storage.ide
+.vs/BlowTrial/v15/Server/sqlite3/storage.ide-shm
+.vs/BlowTrial/v15/Server/sqlite3/storage.ide-wal
+.vs/BlowTrial/v16/Server/sqlite3/db.lock
+.vs/BlowTrial/v16/Server/sqlite3/storage.ide
+.vs/BlowTrial/v16/Server/sqlite3/storage.ide-shm
+.vs/BlowTrial/v16/Server/sqlite3/storage.ide-wal
+.vs/BlowTrial/v16/TestStore/0/testlog.manifest

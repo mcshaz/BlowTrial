@@ -134,11 +134,13 @@ namespace BlowTrial.Infrastructure
         #endregion
 
         #region methods
+        /*
         void SetAllAges()
         {
             DateTime now = DateTime.Now;
             _participants.ForEach(p=>p.Value.AgeDays = (now - p.Value.DateTimeBirth).Days);
         }
+        */
         void StartTimer(TimeSpan interval)
         {
             _timer.Interval = interval;

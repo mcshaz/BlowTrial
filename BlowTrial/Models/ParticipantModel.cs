@@ -128,7 +128,7 @@ namespace BlowTrial.Models
                     : Strings.NewPatient_Gender_Female;
             }
         }
-
+        /*
         string ValidateName()
         {
             if (string.IsNullOrWhiteSpace(Name))
@@ -137,7 +137,7 @@ namespace BlowTrial.Models
             }
             return null;
         }
-
+        */
         public DataRequiredOption GetDataRequired()
         {
             return DataRequiredFunc(this);
@@ -273,8 +273,8 @@ namespace BlowTrial.Models
         #endregion // Constructors
 
         #region Fields
-        const double TicksPerWeek = TimeSpan.TicksPerDay * 7;
-        TimeSpan _cgabirth;
+        // const double TicksPerWeek = TimeSpan.TicksPerDay * 7;
+        // TimeSpan _cgabirth;
         
         #endregion //Fields
 
@@ -362,18 +362,19 @@ namespace BlowTrial.Models
         {
             return GetAge(now).Add(CgaBirth);
         }
-        */
+        
         TimeSpan CgaBirth
         {
             get
             {
-                if (_cgabirth == default(TimeSpan))
+                if (_cgabirth == default)
                 {
                     _cgabirth = new TimeSpan((long)(TicksPerWeek * GestAgeBirth));
                 }
                 return _cgabirth;
             }
         }
+        */
 
         #endregion //Properties
 
@@ -561,6 +562,7 @@ namespace BlowTrial.Models
             }
             return null;
         }
+        /*
         string ValidateBcgPapuleAtDischarge()
         {
             if (BcgPapuleAtDischarge.HasValue && OutcomeAt28Days == OutcomeAt28DaysOption.InpatientAt28Days)
@@ -569,6 +571,7 @@ namespace BlowTrial.Models
             }
             return null;
         }
+        */
         string ValidateOtherCauseOfDeathDetail()
         {
             if (CauseOfDeath==CauseOfDeathOption.Other && string.IsNullOrWhiteSpace(OtherCauseOfDeathDetail))
@@ -732,10 +735,12 @@ namespace BlowTrial.Models
         #endregion //validation
 
         #region Methods
+        /*
         static double RateOfChange(double startingValue,double finishingValue ,double timeUnitsElapsed)
         {
             return Math.Pow(2, Math.Log(finishingValue / startingValue, 2) / timeUnitsElapsed); // work in log 2 as ? performance advantage for binary systems
         }
+        */
         public bool HasBcgRecorded()
         {
             return VaccineModelsAdministered.Any(vm => vm.VaccineGiven.IsBcg);

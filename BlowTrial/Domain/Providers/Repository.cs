@@ -402,7 +402,7 @@ namespace BlowTrial.Domain.Providers
                         admissionWeight,
                         GenderString(isMale))
                 });
-                Engine.RemoveAllocationFromArm(participant, _dbContext);
+                Engine.RemoveAllocationFromArm(participant);
                 returnVar |= UpdateParticipantViolationType.BlockCriteriaChanged;
             }
             if (admissionWeight > Engine.MaxBirthWeightGrams)
@@ -716,10 +716,10 @@ namespace BlowTrial.Domain.Providers
             string copiedFileName = bakFileName.Insert(dotPos, uniqueFileNameSuffix);
             File.Copy(bakFileName, copiedFileName, true);
 
-            ThreadStart work = delegate
+            void work()
             {
                 BackupHelper.ZipVerifyAndPutInCloudDir(copiedFileName, cloudDir);
-            };
+            }
             new Thread(work).Start();
             _dbContext = _createContext.Invoke();
         }
@@ -822,10 +822,12 @@ namespace BlowTrial.Domain.Providers
                 MigrateIfRequired(f);
             }
 
+#pragma warning disable IDE0067 // Dispose objects before losing scope
             BackgroundWorker worker = new BackgroundWorker()
             {
                 WorkerReportsProgress = true
             };
+#pragma warning restore IDE0067 // Dispose objects before losing scope
             worker.DoWork += SyncronisationResult.Sync;
 
             if (UpdateProgress != null)
@@ -853,12 +855,13 @@ namespace BlowTrial.Domain.Providers
                 _dbContext.Dispose();
                 SyncronisationResult.RepairDb(fn);
                 _dbContext = _createContext.Invoke();
+                worker.Dispose();
             };
             worker.RunWorkerAsync(new SyncronisationResult.SyncArgs
                 {   DestContext = _dbContext,
                     DbFileNames = bakupFilePaths.ToList(),
                     UpdateResults = isForUpdate
-            });
+                });
         }
 
         private void WhenSyncronisationResultsAvailable(object sender, RunWorkerCompletedEventArgs e)

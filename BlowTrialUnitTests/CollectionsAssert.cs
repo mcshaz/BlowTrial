@@ -30,8 +30,10 @@ namespace BlowTrialUnitTests
     }
     static class MyCollectionAssert
     {
+        /*
         public static void AreEquivalent(BlockComponent expected, Counter<RandomisationArm> actual)
         { }
+        */
         public static void AreEquivalent<T>(IDictionary<T,int> expected, Counter<T> actual)
         {
             const string assertFailTemplate = "CollectionAssert.AreEquivalent Failed on element {0}: should have {1} occurences, but has {2}";

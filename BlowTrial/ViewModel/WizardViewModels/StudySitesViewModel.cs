@@ -19,8 +19,8 @@ namespace BlowTrial.ViewModel
     public sealed class StudySitesViewModel : WizardPageViewModel, IDataErrorInfo
     {
         #region fields
-        StudySitesModel _appModel;
-        IRepository _repo;
+        readonly StudySitesModel _appModel;
+        readonly IRepository _repo;
         #endregion
 
         #region constructors

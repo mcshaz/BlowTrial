@@ -62,7 +62,7 @@ namespace BlowTrial.Infrastructure
         }
         public static IDictionary<int, RandomisationStrata> GetStrataByBlockNumber()
         {
-            var allEnvelopes = new List<Envelope>(400);
+            // var allEnvelopes = new List<Envelope>(400);
             int lastBlockNumber = 0;
             var returnVar = new Dictionary<int, RandomisationStrata>();
             for (int i = 1; i <= MaxEnvelopeNumber; i++)

@@ -350,7 +350,7 @@ namespace BlowTrial.ViewModel
                 if (WasEnvelopeRandomised)
                 {
                     var dob = _patient.DateTimeBirth;
-                    var enrol = _patient.DateTimeOfEnrollment;
+                    // var enrol = _patient.DateTimeOfEnrollment;
                     if (dob.HasValue && !_isEnrollmentDateTimeAssigned)
                     {
                         DateTime defaultEnrol = new DateTime[] {dob.Value.AddHours(2), DateTime.Now}.Min();
@@ -618,10 +618,12 @@ namespace BlowTrial.ViewModel
                     weightData.CumSnormForAge((double)AdmissionWeight.Value / 1000, 0, IsMale.Value, (double)GestAgeWeeks.Value + (double)(GestAgeDays ?? 0)/7));
             }
         }
+        /*
         void UpdateDateNotified(object args)
         {
             NotifyPropertyChanged("Tomorrow", "MinScreeningDate");
         }
+        */
         #endregion // Private Methods
 
         #region Listbox Options
@@ -947,6 +949,7 @@ namespace BlowTrial.ViewModel
             NotifyPropertyChanged("Name", "HospitalIdentifier", "AdmissionWeight", "GestAgeDays", "GestAgeWeeks", "IsMale", "DateOfBirth", "TimeOfBirth", "DateOfEnrollment", "TimeOfEnrollment", "LikelyDie24Hr", "BadMalform", "BadInfectnImmune", "WasGivenBcgPrior", "RefusedConsent", "MothersName", "WtForAgeCentile", "PhoneNumber", "IsYoungerThanMinEnrolTime", "EnvelopeNumber", "OkToRandomise", "IsConsentRequired", "HasSiblingEnrolled", "MultipleSiblingId",  "HasNoPhone", "AdmissionDiagnosis", "StudyCentre",  "BackgroundBrush", "TextBrush", "HospitalIdentifierMask", "PhoneMask", "IsInborn");
             RecordAltered = false;
             _isEnrollmentDateTimeAssigned = false;
+            MaternalBCGScar = MaternalBCGScarStatus.Missing;
         }
         #endregion
 
@@ -1037,7 +1040,7 @@ namespace BlowTrial.ViewModel
             }
             return null;
         }
-        const double twinSeperationMaxHrs = 5;
+        // const double twinSeperationMaxHrs = 5;
         string ValidateSiblingId()
         {
             if (_hasSiblingEnrolled && !_patient.MultipleSiblingId.HasValue)

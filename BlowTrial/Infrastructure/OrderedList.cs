@@ -58,7 +58,7 @@ namespace BlowTrial.Utilities
         //public bool IsSynchronized { get { return false; } }
         bool ICollection.IsSynchronized { get { return false; } }
         //public object SyncRoot { get { return _list; } }
-        object ICollection.SyncRoot { get { return _list; } } //? should return this 
+        object ICollection.SyncRoot => _list;  //? should return this 
         bool IList.IsFixedSize { get { return false; } }
         bool IList.IsReadOnly { get { return false; } }
         bool ICollection<T>.IsReadOnly { get { return false; } }
@@ -269,14 +269,8 @@ namespace BlowTrial.Utilities
 
         #region NotImplemented
         const string _insertExceptionMsg = "SortedList detemines position to insert automatically - use add method without an index";
-        void IList.Insert(int index, object item)
-        {
-            throw new NotImplementedException(_insertExceptionMsg);
-        }
-        void IList<T>.Insert(int index, T item)
-        {
-            throw new NotImplementedException(_insertExceptionMsg);
-        }
+        void IList.Insert(int index, object item) => throw new NotImplementedException(_insertExceptionMsg);
+        void IList<T>.Insert(int index, T item) => throw new NotImplementedException(_insertExceptionMsg);
         #endregion
     }
 

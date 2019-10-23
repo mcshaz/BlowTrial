@@ -116,8 +116,7 @@ namespace BlowTrial.Models
             }
 
             // If parameter cannot be cast to ParticipantDataStage return false.
-            ParticipantDataStage p = obj as ParticipantDataStage;
-            if ((System.Object)p == null)
+            if (!(obj is ParticipantDataStage p))
             {
                 return false;
             }
@@ -198,8 +197,7 @@ namespace BlowTrial.Models
             }
 
             // If parameter cannot be cast to Point return false.
-            TwoDPoint p = obj as TwoDPoint;
-            if ((System.Object)p == null)
+            if (!(obj is TwoDPoint p))
             {
                 return false;
             }
@@ -262,8 +260,7 @@ namespace BlowTrial.Models
         public override bool Equals(System.Object obj)
         {
             // If parameter cannot be cast to ThreeDPoint return false:
-            ThreeDPoint p = obj as ThreeDPoint;
-            if ((object)p == null)
+            if (!(obj is ThreeDPoint p))
             {
                 return false;
             }

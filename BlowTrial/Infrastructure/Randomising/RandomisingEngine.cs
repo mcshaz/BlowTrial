@@ -1,13 +1,10 @@
 ﻿using BlowTrial.Domain.Interfaces;
 using BlowTrial.Domain.Outcomes;
 using BlowTrial.Domain.Tables;
-using BlowTrial.Infrastructure.Interfaces;
-using BlowTrial.Infrastructure.Randomising;
+using BlowTrial.Infrastructure.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using BlowTrial.Infrastructure.Extensions;
 
 namespace BlowTrial.Infrastructure.Randomising
 {
@@ -66,7 +63,7 @@ namespace BlowTrial.Infrastructure.Randomising
                 throw new InvalidOperationException("participant.TrialArm must have a value of NotSet - use forceallocation if the allocation is pre-set");
             }
             var currentBlock = Get1stUnfilledBlock(participant, out RandomisationStrata strata, context);
-            BlockComponent component = (currentBlock == null)?null:currentBlock.GetComponents();
+            BlockComponent component = currentBlock?.GetComponents();
             if (currentBlock==null || context.Participants.Count(p=>p.AllocationBlockId == currentBlock.Id) == component.TotalBlockSize())
             {
                 currentBlock = CreateNewAllocationBlock(participant, strata, out component ,context);                
@@ -124,7 +121,7 @@ namespace BlowTrial.Infrastructure.Randomising
             return (WeightCategories)returnInt;
         }
        */
-        public static void RemoveAllocationFromArm(Participant participant,ITrialDataContext context)
+        public static void RemoveAllocationFromArm(Participant participant)
         {
             /*
             RandomisationStrata strata;
@@ -171,7 +168,7 @@ namespace BlowTrial.Infrastructure.Randomising
                 currentBlock = GetDescendingBlocks(participant.Centre ?? (participant.Centre = context.StudyCentres.Find(participant.CentreId)), strata, context).FirstOrDefault();
                 if (currentBlock == null)
                 {
-                    currentBlock = CreateNewAllocationBlock(participant, strata, out BlockComponent component, context);
+                    currentBlock = CreateNewAllocationBlock(participant, strata, out _, context);
                 }
                 else
                 {
@@ -275,6 +272,7 @@ namespace BlowTrial.Infrastructure.Randomising
                     select b);
         }
 
+        /*
         static string SqlToUnsetIncorrectEnvelopes()
         {
             StringBuilder returnVar = new StringBuilder("UPDATE [Participants] SET [BlockNumber] = NULL, [BlockSize] = 0 WHERE ");
@@ -287,7 +285,7 @@ namespace BlowTrial.Infrastructure.Randomising
             returnVar.AppendFormat("(Id IN ({0}) AND IsMale = 1 AND AdmissionWeight < {1});", string.Join(",", envelopeDetails[RandomisationStrata.TopWeightMale]), BlockWeight2);
             return returnVar.ToString();
         }
-
+        */
     }
     public static class BlockRandomisation
     {

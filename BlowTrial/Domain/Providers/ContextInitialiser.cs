@@ -94,6 +94,10 @@ namespace BlowTrial.Domain.Providers
                 case AllocationGroups.Japan2Arm:
                     returnList.Add(BcgJapan.Id);
                     break;
+                case AllocationGroups.Uganda3Arm:
+                    returnList.Add(BcgJapan.Id);
+                    returnList.Add(RussianBcg.Id);
+                    break;
             }
             var returnVar = new int[returnList.Count];
             returnList.CopyTo(returnVar);

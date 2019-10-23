@@ -936,4 +936,7 @@
   <data name="ParticipantModel_Error_BCGReactionRequired" xml:space="preserve">
     <value>The baby's BCG reaction at follow up is required</value>
   </data>
+  <data name="AllocationGroups_Uganda3Arm" xml:space="preserve">
+    <value>Uganda 3 arm (Control, BCG India &amp; BCG Japan)</value>
+  </data>
 </root>

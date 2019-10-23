@@ -86,7 +86,7 @@ namespace BlowTrialUnitTests
                     
                     double permutations = SpecialFunctions.Factorial(allocations)
                                                     /
-                    (double)rClone.Ratios.Values.Aggregate(1, (prev, cur) => (int)(prev * SpecialFunctions.Factorial(cur * rClone.Repeats)));
+                    rClone.Ratios.Values.Aggregate(1, (prev, cur) => (int)(prev * SpecialFunctions.Factorial(cur * rClone.Repeats)));
 
                     double expectedOccurence = sameBlockRpt/permutations;
                     string assertMessage = null;

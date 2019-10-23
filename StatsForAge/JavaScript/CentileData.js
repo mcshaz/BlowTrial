@@ -35,7 +35,7 @@
 
     window.Lms.prototype.linearInterpolate = function (interpolWith, fraction) {
         if (fraction < 0 || fraction > 1) {
-            throw ("fraction must be between 0 and 1");
+            throw new Error("fraction must be between 0 and 1");
         }
         var oppFraction = 1 - fraction;
         return new Lms(

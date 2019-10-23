@@ -141,10 +141,12 @@ namespace BlowTrial.Domain.Providers
 
         public static void RepairDb(string fileName)
         {
-            SqlCeEngine engine = new SqlCeEngine(TrialDataContext.GetConnectionString(fileName));
-            if (!engine.Verify())
+            using (var engine = new SqlCeEngine(TrialDataContext.GetConnectionString(fileName)))
             {
-                engine.Repair(null, RepairOption.RecoverAllOrFail);
+                if (!engine.Verify())
+                {
+                    engine.Repair(null, RepairOption.RecoverAllOrFail);
+                }
             }
         }
 
@@ -220,7 +222,7 @@ namespace BlowTrial.Domain.Providers
             e.Result = returnVar;
         }
 #if DEBUG
-        static Stopwatch watch = new Stopwatch();
+        static readonly Stopwatch watch = new Stopwatch();
         static long lastMs = 0;
 #endif
         [Conditional("DEBUG")]
@@ -252,7 +254,7 @@ namespace BlowTrial.Domain.Providers
 #endif
         }
 
-        static System.Text.RegularExpressions.Regex constraintNameComponents = new System.Text.RegularExpressions.Regex(@"FK_dbo\.(?<tableName>[^_]+)_dbo\.(?<referencedTable>[^_])+_?<referencedKey>(\w+)");
+        // static readonly System.Text.RegularExpressions.Regex constraintNameComponents = new System.Text.RegularExpressions.Regex(@"FK_dbo\.(?<tableName>[^_]+)_dbo\.(?<referencedTable>[^_])+_?<referencedKey>(\w+)");
         class Constraint
         {
             public string Name {get; set;}
@@ -331,7 +333,7 @@ namespace BlowTrial.Domain.Providers
             }
             return null;
         }
-
+        /*
         static void UpdateISharedRecord(Type tableType, Database sourceDb, DbContext destContext, IEnumerable<int> IdsToUpdate) 
         {
             if (!IdsToUpdate.Any()) { return;  }
@@ -345,7 +347,7 @@ namespace BlowTrial.Domain.Providers
             WriteTime(tableType, "AttachAndMarkModified");
             destContext.SaveChanges();
         }
-
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         static void InsertISharedRecord(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> destDbRemainingAllocations, IEnumerable<int> IdsToUpdate) 
         {
@@ -393,18 +395,19 @@ namespace BlowTrial.Domain.Providers
             if (wasDestClosed) { destConn.Close(); }
             if (wasSourceClosed) { sourceConn.Close();}
         }
+        
 
         static IEnumerable<int> GetNewRecordIds(Type tableType, Database destContext, IEnumerable<IntegerRange> destDbPriorRemainingAllocations)
         {
             string tableName = TableName(tableType);
             return destContext.SqlQuery<int>(string.Format("select {0}.Id from {0} where {1}", tableName, WhereRange(destDbPriorRemainingAllocations, tableName)));
         }
-
+        
         static string WhereRange(IEnumerable<IntegerRange> ranges, string tableName)
         {
             return string.Join(" or ", ranges.Select(a => string.Format("({0}.Id >= {1} and {0}.Id <= {2})", tableName, a.Min, a.Max)));
         }
-
+        */
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         static Upserts AddOrUpdate(Type tableType, SqlCeConnection sourceConn, SqlCeConnection destConn, IEnumerable<IntegerRange> srcDbIdRanges)
         {
@@ -562,6 +565,7 @@ namespace BlowTrial.Domain.Providers
             }
             return sb.ToString();
         }
+        /*
         static string AsSqlUpdate(System.Data.Common.DbDataReader result, string tableName)
         {
             var sb = new System.Text.StringBuilder();
@@ -584,7 +588,7 @@ namespace BlowTrial.Domain.Providers
             sb.AppendFormat("\r\nWHERE Id = {0}\r\nGO\r\n", id);
             return sb.ToString();
         }
-
+        */
         static string AsSqlInsert(System.Data.Common.DbDataReader result, string tableName)
         {
             var sb = new System.Text.StringBuilder();
@@ -602,7 +606,7 @@ namespace BlowTrial.Domain.Providers
             sb.Append(')');
             return sb.ToString();
         }
-        static Func<object, string> ValueToSqlString = v =>
+        static readonly Func<object, string> ValueToSqlString = v =>
         {
             switch (GetBasicType(v))
             {
@@ -616,6 +620,7 @@ namespace BlowTrial.Domain.Providers
                     return '\'' + v.ToString() + '\'';
             }
         };
+        /*
         static IEnumerable<int> ModifiedIdsFromMaxModifiedTime(Type tableType, Database destDb, Database sourceDb, IEnumerable<IntegerRange> destDbUsedAllocations)
         {
             string tableName = TableName(tableType);
@@ -632,6 +637,7 @@ namespace BlowTrial.Domain.Providers
                 tableName, 
                 whereRange), modifiedDateParam).ToList();
         }
+        */
         enum BasicTypes { Numeric, Date, Null, Other}
         static BasicTypes GetBasicType(object o)
         {
@@ -675,6 +681,7 @@ namespace BlowTrial.Domain.Providers
             public IEnumerable<IntegerRange> UsedAllocations { get; set; }
             public IEnumerable<IntegerRange> RemainingAllocations { get; set; }
         }
+        /*
         static AllocationRanges RemainingAllocationsByCentre(Type tableType, Database destDb, IEnumerable<IntegerRange> sourceCentreRanges)
         {
             string tableName = TableName(tableType);
@@ -700,7 +707,7 @@ namespace BlowTrial.Domain.Providers
                 }).ToList()
             };
         }
-
+        */
         static string TableName(Type entityType)
         {
             if (entityType==typeof(VaccineAdministered))
@@ -709,6 +716,7 @@ namespace BlowTrial.Domain.Providers
             }
             return entityType.Name + 's';//nasty - should use search for dataannotation and then use entity framework pleuralisation
         }
+        /*
         static T[] GetRecordsRequiringUpdating<T>(IQueryable<T> dataSet, IEnumerable<IntegerRange> newSiteIdRanges, DateTime mostRecentBak) where T : class, ISharedRecord
         {
             var returnList = dataSet.Where(p => p.RecordLastModified > mostRecentBak).ToList();
@@ -730,7 +738,8 @@ namespace BlowTrial.Domain.Providers
                 predicate = predicate.Or(p => p.Id >= rng.Min && p.Id <= rng.Max);
             }
             return dataSet.AsNoTracking().AsExpandable().Where(predicate).ToArray();
-             * */
+             * ***
         }
+        */
     }
 }

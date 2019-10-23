@@ -144,6 +144,7 @@ namespace BlowTrial.Models
                     AdministeredTo.DeathOrLastContactDateTime.Value,
                     ref error);
             }
+            /*
             else if (nowVal >= AdministeredTo.Becomes28On)
             {
                 _administeredAtDateTime.ValidateIsBefore(
@@ -151,6 +152,7 @@ namespace BlowTrial.Models
                     AdministeredTo.Becomes28On,
                     ref error);
             }
+            */
             else
             {
                 _administeredAtDateTime.ValidateIsBefore(

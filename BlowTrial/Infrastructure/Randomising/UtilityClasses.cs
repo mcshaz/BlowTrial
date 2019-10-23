@@ -99,6 +99,13 @@ namespace BlowTrial.Infrastructure.Randomising
                     { RandomisationArm.GreenSignalBcg, 1 }
                 };
                 componentDict.Add(AllocationGroups.GreenSignal2Arm, new BlockComponent(2, ratios));
+                ratios = new Dictionary<RandomisationArm, int>(3)
+                {
+                    { RandomisationArm.Control, 1 },
+                    { RandomisationArm.RussianBCG, 1 },
+                    { RandomisationArm.JapanBcg, 1 }
+                };
+                componentDict.Add(AllocationGroups.Uganda3Arm, new BlockComponent(2, ratios));
                 _allBlocks = new ReadOnlyDictionary<AllocationGroups,BlockComponent>(componentDict);
             }
             return _allBlocks;
